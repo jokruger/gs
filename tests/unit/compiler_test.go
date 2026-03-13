@@ -9,8 +9,8 @@ import (
 
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/require"
 	"github.com/jokruger/gs/stdlib"
+	"github.com/jokruger/gs/tests/require"
 	gst "github.com/jokruger/gs/types"
 )
 
@@ -1252,7 +1252,7 @@ func() {
 }
 
 func TestCompiler_custom_extension(t *testing.T) {
-	pathFileSource := "./testdata/issue286/test.yb"
+	pathFileSource := "../testdata/issue286/test.yb"
 
 	modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
 

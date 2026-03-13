@@ -13,8 +13,8 @@ import (
 	"github.com/jokruger/gs"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/require"
 	"github.com/jokruger/gs/stdlib"
+	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/token"
 	gst "github.com/jokruger/gs/types"
 )

@@ -14,8 +14,12 @@ build: generate
     @go build -o ./build/gs ./cmd/gs
 
 test: generate
-    @go test -race -cover ./...
-    @go run ./cmd/gs -resolve ./testdata/cli/test.gs
+    @go test -race ./tests/unit/parser
+    @go test -race ./tests/unit/types
+    @go test -race ./tests/unit/stdlib/json
+    @go test -race ./tests/unit/stdlib
+    @go test -race ./tests/unit
+    @go run ./cmd/gs -resolve ./tests/testdata/cli/test.gs
 
 clean:
     rm -rf ./build

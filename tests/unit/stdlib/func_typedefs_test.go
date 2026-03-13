@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	gse "github.com/jokruger/gs/error"
-	"github.com/jokruger/gs/require"
 	"github.com/jokruger/gs/stdlib"
+	"github.com/jokruger/gs/tests/require"
 	gst "github.com/jokruger/gs/types"
 )
 

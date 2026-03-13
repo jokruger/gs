@@ -4,8 +4,8 @@ import (
 	gojson "encoding/json"
 	"testing"
 
-	"github.com/jokruger/gs/require"
 	"github.com/jokruger/gs/stdlib/json"
+	"github.com/jokruger/gs/tests/require"
 
 	"github.com/jokruger/gs"
 )

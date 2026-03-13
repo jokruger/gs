@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jokruger/gs/require"
+	"github.com/jokruger/gs/tests/require"
 	gst "github.com/jokruger/gs/types"
 )
 

@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/require"
+	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/token"
 )
 

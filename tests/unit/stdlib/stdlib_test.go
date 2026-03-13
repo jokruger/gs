@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/require"
 	"github.com/jokruger/gs/stdlib"
+	"github.com/jokruger/gs/tests/require"
 	gst "github.com/jokruger/gs/types"
 )
 

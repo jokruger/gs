@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/require"
+	"github.com/jokruger/gs/tests/require"
 )
 
 func TestSymbolTable(t *testing.T) {

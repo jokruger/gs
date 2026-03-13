@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 )
 
 var textModule = map[string]gs.Object{
@@ -203,13 +204,13 @@ var textModule = map[string]gs.Object{
 
 func textREMatch(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 2 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -219,7 +220,7 @@ func textREMatch(args ...gs.Object) (ret gs.Object, err error) {
 
 	s2, ok := gs.ToString(args[1])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "string(compatible)",
 			Found:    args[1].TypeName(),
@@ -245,13 +246,13 @@ func textREMatch(args ...gs.Object) (ret gs.Object, err error) {
 func textREFind(args ...gs.Object) (ret gs.Object, err error) {
 	numArgs := len(args)
 	if numArgs != 2 && numArgs != 3 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -267,7 +268,7 @@ func textREFind(args ...gs.Object) (ret gs.Object, err error) {
 
 	s2, ok := gs.ToString(args[1])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "string(compatible)",
 			Found:    args[1].TypeName(),
@@ -301,7 +302,7 @@ func textREFind(args ...gs.Object) (ret gs.Object, err error) {
 
 	i3, ok := gs.ToInt(args[2])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "third",
 			Expected: "int(compatible)",
 			Found:    args[2].TypeName(),
@@ -338,13 +339,13 @@ func textREFind(args ...gs.Object) (ret gs.Object, err error) {
 
 func textREReplace(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 3 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -354,7 +355,7 @@ func textREReplace(args ...gs.Object) (ret gs.Object, err error) {
 
 	s2, ok := gs.ToString(args[1])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "string(compatible)",
 			Found:    args[1].TypeName(),
@@ -364,7 +365,7 @@ func textREReplace(args ...gs.Object) (ret gs.Object, err error) {
 
 	s3, ok := gs.ToString(args[2])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "third",
 			Expected: "string(compatible)",
 			Found:    args[2].TypeName(),
@@ -378,7 +379,7 @@ func textREReplace(args ...gs.Object) (ret gs.Object, err error) {
 	} else {
 		s, ok := doTextRegexpReplace(re, s2, s3)
 		if !ok {
-			return nil, gs.ErrStringLimit
+			return nil, gse.ErrStringLimit
 		}
 
 		ret = &gs.String{Value: s}
@@ -390,13 +391,13 @@ func textREReplace(args ...gs.Object) (ret gs.Object, err error) {
 func textRESplit(args ...gs.Object) (ret gs.Object, err error) {
 	numArgs := len(args)
 	if numArgs != 2 && numArgs != 3 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -406,7 +407,7 @@ func textRESplit(args ...gs.Object) (ret gs.Object, err error) {
 
 	s2, ok := gs.ToString(args[1])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "string(compatible)",
 			Found:    args[1].TypeName(),
@@ -418,7 +419,7 @@ func textRESplit(args ...gs.Object) (ret gs.Object, err error) {
 	if numArgs > 2 {
 		i3, ok = gs.ToInt(args[2])
 		if !ok {
-			err = gs.ErrInvalidArgumentType{
+			err = gse.ErrInvalidArgumentType{
 				Name:     "third",
 				Expected: "int(compatible)",
 				Found:    args[2].TypeName(),
@@ -445,13 +446,13 @@ func textRESplit(args ...gs.Object) (ret gs.Object, err error) {
 
 func textRECompile(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 1 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -471,13 +472,13 @@ func textRECompile(args ...gs.Object) (ret gs.Object, err error) {
 
 func textReplace(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 4 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -487,7 +488,7 @@ func textReplace(args ...gs.Object) (ret gs.Object, err error) {
 
 	s2, ok := gs.ToString(args[1])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "string(compatible)",
 			Found:    args[1].TypeName(),
@@ -497,7 +498,7 @@ func textReplace(args ...gs.Object) (ret gs.Object, err error) {
 
 	s3, ok := gs.ToString(args[2])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "third",
 			Expected: "string(compatible)",
 			Found:    args[2].TypeName(),
@@ -507,7 +508,7 @@ func textReplace(args ...gs.Object) (ret gs.Object, err error) {
 
 	i4, ok := gs.ToInt(args[3])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "fourth",
 			Expected: "int(compatible)",
 			Found:    args[3].TypeName(),
@@ -517,7 +518,7 @@ func textReplace(args ...gs.Object) (ret gs.Object, err error) {
 
 	s, ok := doTextReplace(s1, s2, s3, i4)
 	if !ok {
-		err = gs.ErrStringLimit
+		err = gse.ErrStringLimit
 		return
 	}
 
@@ -529,13 +530,13 @@ func textReplace(args ...gs.Object) (ret gs.Object, err error) {
 func textSubstring(args ...gs.Object) (ret gs.Object, err error) {
 	argslen := len(args)
 	if argslen != 2 && argslen != 3 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -545,7 +546,7 @@ func textSubstring(args ...gs.Object) (ret gs.Object, err error) {
 
 	i2, ok := gs.ToInt(args[1])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "int(compatible)",
 			Found:    args[1].TypeName(),
@@ -558,7 +559,7 @@ func textSubstring(args ...gs.Object) (ret gs.Object, err error) {
 	if argslen == 3 {
 		i3, ok = gs.ToInt(args[2])
 		if !ok {
-			err = gs.ErrInvalidArgumentType{
+			err = gse.ErrInvalidArgumentType{
 				Name:     "third",
 				Expected: "int(compatible)",
 				Found:    args[2].TypeName(),
@@ -568,7 +569,7 @@ func textSubstring(args ...gs.Object) (ret gs.Object, err error) {
 	}
 
 	if i2 > i3 {
-		err = gs.ErrInvalidIndexType
+		err = gse.ErrInvalidIndexType
 		return
 	}
 
@@ -592,13 +593,13 @@ func textSubstring(args ...gs.Object) (ret gs.Object, err error) {
 func textPadLeft(args ...gs.Object) (ret gs.Object, err error) {
 	argslen := len(args)
 	if argslen != 2 && argslen != 3 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -608,7 +609,7 @@ func textPadLeft(args ...gs.Object) (ret gs.Object, err error) {
 
 	i2, ok := gs.ToInt(args[1])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "int(compatible)",
 			Found:    args[1].TypeName(),
@@ -617,7 +618,7 @@ func textPadLeft(args ...gs.Object) (ret gs.Object, err error) {
 	}
 
 	if i2 > gs.MaxStringLen {
-		return nil, gs.ErrStringLimit
+		return nil, gse.ErrStringLimit
 	}
 
 	sLen := len(s1)
@@ -630,7 +631,7 @@ func textPadLeft(args ...gs.Object) (ret gs.Object, err error) {
 	if argslen == 3 {
 		s3, ok = gs.ToString(args[2])
 		if !ok {
-			err = gs.ErrInvalidArgumentType{
+			err = gse.ErrInvalidArgumentType{
 				Name:     "third",
 				Expected: "string(compatible)",
 				Found:    args[2].TypeName(),
@@ -655,13 +656,13 @@ func textPadLeft(args ...gs.Object) (ret gs.Object, err error) {
 func textPadRight(args ...gs.Object) (ret gs.Object, err error) {
 	argslen := len(args)
 	if argslen != 2 && argslen != 3 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -671,7 +672,7 @@ func textPadRight(args ...gs.Object) (ret gs.Object, err error) {
 
 	i2, ok := gs.ToInt(args[1])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "int(compatible)",
 			Found:    args[1].TypeName(),
@@ -680,7 +681,7 @@ func textPadRight(args ...gs.Object) (ret gs.Object, err error) {
 	}
 
 	if i2 > gs.MaxStringLen {
-		return nil, gs.ErrStringLimit
+		return nil, gse.ErrStringLimit
 	}
 
 	sLen := len(s1)
@@ -693,7 +694,7 @@ func textPadRight(args ...gs.Object) (ret gs.Object, err error) {
 	if argslen == 3 {
 		s3, ok = gs.ToString(args[2])
 		if !ok {
-			err = gs.ErrInvalidArgumentType{
+			err = gse.ErrInvalidArgumentType{
 				Name:     "third",
 				Expected: "string(compatible)",
 				Found:    args[2].TypeName(),
@@ -717,12 +718,12 @@ func textPadRight(args ...gs.Object) (ret gs.Object, err error) {
 
 func textRepeat(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 2 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -731,7 +732,7 @@ func textRepeat(args ...gs.Object) (ret gs.Object, err error) {
 
 	i2, ok := gs.ToInt(args[1])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "int(compatible)",
 			Found:    args[1].TypeName(),
@@ -739,7 +740,7 @@ func textRepeat(args ...gs.Object) (ret gs.Object, err error) {
 	}
 
 	if len(s1)*i2 > gs.MaxStringLen {
-		return nil, gs.ErrStringLimit
+		return nil, gse.ErrStringLimit
 	}
 
 	return &gs.String{Value: strings.Repeat(s1, i2)}, nil
@@ -747,7 +748,7 @@ func textRepeat(args ...gs.Object) (ret gs.Object, err error) {
 
 func textJoin(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 2 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 
 	var slen int
@@ -757,7 +758,7 @@ func textJoin(args ...gs.Object) (ret gs.Object, err error) {
 		for idx, a := range arg0.Value {
 			as, ok := gs.ToString(a)
 			if !ok {
-				return nil, gs.ErrInvalidArgumentType{
+				return nil, gse.ErrInvalidArgumentType{
 					Name:     fmt.Sprintf("first[%d]", idx),
 					Expected: "string(compatible)",
 					Found:    a.TypeName(),
@@ -770,7 +771,7 @@ func textJoin(args ...gs.Object) (ret gs.Object, err error) {
 		for idx, a := range arg0.Value {
 			as, ok := gs.ToString(a)
 			if !ok {
-				return nil, gs.ErrInvalidArgumentType{
+				return nil, gse.ErrInvalidArgumentType{
 					Name:     fmt.Sprintf("first[%d]", idx),
 					Expected: "string(compatible)",
 					Found:    a.TypeName(),
@@ -780,7 +781,7 @@ func textJoin(args ...gs.Object) (ret gs.Object, err error) {
 			ss1 = append(ss1, as)
 		}
 	default:
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "array",
 			Found:    args[0].TypeName(),
@@ -789,7 +790,7 @@ func textJoin(args ...gs.Object) (ret gs.Object, err error) {
 
 	s2, ok := gs.ToString(args[1])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "string(compatible)",
 			Found:    args[1].TypeName(),
@@ -798,7 +799,7 @@ func textJoin(args ...gs.Object) (ret gs.Object, err error) {
 
 	// make sure output length does not exceed the limit
 	if slen+len(s2)*(len(ss1)-1) > gs.MaxStringLen {
-		return nil, gs.ErrStringLimit
+		return nil, gse.ErrStringLimit
 	}
 
 	return &gs.String{Value: strings.Join(ss1, s2)}, nil
@@ -806,13 +807,13 @@ func textJoin(args ...gs.Object) (ret gs.Object, err error) {
 
 func textFormatBool(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 1 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	b1, ok := args[0].(*gs.Bool)
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "bool",
 			Found:    args[0].TypeName(),
@@ -831,13 +832,13 @@ func textFormatBool(args ...gs.Object) (ret gs.Object, err error) {
 
 func textFormatFloat(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 4 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	f1, ok := args[0].(*gs.Float)
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "float",
 			Found:    args[0].TypeName(),
@@ -847,7 +848,7 @@ func textFormatFloat(args ...gs.Object) (ret gs.Object, err error) {
 
 	s2, ok := gs.ToString(args[1])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "string(compatible)",
 			Found:    args[1].TypeName(),
@@ -857,7 +858,7 @@ func textFormatFloat(args ...gs.Object) (ret gs.Object, err error) {
 
 	i3, ok := gs.ToInt(args[2])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "third",
 			Expected: "int(compatible)",
 			Found:    args[2].TypeName(),
@@ -867,7 +868,7 @@ func textFormatFloat(args ...gs.Object) (ret gs.Object, err error) {
 
 	i4, ok := gs.ToInt(args[3])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "fourth",
 			Expected: "int(compatible)",
 			Found:    args[3].TypeName(),
@@ -882,13 +883,13 @@ func textFormatFloat(args ...gs.Object) (ret gs.Object, err error) {
 
 func textFormatInt(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 2 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	i1, ok := args[0].(*gs.Int)
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "int",
 			Found:    args[0].TypeName(),
@@ -898,7 +899,7 @@ func textFormatInt(args ...gs.Object) (ret gs.Object, err error) {
 
 	i2, ok := gs.ToInt(args[1])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "int(compatible)",
 			Found:    args[1].TypeName(),
@@ -913,13 +914,13 @@ func textFormatInt(args ...gs.Object) (ret gs.Object, err error) {
 
 func textParseBool(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 1 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	s1, ok := args[0].(*gs.String)
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string",
 			Found:    args[0].TypeName(),
@@ -944,13 +945,13 @@ func textParseBool(args ...gs.Object) (ret gs.Object, err error) {
 
 func textParseFloat(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 2 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	s1, ok := args[0].(*gs.String)
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string",
 			Found:    args[0].TypeName(),
@@ -960,7 +961,7 @@ func textParseFloat(args ...gs.Object) (ret gs.Object, err error) {
 
 	i2, ok := gs.ToInt(args[1])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "int(compatible)",
 			Found:    args[1].TypeName(),
@@ -981,13 +982,13 @@ func textParseFloat(args ...gs.Object) (ret gs.Object, err error) {
 
 func textParseInt(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 3 {
-		err = gs.ErrWrongNumArguments
+		err = gse.ErrWrongNumArguments
 		return
 	}
 
 	s1, ok := args[0].(*gs.String)
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string",
 			Found:    args[0].TypeName(),
@@ -997,7 +998,7 @@ func textParseInt(args ...gs.Object) (ret gs.Object, err error) {
 
 	i2, ok := gs.ToInt(args[1])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "int(compatible)",
 			Found:    args[1].TypeName(),
@@ -1007,7 +1008,7 @@ func textParseInt(args ...gs.Object) (ret gs.Object, err error) {
 
 	i3, ok := gs.ToInt(args[2])
 	if !ok {
-		err = gs.ErrInvalidArgumentType{
+		err = gse.ErrInvalidArgumentType{
 			Name:     "third",
 			Expected: "int(compatible)",
 			Found:    args[2].TypeName(),

@@ -4,6 +4,7 @@ import (
 	"math/rand"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 )
 
 var randModule = map[string]gs.Object{
@@ -39,11 +40,11 @@ var randModule = map[string]gs.Object{
 		Name: "read",
 		Value: func(args ...gs.Object) (ret gs.Object, err error) {
 			if len(args) != 1 {
-				return nil, gs.ErrWrongNumArguments
+				return nil, gse.ErrWrongNumArguments
 			}
 			y1, ok := args[0].(*gs.Bytes)
 			if !ok {
-				return nil, gs.ErrInvalidArgumentType{
+				return nil, gse.ErrInvalidArgumentType{
 					Name:     "first",
 					Expected: "bytes",
 					Found:    args[0].TypeName(),
@@ -61,11 +62,11 @@ var randModule = map[string]gs.Object{
 		Name: "rand",
 		Value: func(args ...gs.Object) (gs.Object, error) {
 			if len(args) != 1 {
-				return nil, gs.ErrWrongNumArguments
+				return nil, gse.ErrWrongNumArguments
 			}
 			i1, ok := gs.ToInt64(args[0])
 			if !ok {
-				return nil, gs.ErrInvalidArgumentType{
+				return nil, gse.ErrInvalidArgumentType{
 					Name:     "first",
 					Expected: "int(compatible)",
 					Found:    args[0].TypeName(),
@@ -115,11 +116,11 @@ func randRand(r *rand.Rand) *gs.ImmutableMap {
 					err error,
 				) {
 					if len(args) != 1 {
-						return nil, gs.ErrWrongNumArguments
+						return nil, gse.ErrWrongNumArguments
 					}
 					y1, ok := args[0].(*gs.Bytes)
 					if !ok {
-						return nil, gs.ErrInvalidArgumentType{
+						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
 							Expected: "bytes",
 							Found:    args[0].TypeName(),

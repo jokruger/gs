@@ -69,7 +69,7 @@ func (s *Script) SetImportDir(dir string) error {
 }
 
 // SetMaxAllocs sets the maximum number of objects allocations during the run
-// time. Compiled script will return ErrObjectAllocLimit error if it
+// time. Compiled script will return gse.ErrObjectAllocLimit error if it
 // exceeds this limit.
 func (s *Script) SetMaxAllocs(n int64) {
 	s.maxAllocs = n

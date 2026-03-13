@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
 )
@@ -88,17 +89,17 @@ type ObjectImpl struct {
 
 // TypeName returns the name of the type.
 func (o *ObjectImpl) TypeName() string {
-	panic(ErrNotImplemented)
+	panic(gse.ErrNotImplemented)
 }
 
 func (o *ObjectImpl) String() string {
-	panic(ErrNotImplemented)
+	panic(gse.ErrNotImplemented)
 }
 
 // BinaryOp returns another object that is the result of a given binary
 // operator and a right-hand side object.
 func (o *ObjectImpl) BinaryOp(_ token.Token, _ Object) (Object, error) {
-	return nil, ErrInvalidOperator
+	return nil, gse.ErrInvalidOperator
 }
 
 // Copy returns a copy of the type.
@@ -119,12 +120,12 @@ func (o *ObjectImpl) Equals(x Object) bool {
 
 // IndexGet returns an element at a given index.
 func (o *ObjectImpl) IndexGet(_ Object) (res Object, err error) {
-	return nil, ErrNotIndexable
+	return nil, gse.ErrNotIndexable
 }
 
 // IndexSet sets an element at a given index.
 func (o *ObjectImpl) IndexSet(_, _ Object) (err error) {
-	return ErrNotIndexAssignable
+	return gse.ErrNotIndexAssignable
 }
 
 // Iterate returns an iterator.
@@ -179,7 +180,7 @@ func (o *Array) BinaryOp(op token.Token, rhs Object) (Object, error) {
 			return &Array{Value: append(o.Value, rhs.Value...)}, nil
 		}
 	}
-	return nil, ErrInvalidOperator
+	return nil, gse.ErrInvalidOperator
 }
 
 // Copy returns a copy of the type.
@@ -223,7 +224,7 @@ func (o *Array) Equals(x Object) bool {
 func (o *Array) IndexGet(index Object) (res Object, err error) {
 	intIdx, ok := index.(*Int)
 	if !ok {
-		err = ErrInvalidIndexType
+		err = gse.ErrInvalidIndexType
 		return
 	}
 	idxVal := int(intIdx.Value)
@@ -239,11 +240,11 @@ func (o *Array) IndexGet(index Object) (res Object, err error) {
 func (o *Array) IndexSet(index, value Object) (err error) {
 	intIdx, ok := ToInt(index)
 	if !ok {
-		err = ErrInvalidIndexType
+		err = gse.ErrInvalidIndexType
 		return
 	}
 	if intIdx < 0 || intIdx >= len(o.Value) {
-		err = ErrIndexOutOfBounds
+		err = gse.ErrIndexOutOfBounds
 		return
 	}
 	o.Value[intIdx] = value
@@ -397,12 +398,12 @@ func (o *Bytes) BinaryOp(op token.Token, rhs Object) (Object, error) {
 		switch rhs := rhs.(type) {
 		case *Bytes:
 			if len(o.Value)+len(rhs.Value) > MaxBytesLen {
-				return nil, ErrBytesLimit
+				return nil, gse.ErrBytesLimit
 			}
 			return &Bytes{Value: append(o.Value, rhs.Value...)}, nil
 		}
 	}
-	return nil, ErrInvalidOperator
+	return nil, gse.ErrInvalidOperator
 }
 
 // Copy returns a copy of the type.
@@ -429,7 +430,7 @@ func (o *Bytes) Equals(x Object) bool {
 func (o *Bytes) IndexGet(index Object) (res Object, err error) {
 	intIdx, ok := index.(*Int)
 	if !ok {
-		err = ErrInvalidIndexType
+		err = gse.ErrInvalidIndexType
 		return
 	}
 	idxVal := int(intIdx.Value)
@@ -544,7 +545,7 @@ func (o *Char) BinaryOp(op token.Token, rhs Object) (Object, error) {
 			return FalseValue, nil
 		}
 	}
-	return nil, ErrInvalidOperator
+	return nil, gse.ErrInvalidOperator
 }
 
 // Copy returns a copy of the type.
@@ -663,7 +664,7 @@ func (o *Error) Equals(x Object) bool {
 // IndexGet returns an element at a given index.
 func (o *Error) IndexGet(index Object) (res Object, err error) {
 	if strIdx, _ := ToString(index); strIdx != "value" {
-		err = ErrInvalidIndexOnError
+		err = gse.ErrInvalidIndexOnError
 		return
 	}
 	res = o.Value
@@ -784,7 +785,7 @@ func (o *Float) BinaryOp(op token.Token, rhs Object) (Object, error) {
 			return FalseValue, nil
 		}
 	}
-	return nil, ErrInvalidOperator
+	return nil, gse.ErrInvalidOperator
 }
 
 // Copy returns a copy of the type.
@@ -835,7 +836,7 @@ func (o *ImmutableArray) BinaryOp(op token.Token, rhs Object) (Object, error) {
 			return &Array{Value: append(o.Value, rhs.Value...)}, nil
 		}
 	}
-	return nil, ErrInvalidOperator
+	return nil, gse.ErrInvalidOperator
 }
 
 // Copy returns a copy of the type.
@@ -879,7 +880,7 @@ func (o *ImmutableArray) Equals(x Object) bool {
 func (o *ImmutableArray) IndexGet(index Object) (res Object, err error) {
 	intIdx, ok := index.(*Int)
 	if !ok {
-		err = ErrInvalidIndexType
+		err = gse.ErrInvalidIndexType
 		return
 	}
 	idxVal := int(intIdx.Value)
@@ -941,7 +942,7 @@ func (o *ImmutableMap) IsFalsy() bool {
 func (o *ImmutableMap) IndexGet(index Object) (res Object, err error) {
 	strIdx, ok := ToString(index)
 	if !ok {
-		err = ErrInvalidIndexType
+		err = gse.ErrInvalidIndexType
 		return
 	}
 	res, ok = o.Value[strIdx]
@@ -1160,7 +1161,7 @@ func (o *Int) BinaryOp(op token.Token, rhs Object) (Object, error) {
 			return FalseValue, nil
 		}
 	}
-	return nil, ErrInvalidOperator
+	return nil, gse.ErrInvalidOperator
 }
 
 // Copy returns a copy of the type.
@@ -1244,7 +1245,7 @@ func (o *Map) Equals(x Object) bool {
 func (o *Map) IndexGet(index Object) (res Object, err error) {
 	strIdx, ok := ToString(index)
 	if !ok {
-		err = ErrInvalidIndexType
+		err = gse.ErrInvalidIndexType
 		return
 	}
 	res, ok = o.Value[strIdx]
@@ -1258,7 +1259,7 @@ func (o *Map) IndexGet(index Object) (res Object, err error) {
 func (o *Map) IndexSet(index, value Object) (err error) {
 	strIdx, ok := ToString(index)
 	if !ok {
-		err = ErrInvalidIndexType
+		err = gse.ErrInvalidIndexType
 		return
 	}
 	o.Value[strIdx] = value
@@ -1338,13 +1339,13 @@ func (o *String) BinaryOp(op token.Token, rhs Object) (Object, error) {
 		switch rhs := rhs.(type) {
 		case *String:
 			if len(o.Value)+len(rhs.Value) > MaxStringLen {
-				return nil, ErrStringLimit
+				return nil, gse.ErrStringLimit
 			}
 			return &String{Value: o.Value + rhs.Value}, nil
 		default:
 			rhsStr := rhs.String()
 			if len(o.Value)+len(rhsStr) > MaxStringLen {
-				return nil, ErrStringLimit
+				return nil, gse.ErrStringLimit
 			}
 			return &String{Value: o.Value + rhsStr}, nil
 		}
@@ -1381,7 +1382,7 @@ func (o *String) BinaryOp(op token.Token, rhs Object) (Object, error) {
 			return FalseValue, nil
 		}
 	}
-	return nil, ErrInvalidOperator
+	return nil, gse.ErrInvalidOperator
 }
 
 // IsFalsy returns true if the value of the type is falsy.
@@ -1408,7 +1409,7 @@ func (o *String) Equals(x Object) bool {
 func (o *String) IndexGet(index Object) (res Object, err error) {
 	intIdx, ok := index.(*Int)
 	if !ok {
-		err = ErrInvalidIndexType
+		err = gse.ErrInvalidIndexType
 		return
 	}
 	idxVal := int(intIdx.Value)
@@ -1497,7 +1498,7 @@ func (o *Time) BinaryOp(op token.Token, rhs Object) (Object, error) {
 			return FalseValue, nil
 		}
 	}
-	return nil, ErrInvalidOperator
+	return nil, gse.ErrInvalidOperator
 }
 
 // Copy returns a copy of the type.

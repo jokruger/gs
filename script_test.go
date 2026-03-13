@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/require"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/token"
@@ -508,7 +509,7 @@ func (n *customNumber) String() string {
 func (n *customNumber) BinaryOp(op token.Token, rhs gs.Object) (gs.Object, error) {
 	i, ok := rhs.(*gs.Int)
 	if !ok {
-		return nil, gs.ErrInvalidOperator
+		return nil, gse.ErrInvalidOperator
 	}
 	return n.binaryOpInt(op, i)
 }
@@ -538,7 +539,7 @@ func (n *customNumber) binaryOpInt(op token.Token, rhs *gs.Int) (gs.Object, erro
 		}
 		return gs.FalseValue, nil
 	}
-	return nil, gs.ErrInvalidOperator
+	return nil, gse.ErrInvalidOperator
 }
 
 func TestScript_ImportError(t *testing.T) {

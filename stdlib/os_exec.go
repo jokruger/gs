@@ -4,6 +4,7 @@ import (
 	"os/exec"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 )
 
 func makeOSExecCommand(cmd *exec.Cmd) *gs.ImmutableMap {
@@ -39,11 +40,11 @@ func makeOSExecCommand(cmd *exec.Cmd) *gs.ImmutableMap {
 				Name: "set_path",
 				Value: func(args ...gs.Object) (gs.Object, error) {
 					if len(args) != 1 {
-						return nil, gs.ErrWrongNumArguments
+						return nil, gse.ErrWrongNumArguments
 					}
 					s1, ok := gs.ToString(args[0])
 					if !ok {
-						return nil, gs.ErrInvalidArgumentType{
+						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
 							Expected: "string(compatible)",
 							Found:    args[0].TypeName(),
@@ -58,11 +59,11 @@ func makeOSExecCommand(cmd *exec.Cmd) *gs.ImmutableMap {
 				Name: "set_dir",
 				Value: func(args ...gs.Object) (gs.Object, error) {
 					if len(args) != 1 {
-						return nil, gs.ErrWrongNumArguments
+						return nil, gse.ErrWrongNumArguments
 					}
 					s1, ok := gs.ToString(args[0])
 					if !ok {
-						return nil, gs.ErrInvalidArgumentType{
+						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
 							Expected: "string(compatible)",
 							Found:    args[0].TypeName(),
@@ -77,7 +78,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *gs.ImmutableMap {
 				Name: "set_env",
 				Value: func(args ...gs.Object) (gs.Object, error) {
 					if len(args) != 1 {
-						return nil, gs.ErrWrongNumArguments
+						return nil, gse.ErrWrongNumArguments
 					}
 
 					var env []string
@@ -94,7 +95,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *gs.ImmutableMap {
 							return nil, err
 						}
 					default:
-						return nil, gs.ErrInvalidArgumentType{
+						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
 							Expected: "array",
 							Found:    arg0.TypeName(),
@@ -109,7 +110,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *gs.ImmutableMap {
 				Name: "process",
 				Value: func(args ...gs.Object) (gs.Object, error) {
 					if len(args) != 0 {
-						return nil, gs.ErrWrongNumArguments
+						return nil, gse.ErrWrongNumArguments
 					}
 					return makeOSProcess(cmd.Process), nil
 				},

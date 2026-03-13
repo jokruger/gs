@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 
+	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
 )
@@ -201,7 +202,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		}
 	case *parser.StringLit:
 		if len(node.Value) > MaxStringLen {
-			return c.error(node, ErrStringLimit)
+			return c.error(node, gse.ErrStringLimit)
 		}
 		c.emit(node, parser.OpConstant,
 			c.addConstant(&String{Value: node.Value}))
@@ -338,7 +339,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		for _, elt := range node.Elements {
 			// key
 			if len(elt.Key) > MaxStringLen {
-				return c.error(node, ErrStringLimit)
+				return c.error(node, gse.ErrStringLimit)
 			}
 			c.emit(node, parser.OpConstant,
 				c.addConstant(&String{Value: elt.Key}))

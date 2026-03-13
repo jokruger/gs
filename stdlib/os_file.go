@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 )
 
 func makeOSFile(file *os.File) *gs.ImmutableMap {
@@ -59,11 +60,11 @@ func makeOSFile(file *os.File) *gs.ImmutableMap {
 				Name: "chmod",
 				Value: func(args ...gs.Object) (gs.Object, error) {
 					if len(args) != 1 {
-						return nil, gs.ErrWrongNumArguments
+						return nil, gse.ErrWrongNumArguments
 					}
 					i1, ok := gs.ToInt64(args[0])
 					if !ok {
-						return nil, gs.ErrInvalidArgumentType{
+						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
 							Expected: "int(compatible)",
 							Found:    args[0].TypeName(),
@@ -77,11 +78,11 @@ func makeOSFile(file *os.File) *gs.ImmutableMap {
 				Name: "seek",
 				Value: func(args ...gs.Object) (gs.Object, error) {
 					if len(args) != 2 {
-						return nil, gs.ErrWrongNumArguments
+						return nil, gse.ErrWrongNumArguments
 					}
 					i1, ok := gs.ToInt64(args[0])
 					if !ok {
-						return nil, gs.ErrInvalidArgumentType{
+						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
 							Expected: "int(compatible)",
 							Found:    args[0].TypeName(),
@@ -89,7 +90,7 @@ func makeOSFile(file *os.File) *gs.ImmutableMap {
 					}
 					i2, ok := gs.ToInt(args[1])
 					if !ok {
-						return nil, gs.ErrInvalidArgumentType{
+						return nil, gse.ErrInvalidArgumentType{
 							Name:     "second",
 							Expected: "int(compatible)",
 							Found:    args[1].TypeName(),
@@ -107,7 +108,7 @@ func makeOSFile(file *os.File) *gs.ImmutableMap {
 				Name: "stat",
 				Value: func(args ...gs.Object) (gs.Object, error) {
 					if len(args) != 0 {
-						return nil, gs.ErrWrongNumArguments
+						return nil, gse.ErrWrongNumArguments
 					}
 					return osStat(&gs.String{Value: file.Name()})
 				},

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 )
 
 var fmtModule = map[string]gs.Object{
@@ -25,12 +26,12 @@ func fmtPrint(args ...gs.Object) (ret gs.Object, err error) {
 func fmtPrintf(args ...gs.Object) (ret gs.Object, err error) {
 	numArgs := len(args)
 	if numArgs == 0 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 
 	format, ok := args[0].(*gs.String)
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "format",
 			Expected: "string",
 			Found:    args[0].TypeName(),
@@ -62,12 +63,12 @@ func fmtPrintln(args ...gs.Object) (ret gs.Object, err error) {
 func fmtSprintf(args ...gs.Object) (ret gs.Object, err error) {
 	numArgs := len(args)
 	if numArgs == 0 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 
 	format, ok := args[0].(*gs.String)
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "format",
 			Expected: "string",
 			Found:    args[0].TypeName(),
@@ -92,7 +93,7 @@ func getPrintArgs(args ...gs.Object) ([]interface{}, error) {
 		slen := len(s)
 		// make sure length does not exceed the limit
 		if l+slen > gs.MaxStringLen {
-			return nil, gs.ErrStringLimit
+			return nil, gse.ErrStringLimit
 		}
 		l += slen
 		printArgs = append(printArgs, s)

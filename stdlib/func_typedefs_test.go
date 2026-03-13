@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/require"
 	"github.com/jokruger/gs/stdlib"
 )
@@ -17,7 +18,7 @@ func TestFuncAIR(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, gs.UndefinedValue, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAR(t *testing.T) {
@@ -26,7 +27,7 @@ func TestFuncAR(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, gs.UndefinedValue, ret)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncARI(t *testing.T) {
@@ -35,7 +36,7 @@ func TestFuncARI(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.Int{Value: 10}, ret)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncARE(t *testing.T) {
@@ -50,7 +51,7 @@ func TestFuncARE(t *testing.T) {
 		Value: &gs.String{Value: "some error"},
 	}, ret)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncARIsE(t *testing.T) {
@@ -70,7 +71,7 @@ func TestFuncARIsE(t *testing.T) {
 		Value: &gs.String{Value: "some error"},
 	}, ret)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncARS(t *testing.T) {
@@ -79,7 +80,7 @@ func TestFuncARS(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.String{Value: "foo"}, ret)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncARSE(t *testing.T) {
@@ -96,7 +97,7 @@ func TestFuncARSE(t *testing.T) {
 		Value: &gs.String{Value: "some error"},
 	}, ret)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncARSs(t *testing.T) {
@@ -106,7 +107,7 @@ func TestFuncARSs(t *testing.T) {
 	require.Equal(t, array(&gs.String{Value: "foo"},
 		&gs.String{Value: "bar"}), ret)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASRE(t *testing.T) {
@@ -123,7 +124,7 @@ func TestFuncASRE(t *testing.T) {
 		Value: &gs.String{Value: "some error"},
 	}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASRS(t *testing.T) {
@@ -132,7 +133,7 @@ func TestFuncASRS(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.String{Value: "foo"}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASRSs(t *testing.T) {
@@ -141,7 +142,7 @@ func TestFuncASRSs(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, array(&gs.String{Value: "foo"}), ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASI64RE(t *testing.T) {
@@ -157,7 +158,7 @@ func TestFuncASI64RE(t *testing.T) {
 	require.Equal(t,
 		&gs.Error{Value: &gs.String{Value: "some error"}}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAIIRE(t *testing.T) {
@@ -173,7 +174,7 @@ func TestFuncAIIRE(t *testing.T) {
 	require.Equal(t,
 		&gs.Error{Value: &gs.String{Value: "some error"}}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASIIRE(t *testing.T) {
@@ -191,7 +192,7 @@ func TestFuncASIIRE(t *testing.T) {
 	require.Equal(t,
 		&gs.Error{Value: &gs.String{Value: "some error"}}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASRSE(t *testing.T) {
@@ -207,7 +208,7 @@ func TestFuncASRSE(t *testing.T) {
 	require.Equal(t,
 		&gs.Error{Value: &gs.String{Value: "some error"}}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASSRE(t *testing.T) {
@@ -225,7 +226,7 @@ func TestFuncASSRE(t *testing.T) {
 	require.Equal(t,
 		&gs.Error{Value: &gs.String{Value: "some error"}}, ret)
 	_, err = funcCall(uf, &gs.String{Value: "foo"})
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASsRS(t *testing.T) {
@@ -237,7 +238,7 @@ func TestFuncASsRS(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.String{Value: "foo bar"}, ret)
 	_, err = funcCall(uf, &gs.String{Value: "foo"})
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncARF(t *testing.T) {
@@ -246,7 +247,7 @@ func TestFuncARF(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.Float{Value: 10.0}, ret)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAFRF(t *testing.T) {
@@ -255,9 +256,9 @@ func TestFuncAFRF(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.Float{Value: 10.0}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 	_, err = funcCall(uf, gs.TrueValue, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAIRF(t *testing.T) {
@@ -268,9 +269,9 @@ func TestFuncAIRF(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.Float{Value: 10.0}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 	_, err = funcCall(uf, gs.TrueValue, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAFRI(t *testing.T) {
@@ -281,9 +282,9 @@ func TestFuncAFRI(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.Int{Value: 10}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 	_, err = funcCall(uf, gs.TrueValue, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAFRB(t *testing.T) {
@@ -294,9 +295,9 @@ func TestFuncAFRB(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, gs.TrueValue, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 	_, err = funcCall(uf, gs.TrueValue, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAFFRF(t *testing.T) {
@@ -308,9 +309,9 @@ func TestFuncAFFRF(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.Float{Value: 30.0}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASIRS(t *testing.T) {
@@ -321,9 +322,9 @@ func TestFuncASIRS(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.String{Value: "abab"}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAIFRF(t *testing.T) {
@@ -334,9 +335,9 @@ func TestFuncAIFRF(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.Float{Value: 30.0}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAFIRF(t *testing.T) {
@@ -347,9 +348,9 @@ func TestFuncAFIRF(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.Float{Value: 30.0}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAFIRB(t *testing.T) {
@@ -360,9 +361,9 @@ func TestFuncAFIRB(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, gs.TrueValue, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAIRSsE(t *testing.T) {
@@ -381,7 +382,7 @@ func TestFuncAIRSsE(t *testing.T) {
 	require.Equal(t,
 		&gs.Error{Value: &gs.String{Value: "some error"}}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASSRSs(t *testing.T) {
@@ -394,7 +395,7 @@ func TestFuncASSRSs(t *testing.T) {
 	require.Equal(t, array(&gs.String{Value: "foo"},
 		&gs.String{Value: "bar"}), ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASSIRSs(t *testing.T) {
@@ -407,7 +408,7 @@ func TestFuncASSIRSs(t *testing.T) {
 	require.Equal(t, array(&gs.String{Value: "foo"},
 		&gs.String{Value: "bar"}, &gs.String{Value: "5"}), ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncARB(t *testing.T) {
@@ -416,7 +417,7 @@ func TestFuncARB(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, gs.TrueValue, ret)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncARYE(t *testing.T) {
@@ -434,7 +435,7 @@ func TestFuncARYE(t *testing.T) {
 	require.Equal(t,
 		&gs.Error{Value: &gs.String{Value: "some error"}}, ret)
 	_, err = funcCall(uf, gs.TrueValue)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASRIE(t *testing.T) {
@@ -450,7 +451,7 @@ func TestFuncASRIE(t *testing.T) {
 	require.Equal(t,
 		&gs.Error{Value: &gs.String{Value: "some error"}}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAYRIE(t *testing.T) {
@@ -466,7 +467,7 @@ func TestFuncAYRIE(t *testing.T) {
 	require.Equal(t,
 		&gs.Error{Value: &gs.String{Value: "some error"}}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASSRI(t *testing.T) {
@@ -476,7 +477,7 @@ func TestFuncASSRI(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.Int{Value: 6}, ret)
 	_, err = funcCall(uf, &gs.String{Value: "foo"})
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASSRS(t *testing.T) {
@@ -486,7 +487,7 @@ func TestFuncASSRS(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.String{Value: "foobar"}, ret)
 	_, err = funcCall(uf, &gs.String{Value: "foo"})
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASSRB(t *testing.T) {
@@ -496,7 +497,7 @@ func TestFuncASSRB(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, gs.TrueValue, ret)
 	_, err = funcCall(uf, &gs.String{Value: "foo"})
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAIRS(t *testing.T) {
@@ -505,7 +506,7 @@ func TestFuncAIRS(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.String{Value: "55"}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAIRIs(t *testing.T) {
@@ -514,7 +515,7 @@ func TestFuncAIRIs(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, array(&gs.Int{Value: 55}, &gs.Int{Value: 55}), ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAI64R(t *testing.T) {
@@ -523,7 +524,7 @@ func TestFuncAI64R(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, gs.UndefinedValue, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncARI64(t *testing.T) {
@@ -532,7 +533,7 @@ func TestFuncARI64(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.Int{Value: 55}, ret)
 	_, err = funcCall(uf, &gs.Int{Value: 55})
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncASsSRS(t *testing.T) {
@@ -545,7 +546,7 @@ func TestFuncASsSRS(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.String{Value: "abc-def"}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func TestFuncAI64RI64(t *testing.T) {
@@ -554,7 +555,7 @@ func TestFuncAI64RI64(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &gs.Int{Value: 110}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gs.ErrWrongNumArguments, err)
+	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
 func funcCall(

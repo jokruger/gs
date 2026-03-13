@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/require"
 	"github.com/jokruger/gs/stdlib"
@@ -677,18 +678,15 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = type_name(undefined)`, nil, "undefined")
 	expectRun(t, `out = type_name(error("err"))`, nil, "error")
 	expectRun(t, `out = type_name(func() {})`, nil, "compiled-function")
-	expectRun(t, `a := func(x) { return func() { return x } }; out = type_name(a(5))`,
-		nil, "compiled-function") // closure
+	expectRun(t, `a := func(x) { return func() { return x } }; out = type_name(a(5))`, nil, "compiled-function") // closure
 
 	// is_function
 	expectRun(t, `out = is_function(1)`, nil, false)
 	expectRun(t, `out = is_function(func() {})`, nil, true)
 	expectRun(t, `out = is_function(func(x) { return x })`, nil, true)
-	expectRun(t, `out = is_function(len)`, nil, false) // builtin function
-	expectRun(t, `a := func(x) { return func() { return x } }; out = is_function(a)`,
-		nil, true) // function
-	expectRun(t, `a := func(x) { return func() { return x } }; out = is_function(a(5))`,
-		nil, true) // closure
+	expectRun(t, `out = is_function(len)`, nil, false)                                              // builtin function
+	expectRun(t, `a := func(x) { return func() { return x } }; out = is_function(a)`, nil, true)    // function
+	expectRun(t, `a := func(x) { return func() { return x } }; out = is_function(a(5))`, nil, true) // closure
 	expectRun(t, `out = is_function(x)`,
 		Opts().Symbol("x", &StringArray{
 			Value: []string{"foo", "bar"},
@@ -728,10 +726,10 @@ func TestBuiltinFunction(t *testing.T) {
 	gs.MaxStringLen = 2147483647
 
 	// delete
-	expectError(t, `delete()`, nil, gs.ErrWrongNumArguments.Error())
-	expectError(t, `delete(1)`, nil, gs.ErrWrongNumArguments.Error())
-	expectError(t, `delete(1, 2, 3)`, nil, gs.ErrWrongNumArguments.Error())
-	expectError(t, `delete({}, "", 3)`, nil, gs.ErrWrongNumArguments.Error())
+	expectError(t, `delete()`, nil, gse.ErrWrongNumArguments.Error())
+	expectError(t, `delete(1)`, nil, gse.ErrWrongNumArguments.Error())
+	expectError(t, `delete(1, 2, 3)`, nil, gse.ErrWrongNumArguments.Error())
+	expectError(t, `delete({}, "", 3)`, nil, gse.ErrWrongNumArguments.Error())
 	expectError(t, `delete(1, 1)`, nil, `invalid type for argument 'first'`)
 	expectError(t, `delete(1.0, 1)`, nil, `invalid type for argument 'first'`)
 	expectError(t, `delete("str", 1)`, nil, `invalid type for argument 'first'`)
@@ -778,79 +776,46 @@ func TestBuiltinFunction(t *testing.T) {
 		ARR{1, "2", MAP{"a": "b"}})
 
 	// splice
-	expectError(t, `splice()`, nil, gs.ErrWrongNumArguments.Error())
+	expectError(t, `splice()`, nil, gse.ErrWrongNumArguments.Error())
 	expectError(t, `splice(1)`, nil, `invalid type for argument 'first'`)
 	expectError(t, `splice(1.0)`, nil, `invalid type for argument 'first'`)
 	expectError(t, `splice("str")`, nil, `invalid type for argument 'first'`)
-	expectError(t, `splice(bytes("str"))`, nil,
-		`invalid type for argument 'first'`)
-	expectError(t, `splice(error("err"))`, nil,
-		`invalid type for argument 'first'`)
+	expectError(t, `splice(bytes("str"))`, nil, `invalid type for argument 'first'`)
+	expectError(t, `splice(error("err"))`, nil, `invalid type for argument 'first'`)
 	expectError(t, `splice(true)`, nil, `invalid type for argument 'first'`)
-	expectError(t, `splice(char('c'))`, nil,
-		`invalid type for argument 'first'`)
-	expectError(t, `splice(undefined)`, nil,
-		`invalid type for argument 'first'`)
-	expectError(t, `splice(time(1257894000))`, nil,
-		`invalid type for argument 'first'`)
-	expectError(t, `splice(immutable({}))`, nil,
-		`invalid type for argument 'first'`)
-	expectError(t, `splice(immutable([]))`, nil,
-		`invalid type for argument 'first'`)
+	expectError(t, `splice(char('c'))`, nil, `invalid type for argument 'first'`)
+	expectError(t, `splice(undefined)`, nil, `invalid type for argument 'first'`)
+	expectError(t, `splice(time(1257894000))`, nil, `invalid type for argument 'first'`)
+	expectError(t, `splice(immutable({}))`, nil, `invalid type for argument 'first'`)
+	expectError(t, `splice(immutable([]))`, nil, `invalid type for argument 'first'`)
 	expectError(t, `splice({})`, nil, `invalid type for argument 'first'`)
-	expectError(t, `splice([], 1.0)`, nil,
-		`invalid type for argument 'second'`)
-	expectError(t, `splice([], "str")`, nil,
-		`invalid type for argument 'second'`)
-	expectError(t, `splice([], bytes("str"))`, nil,
-		`invalid type for argument 'second'`)
-	expectError(t, `splice([], error("error"))`, nil,
-		`invalid type for argument 'second'`)
-	expectError(t, `splice([], false)`, nil,
-		`invalid type for argument 'second'`)
-	expectError(t, `splice([], char('d'))`, nil,
-		`invalid type for argument 'second'`)
-	expectError(t, `splice([], undefined)`, nil,
-		`invalid type for argument 'second'`)
-	expectError(t, `splice([], time(0))`, nil,
-		`invalid type for argument 'second'`)
-	expectError(t, `splice([], [])`, nil,
-		`invalid type for argument 'second'`)
-	expectError(t, `splice([], {})`, nil,
-		`invalid type for argument 'second'`)
-	expectError(t, `splice([], immutable([]))`, nil,
-		`invalid type for argument 'second'`)
-	expectError(t, `splice([], immutable({}))`, nil,
-		`invalid type for argument 'second'`)
-	expectError(t, `splice([], 0, 1.0)`, nil,
-		`invalid type for argument 'third'`)
-	expectError(t, `splice([], 0, "string")`, nil,
-		`invalid type for argument 'third'`)
-	expectError(t, `splice([], 0, bytes("string"))`, nil,
-		`invalid type for argument 'third'`)
-	expectError(t, `splice([], 0, error("string"))`, nil,
-		`invalid type for argument 'third'`)
-	expectError(t, `splice([], 0, true)`, nil,
-		`invalid type for argument 'third'`)
-	expectError(t, `splice([], 0, char('f'))`, nil,
-		`invalid type for argument 'third'`)
-	expectError(t, `splice([], 0, undefined)`, nil,
-		`invalid type for argument 'third'`)
-	expectError(t, `splice([], 0, time(0))`, nil,
-		`invalid type for argument 'third'`)
-	expectError(t, `splice([], 0, [])`, nil,
-		`invalid type for argument 'third'`)
-	expectError(t, `splice([], 0, {})`, nil,
-		`invalid type for argument 'third'`)
-	expectError(t, `splice([], 0, immutable([]))`, nil,
-		`invalid type for argument 'third'`)
-	expectError(t, `splice([], 0, immutable({}))`, nil,
-		`invalid type for argument 'third'`)
-	expectError(t, `splice([], 1)`, nil, gs.ErrIndexOutOfBounds.Error())
-	expectError(t, `splice([1, 2, 3], 0, -1)`, nil,
-		gs.ErrIndexOutOfBounds.Error())
-	expectError(t, `splice([1, 2, 3], 99, 0, "a", "b")`, nil,
-		gs.ErrIndexOutOfBounds.Error())
+	expectError(t, `splice([], 1.0)`, nil, `invalid type for argument 'second'`)
+	expectError(t, `splice([], "str")`, nil, `invalid type for argument 'second'`)
+	expectError(t, `splice([], bytes("str"))`, nil, `invalid type for argument 'second'`)
+	expectError(t, `splice([], error("error"))`, nil, `invalid type for argument 'second'`)
+	expectError(t, `splice([], false)`, nil, `invalid type for argument 'second'`)
+	expectError(t, `splice([], char('d'))`, nil, `invalid type for argument 'second'`)
+	expectError(t, `splice([], undefined)`, nil, `invalid type for argument 'second'`)
+	expectError(t, `splice([], time(0))`, nil, `invalid type for argument 'second'`)
+	expectError(t, `splice([], [])`, nil, `invalid type for argument 'second'`)
+	expectError(t, `splice([], {})`, nil, `invalid type for argument 'second'`)
+	expectError(t, `splice([], immutable([]))`, nil, `invalid type for argument 'second'`)
+	expectError(t, `splice([], immutable({}))`, nil, `invalid type for argument 'second'`)
+	expectError(t, `splice([], 0, 1.0)`, nil, `invalid type for argument 'third'`)
+	expectError(t, `splice([], 0, "string")`, nil, `invalid type for argument 'third'`)
+	expectError(t, `splice([], 0, bytes("string"))`, nil, `invalid type for argument 'third'`)
+	expectError(t, `splice([], 0, error("string"))`, nil, `invalid type for argument 'third'`)
+	expectError(t, `splice([], 0, true)`, nil, `invalid type for argument 'third'`)
+	expectError(t, `splice([], 0, char('f'))`, nil, `invalid type for argument 'third'`)
+	expectError(t, `splice([], 0, undefined)`, nil, `invalid type for argument 'third'`)
+	expectError(t, `splice([], 0, time(0))`, nil, `invalid type for argument 'third'`)
+	expectError(t, `splice([], 0, [])`, nil, `invalid type for argument 'third'`)
+	expectError(t, `splice([], 0, {})`, nil, `invalid type for argument 'third'`)
+	expectError(t, `splice([], 0, immutable([]))`, nil, `invalid type for argument 'third'`)
+	expectError(t, `splice([], 0, immutable({}))`, nil, `invalid type for argument 'third'`)
+	expectError(t, `splice([], 1)`, nil, gse.ErrIndexOutOfBounds.Error())
+	expectError(t, `splice([1, 2, 3], 0, -1)`, nil, gse.ErrIndexOutOfBounds.Error())
+	expectError(t, `splice([1, 2, 3], 99, 0, "a", "b")`, nil, gse.ErrIndexOutOfBounds.Error())
 	expectRun(t, `out = []; splice(out)`, nil, ARR{})
 	expectRun(t, `out = ["a"]; splice(out, 1)`, nil, ARR{"a"})
 	expectRun(t, `out = ["a"]; out = splice(out, 1)`, nil, ARR{})
@@ -2115,7 +2080,7 @@ func (o *StringDict) TypeName() string {
 func (o *StringDict) IndexGet(index gs.Object) (gs.Object, error) {
 	strIdx, ok := index.(*gs.String)
 	if !ok {
-		return nil, gs.ErrInvalidIndexType
+		return nil, gse.ErrInvalidIndexType
 	}
 
 	for k, v := range o.Value {
@@ -2130,12 +2095,12 @@ func (o *StringDict) IndexGet(index gs.Object) (gs.Object, error) {
 func (o *StringDict) IndexSet(index, value gs.Object) error {
 	strIdx, ok := index.(*gs.String)
 	if !ok {
-		return gs.ErrInvalidIndexType
+		return gse.ErrInvalidIndexType
 	}
 
 	strVal, ok := gs.ToString(value)
 	if !ok {
-		return gs.ErrInvalidIndexValueType
+		return gse.ErrInvalidIndexValueType
 	}
 
 	o.Value[strings.ToLower(strIdx.Value)] = strVal
@@ -2159,7 +2124,7 @@ func (o *StringCircle) String() string {
 func (o *StringCircle) IndexGet(index gs.Object) (gs.Object, error) {
 	intIdx, ok := index.(*gs.Int)
 	if !ok {
-		return nil, gs.ErrInvalidIndexType
+		return nil, gse.ErrInvalidIndexType
 	}
 
 	r := int(intIdx.Value) % len(o.Value)
@@ -2173,7 +2138,7 @@ func (o *StringCircle) IndexGet(index gs.Object) (gs.Object, error) {
 func (o *StringCircle) IndexSet(index, value gs.Object) error {
 	intIdx, ok := index.(*gs.Int)
 	if !ok {
-		return gs.ErrInvalidIndexType
+		return gse.ErrInvalidIndexType
 	}
 
 	r := int(intIdx.Value) % len(o.Value)
@@ -2183,7 +2148,7 @@ func (o *StringCircle) IndexSet(index, value gs.Object) error {
 
 	strVal, ok := gs.ToString(value)
 	if !ok {
-		return gs.ErrInvalidIndexValueType
+		return gse.ErrInvalidIndexValueType
 	}
 
 	o.Value[r] = strVal
@@ -2214,7 +2179,7 @@ func (o *StringArray) BinaryOp(
 		}
 	}
 
-	return nil, gs.ErrInvalidOperator
+	return nil, gse.ErrInvalidOperator
 }
 
 func (o *StringArray) IsFalsy() bool {
@@ -2256,7 +2221,7 @@ func (o *StringArray) IndexGet(index gs.Object) (gs.Object, error) {
 			return &gs.String{Value: o.Value[intIdx.Value]}, nil
 		}
 
-		return nil, gs.ErrIndexOutOfBounds
+		return nil, gse.ErrIndexOutOfBounds
 	}
 
 	strIdx, ok := index.(*gs.String)
@@ -2270,13 +2235,13 @@ func (o *StringArray) IndexGet(index gs.Object) (gs.Object, error) {
 		return gs.UndefinedValue, nil
 	}
 
-	return nil, gs.ErrInvalidIndexType
+	return nil, gse.ErrInvalidIndexType
 }
 
 func (o *StringArray) IndexSet(index, value gs.Object) error {
 	strVal, ok := gs.ToString(value)
 	if !ok {
-		return gs.ErrInvalidIndexValueType
+		return gse.ErrInvalidIndexValueType
 	}
 
 	intIdx, ok := index.(*gs.Int)
@@ -2286,22 +2251,22 @@ func (o *StringArray) IndexSet(index, value gs.Object) error {
 			return nil
 		}
 
-		return gs.ErrIndexOutOfBounds
+		return gse.ErrIndexOutOfBounds
 	}
 
-	return gs.ErrInvalidIndexType
+	return gse.ErrInvalidIndexType
 }
 
 func (o *StringArray) Call(
 	args ...gs.Object,
 ) (ret gs.Object, err error) {
 	if len(args) != 1 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync/atomic"
 
+	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
 )
@@ -116,7 +117,7 @@ func (v *VM) run() {
 			res, e := left.BinaryOp(tok, right)
 			if e != nil {
 				v.sp -= 2
-				if e == ErrInvalidOperator {
+				if e == gse.ErrInvalidOperator {
 					v.err = fmt.Errorf("invalid operation: %s %s %s",
 						left.TypeName(), tok.String(), right.TypeName())
 					return
@@ -127,7 +128,7 @@ func (v *VM) run() {
 
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = ErrObjectAllocLimit
+				v.err = gse.ErrObjectAllocLimit
 				return
 			}
 
@@ -179,7 +180,7 @@ func (v *VM) run() {
 				var res Object = &Int{Value: ^x.Value}
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = ErrObjectAllocLimit
+					v.err = gse.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = res
@@ -198,7 +199,7 @@ func (v *VM) run() {
 				var res Object = &Int{Value: -x.Value}
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = ErrObjectAllocLimit
+					v.err = gse.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = res
@@ -207,7 +208,7 @@ func (v *VM) run() {
 				var res Object = &Float{Value: -x.Value}
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = ErrObjectAllocLimit
+					v.err = gse.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = res
@@ -284,7 +285,7 @@ func (v *VM) run() {
 			var arr Object = &Array{Value: elements}
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = ErrObjectAllocLimit
+				v.err = gse.ErrObjectAllocLimit
 				return
 			}
 
@@ -304,7 +305,7 @@ func (v *VM) run() {
 			var m Object = &Map{Value: kv}
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = ErrObjectAllocLimit
+				v.err = gse.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp] = m
@@ -316,7 +317,7 @@ func (v *VM) run() {
 			}
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = ErrObjectAllocLimit
+				v.err = gse.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp-1] = e
@@ -329,7 +330,7 @@ func (v *VM) run() {
 				}
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = ErrObjectAllocLimit
+					v.err = gse.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp-1] = immutableArray
@@ -339,7 +340,7 @@ func (v *VM) run() {
 				}
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = ErrObjectAllocLimit
+					v.err = gse.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp-1] = immutableMap
@@ -351,13 +352,12 @@ func (v *VM) run() {
 
 			val, err := left.IndexGet(index)
 			if err != nil {
-				if err == ErrNotIndexable {
+				if err == gse.ErrNotIndexable {
 					v.err = fmt.Errorf("not indexable: %s", index.TypeName())
 					return
 				}
-				if err == ErrInvalidIndexType {
-					v.err = fmt.Errorf("invalid index type: %s",
-						index.TypeName())
+				if err == gse.ErrInvalidIndexType {
+					v.err = fmt.Errorf("invalid index type: %s", index.TypeName())
 					return
 				}
 				v.err = err
@@ -418,7 +418,7 @@ func (v *VM) run() {
 				}
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = ErrObjectAllocLimit
+					v.err = gse.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = val
@@ -455,7 +455,7 @@ func (v *VM) run() {
 				}
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = ErrObjectAllocLimit
+					v.err = gse.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = val
@@ -492,7 +492,7 @@ func (v *VM) run() {
 				}
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = ErrObjectAllocLimit
+					v.err = gse.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = val
@@ -529,7 +529,7 @@ func (v *VM) run() {
 				}
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = ErrObjectAllocLimit
+					v.err = gse.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = val
@@ -616,7 +616,7 @@ func (v *VM) run() {
 					}
 				}
 				if v.framesIndex >= MaxFrames {
-					v.err = ErrStackOverflow
+					v.err = gse.ErrStackOverflow
 					return
 				}
 
@@ -638,17 +638,12 @@ func (v *VM) run() {
 
 				// runtime error
 				if e != nil {
-					if e == ErrWrongNumArguments {
-						v.err = fmt.Errorf(
-							"wrong number of arguments in call to '%s'",
-							value.TypeName())
+					if e == gse.ErrWrongNumArguments {
+						v.err = fmt.Errorf("wrong number of arguments in call to '%s'", value.TypeName())
 						return
 					}
-					if e, ok := e.(ErrInvalidArgumentType); ok {
-						v.err = fmt.Errorf(
-							"invalid type for argument '%s' in call to '%s': "+
-								"expected %s, found %s",
-							e.Name, value.TypeName(), e.Expected, e.Found)
+					if e, ok := e.(gse.ErrInvalidArgumentType); ok {
+						v.err = fmt.Errorf("invalid type for argument '%s' in call to '%s': expected %s, found %s", e.Name, value.TypeName(), e.Expected, e.Found)
 						return
 					}
 					v.err = e
@@ -661,7 +656,7 @@ func (v *VM) run() {
 				}
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = ErrObjectAllocLimit
+					v.err = gse.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = ret
@@ -775,7 +770,7 @@ func (v *VM) run() {
 			}
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = ErrObjectAllocLimit
+				v.err = gse.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp] = cl
@@ -840,7 +835,7 @@ func (v *VM) run() {
 			iterator = dst.Iterate()
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = ErrObjectAllocLimit
+				v.err = gse.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp] = iterator
@@ -886,10 +881,10 @@ func indexAssign(dst, src Object, selectors []Object) error {
 	for sidx := numSel - 1; sidx > 0; sidx-- {
 		next, err := dst.IndexGet(selectors[sidx])
 		if err != nil {
-			if err == ErrNotIndexable {
+			if err == gse.ErrNotIndexable {
 				return fmt.Errorf("not indexable: %s", dst.TypeName())
 			}
-			if err == ErrInvalidIndexType {
+			if err == gse.ErrInvalidIndexType {
 				return fmt.Errorf("invalid index type: %s",
 					selectors[sidx].TypeName())
 			}
@@ -899,10 +894,10 @@ func indexAssign(dst, src Object, selectors []Object) error {
 	}
 
 	if err := dst.IndexSet(selectors[0], src); err != nil {
-		if err == ErrNotIndexAssignable {
+		if err == gse.ErrNotIndexAssignable {
 			return fmt.Errorf("not index-assignable: %s", dst.TypeName())
 		}
-		if err == ErrInvalidIndexValueType {
+		if err == gse.ErrInvalidIndexValueType {
 			return fmt.Errorf("invaid index value type: %s", src.TypeName())
 		}
 		return err

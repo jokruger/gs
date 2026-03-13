@@ -8,6 +8,7 @@ import (
 	"runtime"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 )
 
 var osModule = map[string]gs.Object{
@@ -204,11 +205,11 @@ var osModule = map[string]gs.Object{
 
 func osReadFile(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 1 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 	fname, ok := gs.ToString(args[0])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -219,18 +220,18 @@ func osReadFile(args ...gs.Object) (ret gs.Object, err error) {
 		return wrapError(err), nil
 	}
 	if len(bytes) > gs.MaxBytesLen {
-		return nil, gs.ErrBytesLimit
+		return nil, gse.ErrBytesLimit
 	}
 	return &gs.Bytes{Value: bytes}, nil
 }
 
 func osStat(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 1 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 	fname, ok := gs.ToString(args[0])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -258,11 +259,11 @@ func osStat(args ...gs.Object) (ret gs.Object, err error) {
 
 func osCreate(args ...gs.Object) (gs.Object, error) {
 	if len(args) != 1 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -277,11 +278,11 @@ func osCreate(args ...gs.Object) (gs.Object, error) {
 
 func osOpen(args ...gs.Object) (gs.Object, error) {
 	if len(args) != 1 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -296,11 +297,11 @@ func osOpen(args ...gs.Object) (gs.Object, error) {
 
 func osOpenFile(args ...gs.Object) (gs.Object, error) {
 	if len(args) != 3 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -308,7 +309,7 @@ func osOpenFile(args ...gs.Object) (gs.Object, error) {
 	}
 	i2, ok := gs.ToInt(args[1])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "int(compatible)",
 			Found:    args[1].TypeName(),
@@ -316,7 +317,7 @@ func osOpenFile(args ...gs.Object) (gs.Object, error) {
 	}
 	i3, ok := gs.ToInt(args[2])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "third",
 			Expected: "int(compatible)",
 			Found:    args[2].TypeName(),
@@ -331,12 +332,12 @@ func osOpenFile(args ...gs.Object) (gs.Object, error) {
 
 func osArgs(args ...gs.Object) (gs.Object, error) {
 	if len(args) != 0 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 	arr := &gs.Array{}
 	for _, osArg := range os.Args {
 		if len(osArg) > gs.MaxStringLen {
-			return nil, gs.ErrStringLimit
+			return nil, gse.ErrStringLimit
 		}
 		arr.Value = append(arr.Value, &gs.String{Value: osArg})
 	}
@@ -351,11 +352,11 @@ func osFuncASFmRE(
 		Name: name,
 		Value: func(args ...gs.Object) (gs.Object, error) {
 			if len(args) != 2 {
-				return nil, gs.ErrWrongNumArguments
+				return nil, gse.ErrWrongNumArguments
 			}
 			s1, ok := gs.ToString(args[0])
 			if !ok {
-				return nil, gs.ErrInvalidArgumentType{
+				return nil, gse.ErrInvalidArgumentType{
 					Name:     "first",
 					Expected: "string(compatible)",
 					Found:    args[0].TypeName(),
@@ -363,7 +364,7 @@ func osFuncASFmRE(
 			}
 			i2, ok := gs.ToInt64(args[1])
 			if !ok {
-				return nil, gs.ErrInvalidArgumentType{
+				return nil, gse.ErrInvalidArgumentType{
 					Name:     "second",
 					Expected: "int(compatible)",
 					Found:    args[1].TypeName(),
@@ -376,11 +377,11 @@ func osFuncASFmRE(
 
 func osLookupEnv(args ...gs.Object) (gs.Object, error) {
 	if len(args) != 1 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -391,18 +392,18 @@ func osLookupEnv(args ...gs.Object) (gs.Object, error) {
 		return gs.FalseValue, nil
 	}
 	if len(res) > gs.MaxStringLen {
-		return nil, gs.ErrStringLimit
+		return nil, gse.ErrStringLimit
 	}
 	return &gs.String{Value: res}, nil
 }
 
 func osExpandEnv(args ...gs.Object) (gs.Object, error) {
 	if len(args) != 1 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 	s1, ok := gs.ToString(args[0])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -426,18 +427,18 @@ func osExpandEnv(args ...gs.Object) (gs.Object, error) {
 		return v
 	})
 	if failed || len(s) > gs.MaxStringLen {
-		return nil, gs.ErrStringLimit
+		return nil, gse.ErrStringLimit
 	}
 	return &gs.String{Value: s}, nil
 }
 
 func osExec(args ...gs.Object) (gs.Object, error) {
 	if len(args) == 0 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 	name, ok := gs.ToString(args[0])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -447,7 +448,7 @@ func osExec(args ...gs.Object) (gs.Object, error) {
 	for idx, arg := range args[1:] {
 		execArg, ok := gs.ToString(arg)
 		if !ok {
-			return nil, gs.ErrInvalidArgumentType{
+			return nil, gse.ErrInvalidArgumentType{
 				Name:     fmt.Sprintf("args[%d]", idx),
 				Expected: "string(compatible)",
 				Found:    args[1+idx].TypeName(),
@@ -460,11 +461,11 @@ func osExec(args ...gs.Object) (gs.Object, error) {
 
 func osFindProcess(args ...gs.Object) (gs.Object, error) {
 	if len(args) != 1 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 	i1, ok := gs.ToInt(args[0])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "int(compatible)",
 			Found:    args[0].TypeName(),
@@ -479,11 +480,11 @@ func osFindProcess(args ...gs.Object) (gs.Object, error) {
 
 func osStartProcess(args ...gs.Object) (gs.Object, error) {
 	if len(args) != 4 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 	name, ok := gs.ToString(args[0])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "string(compatible)",
 			Found:    args[0].TypeName(),
@@ -503,7 +504,7 @@ func osStartProcess(args ...gs.Object) (gs.Object, error) {
 			return nil, err
 		}
 	default:
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "second",
 			Expected: "array",
 			Found:    arg1.TypeName(),
@@ -512,7 +513,7 @@ func osStartProcess(args ...gs.Object) (gs.Object, error) {
 
 	dir, ok := gs.ToString(args[2])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "third",
 			Expected: "string(compatible)",
 			Found:    args[2].TypeName(),
@@ -532,7 +533,7 @@ func osStartProcess(args ...gs.Object) (gs.Object, error) {
 			return nil, err
 		}
 	default:
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "fourth",
 			Expected: "array",
 			Found:    arg3.TypeName(),
@@ -554,7 +555,7 @@ func stringArray(arr []gs.Object, argName string) ([]string, error) {
 	for idx, elem := range arr {
 		str, ok := elem.(*gs.String)
 		if !ok {
-			return nil, gs.ErrInvalidArgumentType{
+			return nil, gse.ErrInvalidArgumentType{
 				Name:     fmt.Sprintf("%s[%d]", argName, idx),
 				Expected: "string",
 				Found:    elem.TypeName(),

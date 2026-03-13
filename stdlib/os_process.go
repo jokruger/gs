@@ -5,6 +5,7 @@ import (
 	"syscall"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 )
 
 func makeOSProcessState(state *os.ProcessState) *gs.ImmutableMap {
@@ -45,11 +46,11 @@ func makeOSProcess(proc *os.Process) *gs.ImmutableMap {
 				Name: "signal",
 				Value: func(args ...gs.Object) (gs.Object, error) {
 					if len(args) != 1 {
-						return nil, gs.ErrWrongNumArguments
+						return nil, gse.ErrWrongNumArguments
 					}
 					i1, ok := gs.ToInt64(args[0])
 					if !ok {
-						return nil, gs.ErrInvalidArgumentType{
+						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
 							Expected: "int(compatible)",
 							Found:    args[0].TypeName(),
@@ -62,7 +63,7 @@ func makeOSProcess(proc *os.Process) *gs.ImmutableMap {
 				Name: "wait",
 				Value: func(args ...gs.Object) (gs.Object, error) {
 					if len(args) != 0 {
-						return nil, gs.ErrWrongNumArguments
+						return nil, gse.ErrWrongNumArguments
 					}
 					state, err := proc.Wait()
 					if err != nil {

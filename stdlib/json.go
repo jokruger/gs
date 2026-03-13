@@ -5,6 +5,7 @@ import (
 	gojson "encoding/json"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/stdlib/json"
 )
 
@@ -29,7 +30,7 @@ var jsonModule = map[string]gs.Object{
 
 func jsonDecode(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 1 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 
 	switch o := args[0].(type) {
@@ -50,7 +51,7 @@ func jsonDecode(args ...gs.Object) (ret gs.Object, err error) {
 		}
 		return v, nil
 	default:
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "bytes/string",
 			Found:    args[0].TypeName(),
@@ -60,7 +61,7 @@ func jsonDecode(args ...gs.Object) (ret gs.Object, err error) {
 
 func jsonEncode(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 1 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 
 	b, err := json.Encode(args[0])
@@ -73,12 +74,12 @@ func jsonEncode(args ...gs.Object) (ret gs.Object, err error) {
 
 func jsonIndent(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 3 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 
 	prefix, ok := gs.ToString(args[1])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "prefix",
 			Expected: "string(compatible)",
 			Found:    args[1].TypeName(),
@@ -87,7 +88,7 @@ func jsonIndent(args ...gs.Object) (ret gs.Object, err error) {
 
 	indent, ok := gs.ToString(args[2])
 	if !ok {
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "indent",
 			Expected: "string(compatible)",
 			Found:    args[2].TypeName(),
@@ -114,7 +115,7 @@ func jsonIndent(args ...gs.Object) (ret gs.Object, err error) {
 		}
 		return &gs.Bytes{Value: dst.Bytes()}, nil
 	default:
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "bytes/string",
 			Found:    args[0].TypeName(),
@@ -124,7 +125,7 @@ func jsonIndent(args ...gs.Object) (ret gs.Object, err error) {
 
 func jsonHTMLEscape(args ...gs.Object) (ret gs.Object, err error) {
 	if len(args) != 1 {
-		return nil, gs.ErrWrongNumArguments
+		return nil, gse.ErrWrongNumArguments
 	}
 
 	switch o := args[0].(type) {
@@ -137,7 +138,7 @@ func jsonHTMLEscape(args ...gs.Object) (ret gs.Object, err error) {
 		gojson.HTMLEscape(&dst, []byte(o.Value))
 		return &gs.Bytes{Value: dst.Bytes()}, nil
 	default:
-		return nil, gs.ErrInvalidArgumentType{
+		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
 			Expected: "bytes/string",
 			Found:    args[0].TypeName(),

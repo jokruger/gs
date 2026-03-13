@@ -4,6 +4,7 @@ import (
 	"regexp"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 )
 
 func makeTextRegexp(re *regexp.Regexp) *gs.ImmutableMap {
@@ -16,13 +17,13 @@ func makeTextRegexp(re *regexp.Regexp) *gs.ImmutableMap {
 					err error,
 				) {
 					if len(args) != 1 {
-						err = gs.ErrWrongNumArguments
+						err = gse.ErrWrongNumArguments
 						return
 					}
 
 					s1, ok := gs.ToString(args[0])
 					if !ok {
-						err = gs.ErrInvalidArgumentType{
+						err = gse.ErrInvalidArgumentType{
 							Name:     "first",
 							Expected: "string(compatible)",
 							Found:    args[0].TypeName(),
@@ -49,13 +50,13 @@ func makeTextRegexp(re *regexp.Regexp) *gs.ImmutableMap {
 				) {
 					numArgs := len(args)
 					if numArgs != 1 && numArgs != 2 {
-						err = gs.ErrWrongNumArguments
+						err = gse.ErrWrongNumArguments
 						return
 					}
 
 					s1, ok := gs.ToString(args[0])
 					if !ok {
-						err = gs.ErrInvalidArgumentType{
+						err = gse.ErrInvalidArgumentType{
 							Name:     "first",
 							Expected: "string(compatible)",
 							Found:    args[0].TypeName(),
@@ -94,7 +95,7 @@ func makeTextRegexp(re *regexp.Regexp) *gs.ImmutableMap {
 
 					i2, ok := gs.ToInt(args[1])
 					if !ok {
-						err = gs.ErrInvalidArgumentType{
+						err = gse.ErrInvalidArgumentType{
 							Name:     "second",
 							Expected: "int(compatible)",
 							Found:    args[1].TypeName(),
@@ -142,13 +143,13 @@ func makeTextRegexp(re *regexp.Regexp) *gs.ImmutableMap {
 					err error,
 				) {
 					if len(args) != 2 {
-						err = gs.ErrWrongNumArguments
+						err = gse.ErrWrongNumArguments
 						return
 					}
 
 					s1, ok := gs.ToString(args[0])
 					if !ok {
-						err = gs.ErrInvalidArgumentType{
+						err = gse.ErrInvalidArgumentType{
 							Name:     "first",
 							Expected: "string(compatible)",
 							Found:    args[0].TypeName(),
@@ -158,7 +159,7 @@ func makeTextRegexp(re *regexp.Regexp) *gs.ImmutableMap {
 
 					s2, ok := gs.ToString(args[1])
 					if !ok {
-						err = gs.ErrInvalidArgumentType{
+						err = gse.ErrInvalidArgumentType{
 							Name:     "second",
 							Expected: "string(compatible)",
 							Found:    args[1].TypeName(),
@@ -168,7 +169,7 @@ func makeTextRegexp(re *regexp.Regexp) *gs.ImmutableMap {
 
 					s, ok := doTextRegexpReplace(re, s1, s2)
 					if !ok {
-						return nil, gs.ErrStringLimit
+						return nil, gse.ErrStringLimit
 					}
 
 					ret = &gs.String{Value: s}
@@ -186,13 +187,13 @@ func makeTextRegexp(re *regexp.Regexp) *gs.ImmutableMap {
 				) {
 					numArgs := len(args)
 					if numArgs != 1 && numArgs != 2 {
-						err = gs.ErrWrongNumArguments
+						err = gse.ErrWrongNumArguments
 						return
 					}
 
 					s1, ok := gs.ToString(args[0])
 					if !ok {
-						err = gs.ErrInvalidArgumentType{
+						err = gse.ErrInvalidArgumentType{
 							Name:     "first",
 							Expected: "string(compatible)",
 							Found:    args[0].TypeName(),
@@ -204,7 +205,7 @@ func makeTextRegexp(re *regexp.Regexp) *gs.ImmutableMap {
 					if numArgs > 1 {
 						i2, ok = gs.ToInt(args[1])
 						if !ok {
-							err = gs.ErrInvalidArgumentType{
+							err = gse.ErrInvalidArgumentType{
 								Name:     "second",
 								Expected: "int(compatible)",
 								Found:    args[1].TypeName(),

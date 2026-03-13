@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"sync"
 	"unicode/utf8"
+
+	gse "github.com/jokruger/gs/error"
 )
 
 // Strings for use with fmtbuf.WriteString. This is less overhead than using
@@ -86,7 +88,7 @@ func (f *formatter) writePadding(n int) {
 	newLen := oldLen + n
 
 	if newLen > MaxStringLen {
-		panic(ErrStringLimit)
+		panic(gse.ErrStringLimit)
 	}
 
 	// Make enough room for padding.
@@ -621,7 +623,7 @@ type fmtbuf []byte
 
 func (b *fmtbuf) Write(p []byte) {
 	if len(*b)+len(p) > MaxStringLen {
-		panic(ErrStringLimit)
+		panic(gse.ErrStringLimit)
 	}
 
 	*b = append(*b, p...)
@@ -629,7 +631,7 @@ func (b *fmtbuf) Write(p []byte) {
 
 func (b *fmtbuf) WriteString(s string) {
 	if len(*b)+len(s) > MaxStringLen {
-		panic(ErrStringLimit)
+		panic(gse.ErrStringLimit)
 	}
 
 	*b = append(*b, s...)
@@ -637,7 +639,7 @@ func (b *fmtbuf) WriteString(s string) {
 
 func (b *fmtbuf) WriteSingleByte(c byte) {
 	if len(*b) >= MaxStringLen {
-		panic(ErrStringLimit)
+		panic(gse.ErrStringLimit)
 	}
 
 	*b = append(*b, c)
@@ -645,7 +647,7 @@ func (b *fmtbuf) WriteSingleByte(c byte) {
 
 func (b *fmtbuf) WriteRune(r rune) {
 	if len(*b)+utf8.RuneLen(r) > MaxStringLen {
-		panic(ErrStringLimit)
+		panic(gse.ErrStringLimit)
 	}
 
 	if r < utf8.RuneSelf {
@@ -1046,7 +1048,7 @@ func (p *pp) missingArg(verb rune) {
 func (p *pp) doFormat(format string, a []Object) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			if e, ok := r.(error); ok && e == ErrStringLimit {
+			if e, ok := r.(error); ok && e == gse.ErrStringLimit {
 				err = e
 				return
 			}

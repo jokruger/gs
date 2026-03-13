@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	gse "github.com/jokruger/gs/error"
 )
 
 var (
@@ -249,7 +251,7 @@ func FromInterface(v interface{}) (Object, error) {
 		return UndefinedValue, nil
 	case string:
 		if len(v) > MaxStringLen {
-			return nil, ErrStringLimit
+			return nil, gse.ErrStringLimit
 		}
 		return &String{Value: v}, nil
 	case int64:
@@ -269,7 +271,7 @@ func FromInterface(v interface{}) (Object, error) {
 		return &Float{Value: v}, nil
 	case []byte:
 		if len(v) > MaxBytesLen {
-			return nil, ErrBytesLimit
+			return nil, gse.ErrBytesLimit
 		}
 		return &Bytes{Value: v}, nil
 	case error:

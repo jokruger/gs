@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/jokruger/gs"
+	gse "github.com/jokruger/gs/error"
 )
 
 func Test_builtinDelete(t *testing.T) {
@@ -32,19 +33,19 @@ func Test_builtinDelete(t *testing.T) {
 	}{
 		{name: "invalid-arg", args: args{[]gs.Object{&gs.String{},
 			&gs.String{}}}, wantErr: true,
-			wantedErr: gs.ErrInvalidArgumentType{
+			wantedErr: gse.ErrInvalidArgumentType{
 				Name:     "first",
 				Expected: "map",
 				Found:    "string"},
 		},
 		{name: "no-args",
-			wantErr: true, wantedErr: gs.ErrWrongNumArguments},
+			wantErr: true, wantedErr: gse.ErrWrongNumArguments},
 		{name: "empty-args", args: args{[]gs.Object{}}, wantErr: true,
-			wantedErr: gs.ErrWrongNumArguments,
+			wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "3-args", args: args{[]gs.Object{
 			(*gs.Map)(nil), (*gs.String)(nil), (*gs.String)(nil)}},
-			wantErr: true, wantedErr: gs.ErrWrongNumArguments,
+			wantErr: true, wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "nil-map-empty-key",
 			args: args{[]gs.Object{&gs.Map{}, &gs.String{}}},
@@ -53,12 +54,12 @@ func Test_builtinDelete(t *testing.T) {
 		{name: "nil-map-nonstr-key",
 			args: args{[]gs.Object{
 				&gs.Map{}, &gs.Int{}}}, wantErr: true,
-			wantedErr: gs.ErrInvalidArgumentType{
+			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "second", Expected: "string", Found: "int"},
 		},
 		{name: "nil-map-no-key",
 			args: args{[]gs.Object{&gs.Map{}}}, wantErr: true,
-			wantedErr: gs.ErrWrongNumArguments,
+			wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "map-missing-key",
 			args: args{
@@ -152,29 +153,29 @@ func Test_builtinSplice(t *testing.T) {
 		wantedErr error
 	}{
 		{name: "no args", args: []gs.Object{}, wantErr: true,
-			wantedErr: gs.ErrWrongNumArguments,
+			wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "invalid args", args: []gs.Object{&gs.Map{}},
 			wantErr: true,
-			wantedErr: gs.ErrInvalidArgumentType{
+			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "first", Expected: "array", Found: "map"},
 		},
 		{name: "invalid args",
 			args:    []gs.Object{&gs.Array{}, &gs.String{}},
 			wantErr: true,
-			wantedErr: gs.ErrInvalidArgumentType{
+			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "second", Expected: "int", Found: "string"},
 		},
 		{name: "negative index",
 			args:      []gs.Object{&gs.Array{}, &gs.Int{Value: -1}},
 			wantErr:   true,
-			wantedErr: gs.ErrIndexOutOfBounds},
+			wantedErr: gse.ErrIndexOutOfBounds},
 		{name: "non int count",
 			args: []gs.Object{
 				&gs.Array{}, &gs.Int{Value: 0},
 				&gs.String{Value: ""}},
 			wantErr: true,
-			wantedErr: gs.ErrInvalidArgumentType{
+			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "third", Expected: "int", Found: "string"},
 		},
 		{name: "negative count",
@@ -186,7 +187,7 @@ func Test_builtinSplice(t *testing.T) {
 				&gs.Int{Value: 0},
 				&gs.Int{Value: -1}},
 			wantErr:   true,
-			wantedErr: gs.ErrIndexOutOfBounds,
+			wantedErr: gse.ErrIndexOutOfBounds,
 		},
 		{name: "insert with zero count",
 			args: []gs.Object{
@@ -371,43 +372,43 @@ func Test_builtinRange(t *testing.T) {
 		wantedErr error
 	}{
 		{name: "no args", args: []gs.Object{}, wantErr: true,
-			wantedErr: gs.ErrWrongNumArguments,
+			wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "single args", args: []gs.Object{&gs.Map{}},
 			wantErr:   true,
-			wantedErr: gs.ErrWrongNumArguments,
+			wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "4 args", args: []gs.Object{&gs.Map{}, &gs.String{}, &gs.String{}, &gs.String{}},
 			wantErr:   true,
-			wantedErr: gs.ErrWrongNumArguments,
+			wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "invalid start",
 			args:    []gs.Object{&gs.String{}, &gs.String{}},
 			wantErr: true,
-			wantedErr: gs.ErrInvalidArgumentType{
+			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "start", Expected: "int", Found: "string"},
 		},
 		{name: "invalid stop",
 			args:    []gs.Object{&gs.Int{}, &gs.String{}},
 			wantErr: true,
-			wantedErr: gs.ErrInvalidArgumentType{
+			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "stop", Expected: "int", Found: "string"},
 		},
 		{name: "invalid step",
 			args:    []gs.Object{&gs.Int{}, &gs.Int{}, &gs.String{}},
 			wantErr: true,
-			wantedErr: gs.ErrInvalidArgumentType{
+			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "step", Expected: "int", Found: "string"},
 		},
 		{name: "zero step",
 			args:      []gs.Object{&gs.Int{}, &gs.Int{}, &gs.Int{}}, //must greate than 0
 			wantErr:   true,
-			wantedErr: gs.ErrInvalidRangeStep,
+			wantedErr: gse.ErrInvalidRangeStep,
 		},
 		{name: "negative step",
 			args:      []gs.Object{&gs.Int{}, &gs.Int{}, intObject(-2)}, //must greate than 0
 			wantErr:   true,
-			wantedErr: gs.ErrInvalidRangeStep,
+			wantedErr: gse.ErrInvalidRangeStep,
 		},
 		{name: "same bound",
 			args:    []gs.Object{&gs.Int{}, &gs.Int{}},

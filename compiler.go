@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -535,7 +534,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 					err.Error())
 			}
 
-			moduleSrc, err := ioutil.ReadFile(modulePath)
+			moduleSrc, err := os.ReadFile(modulePath)
 			if err != nil {
 				return c.errorf(node, "module file read error: %s",
 					err.Error())

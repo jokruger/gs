@@ -2,7 +2,7 @@ package gs_test
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -1255,10 +1255,10 @@ func TestCompiler_custom_extension(t *testing.T) {
 
 	modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
 
-	src, err := ioutil.ReadFile(pathFileSource)
+	src, err := os.ReadFile(pathFileSource)
 	require.NoError(t, err)
 
-	// Escape shegang
+	// Escape hashbang
 	if len(src) > 1 && string(src[:2]) == "#!" {
 		copy(src, "//")
 	}

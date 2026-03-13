@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -54,10 +53,9 @@ func main() {
 		return
 	}
 
-	inputData, err := ioutil.ReadFile(inputFile)
+	inputData, err := os.ReadFile(inputFile)
 	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr,
-			"Error reading input file: %s\n", err.Error())
+		fmt.Fprintf(os.Stderr, "Error reading input file: %s\n", err.Error())
 		os.Exit(1)
 	}
 

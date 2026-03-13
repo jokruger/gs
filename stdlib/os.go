@@ -3,7 +3,6 @@ package stdlib
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"runtime"
@@ -215,7 +214,7 @@ func osReadFile(args ...gs.Object) (ret gs.Object, err error) {
 			Found:    args[0].TypeName(),
 		}
 	}
-	bytes, err := ioutil.ReadFile(fname)
+	bytes, err := os.ReadFile(fname)
 	if err != nil {
 		return wrapError(err), nil
 	}

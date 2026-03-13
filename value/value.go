@@ -1,4 +1,4 @@
-package types
+package value
 
 import (
 	"time"
@@ -7,9 +7,6 @@ import (
 )
 
 const (
-	// NoPos represents an invalid position.
-	NoPos Pos = 0
-
 	// TrueString is a string representation of the boolean value true.
 	TrueString = "true"
 

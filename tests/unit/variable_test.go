@@ -5,7 +5,7 @@ import (
 
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/tests/require"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 type VariableTest struct {
@@ -18,7 +18,7 @@ type VariableTest struct {
 	CharValue   rune
 	BoolValue   bool
 	StringValue string
-	Object      gst.Object
+	Object      value.Object
 	IsUndefined bool
 }
 
@@ -34,7 +34,7 @@ func TestVariable(t *testing.T) {
 			CharValue:   rune(1),
 			BoolValue:   true,
 			StringValue: "1",
-			Object:      &gst.Int{Value: 1},
+			Object:      &value.Int{Value: 1},
 		},
 		{
 			Name:        "b",
@@ -43,7 +43,7 @@ func TestVariable(t *testing.T) {
 			FloatValue:  52.11,
 			StringValue: "52.11",
 			BoolValue:   true,
-			Object:      &gst.String{Value: "52.11"},
+			Object:      &value.String{Value: "52.11"},
 		},
 		{
 			Name:        "c",
@@ -54,13 +54,13 @@ func TestVariable(t *testing.T) {
 			FloatValue:  0,
 			BoolValue:   true,
 			StringValue: "true",
-			Object:      gst.TrueValue,
+			Object:      value.TrueValue,
 		},
 		{
 			Name:        "d",
 			Value:       nil,
 			ValueType:   "undefined",
-			Object:      gst.UndefinedValue,
+			Object:      value.UndefinedValue,
 			IsUndefined: true,
 		},
 	}

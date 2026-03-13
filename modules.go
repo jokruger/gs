@@ -1,8 +1,6 @@
 package gs
 
-import (
-	gst "github.com/jokruger/gs/types"
-)
+import "github.com/jokruger/gs/value"
 
 // Importable interface represents importable module instance.
 type Importable interface {
@@ -34,8 +32,8 @@ func (m *ModuleMap) Add(name string, module Importable) {
 }
 
 // AddBuiltinModule adds a builtin module.
-func (m *ModuleMap) AddBuiltinModule(name string, attrs map[string]gst.Object) {
-	m.m[name] = &gst.BuiltinModule{Attrs: attrs}
+func (m *ModuleMap) AddBuiltinModule(name string, attrs map[string]value.Object) {
+	m.m[name] = &value.BuiltinModule{Attrs: attrs}
 }
 
 // AddSourceModule adds a source module.
@@ -56,8 +54,8 @@ func (m *ModuleMap) Get(name string) Importable {
 
 // GetBuiltinModule returns a builtin module identified by name. It returns
 // if the name is not found or the module is not a builtin module.
-func (m *ModuleMap) GetBuiltinModule(name string) *gst.BuiltinModule {
-	mod, _ := m.m[name].(*gst.BuiltinModule)
+func (m *ModuleMap) GetBuiltinModule(name string) *value.BuiltinModule {
+	mod, _ := m.m[name].(*value.BuiltinModule)
 	return mod
 }
 

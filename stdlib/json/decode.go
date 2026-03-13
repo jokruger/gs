@@ -12,11 +12,11 @@ import (
 	"unicode/utf16"
 	"unicode/utf8"
 
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 // Decode parses the JSON-encoded data and returns the result object.
-func Decode(data []byte) (gst.Object, error) {
+func Decode(data []byte) (value.Object, error) {
 	var d decodeState
 	err := checkValid(data, &d.scan)
 	if err != nil {
@@ -82,7 +82,7 @@ func (d *decodeState) scanWhile(op int) (isFloat bool) {
 	return
 }
 
-func (d *decodeState) value() (gst.Object, error) {
+func (d *decodeState) value() (value.Object, error) {
 	switch d.opcode {
 	default:
 		panic(phasePanicMsg)
@@ -105,8 +105,8 @@ func (d *decodeState) value() (gst.Object, error) {
 	}
 }
 
-func (d *decodeState) array() (gst.Object, error) {
-	var arr []gst.Object
+func (d *decodeState) array() (value.Object, error) {
+	var arr []value.Object
 	for {
 		// Look ahead for ] - can only happen on first iteration.
 		d.scanWhile(scanSkipSpace)
@@ -130,11 +130,11 @@ func (d *decodeState) array() (gst.Object, error) {
 			panic(phasePanicMsg)
 		}
 	}
-	return &gst.Array{Value: arr}, nil
+	return &value.Array{Value: arr}, nil
 }
 
-func (d *decodeState) object() (gst.Object, error) {
-	m := make(map[string]gst.Object)
+func (d *decodeState) object() (value.Object, error) {
+	m := make(map[string]value.Object)
 	for {
 		// Read opening " of string key or closing }.
 		d.scanWhile(scanSkipSpace)
@@ -183,10 +183,10 @@ func (d *decodeState) object() (gst.Object, error) {
 			panic(phasePanicMsg)
 		}
 	}
-	return &gst.Map{Value: m}, nil
+	return &value.Map{Value: m}, nil
 }
 
-func (d *decodeState) literal() (gst.Object, error) {
+func (d *decodeState) literal() (value.Object, error) {
 	// All bytes inside literal return scanContinue op code.
 	start := d.readIndex()
 	isFloat := d.scanWhile(scanContinue)
@@ -195,20 +195,20 @@ func (d *decodeState) literal() (gst.Object, error) {
 
 	switch c := item[0]; c {
 	case 'n': // null
-		return gst.UndefinedValue, nil
+		return value.UndefinedValue, nil
 
 	case 't', 'f': // true, false
 		if c == 't' {
-			return gst.TrueValue, nil
+			return value.TrueValue, nil
 		}
-		return gst.FalseValue, nil
+		return value.FalseValue, nil
 
 	case '"': // string
 		s, ok := unquote(item)
 		if !ok {
 			panic(phasePanicMsg)
 		}
-		return &gst.String{Value: s}, nil
+		return &value.String{Value: s}, nil
 
 	default: // number
 		if c != '-' && (c < '0' || c > '9') {
@@ -216,10 +216,10 @@ func (d *decodeState) literal() (gst.Object, error) {
 		}
 		if isFloat {
 			n, _ := strconv.ParseFloat(string(item), 10)
-			return &gst.Float{Value: n}, nil
+			return &value.Float{Value: n}, nil
 		}
 		n, _ := strconv.ParseInt(string(item), 10, 64)
-		return &gst.Int{Value: n}, nil
+		return &value.Int{Value: n}, nil
 	}
 }
 

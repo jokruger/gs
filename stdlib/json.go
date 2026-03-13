@@ -6,47 +6,47 @@ import (
 
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/stdlib/json"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
-var jsonModule = map[string]gst.Object{
-	"decode": &gst.UserFunction{
+var jsonModule = map[string]value.Object{
+	"decode": &value.UserFunction{
 		Name:  "decode",
 		Value: jsonDecode,
 	},
-	"encode": &gst.UserFunction{
+	"encode": &value.UserFunction{
 		Name:  "encode",
 		Value: jsonEncode,
 	},
-	"indent": &gst.UserFunction{
+	"indent": &value.UserFunction{
 		Name:  "encode",
 		Value: jsonIndent,
 	},
-	"html_escape": &gst.UserFunction{
+	"html_escape": &value.UserFunction{
 		Name:  "html_escape",
 		Value: jsonHTMLEscape,
 	},
 }
 
-func jsonDecode(args ...gst.Object) (ret gst.Object, err error) {
+func jsonDecode(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
 
 	switch o := args[0].(type) {
-	case *gst.Bytes:
+	case *value.Bytes:
 		v, err := json.Decode(o.Value)
 		if err != nil {
-			return &gst.Error{
-				Value: &gst.String{Value: err.Error()},
+			return &value.Error{
+				Value: &value.String{Value: err.Error()},
 			}, nil
 		}
 		return v, nil
-	case *gst.String:
+	case *value.String:
 		v, err := json.Decode([]byte(o.Value))
 		if err != nil {
-			return &gst.Error{
-				Value: &gst.String{Value: err.Error()},
+			return &value.Error{
+				Value: &value.String{Value: err.Error()},
 			}, nil
 		}
 		return v, nil
@@ -59,20 +59,20 @@ func jsonDecode(args ...gst.Object) (ret gst.Object, err error) {
 	}
 }
 
-func jsonEncode(args ...gst.Object) (ret gst.Object, err error) {
+func jsonEncode(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
 
 	b, err := json.Encode(args[0])
 	if err != nil {
-		return &gst.Error{Value: &gst.String{Value: err.Error()}}, nil
+		return &value.Error{Value: &value.String{Value: err.Error()}}, nil
 	}
 
-	return &gst.Bytes{Value: b}, nil
+	return &value.Bytes{Value: b}, nil
 }
 
-func jsonIndent(args ...gst.Object) (ret gst.Object, err error) {
+func jsonIndent(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 3 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -96,24 +96,24 @@ func jsonIndent(args ...gst.Object) (ret gst.Object, err error) {
 	}
 
 	switch o := args[0].(type) {
-	case *gst.Bytes:
+	case *value.Bytes:
 		var dst bytes.Buffer
 		err := gojson.Indent(&dst, o.Value, prefix, indent)
 		if err != nil {
-			return &gst.Error{
-				Value: &gst.String{Value: err.Error()},
+			return &value.Error{
+				Value: &value.String{Value: err.Error()},
 			}, nil
 		}
-		return &gst.Bytes{Value: dst.Bytes()}, nil
-	case *gst.String:
+		return &value.Bytes{Value: dst.Bytes()}, nil
+	case *value.String:
 		var dst bytes.Buffer
 		err := gojson.Indent(&dst, []byte(o.Value), prefix, indent)
 		if err != nil {
-			return &gst.Error{
-				Value: &gst.String{Value: err.Error()},
+			return &value.Error{
+				Value: &value.String{Value: err.Error()},
 			}, nil
 		}
-		return &gst.Bytes{Value: dst.Bytes()}, nil
+		return &value.Bytes{Value: dst.Bytes()}, nil
 	default:
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -123,20 +123,20 @@ func jsonIndent(args ...gst.Object) (ret gst.Object, err error) {
 	}
 }
 
-func jsonHTMLEscape(args ...gst.Object) (ret gst.Object, err error) {
+func jsonHTMLEscape(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
 
 	switch o := args[0].(type) {
-	case *gst.Bytes:
+	case *value.Bytes:
 		var dst bytes.Buffer
 		gojson.HTMLEscape(&dst, o.Value)
-		return &gst.Bytes{Value: dst.Bytes()}, nil
-	case *gst.String:
+		return &value.Bytes{Value: dst.Bytes()}, nil
+	case *value.String:
 		var dst bytes.Buffer
 		gojson.HTMLEscape(&dst, []byte(o.Value))
-		return &gst.Bytes{Value: dst.Bytes()}, nil
+		return &value.Bytes{Value: dst.Bytes()}, nil
 	default:
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",

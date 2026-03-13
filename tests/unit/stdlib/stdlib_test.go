@@ -8,7 +8,7 @@ import (
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/tests/require"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 type ARR = []interface{}
@@ -106,20 +106,20 @@ func (c callres) call(funcName string, args ...interface{}) callres {
 		return c
 	}
 
-	var oargs []gst.Object
+	var oargs []value.Object
 	for _, v := range args {
 		oargs = append(oargs, object(v))
 	}
 
 	switch o := c.o.(type) {
-	case *gst.BuiltinModule:
+	case *value.BuiltinModule:
 		m, ok := o.Attrs[funcName]
 		if !ok {
 			return callres{t: c.t, e: fmt.Errorf(
 				"function not found: %s", funcName)}
 		}
 
-		f, ok := m.(*gst.UserFunction)
+		f, ok := m.(*value.UserFunction)
 		if !ok {
 			return callres{t: c.t, e: fmt.Errorf(
 				"non-callable: %s", funcName)}
@@ -127,16 +127,16 @@ func (c callres) call(funcName string, args ...interface{}) callres {
 
 		res, err := f.Value(oargs...)
 		return callres{t: c.t, o: res, e: err}
-	case *gst.UserFunction:
+	case *value.UserFunction:
 		res, err := o.Value(oargs...)
 		return callres{t: c.t, o: res, e: err}
-	case *gst.ImmutableMap:
+	case *value.ImmutableMap:
 		m, ok := o.Value[funcName]
 		if !ok {
 			return callres{t: c.t, e: fmt.Errorf("function not found: %s", funcName)}
 		}
 
-		f, ok := m.(*gst.UserFunction)
+		f, ok := m.(*value.UserFunction)
 		if !ok {
 			return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
 		}
@@ -166,66 +166,66 @@ func module(t *testing.T, moduleName string) callres {
 	return callres{t: t, o: mod}
 }
 
-func object(v interface{}) gst.Object {
+func object(v interface{}) value.Object {
 	switch v := v.(type) {
-	case gst.Object:
+	case value.Object:
 		return v
 	case string:
-		return &gst.String{Value: v}
+		return &value.String{Value: v}
 	case int64:
-		return &gst.Int{Value: v}
+		return &value.Int{Value: v}
 	case int: // for convenience
-		return &gst.Int{Value: int64(v)}
+		return &value.Int{Value: int64(v)}
 	case bool:
 		if v {
-			return gst.TrueValue
+			return value.TrueValue
 		}
-		return gst.FalseValue
+		return value.FalseValue
 	case rune:
-		return &gst.Char{Value: v}
+		return &value.Char{Value: v}
 	case byte: // for convenience
-		return &gst.Char{Value: rune(v)}
+		return &value.Char{Value: rune(v)}
 	case float64:
-		return &gst.Float{Value: v}
+		return &value.Float{Value: v}
 	case []byte:
-		return &gst.Bytes{Value: v}
+		return &value.Bytes{Value: v}
 	case MAP:
-		objs := make(map[string]gst.Object)
+		objs := make(map[string]value.Object)
 		for k, v := range v {
 			objs[k] = object(v)
 		}
 
-		return &gst.Map{Value: objs}
+		return &value.Map{Value: objs}
 	case ARR:
-		var objs []gst.Object
+		var objs []value.Object
 		for _, e := range v {
 			objs = append(objs, object(e))
 		}
 
-		return &gst.Array{Value: objs}
+		return &value.Array{Value: objs}
 	case IMAP:
-		objs := make(map[string]gst.Object)
+		objs := make(map[string]value.Object)
 		for k, v := range v {
 			objs[k] = object(v)
 		}
 
-		return &gst.ImmutableMap{Value: objs}
+		return &value.ImmutableMap{Value: objs}
 	case IARR:
-		var objs []gst.Object
+		var objs []value.Object
 		for _, e := range v {
 			objs = append(objs, object(e))
 		}
 
-		return &gst.ImmutableArray{Value: objs}
+		return &value.ImmutableArray{Value: objs}
 	case time.Time:
-		return &gst.Time{Value: v}
+		return &value.Time{Value: v}
 	case []int:
-		var objs []gst.Object
+		var objs []value.Object
 		for _, e := range v {
-			objs = append(objs, &gst.Int{Value: int64(e)})
+			objs = append(objs, &value.Int{Value: int64(e)})
 		}
 
-		return &gst.Array{Value: objs}
+		return &value.Array{Value: objs}
 	}
 
 	panic(fmt.Errorf("unknown type: %T", v))

@@ -13,7 +13,8 @@ import (
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 // NoError asserts err is not an error.
@@ -125,51 +126,51 @@ func Equal(
 		if !equalSymbol(expected, actual.(*gs.Symbol)) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
-	case gst.Pos:
-		if expected != actual.(gst.Pos) {
+	case types.Pos:
+		if expected != actual.(types.Pos) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
 	case token.Token:
 		if expected != actual.(token.Token) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
-	case []gst.Object:
-		equalObjectSlice(t, expected, actual.([]gst.Object), msg...)
-	case *gst.Int:
-		Equal(t, expected.Value, actual.(*gst.Int).Value, msg...)
-	case *gst.Float:
-		Equal(t, expected.Value, actual.(*gst.Float).Value, msg...)
-	case *gst.String:
-		Equal(t, expected.Value, actual.(*gst.String).Value, msg...)
-	case *gst.Char:
-		Equal(t, expected.Value, actual.(*gst.Char).Value, msg...)
-	case *gst.Bool:
+	case []value.Object:
+		equalObjectSlice(t, expected, actual.([]value.Object), msg...)
+	case *value.Int:
+		Equal(t, expected.Value, actual.(*value.Int).Value, msg...)
+	case *value.Float:
+		Equal(t, expected.Value, actual.(*value.Float).Value, msg...)
+	case *value.String:
+		Equal(t, expected.Value, actual.(*value.String).Value, msg...)
+	case *value.Char:
+		Equal(t, expected.Value, actual.(*value.Char).Value, msg...)
+	case *value.Bool:
 		if expected != actual {
 			failExpectedActual(t, expected, actual, msg...)
 		}
-	case *gst.Array:
+	case *value.Array:
 		equalObjectSlice(t, expected.Value,
-			actual.(*gst.Array).Value, msg...)
-	case *gst.ImmutableArray:
-		equalObjectSlice(t, expected.Value, actual.(*gst.ImmutableArray).Value, msg...)
-	case *gst.Bytes:
-		if !bytes.Equal(expected.Value, actual.(*gst.Bytes).Value) {
-			failExpectedActual(t, string(expected.Value), string(actual.(*gst.Bytes).Value), msg...)
+			actual.(*value.Array).Value, msg...)
+	case *value.ImmutableArray:
+		equalObjectSlice(t, expected.Value, actual.(*value.ImmutableArray).Value, msg...)
+	case *value.Bytes:
+		if !bytes.Equal(expected.Value, actual.(*value.Bytes).Value) {
+			failExpectedActual(t, string(expected.Value), string(actual.(*value.Bytes).Value), msg...)
 		}
-	case *gst.Map:
-		equalObjectMap(t, expected.Value, actual.(*gst.Map).Value, msg...)
-	case *gst.ImmutableMap:
-		equalObjectMap(t, expected.Value, actual.(*gst.ImmutableMap).Value, msg...)
-	case *gst.CompiledFunction:
-		equalCompiledFunction(t, expected, actual.(*gst.CompiledFunction), msg...)
-	case *gst.Undefined:
+	case *value.Map:
+		equalObjectMap(t, expected.Value, actual.(*value.Map).Value, msg...)
+	case *value.ImmutableMap:
+		equalObjectMap(t, expected.Value, actual.(*value.ImmutableMap).Value, msg...)
+	case *value.CompiledFunction:
+		equalCompiledFunction(t, expected, actual.(*value.CompiledFunction), msg...)
+	case *value.Undefined:
 		if expected != actual {
 			failExpectedActual(t, expected, actual, msg...)
 		}
-	case *gst.Error:
-		Equal(t, expected.Value, actual.(*gst.Error).Value, msg...)
-	case gst.Object:
-		if !expected.Equals(actual.(gst.Object)) {
+	case *value.Error:
+		Equal(t, expected.Value, actual.(*value.Error).Value, msg...)
+	case value.Object:
+		if !expected.Equals(actual.(value.Object)) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
 	case *parser.SourceFileSet:
@@ -253,7 +254,7 @@ func equalSymbol(a, b *gs.Symbol) bool {
 		a.Scope == b.Scope
 }
 
-func equalObjectSlice(t *testing.T, expected, actual []gst.Object, msg ...interface{}) {
+func equalObjectSlice(t *testing.T, expected, actual []value.Object, msg ...interface{}) {
 	Equal(t, len(expected), len(actual), msg...)
 	for i := 0; i < len(expected); i++ {
 		Equal(t, expected[i], actual[i], msg...)
@@ -269,7 +270,7 @@ func equalFileSet(t *testing.T, expected, actual *parser.SourceFileSet, msg ...i
 	Equal(t, expected.LastFile, actual.LastFile)
 }
 
-func equalObjectMap(t *testing.T, expected, actual map[string]gst.Object, msg ...interface{}) {
+func equalObjectMap(t *testing.T, expected, actual map[string]value.Object, msg ...interface{}) {
 	Equal(t, len(expected), len(actual), msg...)
 	for key, expectedVal := range expected {
 		actualVal := actual[key]
@@ -277,9 +278,9 @@ func equalObjectMap(t *testing.T, expected, actual map[string]gst.Object, msg ..
 	}
 }
 
-func equalCompiledFunction(t *testing.T, expected, actual gst.Object, msg ...interface{}) {
-	expectedT := expected.(*gst.CompiledFunction)
-	actualT := actual.(*gst.CompiledFunction)
+func equalCompiledFunction(t *testing.T, expected, actual value.Object, msg ...interface{}) {
+	expectedT := expected.(*value.CompiledFunction)
+	actualT := actual.(*value.CompiledFunction)
 	Equal(t, gs.FormatInstructions(expectedT.Instructions, 0), gs.FormatInstructions(actualT.Instructions, 0), msg...)
 }
 

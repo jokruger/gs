@@ -5,25 +5,25 @@ import (
 	"syscall"
 
 	gse "github.com/jokruger/gs/error"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
-func makeOSProcessState(state *os.ProcessState) *gst.ImmutableMap {
-	return &gst.ImmutableMap{
-		Value: map[string]gst.Object{
-			"exited": &gst.UserFunction{
+func makeOSProcessState(state *os.ProcessState) *value.ImmutableMap {
+	return &value.ImmutableMap{
+		Value: map[string]value.Object{
+			"exited": &value.UserFunction{
 				Name:  "exited",
 				Value: FuncARB(state.Exited),
 			},
-			"pid": &gst.UserFunction{
+			"pid": &value.UserFunction{
 				Name:  "pid",
 				Value: FuncARI(state.Pid),
 			},
-			"string": &gst.UserFunction{
+			"string": &value.UserFunction{
 				Name:  "string",
 				Value: FuncARS(state.String),
 			},
-			"success": &gst.UserFunction{
+			"success": &value.UserFunction{
 				Name:  "success",
 				Value: FuncARB(state.Success),
 			},
@@ -31,20 +31,20 @@ func makeOSProcessState(state *os.ProcessState) *gst.ImmutableMap {
 	}
 }
 
-func makeOSProcess(proc *os.Process) *gst.ImmutableMap {
-	return &gst.ImmutableMap{
-		Value: map[string]gst.Object{
-			"kill": &gst.UserFunction{
+func makeOSProcess(proc *os.Process) *value.ImmutableMap {
+	return &value.ImmutableMap{
+		Value: map[string]value.Object{
+			"kill": &value.UserFunction{
 				Name:  "kill",
 				Value: FuncARE(proc.Kill),
 			},
-			"release": &gst.UserFunction{
+			"release": &value.UserFunction{
 				Name:  "release",
 				Value: FuncARE(proc.Release),
 			},
-			"signal": &gst.UserFunction{
+			"signal": &value.UserFunction{
 				Name: "signal",
-				Value: func(args ...gst.Object) (gst.Object, error) {
+				Value: func(args ...value.Object) (value.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
@@ -59,9 +59,9 @@ func makeOSProcess(proc *os.Process) *gst.ImmutableMap {
 					return wrapError(proc.Signal(syscall.Signal(i1))), nil
 				},
 			},
-			"wait": &gst.UserFunction{
+			"wait": &value.UserFunction{
 				Name: "wait",
-				Value: func(args ...gst.Object) (gst.Object, error) {
+				Value: func(args ...value.Object) (value.Object, error) {
 					if len(args) != 0 {
 						return nil, gse.ErrWrongNumArguments
 					}

@@ -1,4 +1,4 @@
-package types
+package value
 
 import (
 	gse "github.com/jokruger/gs/error"

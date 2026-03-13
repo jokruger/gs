@@ -1,5 +1,8 @@
 package types
 
+// NoPos represents an invalid position.
+const NoPos Pos = 0
+
 // Pos represents a position in the file set.
 type Pos int
 

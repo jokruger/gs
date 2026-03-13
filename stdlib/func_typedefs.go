@@ -4,46 +4,46 @@ import (
 	"fmt"
 
 	gse "github.com/jokruger/gs/error"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 // FuncAR transform a function of 'func()' signature into CallableFunc type.
-func FuncAR(fn func()) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAR(fn func()) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
 		}
 		fn()
-		return gst.UndefinedValue, nil
+		return value.UndefinedValue, nil
 	}
 }
 
 // FuncARI transform a function of 'func() int' signature into CallableFunc
 // type.
-func FuncARI(fn func() int) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncARI(fn func() int) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		return &gst.Int{Value: int64(fn())}, nil
+		return &value.Int{Value: int64(fn())}, nil
 	}
 }
 
 // FuncARI64 transform a function of 'func() int64' signature into CallableFunc
 // type.
-func FuncARI64(fn func() int64) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncARI64(fn func() int64) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		return &gst.Int{Value: fn()}, nil
+		return &value.Int{Value: fn()}, nil
 	}
 }
 
 // FuncAI64RI64 transform a function of 'func(int64) int64' signature into
 // CallableFunc type.
-func FuncAI64RI64(fn func(int64) int64) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAI64RI64(fn func(int64) int64) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -56,14 +56,14 @@ func FuncAI64RI64(fn func(int64) int64) gst.CallableFunc {
 				Found:    args[0].TypeName(),
 			}
 		}
-		return &gst.Int{Value: fn(i1)}, nil
+		return &value.Int{Value: fn(i1)}, nil
 	}
 }
 
 // FuncAI64R transform a function of 'func(int64)' signature into CallableFunc
 // type.
-func FuncAI64R(fn func(int64)) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAI64R(fn func(int64)) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -77,28 +77,28 @@ func FuncAI64R(fn func(int64)) gst.CallableFunc {
 			}
 		}
 		fn(i1)
-		return gst.UndefinedValue, nil
+		return value.UndefinedValue, nil
 	}
 }
 
 // FuncARB transform a function of 'func() bool' signature into CallableFunc
 // type.
-func FuncARB(fn func() bool) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncARB(fn func() bool) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
 		}
 		if fn() {
-			return gst.TrueValue, nil
+			return value.TrueValue, nil
 		}
-		return gst.FalseValue, nil
+		return value.FalseValue, nil
 	}
 }
 
 // FuncARE transform a function of 'func() error' signature into CallableFunc
 // type.
-func FuncARE(fn func() error) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncARE(fn func() error) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -108,23 +108,23 @@ func FuncARE(fn func() error) gst.CallableFunc {
 
 // FuncARS transform a function of 'func() string' signature into CallableFunc
 // type.
-func FuncARS(fn func() string) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncARS(fn func() string) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
 		}
 		s := fn()
-		if len(s) > gst.MaxStringLen {
+		if len(s) > value.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
-		return &gst.String{Value: s}, nil
+		return &value.String{Value: s}, nil
 	}
 }
 
 // FuncARSE transform a function of 'func() (string, error)' signature into
 // CallableFunc type.
-func FuncARSE(fn func() (string, error)) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncARSE(fn func() (string, error)) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -132,17 +132,17 @@ func FuncARSE(fn func() (string, error)) gst.CallableFunc {
 		if err != nil {
 			return wrapError(err), nil
 		}
-		if len(res) > gst.MaxStringLen {
+		if len(res) > value.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
-		return &gst.String{Value: res}, nil
+		return &value.String{Value: res}, nil
 	}
 }
 
 // FuncARYE transform a function of 'func() ([]byte, error)' signature into
 // CallableFunc type.
-func FuncARYE(fn func() ([]byte, error)) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncARYE(fn func() ([]byte, error)) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -150,37 +150,37 @@ func FuncARYE(fn func() ([]byte, error)) gst.CallableFunc {
 		if err != nil {
 			return wrapError(err), nil
 		}
-		if len(res) > gst.MaxBytesLen {
+		if len(res) > value.MaxBytesLen {
 			return nil, gse.ErrBytesLimit
 		}
-		return &gst.Bytes{Value: res}, nil
+		return &value.Bytes{Value: res}, nil
 	}
 }
 
 // FuncARF transform a function of 'func() float64' signature into CallableFunc
 // type.
-func FuncARF(fn func() float64) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncARF(fn func() float64) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		return &gst.Float{Value: fn()}, nil
+		return &value.Float{Value: fn()}, nil
 	}
 }
 
 // FuncARSs transform a function of 'func() []string' signature into
 // CallableFunc type.
-func FuncARSs(fn func() []string) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncARSs(fn func() []string) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		arr := &gst.Array{}
+		arr := &value.Array{}
 		for _, elem := range fn() {
-			if len(elem) > gst.MaxStringLen {
+			if len(elem) > value.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
-			arr.Value = append(arr.Value, &gst.String{Value: elem})
+			arr.Value = append(arr.Value, &value.String{Value: elem})
 		}
 		return arr, nil
 	}
@@ -188,8 +188,8 @@ func FuncARSs(fn func() []string) gst.CallableFunc {
 
 // FuncARIsE transform a function of 'func() ([]int, error)' signature into
 // CallableFunc type.
-func FuncARIsE(fn func() ([]int, error)) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncARIsE(fn func() ([]int, error)) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -197,9 +197,9 @@ func FuncARIsE(fn func() ([]int, error)) gst.CallableFunc {
 		if err != nil {
 			return wrapError(err), nil
 		}
-		arr := &gst.Array{}
+		arr := &value.Array{}
 		for _, v := range res {
-			arr.Value = append(arr.Value, &gst.Int{Value: int64(v)})
+			arr.Value = append(arr.Value, &value.Int{Value: int64(v)})
 		}
 		return arr, nil
 	}
@@ -207,8 +207,8 @@ func FuncARIsE(fn func() ([]int, error)) gst.CallableFunc {
 
 // FuncAIRIs transform a function of 'func(int) []int' signature into
 // CallableFunc type.
-func FuncAIRIs(fn func(int) []int) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAIRIs(fn func(int) []int) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -221,9 +221,9 @@ func FuncAIRIs(fn func(int) []int) gst.CallableFunc {
 			}
 		}
 		res := fn(i1)
-		arr := &gst.Array{}
+		arr := &value.Array{}
 		for _, v := range res {
-			arr.Value = append(arr.Value, &gst.Int{Value: int64(v)})
+			arr.Value = append(arr.Value, &value.Int{Value: int64(v)})
 		}
 		return arr, nil
 	}
@@ -231,8 +231,8 @@ func FuncAIRIs(fn func(int) []int) gst.CallableFunc {
 
 // FuncAFRF transform a function of 'func(float64) float64' signature into
 // CallableFunc type.
-func FuncAFRF(fn func(float64) float64) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAFRF(fn func(float64) float64) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -244,13 +244,13 @@ func FuncAFRF(fn func(float64) float64) gst.CallableFunc {
 				Found:    args[0].TypeName(),
 			}
 		}
-		return &gst.Float{Value: fn(f1)}, nil
+		return &value.Float{Value: fn(f1)}, nil
 	}
 }
 
 // FuncAIR transform a function of 'func(int)' signature into CallableFunc type.
-func FuncAIR(fn func(int)) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAIR(fn func(int)) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -263,14 +263,14 @@ func FuncAIR(fn func(int)) gst.CallableFunc {
 			}
 		}
 		fn(i1)
-		return gst.UndefinedValue, nil
+		return value.UndefinedValue, nil
 	}
 }
 
 // FuncAIRF transform a function of 'func(int) float64' signature into
 // CallableFunc type.
-func FuncAIRF(fn func(int) float64) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAIRF(fn func(int) float64) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -282,14 +282,14 @@ func FuncAIRF(fn func(int) float64) gst.CallableFunc {
 				Found:    args[0].TypeName(),
 			}
 		}
-		return &gst.Float{Value: fn(i1)}, nil
+		return &value.Float{Value: fn(i1)}, nil
 	}
 }
 
 // FuncAFRI transform a function of 'func(float64) int' signature into
 // CallableFunc type.
-func FuncAFRI(fn func(float64) int) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAFRI(fn func(float64) int) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -301,14 +301,14 @@ func FuncAFRI(fn func(float64) int) gst.CallableFunc {
 				Found:    args[0].TypeName(),
 			}
 		}
-		return &gst.Int{Value: int64(fn(f1))}, nil
+		return &value.Int{Value: int64(fn(f1))}, nil
 	}
 }
 
 // FuncAFFRF transform a function of 'func(float64, float64) float64' signature
 // into CallableFunc type.
-func FuncAFFRF(fn func(float64, float64) float64) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAFFRF(fn func(float64, float64) float64) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -328,14 +328,14 @@ func FuncAFFRF(fn func(float64, float64) float64) gst.CallableFunc {
 				Found:    args[1].TypeName(),
 			}
 		}
-		return &gst.Float{Value: fn(f1, f2)}, nil
+		return &value.Float{Value: fn(f1, f2)}, nil
 	}
 }
 
 // FuncAIFRF transform a function of 'func(int, float64) float64' signature
 // into CallableFunc type.
-func FuncAIFRF(fn func(int, float64) float64) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAIFRF(fn func(int, float64) float64) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -355,14 +355,14 @@ func FuncAIFRF(fn func(int, float64) float64) gst.CallableFunc {
 				Found:    args[1].TypeName(),
 			}
 		}
-		return &gst.Float{Value: fn(i1, f2)}, nil
+		return &value.Float{Value: fn(i1, f2)}, nil
 	}
 }
 
 // FuncAFIRF transform a function of 'func(float64, int) float64' signature
 // into CallableFunc type.
-func FuncAFIRF(fn func(float64, int) float64) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAFIRF(fn func(float64, int) float64) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -382,14 +382,14 @@ func FuncAFIRF(fn func(float64, int) float64) gst.CallableFunc {
 				Found:    args[1].TypeName(),
 			}
 		}
-		return &gst.Float{Value: fn(f1, i2)}, nil
+		return &value.Float{Value: fn(f1, i2)}, nil
 	}
 }
 
 // FuncAFIRB transform a function of 'func(float64, int) bool' signature
 // into CallableFunc type.
-func FuncAFIRB(fn func(float64, int) bool) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAFIRB(fn func(float64, int) bool) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -410,16 +410,16 @@ func FuncAFIRB(fn func(float64, int) bool) gst.CallableFunc {
 			}
 		}
 		if fn(f1, i2) {
-			return gst.TrueValue, nil
+			return value.TrueValue, nil
 		}
-		return gst.FalseValue, nil
+		return value.FalseValue, nil
 	}
 }
 
 // FuncAFRB transform a function of 'func(float64) bool' signature
 // into CallableFunc type.
-func FuncAFRB(fn func(float64) bool) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAFRB(fn func(float64) bool) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -432,17 +432,17 @@ func FuncAFRB(fn func(float64) bool) gst.CallableFunc {
 			}
 		}
 		if fn(f1) {
-			return gst.TrueValue, nil
+			return value.TrueValue, nil
 		}
-		return gst.FalseValue, nil
+		return value.FalseValue, nil
 	}
 }
 
 // FuncASRS transform a function of 'func(string) string' signature into
 // CallableFunc type. User function will return 'true' if underlying native
 // function returns nil.
-func FuncASRS(fn func(string) string) gst.CallableFunc {
-	return func(args ...gst.Object) (gst.Object, error) {
+func FuncASRS(fn func(string) string) value.CallableFunc {
+	return func(args ...value.Object) (value.Object, error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -455,17 +455,17 @@ func FuncASRS(fn func(string) string) gst.CallableFunc {
 			}
 		}
 		s := fn(s1)
-		if len(s) > gst.MaxStringLen {
+		if len(s) > value.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
-		return &gst.String{Value: s}, nil
+		return &value.String{Value: s}, nil
 	}
 }
 
 // FuncASRSs transform a function of 'func(string) []string' signature into
 // CallableFunc type.
-func FuncASRSs(fn func(string) []string) gst.CallableFunc {
-	return func(args ...gst.Object) (gst.Object, error) {
+func FuncASRSs(fn func(string) []string) value.CallableFunc {
+	return func(args ...value.Object) (value.Object, error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -478,12 +478,12 @@ func FuncASRSs(fn func(string) []string) gst.CallableFunc {
 			}
 		}
 		res := fn(s1)
-		arr := &gst.Array{}
+		arr := &value.Array{}
 		for _, elem := range res {
-			if len(elem) > gst.MaxStringLen {
+			if len(elem) > value.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
-			arr.Value = append(arr.Value, &gst.String{Value: elem})
+			arr.Value = append(arr.Value, &value.String{Value: elem})
 		}
 		return arr, nil
 	}
@@ -492,8 +492,8 @@ func FuncASRSs(fn func(string) []string) gst.CallableFunc {
 // FuncASRSE transform a function of 'func(string) (string, error)' signature
 // into CallableFunc type. User function will return 'true' if underlying
 // native function returns nil.
-func FuncASRSE(fn func(string) (string, error)) gst.CallableFunc {
-	return func(args ...gst.Object) (gst.Object, error) {
+func FuncASRSE(fn func(string) (string, error)) value.CallableFunc {
+	return func(args ...value.Object) (value.Object, error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -509,18 +509,18 @@ func FuncASRSE(fn func(string) (string, error)) gst.CallableFunc {
 		if err != nil {
 			return wrapError(err), nil
 		}
-		if len(res) > gst.MaxStringLen {
+		if len(res) > value.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
-		return &gst.String{Value: res}, nil
+		return &value.String{Value: res}, nil
 	}
 }
 
 // FuncASRE transform a function of 'func(string) error' signature into
 // CallableFunc type. User function will return 'true' if underlying native
 // function returns nil.
-func FuncASRE(fn func(string) error) gst.CallableFunc {
-	return func(args ...gst.Object) (gst.Object, error) {
+func FuncASRE(fn func(string) error) value.CallableFunc {
+	return func(args ...value.Object) (value.Object, error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -539,8 +539,8 @@ func FuncASRE(fn func(string) error) gst.CallableFunc {
 // FuncASSRE transform a function of 'func(string, string) error' signature
 // into CallableFunc type. User function will return 'true' if underlying
 // native function returns nil.
-func FuncASSRE(fn func(string, string) error) gst.CallableFunc {
-	return func(args ...gst.Object) (gst.Object, error) {
+func FuncASSRE(fn func(string, string) error) value.CallableFunc {
+	return func(args ...value.Object) (value.Object, error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -566,8 +566,8 @@ func FuncASSRE(fn func(string, string) error) gst.CallableFunc {
 
 // FuncASSRSs transform a function of 'func(string, string) []string'
 // signature into CallableFunc type.
-func FuncASSRSs(fn func(string, string) []string) gst.CallableFunc {
-	return func(args ...gst.Object) (gst.Object, error) {
+func FuncASSRSs(fn func(string, string) []string) value.CallableFunc {
+	return func(args ...value.Object) (value.Object, error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -587,12 +587,12 @@ func FuncASSRSs(fn func(string, string) []string) gst.CallableFunc {
 				Found:    args[1].TypeName(),
 			}
 		}
-		arr := &gst.Array{}
+		arr := &value.Array{}
 		for _, res := range fn(s1, s2) {
-			if len(res) > gst.MaxStringLen {
+			if len(res) > value.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
-			arr.Value = append(arr.Value, &gst.String{Value: res})
+			arr.Value = append(arr.Value, &value.String{Value: res})
 		}
 		return arr, nil
 	}
@@ -600,8 +600,8 @@ func FuncASSRSs(fn func(string, string) []string) gst.CallableFunc {
 
 // FuncASSIRSs transform a function of 'func(string, string, int) []string'
 // signature into CallableFunc type.
-func FuncASSIRSs(fn func(string, string, int) []string) gst.CallableFunc {
-	return func(args ...gst.Object) (gst.Object, error) {
+func FuncASSIRSs(fn func(string, string, int) []string) value.CallableFunc {
+	return func(args ...value.Object) (value.Object, error) {
 		if len(args) != 3 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -629,12 +629,12 @@ func FuncASSIRSs(fn func(string, string, int) []string) gst.CallableFunc {
 				Found:    args[2].TypeName(),
 			}
 		}
-		arr := &gst.Array{}
+		arr := &value.Array{}
 		for _, res := range fn(s1, s2, i3) {
-			if len(res) > gst.MaxStringLen {
+			if len(res) > value.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
-			arr.Value = append(arr.Value, &gst.String{Value: res})
+			arr.Value = append(arr.Value, &value.String{Value: res})
 		}
 		return arr, nil
 	}
@@ -642,8 +642,8 @@ func FuncASSIRSs(fn func(string, string, int) []string) gst.CallableFunc {
 
 // FuncASSRI transform a function of 'func(string, string) int' signature into
 // CallableFunc type.
-func FuncASSRI(fn func(string, string) int) gst.CallableFunc {
-	return func(args ...gst.Object) (gst.Object, error) {
+func FuncASSRI(fn func(string, string) int) value.CallableFunc {
+	return func(args ...value.Object) (value.Object, error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -663,14 +663,14 @@ func FuncASSRI(fn func(string, string) int) gst.CallableFunc {
 				Found:    args[0].TypeName(),
 			}
 		}
-		return &gst.Int{Value: int64(fn(s1, s2))}, nil
+		return &value.Int{Value: int64(fn(s1, s2))}, nil
 	}
 }
 
 // FuncASSRS transform a function of 'func(string, string) string' signature
 // into CallableFunc type.
-func FuncASSRS(fn func(string, string) string) gst.CallableFunc {
-	return func(args ...gst.Object) (gst.Object, error) {
+func FuncASSRS(fn func(string, string) string) value.CallableFunc {
+	return func(args ...value.Object) (value.Object, error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -691,17 +691,17 @@ func FuncASSRS(fn func(string, string) string) gst.CallableFunc {
 			}
 		}
 		s := fn(s1, s2)
-		if len(s) > gst.MaxStringLen {
+		if len(s) > value.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
-		return &gst.String{Value: s}, nil
+		return &value.String{Value: s}, nil
 	}
 }
 
 // FuncASSRB transform a function of 'func(string, string) bool' signature
 // into CallableFunc type.
-func FuncASSRB(fn func(string, string) bool) gst.CallableFunc {
-	return func(args ...gst.Object) (gst.Object, error) {
+func FuncASSRB(fn func(string, string) bool) value.CallableFunc {
+	return func(args ...value.Object) (value.Object, error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -722,22 +722,22 @@ func FuncASSRB(fn func(string, string) bool) gst.CallableFunc {
 			}
 		}
 		if fn(s1, s2) {
-			return gst.TrueValue, nil
+			return value.TrueValue, nil
 		}
-		return gst.FalseValue, nil
+		return value.FalseValue, nil
 	}
 }
 
 // FuncASsSRS transform a function of 'func([]string, string) string' signature
 // into CallableFunc type.
-func FuncASsSRS(fn func([]string, string) string) gst.CallableFunc {
-	return func(args ...gst.Object) (gst.Object, error) {
+func FuncASsSRS(fn func([]string, string) string) value.CallableFunc {
+	return func(args ...value.Object) (value.Object, error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
 		var ss1 []string
 		switch arg0 := args[0].(type) {
-		case *gst.Array:
+		case *value.Array:
 			for idx, a := range arg0.Value {
 				as, ok := a.ToString()
 				if !ok {
@@ -749,7 +749,7 @@ func FuncASsSRS(fn func([]string, string) string) gst.CallableFunc {
 				}
 				ss1 = append(ss1, as)
 			}
-		case *gst.ImmutableArray:
+		case *value.ImmutableArray:
 			for idx, a := range arg0.Value {
 				as, ok := a.ToString()
 				if !ok {
@@ -777,17 +777,17 @@ func FuncASsSRS(fn func([]string, string) string) gst.CallableFunc {
 			}
 		}
 		s := fn(ss1, s2)
-		if len(s) > gst.MaxStringLen {
+		if len(s) > value.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
-		return &gst.String{Value: s}, nil
+		return &value.String{Value: s}, nil
 	}
 }
 
 // FuncASI64RE transform a function of 'func(string, int64) error' signature
 // into CallableFunc type.
-func FuncASI64RE(fn func(string, int64) error) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncASI64RE(fn func(string, int64) error) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -813,8 +813,8 @@ func FuncASI64RE(fn func(string, int64) error) gst.CallableFunc {
 
 // FuncAIIRE transform a function of 'func(int, int) error' signature
 // into CallableFunc type.
-func FuncAIIRE(fn func(int, int) error) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAIIRE(fn func(int, int) error) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -840,8 +840,8 @@ func FuncAIIRE(fn func(int, int) error) gst.CallableFunc {
 
 // FuncASIRS transform a function of 'func(string, int) string' signature
 // into CallableFunc type.
-func FuncASIRS(fn func(string, int) string) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncASIRS(fn func(string, int) string) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -862,17 +862,17 @@ func FuncASIRS(fn func(string, int) string) gst.CallableFunc {
 			}
 		}
 		s := fn(s1, i2)
-		if len(s) > gst.MaxStringLen {
+		if len(s) > value.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
-		return &gst.String{Value: s}, nil
+		return &value.String{Value: s}, nil
 	}
 }
 
 // FuncASIIRE transform a function of 'func(string, int, int) error' signature
 // into CallableFunc type.
-func FuncASIIRE(fn func(string, int, int) error) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncASIIRE(fn func(string, int, int) error) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 3 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -906,8 +906,8 @@ func FuncASIIRE(fn func(string, int, int) error) gst.CallableFunc {
 
 // FuncAYRIE transform a function of 'func([]byte) (int, error)' signature
 // into CallableFunc type.
-func FuncAYRIE(fn func([]byte) (int, error)) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAYRIE(fn func([]byte) (int, error)) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -923,14 +923,14 @@ func FuncAYRIE(fn func([]byte) (int, error)) gst.CallableFunc {
 		if err != nil {
 			return wrapError(err), nil
 		}
-		return &gst.Int{Value: int64(res)}, nil
+		return &value.Int{Value: int64(res)}, nil
 	}
 }
 
 // FuncAYRS transform a function of 'func([]byte) string' signature into
 // CallableFunc type.
-func FuncAYRS(fn func([]byte) string) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAYRS(fn func([]byte) string) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -943,14 +943,14 @@ func FuncAYRS(fn func([]byte) string) gst.CallableFunc {
 			}
 		}
 		res := fn(y1)
-		return &gst.String{Value: res}, nil
+		return &value.String{Value: res}, nil
 	}
 }
 
 // FuncASRIE transform a function of 'func(string) (int, error)' signature
 // into CallableFunc type.
-func FuncASRIE(fn func(string) (int, error)) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncASRIE(fn func(string) (int, error)) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -966,14 +966,14 @@ func FuncASRIE(fn func(string) (int, error)) gst.CallableFunc {
 		if err != nil {
 			return wrapError(err), nil
 		}
-		return &gst.Int{Value: int64(res)}, nil
+		return &value.Int{Value: int64(res)}, nil
 	}
 }
 
 // FuncASRYE transform a function of 'func(string) ([]byte, error)' signature
 // into CallableFunc type.
-func FuncASRYE(fn func(string) ([]byte, error)) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncASRYE(fn func(string) ([]byte, error)) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -989,17 +989,17 @@ func FuncASRYE(fn func(string) ([]byte, error)) gst.CallableFunc {
 		if err != nil {
 			return wrapError(err), nil
 		}
-		if len(res) > gst.MaxBytesLen {
+		if len(res) > value.MaxBytesLen {
 			return nil, gse.ErrBytesLimit
 		}
-		return &gst.Bytes{Value: res}, nil
+		return &value.Bytes{Value: res}, nil
 	}
 }
 
 // FuncAIRSsE transform a function of 'func(int) ([]string, error)' signature
 // into CallableFunc type.
-func FuncAIRSsE(fn func(int) ([]string, error)) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAIRSsE(fn func(int) ([]string, error)) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -1015,12 +1015,12 @@ func FuncAIRSsE(fn func(int) ([]string, error)) gst.CallableFunc {
 		if err != nil {
 			return wrapError(err), nil
 		}
-		arr := &gst.Array{}
+		arr := &value.Array{}
 		for _, r := range res {
-			if len(r) > gst.MaxStringLen {
+			if len(r) > value.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
-			arr.Value = append(arr.Value, &gst.String{Value: r})
+			arr.Value = append(arr.Value, &value.String{Value: r})
 		}
 		return arr, nil
 	}
@@ -1028,8 +1028,8 @@ func FuncAIRSsE(fn func(int) ([]string, error)) gst.CallableFunc {
 
 // FuncAIRS transform a function of 'func(int) string' signature into
 // CallableFunc type.
-func FuncAIRS(fn func(int) string) gst.CallableFunc {
-	return func(args ...gst.Object) (ret gst.Object, err error) {
+func FuncAIRS(fn func(int) string) value.CallableFunc {
+	return func(args ...value.Object) (ret value.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
@@ -1042,9 +1042,9 @@ func FuncAIRS(fn func(int) string) gst.CallableFunc {
 			}
 		}
 		s := fn(i1)
-		if len(s) > gst.MaxStringLen {
+		if len(s) > value.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
-		return &gst.String{Value: s}, nil
+		return &value.String{Value: s}, nil
 	}
 }

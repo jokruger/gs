@@ -4,41 +4,41 @@ import (
 	"os/exec"
 
 	gse "github.com/jokruger/gs/error"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
-func makeOSExecCommand(cmd *exec.Cmd) *gst.ImmutableMap {
-	return &gst.ImmutableMap{
-		Value: map[string]gst.Object{
+func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
+	return &value.ImmutableMap{
+		Value: map[string]value.Object{
 			// combined_output() => bytes/error
-			"combined_output": &gst.UserFunction{
+			"combined_output": &value.UserFunction{
 				Name:  "combined_output",
 				Value: FuncARYE(cmd.CombinedOutput),
 			},
 			// output() => bytes/error
-			"output": &gst.UserFunction{
+			"output": &value.UserFunction{
 				Name:  "output",
 				Value: FuncARYE(cmd.Output),
 			}, //
 			// run() => error
-			"run": &gst.UserFunction{
+			"run": &value.UserFunction{
 				Name:  "run",
 				Value: FuncARE(cmd.Run),
 			}, //
 			// start() => error
-			"start": &gst.UserFunction{
+			"start": &value.UserFunction{
 				Name:  "start",
 				Value: FuncARE(cmd.Start),
 			}, //
 			// wait() => error
-			"wait": &gst.UserFunction{
+			"wait": &value.UserFunction{
 				Name:  "wait",
 				Value: FuncARE(cmd.Wait),
 			}, //
 			// set_path(path string)
-			"set_path": &gst.UserFunction{
+			"set_path": &value.UserFunction{
 				Name: "set_path",
-				Value: func(args ...gst.Object) (gst.Object, error) {
+				Value: func(args ...value.Object) (value.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
@@ -51,13 +51,13 @@ func makeOSExecCommand(cmd *exec.Cmd) *gst.ImmutableMap {
 						}
 					}
 					cmd.Path = s1
-					return gst.UndefinedValue, nil
+					return value.UndefinedValue, nil
 				},
 			},
 			// set_dir(dir string)
-			"set_dir": &gst.UserFunction{
+			"set_dir": &value.UserFunction{
 				Name: "set_dir",
-				Value: func(args ...gst.Object) (gst.Object, error) {
+				Value: func(args ...value.Object) (value.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
@@ -70,13 +70,13 @@ func makeOSExecCommand(cmd *exec.Cmd) *gst.ImmutableMap {
 						}
 					}
 					cmd.Dir = s1
-					return gst.UndefinedValue, nil
+					return value.UndefinedValue, nil
 				},
 			},
 			// set_env(env array(string))
-			"set_env": &gst.UserFunction{
+			"set_env": &value.UserFunction{
 				Name: "set_env",
-				Value: func(args ...gst.Object) (gst.Object, error) {
+				Value: func(args ...value.Object) (value.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
@@ -84,12 +84,12 @@ func makeOSExecCommand(cmd *exec.Cmd) *gst.ImmutableMap {
 					var env []string
 					var err error
 					switch arg0 := args[0].(type) {
-					case *gst.Array:
+					case *value.Array:
 						env, err = stringArray(arg0.Value, "first")
 						if err != nil {
 							return nil, err
 						}
-					case *gst.ImmutableArray:
+					case *value.ImmutableArray:
 						env, err = stringArray(arg0.Value, "first")
 						if err != nil {
 							return nil, err
@@ -102,13 +102,13 @@ func makeOSExecCommand(cmd *exec.Cmd) *gst.ImmutableMap {
 						}
 					}
 					cmd.Env = env
-					return gst.UndefinedValue, nil
+					return value.UndefinedValue, nil
 				},
 			},
 			// process() => imap(process)
-			"process": &gst.UserFunction{
+			"process": &value.UserFunction{
 				Name: "process",
-				Value: func(args ...gst.Object) (gst.Object, error) {
+				Value: func(args ...value.Object) (value.Object, error) {
 					if len(args) != 0 {
 						return nil, gse.ErrWrongNumArguments
 					}

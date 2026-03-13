@@ -3,13 +3,13 @@ package gs
 import (
 	"errors"
 
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 // Variable is a user-defined variable for the script.
 type Variable struct {
 	name  string
-	value gst.Object
+	value value.Object
 }
 
 // NewVariable creates a Variable.
@@ -78,7 +78,7 @@ func (v *Variable) Bool() bool {
 // value is not convertible to []interface.
 func (v *Variable) Array() []interface{} {
 	switch val := v.value.(type) {
-	case *gst.Array:
+	case *value.Array:
 		var arr []interface{}
 		for _, e := range val.Value {
 			arr = append(arr, ToInterface(e))
@@ -92,7 +92,7 @@ func (v *Variable) Array() []interface{} {
 // 0 if the value is not convertible to map[string]interface{}.
 func (v *Variable) Map() map[string]interface{} {
 	switch val := v.value.(type) {
-	case *gst.Map:
+	case *value.Map:
 		kv := make(map[string]interface{})
 		for mk, mv := range val.Value {
 			kv[mk] = ToInterface(mv)
@@ -119,7 +119,7 @@ func (v *Variable) Bytes() []byte {
 // Error returns an error if the underlying value is error object. If not,
 // this returns nil.
 func (v *Variable) Error() error {
-	err, ok := v.value.(*gst.Error)
+	err, ok := v.value.(*value.Error)
 	if ok {
 		return errors.New(err.String())
 	}
@@ -128,11 +128,11 @@ func (v *Variable) Error() error {
 
 // Object returns an underlying Object of the variable value. Note that
 // returned Object is a copy of an actual Object used in the script.
-func (v *Variable) Object() gst.Object {
+func (v *Variable) Object() value.Object {
 	return v.value
 }
 
 // IsUndefined returns true if the underlying value is undefined.
 func (v *Variable) IsUndefined() bool {
-	return v.value == gst.UndefinedValue
+	return v.value == value.UndefinedValue
 }

@@ -1,4 +1,4 @@
-package types
+package value
 
 import (
 	"fmt"
@@ -7,16 +7,16 @@ import (
 	gse "github.com/jokruger/gs/error"
 )
 
-type Map struct {
+type ImmutableMap struct {
 	ObjectImpl
 	Value map[string]Object
 }
 
-func (o *Map) TypeName() string {
-	return "map"
+func (o *ImmutableMap) TypeName() string {
+	return "immutable-map"
 }
 
-func (o *Map) String() string {
+func (o *ImmutableMap) String() string {
 	var pairs []string
 	for k, v := range o.Value {
 		pairs = append(pairs, fmt.Sprintf("%s: %s", k, v.String()))
@@ -24,7 +24,7 @@ func (o *Map) String() string {
 	return fmt.Sprintf("{%s}", strings.Join(pairs, ", "))
 }
 
-func (o *Map) Copy() Object {
+func (o *ImmutableMap) Copy() Object {
 	c := make(map[string]Object)
 	for k, v := range o.Value {
 		c[k] = v.Copy()
@@ -32,11 +32,24 @@ func (o *Map) Copy() Object {
 	return &Map{Value: c}
 }
 
-func (o *Map) IsFalsy() bool {
+func (o *ImmutableMap) IsFalsy() bool {
 	return len(o.Value) == 0
 }
 
-func (o *Map) Equals(x Object) bool {
+func (o *ImmutableMap) IndexGet(index Object) (res Object, err error) {
+	strIdx, ok := index.ToString()
+	if !ok {
+		err = gse.ErrInvalidIndexType
+		return
+	}
+	res, ok = o.Value[strIdx]
+	if !ok {
+		res = UndefinedValue
+	}
+	return
+}
+
+func (o *ImmutableMap) Equals(x Object) bool {
 	var xVal map[string]Object
 	switch x := x.(type) {
 	case *Map:
@@ -58,30 +71,7 @@ func (o *Map) Equals(x Object) bool {
 	return true
 }
 
-func (o *Map) IndexGet(index Object) (res Object, err error) {
-	strIdx, ok := index.ToString()
-	if !ok {
-		err = gse.ErrInvalidIndexType
-		return
-	}
-	res, ok = o.Value[strIdx]
-	if !ok {
-		res = UndefinedValue
-	}
-	return
-}
-
-func (o *Map) IndexSet(index, value Object) (err error) {
-	strIdx, ok := index.ToString()
-	if !ok {
-		err = gse.ErrInvalidIndexType
-		return
-	}
-	o.Value[strIdx] = value
-	return nil
-}
-
-func (o *Map) Iterate() Iterator {
+func (o *ImmutableMap) Iterate() Iterator {
 	var keys []string
 	for k := range o.Value {
 		keys = append(keys, k)
@@ -93,14 +83,14 @@ func (o *Map) Iterate() Iterator {
 	}
 }
 
-func (o *Map) CanIterate() bool {
+func (o *ImmutableMap) CanIterate() bool {
 	return true
 }
 
-func (o *Map) ToString() (string, bool) {
+func (o *ImmutableMap) ToString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Map) ToBool() (bool, bool) {
+func (o *ImmutableMap) ToBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }

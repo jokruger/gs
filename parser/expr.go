@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/jokruger/gs/token"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/types"
 )
 
 // Expr represents an expression node in the AST.
@@ -16,19 +16,19 @@ type Expr interface {
 // ArrayLit represents an array literal.
 type ArrayLit struct {
 	Elements []Expr
-	LBrack   gst.Pos
-	RBrack   gst.Pos
+	LBrack   types.Pos
+	RBrack   types.Pos
 }
 
 func (e *ArrayLit) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *ArrayLit) Pos() gst.Pos {
+func (e *ArrayLit) Pos() types.Pos {
 	return e.LBrack
 }
 
 // End returns the position of first character immediately after the node.
-func (e *ArrayLit) End() gst.Pos {
+func (e *ArrayLit) End() types.Pos {
 	return e.RBrack + 1
 }
 
@@ -42,19 +42,19 @@ func (e *ArrayLit) String() string {
 
 // BadExpr represents a bad expression.
 type BadExpr struct {
-	From gst.Pos
-	To   gst.Pos
+	From types.Pos
+	To   types.Pos
 }
 
 func (e *BadExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *BadExpr) Pos() gst.Pos {
+func (e *BadExpr) Pos() types.Pos {
 	return e.From
 }
 
 // End returns the position of first character immediately after the node.
-func (e *BadExpr) End() gst.Pos {
+func (e *BadExpr) End() types.Pos {
 	return e.To
 }
 
@@ -67,18 +67,18 @@ type BinaryExpr struct {
 	LHS      Expr
 	RHS      Expr
 	Token    token.Token
-	TokenPos gst.Pos
+	TokenPos types.Pos
 }
 
 func (e *BinaryExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *BinaryExpr) Pos() gst.Pos {
+func (e *BinaryExpr) Pos() types.Pos {
 	return e.LHS.Pos()
 }
 
 // End returns the position of first character immediately after the node.
-func (e *BinaryExpr) End() gst.Pos {
+func (e *BinaryExpr) End() types.Pos {
 	return e.RHS.End()
 }
 
@@ -90,20 +90,20 @@ func (e *BinaryExpr) String() string {
 // BoolLit represents a boolean literal.
 type BoolLit struct {
 	Value    bool
-	ValuePos gst.Pos
+	ValuePos types.Pos
 	Literal  string
 }
 
 func (e *BoolLit) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *BoolLit) Pos() gst.Pos {
+func (e *BoolLit) Pos() types.Pos {
 	return e.ValuePos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *BoolLit) End() gst.Pos {
-	return gst.Pos(int(e.ValuePos) + len(e.Literal))
+func (e *BoolLit) End() types.Pos {
+	return types.Pos(int(e.ValuePos) + len(e.Literal))
 }
 
 func (e *BoolLit) String() string {
@@ -113,21 +113,21 @@ func (e *BoolLit) String() string {
 // CallExpr represents a function call expression.
 type CallExpr struct {
 	Func     Expr
-	LParen   gst.Pos
+	LParen   types.Pos
 	Args     []Expr
-	Ellipsis gst.Pos
-	RParen   gst.Pos
+	Ellipsis types.Pos
+	RParen   types.Pos
 }
 
 func (e *CallExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *CallExpr) Pos() gst.Pos {
+func (e *CallExpr) Pos() types.Pos {
 	return e.Func.Pos()
 }
 
 // End returns the position of first character immediately after the node.
-func (e *CallExpr) End() gst.Pos {
+func (e *CallExpr) End() types.Pos {
 	return e.RParen + 1
 }
 
@@ -145,20 +145,20 @@ func (e *CallExpr) String() string {
 // CharLit represents a character literal.
 type CharLit struct {
 	Value    rune
-	ValuePos gst.Pos
+	ValuePos types.Pos
 	Literal  string
 }
 
 func (e *CharLit) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *CharLit) Pos() gst.Pos {
+func (e *CharLit) Pos() types.Pos {
 	return e.ValuePos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *CharLit) End() gst.Pos {
-	return gst.Pos(int(e.ValuePos) + len(e.Literal))
+func (e *CharLit) End() types.Pos {
+	return types.Pos(int(e.ValuePos) + len(e.Literal))
 }
 
 func (e *CharLit) String() string {
@@ -170,19 +170,19 @@ type CondExpr struct {
 	Cond        Expr
 	True        Expr
 	False       Expr
-	QuestionPos gst.Pos
-	ColonPos    gst.Pos
+	QuestionPos types.Pos
+	ColonPos    types.Pos
 }
 
 func (e *CondExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *CondExpr) Pos() gst.Pos {
+func (e *CondExpr) Pos() types.Pos {
 	return e.Cond.Pos()
 }
 
 // End returns the position of first character immediately after the node.
-func (e *CondExpr) End() gst.Pos {
+func (e *CondExpr) End() types.Pos {
 	return e.False.End()
 }
 
@@ -194,20 +194,20 @@ func (e *CondExpr) String() string {
 // ErrorExpr represents an error expression
 type ErrorExpr struct {
 	Expr     Expr
-	ErrorPos gst.Pos
-	LParen   gst.Pos
-	RParen   gst.Pos
+	ErrorPos types.Pos
+	LParen   types.Pos
+	RParen   types.Pos
 }
 
 func (e *ErrorExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *ErrorExpr) Pos() gst.Pos {
+func (e *ErrorExpr) Pos() types.Pos {
 	return e.ErrorPos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *ErrorExpr) End() gst.Pos {
+func (e *ErrorExpr) End() types.Pos {
 	return e.RParen
 }
 
@@ -218,20 +218,20 @@ func (e *ErrorExpr) String() string {
 // FloatLit represents a floating point literal.
 type FloatLit struct {
 	Value    float64
-	ValuePos gst.Pos
+	ValuePos types.Pos
 	Literal  string
 }
 
 func (e *FloatLit) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *FloatLit) Pos() gst.Pos {
+func (e *FloatLit) Pos() types.Pos {
 	return e.ValuePos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *FloatLit) End() gst.Pos {
-	return gst.Pos(int(e.ValuePos) + len(e.Literal))
+func (e *FloatLit) End() types.Pos {
+	return types.Pos(int(e.ValuePos) + len(e.Literal))
 }
 
 func (e *FloatLit) String() string {
@@ -247,12 +247,12 @@ type FuncLit struct {
 func (e *FuncLit) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *FuncLit) Pos() gst.Pos {
+func (e *FuncLit) Pos() types.Pos {
 	return e.Type.Pos()
 }
 
 // End returns the position of first character immediately after the node.
-func (e *FuncLit) End() gst.Pos {
+func (e *FuncLit) End() types.Pos {
 	return e.Body.End()
 }
 
@@ -262,19 +262,19 @@ func (e *FuncLit) String() string {
 
 // FuncType represents a function type definition.
 type FuncType struct {
-	FuncPos gst.Pos
+	FuncPos types.Pos
 	Params  *IdentList
 }
 
 func (e *FuncType) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *FuncType) Pos() gst.Pos {
+func (e *FuncType) Pos() types.Pos {
 	return e.FuncPos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *FuncType) End() gst.Pos {
+func (e *FuncType) End() types.Pos {
 	return e.Params.End()
 }
 
@@ -285,19 +285,19 @@ func (e *FuncType) String() string {
 // Ident represents an identifier.
 type Ident struct {
 	Name    string
-	NamePos gst.Pos
+	NamePos types.Pos
 }
 
 func (e *Ident) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *Ident) Pos() gst.Pos {
+func (e *Ident) Pos() types.Pos {
 	return e.NamePos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *Ident) End() gst.Pos {
-	return gst.Pos(int(e.NamePos) + len(e.Name))
+func (e *Ident) End() types.Pos {
+	return types.Pos(int(e.NamePos) + len(e.Name))
 }
 
 func (e *Ident) String() string {
@@ -310,20 +310,20 @@ func (e *Ident) String() string {
 // ImmutableExpr represents an immutable expression
 type ImmutableExpr struct {
 	Expr     Expr
-	ErrorPos gst.Pos
-	LParen   gst.Pos
-	RParen   gst.Pos
+	ErrorPos types.Pos
+	LParen   types.Pos
+	RParen   types.Pos
 }
 
 func (e *ImmutableExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *ImmutableExpr) Pos() gst.Pos {
+func (e *ImmutableExpr) Pos() types.Pos {
 	return e.ErrorPos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *ImmutableExpr) End() gst.Pos {
+func (e *ImmutableExpr) End() types.Pos {
 	return e.RParen
 }
 
@@ -335,20 +335,20 @@ func (e *ImmutableExpr) String() string {
 type ImportExpr struct {
 	ModuleName string
 	Token      token.Token
-	TokenPos   gst.Pos
+	TokenPos   types.Pos
 }
 
 func (e *ImportExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *ImportExpr) Pos() gst.Pos {
+func (e *ImportExpr) Pos() types.Pos {
 	return e.TokenPos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *ImportExpr) End() gst.Pos {
+func (e *ImportExpr) End() types.Pos {
 	// import("moduleName")
-	return gst.Pos(int(e.TokenPos) + 10 + len(e.ModuleName))
+	return types.Pos(int(e.TokenPos) + 10 + len(e.ModuleName))
 }
 
 func (e *ImportExpr) String() string {
@@ -358,20 +358,20 @@ func (e *ImportExpr) String() string {
 // IndexExpr represents an index expression.
 type IndexExpr struct {
 	Expr   Expr
-	LBrack gst.Pos
+	LBrack types.Pos
 	Index  Expr
-	RBrack gst.Pos
+	RBrack types.Pos
 }
 
 func (e *IndexExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *IndexExpr) Pos() gst.Pos {
+func (e *IndexExpr) Pos() types.Pos {
 	return e.Expr.Pos()
 }
 
 // End returns the position of first character immediately after the node.
-func (e *IndexExpr) End() gst.Pos {
+func (e *IndexExpr) End() types.Pos {
 	return e.RBrack + 1
 }
 
@@ -386,20 +386,20 @@ func (e *IndexExpr) String() string {
 // IntLit represents an integer literal.
 type IntLit struct {
 	Value    int64
-	ValuePos gst.Pos
+	ValuePos types.Pos
 	Literal  string
 }
 
 func (e *IntLit) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *IntLit) Pos() gst.Pos {
+func (e *IntLit) Pos() types.Pos {
 	return e.ValuePos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *IntLit) End() gst.Pos {
-	return gst.Pos(int(e.ValuePos) + len(e.Literal))
+func (e *IntLit) End() types.Pos {
+	return types.Pos(int(e.ValuePos) + len(e.Literal))
 }
 
 func (e *IntLit) String() string {
@@ -409,20 +409,20 @@ func (e *IntLit) String() string {
 // MapElementLit represents a map element.
 type MapElementLit struct {
 	Key      string
-	KeyPos   gst.Pos
-	ColonPos gst.Pos
+	KeyPos   types.Pos
+	ColonPos types.Pos
 	Value    Expr
 }
 
 func (e *MapElementLit) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *MapElementLit) Pos() gst.Pos {
+func (e *MapElementLit) Pos() types.Pos {
 	return e.KeyPos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *MapElementLit) End() gst.Pos {
+func (e *MapElementLit) End() types.Pos {
 	return e.Value.End()
 }
 
@@ -432,20 +432,20 @@ func (e *MapElementLit) String() string {
 
 // MapLit represents a map literal.
 type MapLit struct {
-	LBrace   gst.Pos
+	LBrace   types.Pos
 	Elements []*MapElementLit
-	RBrace   gst.Pos
+	RBrace   types.Pos
 }
 
 func (e *MapLit) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *MapLit) Pos() gst.Pos {
+func (e *MapLit) Pos() types.Pos {
 	return e.LBrace
 }
 
 // End returns the position of first character immediately after the node.
-func (e *MapLit) End() gst.Pos {
+func (e *MapLit) End() types.Pos {
 	return e.RBrace + 1
 }
 
@@ -460,19 +460,19 @@ func (e *MapLit) String() string {
 // ParenExpr represents a parenthesis wrapped expression.
 type ParenExpr struct {
 	Expr   Expr
-	LParen gst.Pos
-	RParen gst.Pos
+	LParen types.Pos
+	RParen types.Pos
 }
 
 func (e *ParenExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *ParenExpr) Pos() gst.Pos {
+func (e *ParenExpr) Pos() types.Pos {
 	return e.LParen
 }
 
 // End returns the position of first character immediately after the node.
-func (e *ParenExpr) End() gst.Pos {
+func (e *ParenExpr) End() types.Pos {
 	return e.RParen + 1
 }
 
@@ -489,12 +489,12 @@ type SelectorExpr struct {
 func (e *SelectorExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *SelectorExpr) Pos() gst.Pos {
+func (e *SelectorExpr) Pos() types.Pos {
 	return e.Expr.Pos()
 }
 
 // End returns the position of first character immediately after the node.
-func (e *SelectorExpr) End() gst.Pos {
+func (e *SelectorExpr) End() types.Pos {
 	return e.Sel.End()
 }
 
@@ -505,21 +505,21 @@ func (e *SelectorExpr) String() string {
 // SliceExpr represents a slice expression.
 type SliceExpr struct {
 	Expr   Expr
-	LBrack gst.Pos
+	LBrack types.Pos
 	Low    Expr
 	High   Expr
-	RBrack gst.Pos
+	RBrack types.Pos
 }
 
 func (e *SliceExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *SliceExpr) Pos() gst.Pos {
+func (e *SliceExpr) Pos() types.Pos {
 	return e.Expr.Pos()
 }
 
 // End returns the position of first character immediately after the node.
-func (e *SliceExpr) End() gst.Pos {
+func (e *SliceExpr) End() types.Pos {
 	return e.RBrack + 1
 }
 
@@ -537,20 +537,20 @@ func (e *SliceExpr) String() string {
 // StringLit represents a string literal.
 type StringLit struct {
 	Value    string
-	ValuePos gst.Pos
+	ValuePos types.Pos
 	Literal  string
 }
 
 func (e *StringLit) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *StringLit) Pos() gst.Pos {
+func (e *StringLit) Pos() types.Pos {
 	return e.ValuePos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *StringLit) End() gst.Pos {
-	return gst.Pos(int(e.ValuePos) + len(e.Literal))
+func (e *StringLit) End() types.Pos {
+	return types.Pos(int(e.ValuePos) + len(e.Literal))
 }
 
 func (e *StringLit) String() string {
@@ -561,18 +561,18 @@ func (e *StringLit) String() string {
 type UnaryExpr struct {
 	Expr     Expr
 	Token    token.Token
-	TokenPos gst.Pos
+	TokenPos types.Pos
 }
 
 func (e *UnaryExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *UnaryExpr) Pos() gst.Pos {
+func (e *UnaryExpr) Pos() types.Pos {
 	return e.Expr.Pos()
 }
 
 // End returns the position of first character immediately after the node.
-func (e *UnaryExpr) End() gst.Pos {
+func (e *UnaryExpr) End() types.Pos {
 	return e.Expr.End()
 }
 
@@ -582,18 +582,18 @@ func (e *UnaryExpr) String() string {
 
 // UndefinedLit represents an undefined literal.
 type UndefinedLit struct {
-	TokenPos gst.Pos
+	TokenPos types.Pos
 }
 
 func (e *UndefinedLit) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *UndefinedLit) Pos() gst.Pos {
+func (e *UndefinedLit) Pos() types.Pos {
 	return e.TokenPos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *UndefinedLit) End() gst.Pos {
+func (e *UndefinedLit) End() types.Pos {
 	return e.TokenPos + 9 // len(undefined) == 9
 }
 

@@ -11,7 +11,7 @@ import (
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/tests/require"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 func TestCompiler_Compile(t *testing.T) {
@@ -1338,11 +1338,11 @@ func concatInsts(instructions ...[]byte) []byte {
 
 func bytecode(
 	instructions []byte,
-	constants []gst.Object,
+	constants []value.Object,
 ) *gs.Bytecode {
 	return &gs.Bytecode{
 		FileSet:      parser.NewFileSet(),
-		MainFunction: &gst.CompiledFunction{Instructions: instructions},
+		MainFunction: &value.CompiledFunction{Instructions: instructions},
 		Constants:    constants,
 	}
 }
@@ -1391,7 +1391,7 @@ func equalBytecode(t *testing.T, expected, actual *gs.Bytecode) {
 	equalConstants(t, expected.Constants, actual.Constants)
 }
 
-func equalConstants(t *testing.T, expected, actual []gst.Object) {
+func equalConstants(t *testing.T, expected, actual []value.Object) {
 	require.Equal(t, len(expected), len(actual))
 	for i := 0; i < len(expected); i++ {
 		require.Equal(t, expected[i], actual[i])
@@ -1409,7 +1409,7 @@ func (o *compileTracer) Write(p []byte) (n int, err error) {
 
 func traceCompile(
 	input string,
-	symbols map[string]gst.Object,
+	symbols map[string]value.Object,
 ) (res *gs.Bytecode, trace []string, err error) {
 	fileSet := parser.NewFileSet()
 	file := fileSet.AddFile("test", -1, len(input))
@@ -1448,20 +1448,20 @@ func traceCompile(
 	return
 }
 
-func objectsArray(o ...gst.Object) []gst.Object {
+func objectsArray(o ...value.Object) []value.Object {
 	return o
 }
 
-func intObject(v int64) *gst.Int {
-	return &gst.Int{Value: v}
+func intObject(v int64) *value.Int {
+	return &value.Int{Value: v}
 }
 
-func stringObject(v string) *gst.String {
-	return &gst.String{Value: v}
+func stringObject(v string) *value.String {
+	return &value.String{Value: v}
 }
 
-func compiledFunction(numLocals, numParams int, insts ...[]byte) *gst.CompiledFunction {
-	return &gst.CompiledFunction{
+func compiledFunction(numLocals, numParams int, insts ...[]byte) *value.CompiledFunction {
+	return &value.CompiledFunction{
 		Instructions:  concatInsts(insts...),
 		NumLocals:     numLocals,
 		NumParameters: numParams,

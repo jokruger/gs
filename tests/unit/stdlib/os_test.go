@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/jokruger/gs/tests/require"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 func TestReadFile(t *testing.T) {
@@ -19,7 +19,7 @@ func TestReadFile(t *testing.T) {
 	_ = tf.Close()
 
 	module(t, "os").call("read_file", tf.Name()).
-		expect(&gst.Bytes{Value: content})
+		expect(&value.Bytes{Value: content})
 }
 
 func TestReadFileArgs(t *testing.T) {
@@ -45,13 +45,13 @@ func TestFileStatFile(t *testing.T) {
 		return
 	}
 
-	module(t, "os").call("stat", tf.Name()).expect(&gst.ImmutableMap{
-		Value: map[string]gst.Object{
-			"name":      &gst.String{Value: stat.Name()},
-			"mtime":     &gst.Time{Value: stat.ModTime()},
-			"size":      &gst.Int{Value: stat.Size()},
-			"mode":      &gst.Int{Value: int64(stat.Mode())},
-			"directory": gst.FalseValue,
+	module(t, "os").call("stat", tf.Name()).expect(&value.ImmutableMap{
+		Value: map[string]value.Object{
+			"name":      &value.String{Value: stat.Name()},
+			"mtime":     &value.Time{Value: stat.ModTime()},
+			"size":      &value.Int{Value: stat.Size()},
+			"mode":      &value.Int{Value: int64(stat.Mode())},
+			"directory": value.FalseValue,
 		},
 	})
 }
@@ -64,21 +64,21 @@ func TestFileStatDir(t *testing.T) {
 	stat, err := os.Stat(td)
 	require.NoError(t, err)
 
-	module(t, "os").call("stat", td).expect(&gst.ImmutableMap{
-		Value: map[string]gst.Object{
-			"name":      &gst.String{Value: stat.Name()},
-			"mtime":     &gst.Time{Value: stat.ModTime()},
-			"size":      &gst.Int{Value: stat.Size()},
-			"mode":      &gst.Int{Value: int64(stat.Mode())},
-			"directory": gst.TrueValue,
+	module(t, "os").call("stat", td).expect(&value.ImmutableMap{
+		Value: map[string]value.Object{
+			"name":      &value.String{Value: stat.Name()},
+			"mtime":     &value.Time{Value: stat.ModTime()},
+			"size":      &value.Int{Value: stat.Size()},
+			"mode":      &value.Int{Value: int64(stat.Mode())},
+			"directory": value.TrueValue,
 		},
 	})
 }
 
 func TestOSExpandEnv(t *testing.T) {
-	curMaxStringLen := gst.MaxStringLen
-	defer func() { gst.MaxStringLen = curMaxStringLen }()
-	gst.MaxStringLen = 12
+	curMaxStringLen := value.MaxStringLen
+	defer func() { value.MaxStringLen = curMaxStringLen }()
+	value.MaxStringLen = 12
 
 	_ = os.Setenv("GS", "FOO BAR")
 	module(t, "os").call("expand_env", "$GS").expect("FOO BAR")

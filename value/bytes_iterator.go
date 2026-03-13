@@ -1,4 +1,4 @@
-package types
+package value
 
 type BytesIterator struct {
 	ObjectImpl

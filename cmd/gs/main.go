@@ -13,7 +13,7 @@ import (
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/stdlib"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 const (
@@ -151,7 +151,7 @@ func RunCompiled(modules *gs.ModuleMap, data []byte) (err error) {
 func RunREPL(modules *gs.ModuleMap, in io.Reader, out io.Writer) {
 	stdin := bufio.NewScanner(in)
 	fileSet := parser.NewFileSet()
-	globals := make([]gst.Object, gs.GlobalsSize)
+	globals := make([]value.Object, gs.GlobalsSize)
 	symbolTable := gs.NewSymbolTable()
 	for idx, fn := range gs.GetAllBuiltinFunctions() {
 		symbolTable.DefineBuiltin(idx, fn.Name)
@@ -159,12 +159,12 @@ func RunREPL(modules *gs.ModuleMap, in io.Reader, out io.Writer) {
 
 	// embed println function
 	symbol := symbolTable.Define("__repl_println__")
-	globals[symbol.Index] = &gst.UserFunction{
+	globals[symbol.Index] = &value.UserFunction{
 		Name: "println",
-		Value: func(args ...gst.Object) (ret gst.Object, err error) {
+		Value: func(args ...value.Object) (ret value.Object, err error) {
 			var printArgs []interface{}
 			for _, arg := range args {
-				if _, isUndefined := arg.(*gst.Undefined); isUndefined {
+				if _, isUndefined := arg.(*value.Undefined); isUndefined {
 					printArgs = append(printArgs, "<undefined>")
 				} else {
 					s, _ := arg.ToString()
@@ -177,7 +177,7 @@ func RunREPL(modules *gs.ModuleMap, in io.Reader, out io.Writer) {
 		},
 	}
 
-	var constants []gst.Object
+	var constants []value.Object
 	for {
 		_, _ = fmt.Fprint(out, replPrompt)
 		scanned := stdin.Scan()

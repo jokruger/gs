@@ -16,7 +16,7 @@ import (
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/token"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 const testOut = "out"
@@ -28,7 +28,7 @@ type ARR = []interface{}
 
 type testopts struct {
 	modules     *gs.ModuleMap
-	symbols     map[string]gst.Object
+	symbols     map[string]value.Object
 	maxAllocs   int64
 	skip2ndPass bool
 }
@@ -36,7 +36,7 @@ type testopts struct {
 func Opts() *testopts {
 	return &testopts{
 		modules:     gs.NewModuleMap(),
-		symbols:     make(map[string]gst.Object),
+		symbols:     make(map[string]value.Object),
 		maxAllocs:   -1,
 		skip2ndPass: false,
 	}
@@ -45,7 +45,7 @@ func Opts() *testopts {
 func (o *testopts) copy() *testopts {
 	c := &testopts{
 		modules:     o.modules.Copy(),
-		symbols:     make(map[string]gst.Object),
+		symbols:     make(map[string]value.Object),
 		maxAllocs:   o.maxAllocs,
 		skip2ndPass: o.skip2ndPass,
 	}
@@ -75,7 +75,7 @@ func (o *testopts) Module(name string, mod interface{}) *testopts {
 	return c
 }
 
-func (o *testopts) Symbol(name string, value gst.Object) *testopts {
+func (o *testopts) Symbol(name string, value value.Object) *testopts {
 	c := o.copy()
 	c.symbols[name] = value
 	return c
@@ -135,9 +135,9 @@ func TestArray(t *testing.T) {
 	}
 
 	expectRun(t, fmt.Sprintf("%s[%d]", arrStr, -1),
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 	expectRun(t, fmt.Sprintf("%s[%d]", arrStr, arrLen),
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 
 	// slice operator
 	for low := 0; low < arrLen; low++ {
@@ -534,11 +534,11 @@ func() {
 }
 
 func TestUndefined(t *testing.T) {
-	expectRun(t, `out = undefined`, nil, gst.UndefinedValue)
-	expectRun(t, `out = undefined.a`, nil, gst.UndefinedValue)
-	expectRun(t, `out = undefined[1]`, nil, gst.UndefinedValue)
-	expectRun(t, `out = undefined.a.b`, nil, gst.UndefinedValue)
-	expectRun(t, `out = undefined[1][2]`, nil, gst.UndefinedValue)
+	expectRun(t, `out = undefined`, nil, value.UndefinedValue)
+	expectRun(t, `out = undefined.a`, nil, value.UndefinedValue)
+	expectRun(t, `out = undefined[1]`, nil, value.UndefinedValue)
+	expectRun(t, `out = undefined.a.b`, nil, value.UndefinedValue)
+	expectRun(t, `out = undefined[1][2]`, nil, value.UndefinedValue)
 	expectRun(t, `out = undefined ? 1 : 2`, nil, 2)
 	expectRun(t, `out = undefined == undefined`, nil, true)
 	expectRun(t, `out = undefined == 1`, nil, false)
@@ -576,14 +576,14 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = int(true)`, nil, 1)
 	expectRun(t, `out = int(false)`, nil, 0)
 	expectRun(t, `out = int('8')`, nil, 56)
-	expectRun(t, `out = int([1])`, nil, gst.UndefinedValue)
-	expectRun(t, `out = int({a: 1})`, nil, gst.UndefinedValue)
-	expectRun(t, `out = int(undefined)`, nil, gst.UndefinedValue)
+	expectRun(t, `out = int([1])`, nil, value.UndefinedValue)
+	expectRun(t, `out = int({a: 1})`, nil, value.UndefinedValue)
+	expectRun(t, `out = int(undefined)`, nil, value.UndefinedValue)
 	expectRun(t, `out = int("-522", 1)`, nil, -522)
 	expectRun(t, `out = int(undefined, 1)`, nil, 1)
 	expectRun(t, `out = int(undefined, 1.8)`, nil, 1.8)
 	expectRun(t, `out = int(undefined, string(1))`, nil, "1")
-	expectRun(t, `out = int(undefined, undefined)`, nil, gst.UndefinedValue)
+	expectRun(t, `out = int(undefined, undefined)`, nil, value.UndefinedValue)
 
 	expectRun(t, `out = string(1)`, nil, "1")
 	expectRun(t, `out = string(1.8)`, nil, "1.8")
@@ -593,40 +593,40 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = string('8')`, nil, "8")
 	expectRun(t, `out = string([1,8.1,true,3])`, nil, "[1, 8.1, true, 3]")
 	expectRun(t, `out = string({b: "foo"})`, nil, `{b: "foo"}`)
-	expectRun(t, `out = string(undefined)`, nil, gst.UndefinedValue) // not "undefined"
+	expectRun(t, `out = string(undefined)`, nil, value.UndefinedValue) // not "undefined"
 	expectRun(t, `out = string(1, "-522")`, nil, "1")
 	expectRun(t, `out = string(undefined, "-522")`, nil, "-522") // not "undefined"
 
 	expectRun(t, `out = float(1)`, nil, 1.0)
 	expectRun(t, `out = float(1.8)`, nil, 1.8)
 	expectRun(t, `out = float("-52.2")`, nil, -52.2)
-	expectRun(t, `out = float(true)`, nil, gst.UndefinedValue)
-	expectRun(t, `out = float(false)`, nil, gst.UndefinedValue)
-	expectRun(t, `out = float('8')`, nil, gst.UndefinedValue)
-	expectRun(t, `out = float([1,8.1,true,3])`, nil, gst.UndefinedValue)
-	expectRun(t, `out = float({a: 1, b: "foo"})`, nil, gst.UndefinedValue)
-	expectRun(t, `out = float(undefined)`, nil, gst.UndefinedValue)
+	expectRun(t, `out = float(true)`, nil, value.UndefinedValue)
+	expectRun(t, `out = float(false)`, nil, value.UndefinedValue)
+	expectRun(t, `out = float('8')`, nil, value.UndefinedValue)
+	expectRun(t, `out = float([1,8.1,true,3])`, nil, value.UndefinedValue)
+	expectRun(t, `out = float({a: 1, b: "foo"})`, nil, value.UndefinedValue)
+	expectRun(t, `out = float(undefined)`, nil, value.UndefinedValue)
 	expectRun(t, `out = float("-52.2", 1.8)`, nil, -52.2)
 	expectRun(t, `out = float(undefined, 1)`, nil, 1)
 	expectRun(t, `out = float(undefined, 1.8)`, nil, 1.8)
 	expectRun(t, `out = float(undefined, "-52.2")`, nil, "-52.2")
 	expectRun(t, `out = float(undefined, char(56))`, nil, '8')
-	expectRun(t, `out = float(undefined, undefined)`, nil, gst.UndefinedValue)
+	expectRun(t, `out = float(undefined, undefined)`, nil, value.UndefinedValue)
 
 	expectRun(t, `out = char(56)`, nil, '8')
-	expectRun(t, `out = char(1.8)`, nil, gst.UndefinedValue)
-	expectRun(t, `out = char("-52.2")`, nil, gst.UndefinedValue)
-	expectRun(t, `out = char(true)`, nil, gst.UndefinedValue)
-	expectRun(t, `out = char(false)`, nil, gst.UndefinedValue)
+	expectRun(t, `out = char(1.8)`, nil, value.UndefinedValue)
+	expectRun(t, `out = char("-52.2")`, nil, value.UndefinedValue)
+	expectRun(t, `out = char(true)`, nil, value.UndefinedValue)
+	expectRun(t, `out = char(false)`, nil, value.UndefinedValue)
 	expectRun(t, `out = char('8')`, nil, '8')
-	expectRun(t, `out = char([1,8.1,true,3])`, nil, gst.UndefinedValue)
-	expectRun(t, `out = char({a: 1, b: "foo"})`, nil, gst.UndefinedValue)
-	expectRun(t, `out = char(undefined)`, nil, gst.UndefinedValue)
+	expectRun(t, `out = char([1,8.1,true,3])`, nil, value.UndefinedValue)
+	expectRun(t, `out = char({a: 1, b: "foo"})`, nil, value.UndefinedValue)
+	expectRun(t, `out = char(undefined)`, nil, value.UndefinedValue)
 	expectRun(t, `out = char(56, 'a')`, nil, '8')
 	expectRun(t, `out = char(undefined, '8')`, nil, '8')
 	expectRun(t, `out = char(undefined, 56)`, nil, 56)
 	expectRun(t, `out = char(undefined, "-52.2")`, nil, "-52.2")
-	expectRun(t, `out = char(undefined, undefined)`, nil, gst.UndefinedValue)
+	expectRun(t, `out = char(undefined, undefined)`, nil, value.UndefinedValue)
 
 	expectRun(t, `out = bool(1)`, nil, true)          // non-zero integer: true
 	expectRun(t, `out = bool(0)`, nil, false)         // zero: true
@@ -645,20 +645,20 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = bool(undefined)`, nil, false) // undefined: false
 
 	expectRun(t, `out = bytes(1)`, nil, []byte{0})
-	expectRun(t, `out = bytes(1.8)`, nil, gst.UndefinedValue)
+	expectRun(t, `out = bytes(1.8)`, nil, value.UndefinedValue)
 	expectRun(t, `out = bytes("-522")`, nil, []byte{'-', '5', '2', '2'})
-	expectRun(t, `out = bytes(true)`, nil, gst.UndefinedValue)
-	expectRun(t, `out = bytes(false)`, nil, gst.UndefinedValue)
-	expectRun(t, `out = bytes('8')`, nil, gst.UndefinedValue)
-	expectRun(t, `out = bytes([1])`, nil, gst.UndefinedValue)
-	expectRun(t, `out = bytes({a: 1})`, nil, gst.UndefinedValue)
-	expectRun(t, `out = bytes(undefined)`, nil, gst.UndefinedValue)
+	expectRun(t, `out = bytes(true)`, nil, value.UndefinedValue)
+	expectRun(t, `out = bytes(false)`, nil, value.UndefinedValue)
+	expectRun(t, `out = bytes('8')`, nil, value.UndefinedValue)
+	expectRun(t, `out = bytes([1])`, nil, value.UndefinedValue)
+	expectRun(t, `out = bytes({a: 1})`, nil, value.UndefinedValue)
+	expectRun(t, `out = bytes(undefined)`, nil, value.UndefinedValue)
 	expectRun(t, `out = bytes("-522", ['8'])`, nil, []byte{'-', '5', '2', '2'})
 	expectRun(t, `out = bytes(undefined, "-522")`, nil, "-522")
 	expectRun(t, `out = bytes(undefined, 1)`, nil, 1)
 	expectRun(t, `out = bytes(undefined, 1.8)`, nil, 1.8)
 	expectRun(t, `out = bytes(undefined, int("-522"))`, nil, -522)
-	expectRun(t, `out = bytes(undefined, undefined)`, nil, gst.UndefinedValue)
+	expectRun(t, `out = bytes(undefined, undefined)`, nil, value.UndefinedValue)
 
 	expectRun(t, `out = is_error(error(1))`, nil, true)
 	expectRun(t, `out = is_error(1)`, nil, false)
@@ -721,10 +721,10 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = format("%v", [1, [2, [3, 4]]])`,
 		nil, `[1, [2, [3, 4]]]`)
 
-	gst.MaxStringLen = 9
+	value.MaxStringLen = 9
 	expectError(t, `format("%s", "1234567890")`,
 		nil, "exceeding string size limit")
-	gst.MaxStringLen = 2147483647
+	value.MaxStringLen = 2147483647
 
 	// delete
 	expectError(t, `delete()`, nil, gse.ErrWrongNumArguments.Error())
@@ -769,7 +769,7 @@ func TestBuiltinFunction(t *testing.T) {
 	expectError(t, `delete({}, immutable([]))`, nil,
 		`invalid type for argument 'second'`)
 
-	expectRun(t, `out = delete({}, "")`, nil, gst.UndefinedValue)
+	expectRun(t, `out = delete({}, "")`, nil, value.UndefinedValue)
 	expectRun(t, `out = {key1: 1}; delete(out, "key1")`, nil, MAP{})
 	expectRun(t, `out = {key1: 1, key2: "2"}; delete(out, "key1")`, nil,
 		MAP{"key2": "2"})
@@ -862,15 +862,15 @@ func TestBuiltinFunction(t *testing.T) {
 }
 
 func TestBytesN(t *testing.T) {
-	curMaxBytesLen := gst.MaxBytesLen
-	defer func() { gst.MaxBytesLen = curMaxBytesLen }()
-	gst.MaxBytesLen = 10
+	curMaxBytesLen := value.MaxBytesLen
+	defer func() { value.MaxBytesLen = curMaxBytesLen }()
+	value.MaxBytesLen = 10
 
 	expectRun(t, `out = bytes(0)`, nil, make([]byte, 0))
 	expectRun(t, `out = bytes(10)`, nil, make([]byte, 10))
 	expectError(t, `bytes(11)`, nil, "bytes size limit")
 
-	gst.MaxBytesLen = 1000
+	value.MaxBytesLen = 1000
 	expectRun(t, `out = bytes(1000)`, nil, make([]byte, 1000))
 	expectError(t, `bytes(1001)`, nil, "bytes size limit")
 }
@@ -884,7 +884,7 @@ func TestBytes(t *testing.T) {
 	expectRun(t, `out = bytes("abcde")[0]`, nil, 97)
 	expectRun(t, `out = bytes("abcde")[1]`, nil, 98)
 	expectRun(t, `out = bytes("abcde")[4]`, nil, 101)
-	expectRun(t, `out = bytes("abcde")[10]`, nil, gst.UndefinedValue)
+	expectRun(t, `out = bytes("abcde")[10]`, nil, value.UndefinedValue)
 }
 
 func TestCall(t *testing.T) {
@@ -1069,17 +1069,17 @@ export func() {
 
 func TestVMErrorUnwrap(t *testing.T) {
 	userErr := errors.New("user runtime error")
-	userFunc := func(err error) *gst.UserFunction {
-		return &gst.UserFunction{Name: "user_func", Value: func(args ...gst.Object) (gst.Object, error) {
+	userFunc := func(err error) *value.UserFunction {
+		return &value.UserFunction{Name: "user_func", Value: func(args ...value.Object) (value.Object, error) {
 			return nil, err
 		}}
 	}
-	userModule := func(err error) *gst.BuiltinModule {
-		return &gst.BuiltinModule{
-			Attrs: map[string]gst.Object{
-				"afunction": &gst.UserFunction{
+	userModule := func(err error) *value.BuiltinModule {
+		return &value.BuiltinModule{
+			Attrs: map[string]value.Object{
+				"afunction": &value.UserFunction{
 					Name: "afunction",
-					Value: func(a ...gst.Object) (gst.Object, error) {
+					Value: func(a ...value.Object) (value.Object, error) {
 						return nil, err
 					},
 				},
@@ -1437,11 +1437,11 @@ func TestFor(t *testing.T) {
 func TestFunction(t *testing.T) {
 	// function with no "return" statement returns "invalid" value.
 	expectRun(t, `f1 := func() {}; out = f1();`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 	expectRun(t, `f1 := func() {}; f2 := func() { return f1(); }; f1(); out = f2();`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 	expectRun(t, `f := func(x) { x; }; out = f(5);`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 
 	expectRun(t, `f := func(...x) { return x; }; out = f(1,2,3);`,
 		nil, ARR{1, 2, 3})
@@ -1453,7 +1453,7 @@ func TestFunction(t *testing.T) {
 		nil, ARR{"a", ARR{"b"}, 7})
 
 	expectRun(t, `f := func(...x) { return x; }; out = f();`,
-		nil, &gst.Array{Value: []gst.Object{}})
+		nil, &value.Array{Value: []value.Object{}})
 
 	expectRun(t, `f := func(a, b, ...x) { return [a, b, x]; }; out = f(8, 9);`,
 		nil, ARR{8, 9, ARR{}})
@@ -1750,23 +1750,23 @@ func() {
 
 	// function skipping return
 	expectRun(t, `out = func() {}()`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 	expectRun(t, `out = func(v) { if v { return true } }(1)`,
 		nil, true)
 	expectRun(t, `out = func(v) { if v { return true } }(0)`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 	expectRun(t, `out = func(v) { if v { } else { return true } }(1)`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 	expectRun(t, `out = func(v) { if v { return } }(1)`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 	expectRun(t, `out = func(v) { if v { return } }(0)`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 	expectRun(t, `out = func(v) { if v { } else { return } }(1)`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 	expectRun(t, `out = func(v) { for ;;v++ { if v == 3 { return true } } }(1)`,
 		nil, true)
 	expectRun(t, `out = func(v) { for ;;v++ { if v == 3 { break } } }(1)`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 
 	// 'f' in RHS at line 4 must reference global variable 'f'
 	expectRun(t, `
@@ -1866,12 +1866,12 @@ for x in [1, 2, 3] {
 func TestIf(t *testing.T) {
 
 	expectRun(t, `if (true) { out = 10 }`, nil, 10)
-	expectRun(t, `if (false) { out = 10 }`, nil, gst.UndefinedValue)
+	expectRun(t, `if (false) { out = 10 }`, nil, value.UndefinedValue)
 	expectRun(t, `if (false) { out = 10 } else { out = 20 }`, nil, 20)
 	expectRun(t, `if (1) { out = 10 }`, nil, 10)
 	expectRun(t, `if (0) { out = 10 } else { out = 20 }`, nil, 20)
 	expectRun(t, `if (1 < 2) { out = 10 }`, nil, 10)
-	expectRun(t, `if (1 > 2) { out = 10 }`, nil, gst.UndefinedValue)
+	expectRun(t, `if (1 > 2) { out = 10 }`, nil, value.UndefinedValue)
 	expectRun(t, `if (1 < 2) { out = 10 } else { out = 20 }`, nil, 10)
 	expectRun(t, `if (1 > 2) { out = 10 } else { out = 20 }`, nil, 20)
 
@@ -2011,7 +2011,7 @@ func TestImmutable(t *testing.T) {
 	expectRun(t, `a := immutable([1,2,3]); a = 5; out = a`,
 		nil, 5)
 	expectRun(t, `a := immutable([1, 2, 3]); out = a[5]`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 
 	// map
 	expectError(t, `a := immutable({b: 1, c: 2}); a.b = 5`,
@@ -2043,7 +2043,7 @@ func TestImmutable(t *testing.T) {
 	expectRun(t, `a := immutable({a:1,b:2}); a = 5; out = 5`,
 		nil, 5)
 	expectRun(t, `a := immutable({a:1,b:2}); out = a.c`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 
 	expectRun(t, `a := immutable({b: 5, c: "foo"}); out = a.b`,
 		nil, 5)
@@ -2068,7 +2068,7 @@ func TestIncDec(t *testing.T) {
 }
 
 type StringDict struct {
-	gst.ObjectImpl
+	value.ObjectImpl
 	Value map[string]string
 }
 
@@ -2078,28 +2078,28 @@ func (o *StringDict) TypeName() string {
 	return "string-dict"
 }
 
-func (o *StringDict) IndexGet(index gst.Object) (gst.Object, error) {
-	strIdx, ok := index.(*gst.String)
+func (o *StringDict) IndexGet(index value.Object) (value.Object, error) {
+	strIdx, ok := index.(*value.String)
 	if !ok {
 		return nil, gse.ErrInvalidIndexType
 	}
 
 	for k, v := range o.Value {
 		if strings.EqualFold(strIdx.Value, k) {
-			return &gst.String{Value: v}, nil
+			return &value.String{Value: v}, nil
 		}
 	}
 
-	return gst.UndefinedValue, nil
+	return value.UndefinedValue, nil
 }
 
-func (o *StringDict) IndexSet(index, value gst.Object) error {
-	strIdx, ok := index.(*gst.String)
+func (o *StringDict) IndexSet(i, v value.Object) error {
+	strIdx, ok := i.(*value.String)
 	if !ok {
 		return gse.ErrInvalidIndexType
 	}
 
-	strVal, ok := value.ToString()
+	strVal, ok := v.ToString()
 	if !ok {
 		return gse.ErrInvalidIndexValueType
 	}
@@ -2110,7 +2110,7 @@ func (o *StringDict) IndexSet(index, value gst.Object) error {
 }
 
 type StringCircle struct {
-	gst.ObjectImpl
+	value.ObjectImpl
 	Value []string
 }
 
@@ -2122,8 +2122,8 @@ func (o *StringCircle) String() string {
 	return ""
 }
 
-func (o *StringCircle) IndexGet(index gst.Object) (gst.Object, error) {
-	intIdx, ok := index.(*gst.Int)
+func (o *StringCircle) IndexGet(index value.Object) (value.Object, error) {
+	intIdx, ok := index.(*value.Int)
 	if !ok {
 		return nil, gse.ErrInvalidIndexType
 	}
@@ -2133,11 +2133,11 @@ func (o *StringCircle) IndexGet(index gst.Object) (gst.Object, error) {
 		r = len(o.Value) + r
 	}
 
-	return &gst.String{Value: o.Value[r]}, nil
+	return &value.String{Value: o.Value[r]}, nil
 }
 
-func (o *StringCircle) IndexSet(index, value gst.Object) error {
-	intIdx, ok := index.(*gst.Int)
+func (o *StringCircle) IndexSet(i, v value.Object) error {
+	intIdx, ok := i.(*value.Int)
 	if !ok {
 		return gse.ErrInvalidIndexType
 	}
@@ -2147,7 +2147,7 @@ func (o *StringCircle) IndexSet(index, value gst.Object) error {
 		r = len(o.Value) + r
 	}
 
-	strVal, ok := value.ToString()
+	strVal, ok := v.ToString()
 	if !ok {
 		return gse.ErrInvalidIndexValueType
 	}
@@ -2158,7 +2158,7 @@ func (o *StringCircle) IndexSet(index, value gst.Object) error {
 }
 
 type StringArray struct {
-	gst.ObjectImpl
+	value.ObjectImpl
 	Value []string
 }
 
@@ -2168,8 +2168,8 @@ func (o *StringArray) String() string {
 
 func (o *StringArray) BinaryOp(
 	op token.Token,
-	rhs gst.Object,
-) (gst.Object, error) {
+	rhs value.Object,
+) (value.Object, error) {
 	if rhs, ok := rhs.(*StringArray); ok {
 		switch op {
 		case token.Add:
@@ -2187,7 +2187,7 @@ func (o *StringArray) IsFalsy() bool {
 	return len(o.Value) == 0
 }
 
-func (o *StringArray) Equals(x gst.Object) bool {
+func (o *StringArray) Equals(x value.Object) bool {
 	if x, ok := x.(*StringArray); ok {
 		if len(o.Value) != len(x.Value) {
 			return false
@@ -2205,7 +2205,7 @@ func (o *StringArray) Equals(x gst.Object) bool {
 	return false
 }
 
-func (o *StringArray) Copy() gst.Object {
+func (o *StringArray) Copy() value.Object {
 	return &StringArray{
 		Value: append([]string{}, o.Value...),
 	}
@@ -2215,37 +2215,37 @@ func (o *StringArray) TypeName() string {
 	return "string-array"
 }
 
-func (o *StringArray) IndexGet(index gst.Object) (gst.Object, error) {
-	intIdx, ok := index.(*gst.Int)
+func (o *StringArray) IndexGet(index value.Object) (value.Object, error) {
+	intIdx, ok := index.(*value.Int)
 	if ok {
 		if intIdx.Value >= 0 && intIdx.Value < int64(len(o.Value)) {
-			return &gst.String{Value: o.Value[intIdx.Value]}, nil
+			return &value.String{Value: o.Value[intIdx.Value]}, nil
 		}
 
 		return nil, gse.ErrIndexOutOfBounds
 	}
 
-	strIdx, ok := index.(*gst.String)
+	strIdx, ok := index.(*value.String)
 	if ok {
 		for vidx, str := range o.Value {
 			if strIdx.Value == str {
-				return &gst.Int{Value: int64(vidx)}, nil
+				return &value.Int{Value: int64(vidx)}, nil
 			}
 		}
 
-		return gst.UndefinedValue, nil
+		return value.UndefinedValue, nil
 	}
 
 	return nil, gse.ErrInvalidIndexType
 }
 
-func (o *StringArray) IndexSet(index, value gst.Object) error {
-	strVal, ok := value.ToString()
+func (o *StringArray) IndexSet(i, v value.Object) error {
+	strVal, ok := v.ToString()
 	if !ok {
 		return gse.ErrInvalidIndexValueType
 	}
 
-	intIdx, ok := index.(*gst.Int)
+	intIdx, ok := i.(*value.Int)
 	if ok {
 		if intIdx.Value >= 0 && intIdx.Value < int64(len(o.Value)) {
 			o.Value[intIdx.Value] = strVal
@@ -2259,8 +2259,8 @@ func (o *StringArray) IndexSet(index, value gst.Object) error {
 }
 
 func (o *StringArray) Call(
-	args ...gst.Object,
-) (ret gst.Object, err error) {
+	args ...value.Object,
+) (ret value.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -2276,11 +2276,11 @@ func (o *StringArray) Call(
 
 	for i, v := range o.Value {
 		if v == s1 {
-			return &gst.Int{Value: int64(i)}, nil
+			return &value.Int{Value: int64(i)}, nil
 		}
 	}
 
-	return gst.UndefinedValue, nil
+	return value.UndefinedValue, nil
 }
 
 func (o *StringArray) CanCall() bool {
@@ -2296,7 +2296,7 @@ func TestIndexable(t *testing.T) {
 	expectRun(t, `out = dict["B"]`,
 		Opts().Symbol("dict", dict()).Skip2ndPass(), "bar")
 	expectRun(t, `out = dict["x"]`,
-		Opts().Symbol("dict", dict()).Skip2ndPass(), gst.UndefinedValue)
+		Opts().Symbol("dict", dict()).Skip2ndPass(), value.UndefinedValue)
 	expectError(t, `dict[0]`,
 		Opts().Symbol("dict", dict()).Skip2ndPass(), "invalid index type")
 
@@ -2324,7 +2324,7 @@ func TestIndexable(t *testing.T) {
 	expectRun(t, `out = arr["three"]`,
 		Opts().Symbol("arr", strArr()).Skip2ndPass(), 2)
 	expectRun(t, `out = arr["four"]`,
-		Opts().Symbol("arr", strArr()).Skip2ndPass(), gst.UndefinedValue)
+		Opts().Symbol("arr", strArr()).Skip2ndPass(), value.UndefinedValue)
 	expectRun(t, `out = arr[0]`,
 		Opts().Symbol("arr", strArr()).Skip2ndPass(), "one")
 	expectRun(t, `out = arr[1]`,
@@ -2397,7 +2397,7 @@ func TestInteger(t *testing.T) {
 }
 
 type StringArrayIterator struct {
-	gst.ObjectImpl
+	value.ObjectImpl
 	strArr *StringArray
 	idx    int
 }
@@ -2415,15 +2415,15 @@ func (i *StringArrayIterator) Next() bool {
 	return i.idx <= len(i.strArr.Value)
 }
 
-func (i *StringArrayIterator) Key() gst.Object {
-	return &gst.Int{Value: int64(i.idx - 1)}
+func (i *StringArrayIterator) Key() value.Object {
+	return &value.Int{Value: int64(i.idx - 1)}
 }
 
-func (i *StringArrayIterator) Value() gst.Object {
-	return &gst.String{Value: i.strArr.Value[i.idx-1]}
+func (i *StringArrayIterator) Value() value.Object {
+	return &value.String{Value: i.strArr.Value[i.idx-1]}
 }
 
-func (o *StringArray) Iterate() gst.Iterator {
+func (o *StringArray) Iterate() value.Iterator {
 	return &StringArrayIterator{
 		strArr: o,
 	}
@@ -2515,9 +2515,9 @@ out = {
 	})
 
 	expectRun(t, `out = {foo: 5}["foo"]`, nil, 5)
-	expectRun(t, `out = {foo: 5}["bar"]`, nil, gst.UndefinedValue)
+	expectRun(t, `out = {foo: 5}["bar"]`, nil, value.UndefinedValue)
 	expectRun(t, `key := "foo"; out = {foo: 5}[key]`, nil, 5)
-	expectRun(t, `out = {}["foo"]`, nil, gst.UndefinedValue)
+	expectRun(t, `out = {}["foo"]`, nil, value.UndefinedValue)
 
 	expectRun(t, `
 m := {
@@ -2541,13 +2541,13 @@ out = m["foo"](2) + m["foo"](3)
 
 func TestBuiltin(t *testing.T) {
 	m := Opts().Module("math",
-		&gst.BuiltinModule{
-			Attrs: map[string]gst.Object{
-				"abs": &gst.UserFunction{
+		&value.BuiltinModule{
+			Attrs: map[string]value.Object{
+				"abs": &value.UserFunction{
 					Name: "abs",
-					Value: func(a ...gst.Object) (gst.Object, error) {
+					Value: func(a ...value.Object) (value.Object, error) {
 						v, _ := a[0].ToFloat64()
-						return &gst.Float{Value: math.Abs(v)}, nil
+						return &value.Float{Value: math.Abs(v)}, nil
 					},
 				},
 			},
@@ -2564,7 +2564,7 @@ func TestUserModules(t *testing.T) {
 	// export none
 	expectRun(t, `out = import("mod1")`,
 		Opts().Module("mod1", `fn := func() { return 5.0 }; a := 2`),
-		gst.UndefinedValue)
+		value.UndefinedValue)
 
 	// export values
 	expectRun(t, `out = import("mod1")`,
@@ -2709,21 +2709,21 @@ export func(a) {
 
 	// module skipping export
 	expectRun(t, `out = import("mod0")`,
-		Opts().Module("mod0", ``), gst.UndefinedValue)
+		Opts().Module("mod0", ``), value.UndefinedValue)
 	expectRun(t, `out = import("mod0")`,
 		Opts().Module("mod0", `if 1 { export true }`), true)
 	expectRun(t, `out = import("mod0")`,
 		Opts().Module("mod0", `if 0 { export true }`),
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	expectRun(t, `out = import("mod0")`,
 		Opts().Module("mod0", `if 1 { } else { export true }`),
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	expectRun(t, `out = import("mod0")`,
 		Opts().Module("mod0", `for v:=0;;v++ { if v == 3 { export true } }`),
 		true)
 	expectRun(t, `out = import("mod0")`,
 		Opts().Module("mod0", `for v:=0;;v++ { if v == 3 { break } }`),
-		gst.UndefinedValue)
+		value.UndefinedValue)
 
 	// duplicate compiled functions
 	// NOTE: module "mod" has a function with some local variable, and it's
@@ -2747,13 +2747,13 @@ export { x: 1 }
 
 func TestModuleBlockScopes(t *testing.T) {
 	m := Opts().Module("rand",
-		&gst.BuiltinModule{
-			Attrs: map[string]gst.Object{
-				"intn": &gst.UserFunction{
+		&value.BuiltinModule{
+			Attrs: map[string]value.Object{
+				"intn": &value.UserFunction{
 					Name: "abs",
-					Value: func(a ...gst.Object) (gst.Object, error) {
+					Value: func(a ...value.Object) (value.Object, error) {
 						v, _ := a[0].ToInt64()
-						return &gst.Int{Value: rand.Int63n(v)}, nil
+						return &value.Int{Value: rand.Int63n(v)}, nil
 					},
 				},
 			},
@@ -2834,11 +2834,11 @@ f()
 
 func testAllocsLimit(t *testing.T, src string, limit int64) {
 	expectRun(t, src,
-		Opts().Skip2ndPass(), gst.UndefinedValue) // no limit
+		Opts().Skip2ndPass(), value.UndefinedValue) // no limit
 	expectRun(t, src,
-		Opts().MaxAllocs(limit).Skip2ndPass(), gst.UndefinedValue)
+		Opts().MaxAllocs(limit).Skip2ndPass(), value.UndefinedValue)
 	expectRun(t, src,
-		Opts().MaxAllocs(limit+1).Skip2ndPass(), gst.UndefinedValue)
+		Opts().MaxAllocs(limit+1).Skip2ndPass(), value.UndefinedValue)
 	if limit > 1 {
 		expectError(t, src,
 			Opts().MaxAllocs(limit-1).Skip2ndPass(),
@@ -2976,7 +2976,7 @@ func TestSelector(t *testing.T) {
 	expectRun(t, `a := {k1: 5, k2: "foo"}; out = a.k2`,
 		nil, "foo")
 	expectRun(t, `a := {k1: 5, k2: "foo"}; out = a.k3`,
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 
 	expectRun(t, `
 a := {
@@ -2996,7 +2996,7 @@ a := {
 	},
 	c: "foo bar"
 }
-b := a.x.c`, nil, gst.UndefinedValue)
+b := a.x.c`, nil, value.UndefinedValue)
 
 	expectRun(t, `
 a := {
@@ -3006,7 +3006,7 @@ a := {
 	},
 	c: "foo bar"
 }
-b := a.x.y`, nil, gst.UndefinedValue)
+b := a.x.y`, nil, value.UndefinedValue)
 
 	expectRun(t, `a := {b: 1, c: "foo"}; a.b = 2; out = a.b`,
 		nil, 2)
@@ -3098,9 +3098,9 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.all({a:true, b:0}, enum.value)`, false)
 	testEnumModule(t, `out = enum.all({a:true, b:0, c:1}, enum.value)`, false)
 	testEnumModule(t, `out = enum.all(0, enum.value)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.all("123", enum.value)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 
 	testEnumModule(t, `out = enum.any([], enum.value)`, false)
 	testEnumModule(t, `out = enum.any([1], enum.value)`, true)
@@ -3121,9 +3121,9 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.any({a:false}, enum.value)`, false)
 	testEnumModule(t, `out = enum.any({a:false, b:0}, enum.value)`, false)
 	testEnumModule(t, `out = enum.any(0, enum.value)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.any("123", enum.value)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 
 	testEnumModule(t, `out = enum.chunk([], 1)`, ARR{})
 	testEnumModule(t, `out = enum.chunk([1], 1)`, ARR{ARR{1}})
@@ -3138,30 +3138,30 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.chunk([1,2,3,4], 3)`,
 		ARR{ARR{1, 2, 3}, ARR{4}})
 	testEnumModule(t, `out = enum.chunk([], 0)`,
-		gst.UndefinedValue) // size=0: undefined
+		value.UndefinedValue) // size=0: undefined
 	testEnumModule(t, `out = enum.chunk([1], 0)`,
-		gst.UndefinedValue) // size=0: undefined
+		value.UndefinedValue) // size=0: undefined
 	testEnumModule(t, `out = enum.chunk([1,2,3], 0)`,
-		gst.UndefinedValue) // size=0: undefined
+		value.UndefinedValue) // size=0: undefined
 	testEnumModule(t, `out = enum.chunk({a:1,b:2,c:3}, 1)`,
-		gst.UndefinedValue) // map: undefined
+		value.UndefinedValue) // map: undefined
 	testEnumModule(t, `out = enum.chunk(0, 1)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.chunk("123", 1)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 
 	testEnumModule(t, `out = enum.at([], 0)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.at([], 1)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.at([], -1)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.at(["one"], 0)`,
 		"one")
 	testEnumModule(t, `out = enum.at(["one"], 1)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.at(["one"], -1)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.at(["one","two","three"], 0)`,
 		"one")
 	testEnumModule(t, `out = enum.at(["one","two","three"], 1)`,
@@ -3169,17 +3169,17 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.at(["one","two","three"], 2)`,
 		"three")
 	testEnumModule(t, `out = enum.at(["one","two","three"], -1)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.at(["one","two","three"], 3)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.at(["one","two","three"], "1")`,
-		gst.UndefinedValue) // non-int index: undefined
+		value.UndefinedValue) // non-int index: undefined
 	testEnumModule(t, `out = enum.at({}, "a")`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.at({a:"one"}, "a")`,
 		"one")
 	testEnumModule(t, `out = enum.at({a:"one"}, "b")`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.at({a:"one",b:"two",c:"three"}, "a")`,
 		"one")
 	testEnumModule(t, `out = enum.at({a:"one",b:"two",c:"three"}, "b")`,
@@ -3187,13 +3187,13 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.at({a:"one",b:"two",c:"three"}, "c")`,
 		"three")
 	testEnumModule(t, `out = enum.at({a:"one",b:"two",c:"three"}, "d")`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.at({a:"one",b:"two",c:"three"}, 'a')`,
-		gst.UndefinedValue) // non-string index: undefined
+		value.UndefinedValue) // non-string index: undefined
 	testEnumModule(t, `out = enum.at(0, 1)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.at("abc", 1)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 
 	testEnumModule(t, `out=0; enum.each([],func(k,v){out+=v})`, 0)
 	testEnumModule(t, `out=0; enum.each([1,2,3],func(k,v){out+=v})`, 6)
@@ -3211,53 +3211,53 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.filter([false,1,0,2], enum.value)`,
 		ARR{1, 2})
 	testEnumModule(t, `out = enum.filter({}, enum.value)`,
-		gst.UndefinedValue) // non-array: undefined
+		value.UndefinedValue) // non-array: undefined
 	testEnumModule(t, `out = enum.filter(0, enum.value)`,
-		gst.UndefinedValue) // non-array: undefined
+		value.UndefinedValue) // non-array: undefined
 	testEnumModule(t, `out = enum.filter("123", enum.value)`,
-		gst.UndefinedValue) // non-array: undefined
+		value.UndefinedValue) // non-array: undefined
 
 	testEnumModule(t, `out = enum.find([], enum.value)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.find([0], enum.value)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.find([1], enum.value)`, 1)
 	testEnumModule(t, `out = enum.find([false,0,undefined,1], enum.value)`, 1)
 	testEnumModule(t, `out = enum.find([1,2,3], enum.value)`, 1)
 	testEnumModule(t, `out = enum.find({}, enum.value)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.find({a:0}, enum.value)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.find({a:1}, enum.value)`, 1)
 	testEnumModule(t, `out = enum.find({a:false,b:0,c:undefined,d:1}, enum.value)`,
 		1)
 	//testEnumModule(t, `out = enum.find({a:1,b:2,c:3}, enum.value)`, 1)
 	testEnumModule(t, `out = enum.find(0, enum.value)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.find("123", enum.value)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 
 	testEnumModule(t, `out = enum.find_key([], enum.value)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.find_key([0], enum.value)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.find_key([1], enum.value)`, 0)
 	testEnumModule(t, `out = enum.find_key([false,0,undefined,1], enum.value)`,
 		3)
 	testEnumModule(t, `out = enum.find_key([1,2,3], enum.value)`, 0)
 	testEnumModule(t, `out = enum.find_key({}, enum.value)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.find_key({a:0}, enum.value)`,
-		gst.UndefinedValue)
+		value.UndefinedValue)
 	testEnumModule(t, `out = enum.find_key({a:1}, enum.value)`,
 		"a")
 	testEnumModule(t, `out = enum.find_key({a:false,b:0,c:undefined,d:1}, enum.value)`,
 		"d")
 	//testEnumModule(t, `out = enum.find_key({a:1,b:2,c:3}, enum.value)`, "a")
 	testEnumModule(t, `out = enum.find_key(0, enum.value)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.find_key("123", enum.value)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 
 	testEnumModule(t, `out = enum.map([], enum.value)`,
 		ARR{})
@@ -3272,9 +3272,9 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.map({a:1}, func(k,v) { return v*2 })`,
 		ARR{2})
 	testEnumModule(t, `out = enum.map(0, enum.value)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.map("123", enum.value)`,
-		gst.UndefinedValue) // non-enumerable: undefined
+		value.UndefinedValue) // non-enumerable: undefined
 }
 
 func testEnumModule(t *testing.T, input string, expected interface{}) {
@@ -3368,9 +3368,9 @@ func TestString(t *testing.T) {
 	}
 
 	expectRun(t, fmt.Sprintf("%s[%d]", strStr, -1),
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 	expectRun(t, fmt.Sprintf("%s[%d]", strStr, strLen),
-		nil, gst.UndefinedValue)
+		nil, value.UndefinedValue)
 
 	// slice operator
 	for low := 0; low <= strLen; low++ {
@@ -3623,7 +3623,7 @@ func expectRun(
 	expectedObj := toObject(expected)
 
 	if symbols == nil {
-		symbols = make(map[string]gst.Object)
+		symbols = make(map[string]value.Object)
 	}
 	symbols[testOut] = objectZeroCopy(expectedObj)
 
@@ -3651,10 +3651,10 @@ func expectRun(
 
 		expectedObj := toObject(expected)
 		switch eo := expectedObj.(type) {
-		case *gst.Array:
-			expectedObj = &gst.ImmutableArray{Value: eo.Value}
-		case *gst.Map:
-			expectedObj = &gst.ImmutableMap{Value: eo.Value}
+		case *value.Array:
+			expectedObj = &value.ImmutableArray{Value: eo.Value}
+		case *value.Map:
+			expectedObj = &value.ImmutableMap{Value: eo.Value}
 		}
 
 		modules.AddSourceModule("__code__",
@@ -3765,10 +3765,10 @@ func (o *vmTracer) Write(p []byte) (n int, err error) {
 
 func traceCompileRun(
 	file *parser.File,
-	symbols map[string]gst.Object,
+	symbols map[string]value.Object,
 	modules *gs.ModuleMap,
 	maxAllocs int64,
-) (res map[string]gst.Object, trace []string, err error) {
+) (res map[string]value.Object, trace []string, err error) {
 	var v *gs.VM
 
 	defer func() {
@@ -3792,7 +3792,7 @@ func traceCompileRun(
 		}
 	}()
 
-	globals := make([]gst.Object, gs.GlobalsSize)
+	globals := make([]value.Object, gs.GlobalsSize)
 
 	symTable := gs.NewSymbolTable()
 	for name, value := range symbols {
@@ -3828,7 +3828,7 @@ func traceCompileRun(
 
 	err = v.Run()
 	{
-		res = make(map[string]gst.Object)
+		res = make(map[string]value.Object)
 		for name := range symbols {
 			sym, depth, ok := symTable.Resolve(name, false)
 			if !ok || depth != 0 {
@@ -3848,7 +3848,7 @@ func traceCompileRun(
 	return
 }
 
-func formatGlobals(globals []gst.Object) (formatted []string) {
+func formatGlobals(globals []value.Object) (formatted []string) {
 	for idx, global := range globals {
 		if global == nil {
 			return
@@ -3869,92 +3869,92 @@ func parse(t *testing.T, input string) *parser.File {
 	return file
 }
 
-func errorObject(v interface{}) *gst.Error {
-	return &gst.Error{Value: toObject(v)}
+func errorObject(v interface{}) *value.Error {
+	return &value.Error{Value: toObject(v)}
 }
 
-func toObject(v interface{}) gst.Object {
+func toObject(v interface{}) value.Object {
 	switch v := v.(type) {
-	case gst.Object:
+	case value.Object:
 		return v
 	case string:
-		return &gst.String{Value: v}
+		return &value.String{Value: v}
 	case int64:
-		return &gst.Int{Value: v}
+		return &value.Int{Value: v}
 	case int: // for convenience
-		return &gst.Int{Value: int64(v)}
+		return &value.Int{Value: int64(v)}
 	case bool:
 		if v {
-			return gst.TrueValue
+			return value.TrueValue
 		}
-		return gst.FalseValue
+		return value.FalseValue
 	case rune:
-		return &gst.Char{Value: v}
+		return &value.Char{Value: v}
 	case byte: // for convenience
-		return &gst.Char{Value: rune(v)}
+		return &value.Char{Value: rune(v)}
 	case float64:
-		return &gst.Float{Value: v}
+		return &value.Float{Value: v}
 	case []byte:
-		return &gst.Bytes{Value: v}
+		return &value.Bytes{Value: v}
 	case MAP:
-		objs := make(map[string]gst.Object)
+		objs := make(map[string]value.Object)
 		for k, v := range v {
 			objs[k] = toObject(v)
 		}
 
-		return &gst.Map{Value: objs}
+		return &value.Map{Value: objs}
 	case ARR:
-		var objs []gst.Object
+		var objs []value.Object
 		for _, e := range v {
 			objs = append(objs, toObject(e))
 		}
 
-		return &gst.Array{Value: objs}
+		return &value.Array{Value: objs}
 	case IMAP:
-		objs := make(map[string]gst.Object)
+		objs := make(map[string]value.Object)
 		for k, v := range v {
 			objs[k] = toObject(v)
 		}
 
-		return &gst.ImmutableMap{Value: objs}
+		return &value.ImmutableMap{Value: objs}
 	case IARR:
-		var objs []gst.Object
+		var objs []value.Object
 		for _, e := range v {
 			objs = append(objs, toObject(e))
 		}
 
-		return &gst.ImmutableArray{Value: objs}
+		return &value.ImmutableArray{Value: objs}
 	}
 
 	panic(fmt.Errorf("unknown type: %T", v))
 }
 
-func objectZeroCopy(o gst.Object) gst.Object {
+func objectZeroCopy(o value.Object) value.Object {
 	switch o.(type) {
-	case *gst.Int:
-		return &gst.Int{}
-	case *gst.Float:
-		return &gst.Float{}
-	case *gst.Bool:
-		return &gst.Bool{}
-	case *gst.Char:
-		return &gst.Char{}
-	case *gst.String:
-		return &gst.String{}
-	case *gst.Array:
-		return &gst.Array{}
-	case *gst.Map:
-		return &gst.Map{}
-	case *gst.Undefined:
-		return gst.UndefinedValue
-	case *gst.Error:
-		return &gst.Error{}
-	case *gst.Bytes:
-		return &gst.Bytes{}
-	case *gst.ImmutableArray:
-		return &gst.ImmutableArray{}
-	case *gst.ImmutableMap:
-		return &gst.ImmutableMap{}
+	case *value.Int:
+		return &value.Int{}
+	case *value.Float:
+		return &value.Float{}
+	case *value.Bool:
+		return &value.Bool{}
+	case *value.Char:
+		return &value.Char{}
+	case *value.String:
+		return &value.String{}
+	case *value.Array:
+		return &value.Array{}
+	case *value.Map:
+		return &value.Map{}
+	case *value.Undefined:
+		return value.UndefinedValue
+	case *value.Error:
+		return &value.Error{}
+	case *value.Bytes:
+		return &value.Bytes{}
+	case *value.ImmutableArray:
+		return &value.ImmutableArray{}
+	case *value.ImmutableMap:
+		return &value.ImmutableMap{}
 	case nil:
 		panic("nil")
 	default:

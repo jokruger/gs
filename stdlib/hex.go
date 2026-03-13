@@ -3,10 +3,10 @@ package stdlib
 import (
 	"encoding/hex"
 
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
-var hexModule = map[string]gst.Object{
-	"encode": &gst.UserFunction{Value: FuncAYRS(hex.EncodeToString)},
-	"decode": &gst.UserFunction{Value: FuncASRYE(hex.DecodeString)},
+var hexModule = map[string]value.Object{
+	"encode": &value.UserFunction{Value: FuncAYRS(hex.EncodeToString)},
+	"decode": &value.UserFunction{Value: FuncASRYE(hex.DecodeString)},
 }

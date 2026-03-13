@@ -4,16 +4,16 @@ import (
 	"regexp"
 
 	gse "github.com/jokruger/gs/error"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
-func makeTextRegexp(re *regexp.Regexp) *gst.ImmutableMap {
-	return &gst.ImmutableMap{
-		Value: map[string]gst.Object{
+func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
+	return &value.ImmutableMap{
+		Value: map[string]value.Object{
 			// match(text) => bool
-			"match": &gst.UserFunction{
-				Value: func(args ...gst.Object) (
-					ret gst.Object,
+			"match": &value.UserFunction{
+				Value: func(args ...value.Object) (
+					ret value.Object,
 					err error,
 				) {
 					if len(args) != 1 {
@@ -32,9 +32,9 @@ func makeTextRegexp(re *regexp.Regexp) *gst.ImmutableMap {
 					}
 
 					if re.MatchString(s1) {
-						ret = gst.TrueValue
+						ret = value.TrueValue
 					} else {
-						ret = gst.FalseValue
+						ret = value.FalseValue
 					}
 
 					return
@@ -43,9 +43,9 @@ func makeTextRegexp(re *regexp.Regexp) *gst.ImmutableMap {
 
 			// find(text) 			=> array(array({text:,begin:,end:}))/undefined
 			// find(text, maxCount) => array(array({text:,begin:,end:}))/undefined
-			"find": &gst.UserFunction{
-				Value: func(args ...gst.Object) (
-					ret gst.Object,
+			"find": &value.UserFunction{
+				Value: func(args ...value.Object) (
+					ret value.Object,
 					err error,
 				) {
 					numArgs := len(args)
@@ -67,28 +67,28 @@ func makeTextRegexp(re *regexp.Regexp) *gst.ImmutableMap {
 					if numArgs == 1 {
 						m := re.FindStringSubmatchIndex(s1)
 						if m == nil {
-							ret = gst.UndefinedValue
+							ret = value.UndefinedValue
 							return
 						}
 
-						arr := &gst.Array{}
+						arr := &value.Array{}
 						for i := 0; i < len(m); i += 2 {
 							arr.Value = append(arr.Value,
-								&gst.ImmutableMap{
-									Value: map[string]gst.Object{
-										"text": &gst.String{
+								&value.ImmutableMap{
+									Value: map[string]value.Object{
+										"text": &value.String{
 											Value: s1[m[i]:m[i+1]],
 										},
-										"begin": &gst.Int{
+										"begin": &value.Int{
 											Value: int64(m[i]),
 										},
-										"end": &gst.Int{
+										"end": &value.Int{
 											Value: int64(m[i+1]),
 										},
 									}})
 						}
 
-						ret = &gst.Array{Value: []gst.Object{arr}}
+						ret = &value.Array{Value: []value.Object{arr}}
 
 						return
 					}
@@ -104,24 +104,24 @@ func makeTextRegexp(re *regexp.Regexp) *gst.ImmutableMap {
 					}
 					m := re.FindAllStringSubmatchIndex(s1, i2)
 					if m == nil {
-						ret = gst.UndefinedValue
+						ret = value.UndefinedValue
 						return
 					}
 
-					arr := &gst.Array{}
+					arr := &value.Array{}
 					for _, m := range m {
-						subMatch := &gst.Array{}
+						subMatch := &value.Array{}
 						for i := 0; i < len(m); i += 2 {
 							subMatch.Value = append(subMatch.Value,
-								&gst.ImmutableMap{
-									Value: map[string]gst.Object{
-										"text": &gst.String{
+								&value.ImmutableMap{
+									Value: map[string]value.Object{
+										"text": &value.String{
 											Value: s1[m[i]:m[i+1]],
 										},
-										"begin": &gst.Int{
+										"begin": &value.Int{
 											Value: int64(m[i]),
 										},
-										"end": &gst.Int{
+										"end": &value.Int{
 											Value: int64(m[i+1]),
 										},
 									}})
@@ -137,9 +137,9 @@ func makeTextRegexp(re *regexp.Regexp) *gst.ImmutableMap {
 			},
 
 			// replace(src, repl) => string
-			"replace": &gst.UserFunction{
-				Value: func(args ...gst.Object) (
-					ret gst.Object,
+			"replace": &value.UserFunction{
+				Value: func(args ...value.Object) (
+					ret value.Object,
 					err error,
 				) {
 					if len(args) != 2 {
@@ -172,7 +172,7 @@ func makeTextRegexp(re *regexp.Regexp) *gst.ImmutableMap {
 						return nil, gse.ErrStringLimit
 					}
 
-					ret = &gst.String{Value: s}
+					ret = &value.String{Value: s}
 
 					return
 				},
@@ -180,9 +180,9 @@ func makeTextRegexp(re *regexp.Regexp) *gst.ImmutableMap {
 
 			// split(text) 			 => array(string)
 			// split(text, maxCount) => array(string)
-			"split": &gst.UserFunction{
-				Value: func(args ...gst.Object) (
-					ret gst.Object,
+			"split": &value.UserFunction{
+				Value: func(args ...value.Object) (
+					ret value.Object,
 					err error,
 				) {
 					numArgs := len(args)
@@ -214,10 +214,10 @@ func makeTextRegexp(re *regexp.Regexp) *gst.ImmutableMap {
 						}
 					}
 
-					arr := &gst.Array{}
+					arr := &value.Array{}
 					for _, s := range re.Split(s1, i2) {
 						arr.Value = append(arr.Value,
-							&gst.String{Value: s})
+							&value.String{Value: s})
 					}
 
 					ret = arr
@@ -236,14 +236,14 @@ func doTextRegexpReplace(re *regexp.Regexp, src, repl string) (string, bool) {
 	for _, m := range re.FindAllStringSubmatchIndex(src, -1) {
 		var exp []byte
 		exp = re.ExpandString(exp, repl, src, m)
-		if len(out)+m[0]-idx+len(exp) > gst.MaxStringLen {
+		if len(out)+m[0]-idx+len(exp) > value.MaxStringLen {
 			return "", false
 		}
 		out += src[idx:m[0]] + string(exp)
 		idx = m[1]
 	}
 	if idx < len(src) {
-		if len(out)+len(src)-idx > gst.MaxStringLen {
+		if len(out)+len(src)-idx > value.MaxStringLen {
 			return "", false
 		}
 		out += src[idx:]

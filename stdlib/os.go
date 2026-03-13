@@ -8,202 +8,202 @@ import (
 	"runtime"
 
 	gse "github.com/jokruger/gs/error"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
-var osModule = map[string]gst.Object{
-	"platform":            &gst.String{Value: runtime.GOOS},
-	"arch":                &gst.String{Value: runtime.GOARCH},
-	"o_rdonly":            &gst.Int{Value: int64(os.O_RDONLY)},
-	"o_wronly":            &gst.Int{Value: int64(os.O_WRONLY)},
-	"o_rdwr":              &gst.Int{Value: int64(os.O_RDWR)},
-	"o_append":            &gst.Int{Value: int64(os.O_APPEND)},
-	"o_create":            &gst.Int{Value: int64(os.O_CREATE)},
-	"o_excl":              &gst.Int{Value: int64(os.O_EXCL)},
-	"o_sync":              &gst.Int{Value: int64(os.O_SYNC)},
-	"o_trunc":             &gst.Int{Value: int64(os.O_TRUNC)},
-	"mode_dir":            &gst.Int{Value: int64(os.ModeDir)},
-	"mode_append":         &gst.Int{Value: int64(os.ModeAppend)},
-	"mode_exclusive":      &gst.Int{Value: int64(os.ModeExclusive)},
-	"mode_temporary":      &gst.Int{Value: int64(os.ModeTemporary)},
-	"mode_symlink":        &gst.Int{Value: int64(os.ModeSymlink)},
-	"mode_device":         &gst.Int{Value: int64(os.ModeDevice)},
-	"mode_named_pipe":     &gst.Int{Value: int64(os.ModeNamedPipe)},
-	"mode_socket":         &gst.Int{Value: int64(os.ModeSocket)},
-	"mode_setuid":         &gst.Int{Value: int64(os.ModeSetuid)},
-	"mode_setgui":         &gst.Int{Value: int64(os.ModeSetgid)},
-	"mode_char_device":    &gst.Int{Value: int64(os.ModeCharDevice)},
-	"mode_sticky":         &gst.Int{Value: int64(os.ModeSticky)},
-	"mode_type":           &gst.Int{Value: int64(os.ModeType)},
-	"mode_perm":           &gst.Int{Value: int64(os.ModePerm)},
-	"path_separator":      &gst.Char{Value: os.PathSeparator},
-	"path_list_separator": &gst.Char{Value: os.PathListSeparator},
-	"dev_null":            &gst.String{Value: os.DevNull},
-	"seek_set":            &gst.Int{Value: int64(io.SeekStart)},
-	"seek_cur":            &gst.Int{Value: int64(io.SeekCurrent)},
-	"seek_end":            &gst.Int{Value: int64(io.SeekEnd)},
-	"args": &gst.UserFunction{
+var osModule = map[string]value.Object{
+	"platform":            &value.String{Value: runtime.GOOS},
+	"arch":                &value.String{Value: runtime.GOARCH},
+	"o_rdonly":            &value.Int{Value: int64(os.O_RDONLY)},
+	"o_wronly":            &value.Int{Value: int64(os.O_WRONLY)},
+	"o_rdwr":              &value.Int{Value: int64(os.O_RDWR)},
+	"o_append":            &value.Int{Value: int64(os.O_APPEND)},
+	"o_create":            &value.Int{Value: int64(os.O_CREATE)},
+	"o_excl":              &value.Int{Value: int64(os.O_EXCL)},
+	"o_sync":              &value.Int{Value: int64(os.O_SYNC)},
+	"o_trunc":             &value.Int{Value: int64(os.O_TRUNC)},
+	"mode_dir":            &value.Int{Value: int64(os.ModeDir)},
+	"mode_append":         &value.Int{Value: int64(os.ModeAppend)},
+	"mode_exclusive":      &value.Int{Value: int64(os.ModeExclusive)},
+	"mode_temporary":      &value.Int{Value: int64(os.ModeTemporary)},
+	"mode_symlink":        &value.Int{Value: int64(os.ModeSymlink)},
+	"mode_device":         &value.Int{Value: int64(os.ModeDevice)},
+	"mode_named_pipe":     &value.Int{Value: int64(os.ModeNamedPipe)},
+	"mode_socket":         &value.Int{Value: int64(os.ModeSocket)},
+	"mode_setuid":         &value.Int{Value: int64(os.ModeSetuid)},
+	"mode_setgui":         &value.Int{Value: int64(os.ModeSetgid)},
+	"mode_char_device":    &value.Int{Value: int64(os.ModeCharDevice)},
+	"mode_sticky":         &value.Int{Value: int64(os.ModeSticky)},
+	"mode_type":           &value.Int{Value: int64(os.ModeType)},
+	"mode_perm":           &value.Int{Value: int64(os.ModePerm)},
+	"path_separator":      &value.Char{Value: os.PathSeparator},
+	"path_list_separator": &value.Char{Value: os.PathListSeparator},
+	"dev_null":            &value.String{Value: os.DevNull},
+	"seek_set":            &value.Int{Value: int64(io.SeekStart)},
+	"seek_cur":            &value.Int{Value: int64(io.SeekCurrent)},
+	"seek_end":            &value.Int{Value: int64(io.SeekEnd)},
+	"args": &value.UserFunction{
 		Name:  "args",
 		Value: osArgs,
 	}, // args() => array(string)
-	"chdir": &gst.UserFunction{
+	"chdir": &value.UserFunction{
 		Name:  "chdir",
 		Value: FuncASRE(os.Chdir),
 	}, // chdir(dir string) => error
 	"chmod": osFuncASFmRE("chmod", os.Chmod), // chmod(name string, mode int) => error
-	"chown": &gst.UserFunction{
+	"chown": &value.UserFunction{
 		Name:  "chown",
 		Value: FuncASIIRE(os.Chown),
 	}, // chown(name string, uid int, gid int) => error
-	"clearenv": &gst.UserFunction{
+	"clearenv": &value.UserFunction{
 		Name:  "clearenv",
 		Value: FuncAR(os.Clearenv),
 	}, // clearenv()
-	"environ": &gst.UserFunction{
+	"environ": &value.UserFunction{
 		Name:  "environ",
 		Value: FuncARSs(os.Environ),
 	}, // environ() => array(string)
-	"exit": &gst.UserFunction{
+	"exit": &value.UserFunction{
 		Name:  "exit",
 		Value: FuncAIR(os.Exit),
 	}, // exit(code int)
-	"expand_env": &gst.UserFunction{
+	"expand_env": &value.UserFunction{
 		Name:  "expand_env",
 		Value: osExpandEnv,
 	}, // expand_env(s string) => string
-	"getegid": &gst.UserFunction{
+	"getegid": &value.UserFunction{
 		Name:  "getegid",
 		Value: FuncARI(os.Getegid),
 	}, // getegid() => int
-	"getenv": &gst.UserFunction{
+	"getenv": &value.UserFunction{
 		Name:  "getenv",
 		Value: FuncASRS(os.Getenv),
 	}, // getenv(s string) => string
-	"geteuid": &gst.UserFunction{
+	"geteuid": &value.UserFunction{
 		Name:  "geteuid",
 		Value: FuncARI(os.Geteuid),
 	}, // geteuid() => int
-	"getgid": &gst.UserFunction{
+	"getgid": &value.UserFunction{
 		Name:  "getgid",
 		Value: FuncARI(os.Getgid),
 	}, // getgid() => int
-	"getgroups": &gst.UserFunction{
+	"getgroups": &value.UserFunction{
 		Name:  "getgroups",
 		Value: FuncARIsE(os.Getgroups),
 	}, // getgroups() => array(string)/error
-	"getpagesize": &gst.UserFunction{
+	"getpagesize": &value.UserFunction{
 		Name:  "getpagesize",
 		Value: FuncARI(os.Getpagesize),
 	}, // getpagesize() => int
-	"getpid": &gst.UserFunction{
+	"getpid": &value.UserFunction{
 		Name:  "getpid",
 		Value: FuncARI(os.Getpid),
 	}, // getpid() => int
-	"getppid": &gst.UserFunction{
+	"getppid": &value.UserFunction{
 		Name:  "getppid",
 		Value: FuncARI(os.Getppid),
 	}, // getppid() => int
-	"getuid": &gst.UserFunction{
+	"getuid": &value.UserFunction{
 		Name:  "getuid",
 		Value: FuncARI(os.Getuid),
 	}, // getuid() => int
-	"getwd": &gst.UserFunction{
+	"getwd": &value.UserFunction{
 		Name:  "getwd",
 		Value: FuncARSE(os.Getwd),
 	}, // getwd() => string/error
-	"hostname": &gst.UserFunction{
+	"hostname": &value.UserFunction{
 		Name:  "hostname",
 		Value: FuncARSE(os.Hostname),
 	}, // hostname() => string/error
-	"lchown": &gst.UserFunction{
+	"lchown": &value.UserFunction{
 		Name:  "lchown",
 		Value: FuncASIIRE(os.Lchown),
 	}, // lchown(name string, uid int, gid int) => error
-	"link": &gst.UserFunction{
+	"link": &value.UserFunction{
 		Name:  "link",
 		Value: FuncASSRE(os.Link),
 	}, // link(oldname string, newname string) => error
-	"lookup_env": &gst.UserFunction{
+	"lookup_env": &value.UserFunction{
 		Name:  "lookup_env",
 		Value: osLookupEnv,
 	}, // lookup_env(key string) => string/false
 	"mkdir":     osFuncASFmRE("mkdir", os.Mkdir),        // mkdir(name string, perm int) => error
 	"mkdir_all": osFuncASFmRE("mkdir_all", os.MkdirAll), // mkdir_all(name string, perm int) => error
-	"readlink": &gst.UserFunction{
+	"readlink": &value.UserFunction{
 		Name:  "readlink",
 		Value: FuncASRSE(os.Readlink),
 	}, // readlink(name string) => string/error
-	"remove": &gst.UserFunction{
+	"remove": &value.UserFunction{
 		Name:  "remove",
 		Value: FuncASRE(os.Remove),
 	}, // remove(name string) => error
-	"remove_all": &gst.UserFunction{
+	"remove_all": &value.UserFunction{
 		Name:  "remove_all",
 		Value: FuncASRE(os.RemoveAll),
 	}, // remove_all(name string) => error
-	"rename": &gst.UserFunction{
+	"rename": &value.UserFunction{
 		Name:  "rename",
 		Value: FuncASSRE(os.Rename),
 	}, // rename(oldpath string, newpath string) => error
-	"setenv": &gst.UserFunction{
+	"setenv": &value.UserFunction{
 		Name:  "setenv",
 		Value: FuncASSRE(os.Setenv),
 	}, // setenv(key string, value string) => error
-	"symlink": &gst.UserFunction{
+	"symlink": &value.UserFunction{
 		Name:  "symlink",
 		Value: FuncASSRE(os.Symlink),
 	}, // symlink(oldname string newname string) => error
-	"temp_dir": &gst.UserFunction{
+	"temp_dir": &value.UserFunction{
 		Name:  "temp_dir",
 		Value: FuncARS(os.TempDir),
 	}, // temp_dir() => string
-	"truncate": &gst.UserFunction{
+	"truncate": &value.UserFunction{
 		Name:  "truncate",
 		Value: FuncASI64RE(os.Truncate),
 	}, // truncate(name string, size int) => error
-	"unsetenv": &gst.UserFunction{
+	"unsetenv": &value.UserFunction{
 		Name:  "unsetenv",
 		Value: FuncASRE(os.Unsetenv),
 	}, // unsetenv(key string) => error
-	"create": &gst.UserFunction{
+	"create": &value.UserFunction{
 		Name:  "create",
 		Value: osCreate,
 	}, // create(name string) => imap(file)/error
-	"open": &gst.UserFunction{
+	"open": &value.UserFunction{
 		Name:  "open",
 		Value: osOpen,
 	}, // open(name string) => imap(file)/error
-	"open_file": &gst.UserFunction{
+	"open_file": &value.UserFunction{
 		Name:  "open_file",
 		Value: osOpenFile,
 	}, // open_file(name string, flag int, perm int) => imap(file)/error
-	"find_process": &gst.UserFunction{
+	"find_process": &value.UserFunction{
 		Name:  "find_process",
 		Value: osFindProcess,
 	}, // find_process(pid int) => imap(process)/error
-	"start_process": &gst.UserFunction{
+	"start_process": &value.UserFunction{
 		Name:  "start_process",
 		Value: osStartProcess,
 	}, // start_process(name string, argv array(string), dir string, env array(string)) => imap(process)/error
-	"exec_look_path": &gst.UserFunction{
+	"exec_look_path": &value.UserFunction{
 		Name:  "exec_look_path",
 		Value: FuncASRSE(exec.LookPath),
 	}, // exec_look_path(file) => string/error
-	"exec": &gst.UserFunction{
+	"exec": &value.UserFunction{
 		Name:  "exec",
 		Value: osExec,
 	}, // exec(name, args...) => command
-	"stat": &gst.UserFunction{
+	"stat": &value.UserFunction{
 		Name:  "stat",
 		Value: osStat,
 	}, // stat(name) => imap(fileinfo)/error
-	"read_file": &gst.UserFunction{
+	"read_file": &value.UserFunction{
 		Name:  "read_file",
 		Value: osReadFile,
 	}, // readfile(name) => array(byte)/error
 }
 
-func osReadFile(args ...gst.Object) (ret gst.Object, err error) {
+func osReadFile(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -219,13 +219,13 @@ func osReadFile(args ...gst.Object) (ret gst.Object, err error) {
 	if err != nil {
 		return wrapError(err), nil
 	}
-	if len(bytes) > gst.MaxBytesLen {
+	if len(bytes) > value.MaxBytesLen {
 		return nil, gse.ErrBytesLimit
 	}
-	return &gst.Bytes{Value: bytes}, nil
+	return &value.Bytes{Value: bytes}, nil
 }
 
-func osStat(args ...gst.Object) (ret gst.Object, err error) {
+func osStat(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -241,23 +241,23 @@ func osStat(args ...gst.Object) (ret gst.Object, err error) {
 	if err != nil {
 		return wrapError(err), nil
 	}
-	fstat := &gst.ImmutableMap{
-		Value: map[string]gst.Object{
-			"name":  &gst.String{Value: stat.Name()},
-			"mtime": &gst.Time{Value: stat.ModTime()},
-			"size":  &gst.Int{Value: stat.Size()},
-			"mode":  &gst.Int{Value: int64(stat.Mode())},
+	fstat := &value.ImmutableMap{
+		Value: map[string]value.Object{
+			"name":  &value.String{Value: stat.Name()},
+			"mtime": &value.Time{Value: stat.ModTime()},
+			"size":  &value.Int{Value: stat.Size()},
+			"mode":  &value.Int{Value: int64(stat.Mode())},
 		},
 	}
 	if stat.IsDir() {
-		fstat.Value["directory"] = gst.TrueValue
+		fstat.Value["directory"] = value.TrueValue
 	} else {
-		fstat.Value["directory"] = gst.FalseValue
+		fstat.Value["directory"] = value.FalseValue
 	}
 	return fstat, nil
 }
 
-func osCreate(args ...gst.Object) (gst.Object, error) {
+func osCreate(args ...value.Object) (value.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -276,7 +276,7 @@ func osCreate(args ...gst.Object) (gst.Object, error) {
 	return makeOSFile(res), nil
 }
 
-func osOpen(args ...gst.Object) (gst.Object, error) {
+func osOpen(args ...value.Object) (value.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -295,7 +295,7 @@ func osOpen(args ...gst.Object) (gst.Object, error) {
 	return makeOSFile(res), nil
 }
 
-func osOpenFile(args ...gst.Object) (gst.Object, error) {
+func osOpenFile(args ...value.Object) (value.Object, error) {
 	if len(args) != 3 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -330,16 +330,16 @@ func osOpenFile(args ...gst.Object) (gst.Object, error) {
 	return makeOSFile(res), nil
 }
 
-func osArgs(args ...gst.Object) (gst.Object, error) {
+func osArgs(args ...value.Object) (value.Object, error) {
 	if len(args) != 0 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	arr := &gst.Array{}
+	arr := &value.Array{}
 	for _, osArg := range os.Args {
-		if len(osArg) > gst.MaxStringLen {
+		if len(osArg) > value.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
-		arr.Value = append(arr.Value, &gst.String{Value: osArg})
+		arr.Value = append(arr.Value, &value.String{Value: osArg})
 	}
 	return arr, nil
 }
@@ -347,10 +347,10 @@ func osArgs(args ...gst.Object) (gst.Object, error) {
 func osFuncASFmRE(
 	name string,
 	fn func(string, os.FileMode) error,
-) *gst.UserFunction {
-	return &gst.UserFunction{
+) *value.UserFunction {
+	return &value.UserFunction{
 		Name: name,
-		Value: func(args ...gst.Object) (gst.Object, error) {
+		Value: func(args ...value.Object) (value.Object, error) {
 			if len(args) != 2 {
 				return nil, gse.ErrWrongNumArguments
 			}
@@ -375,7 +375,7 @@ func osFuncASFmRE(
 	}
 }
 
-func osLookupEnv(args ...gst.Object) (gst.Object, error) {
+func osLookupEnv(args ...value.Object) (value.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -389,15 +389,15 @@ func osLookupEnv(args ...gst.Object) (gst.Object, error) {
 	}
 	res, ok := os.LookupEnv(s1)
 	if !ok {
-		return gst.FalseValue, nil
+		return value.FalseValue, nil
 	}
-	if len(res) > gst.MaxStringLen {
+	if len(res) > value.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
-	return &gst.String{Value: res}, nil
+	return &value.String{Value: res}, nil
 }
 
-func osExpandEnv(args ...gst.Object) (gst.Object, error) {
+func osExpandEnv(args ...value.Object) (value.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -420,19 +420,19 @@ func osExpandEnv(args ...gst.Object) (gst.Object, error) {
 		// this does not count the other texts that are not being replaced
 		// but the code checks the final length at the end
 		vlen += len(v)
-		if vlen > gst.MaxStringLen {
+		if vlen > value.MaxStringLen {
 			failed = true
 			return ""
 		}
 		return v
 	})
-	if failed || len(s) > gst.MaxStringLen {
+	if failed || len(s) > value.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
-	return &gst.String{Value: s}, nil
+	return &value.String{Value: s}, nil
 }
 
-func osExec(args ...gst.Object) (gst.Object, error) {
+func osExec(args ...value.Object) (value.Object, error) {
 	if len(args) == 0 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -459,7 +459,7 @@ func osExec(args ...gst.Object) (gst.Object, error) {
 	return makeOSExecCommand(exec.Command(name, execArgs...)), nil
 }
 
-func osFindProcess(args ...gst.Object) (gst.Object, error) {
+func osFindProcess(args ...value.Object) (value.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -478,7 +478,7 @@ func osFindProcess(args ...gst.Object) (gst.Object, error) {
 	return makeOSProcess(proc), nil
 }
 
-func osStartProcess(args ...gst.Object) (gst.Object, error) {
+func osStartProcess(args ...value.Object) (value.Object, error) {
 	if len(args) != 4 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -493,12 +493,12 @@ func osStartProcess(args ...gst.Object) (gst.Object, error) {
 	var argv []string
 	var err error
 	switch arg1 := args[1].(type) {
-	case *gst.Array:
+	case *value.Array:
 		argv, err = stringArray(arg1.Value, "second")
 		if err != nil {
 			return nil, err
 		}
-	case *gst.ImmutableArray:
+	case *value.ImmutableArray:
 		argv, err = stringArray(arg1.Value, "second")
 		if err != nil {
 			return nil, err
@@ -522,12 +522,12 @@ func osStartProcess(args ...gst.Object) (gst.Object, error) {
 
 	var env []string
 	switch arg3 := args[3].(type) {
-	case *gst.Array:
+	case *value.Array:
 		env, err = stringArray(arg3.Value, "fourth")
 		if err != nil {
 			return nil, err
 		}
-	case *gst.ImmutableArray:
+	case *value.ImmutableArray:
 		env, err = stringArray(arg3.Value, "fourth")
 		if err != nil {
 			return nil, err
@@ -550,10 +550,10 @@ func osStartProcess(args ...gst.Object) (gst.Object, error) {
 	return makeOSProcess(proc), nil
 }
 
-func stringArray(arr []gst.Object, argName string) ([]string, error) {
+func stringArray(arr []value.Object, argName string) ([]string, error) {
 	var sarr []string
 	for idx, elem := range arr {
-		str, ok := elem.(*gst.String)
+		str, ok := elem.(*value.String)
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     fmt.Sprintf("%s[%d]", argName, idx),

@@ -1,4 +1,4 @@
-package types
+package value
 
 type BuiltinModule struct {
 	Attrs map[string]Object

@@ -1,4 +1,4 @@
-package types
+package value
 
 type ArrayIterator struct {
 	ObjectImpl

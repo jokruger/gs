@@ -8,201 +8,201 @@ import (
 	"unicode/utf8"
 
 	gse "github.com/jokruger/gs/error"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
-var textModule = map[string]gst.Object{
-	"re_match": &gst.UserFunction{
+var textModule = map[string]value.Object{
+	"re_match": &value.UserFunction{
 		Name:  "re_match",
 		Value: textREMatch,
 	}, // re_match(pattern, text) => bool/error
-	"re_find": &gst.UserFunction{
+	"re_find": &value.UserFunction{
 		Name:  "re_find",
 		Value: textREFind,
 	}, // re_find(pattern, text, count) => [[{text:,begin:,end:}]]/undefined
-	"re_replace": &gst.UserFunction{
+	"re_replace": &value.UserFunction{
 		Name:  "re_replace",
 		Value: textREReplace,
 	}, // re_replace(pattern, text, repl) => string/error
-	"re_split": &gst.UserFunction{
+	"re_split": &value.UserFunction{
 		Name:  "re_split",
 		Value: textRESplit,
 	}, // re_split(pattern, text, count) => [string]/error
-	"re_compile": &gst.UserFunction{
+	"re_compile": &value.UserFunction{
 		Name:  "re_compile",
 		Value: textRECompile,
 	}, // re_compile(pattern) => Regexp/error
-	"compare": &gst.UserFunction{
+	"compare": &value.UserFunction{
 		Name:  "compare",
 		Value: FuncASSRI(strings.Compare),
 	}, // compare(a, b) => int
-	"contains": &gst.UserFunction{
+	"contains": &value.UserFunction{
 		Name:  "contains",
 		Value: FuncASSRB(strings.Contains),
 	}, // contains(s, substr) => bool
-	"contains_any": &gst.UserFunction{
+	"contains_any": &value.UserFunction{
 		Name:  "contains_any",
 		Value: FuncASSRB(strings.ContainsAny),
 	}, // contains_any(s, chars) => bool
-	"count": &gst.UserFunction{
+	"count": &value.UserFunction{
 		Name:  "count",
 		Value: FuncASSRI(strings.Count),
 	}, // count(s, substr) => int
-	"equal_fold": &gst.UserFunction{
+	"equal_fold": &value.UserFunction{
 		Name:  "equal_fold",
 		Value: FuncASSRB(strings.EqualFold),
 	}, // "equal_fold(s, t) => bool
-	"fields": &gst.UserFunction{
+	"fields": &value.UserFunction{
 		Name:  "fields",
 		Value: FuncASRSs(strings.Fields),
 	}, // fields(s) => [string]
-	"has_prefix": &gst.UserFunction{
+	"has_prefix": &value.UserFunction{
 		Name:  "has_prefix",
 		Value: FuncASSRB(strings.HasPrefix),
 	}, // has_prefix(s, prefix) => bool
-	"has_suffix": &gst.UserFunction{
+	"has_suffix": &value.UserFunction{
 		Name:  "has_suffix",
 		Value: FuncASSRB(strings.HasSuffix),
 	}, // has_suffix(s, suffix) => bool
-	"index": &gst.UserFunction{
+	"index": &value.UserFunction{
 		Name:  "index",
 		Value: FuncASSRI(strings.Index),
 	}, // index(s, substr) => int
-	"index_any": &gst.UserFunction{
+	"index_any": &value.UserFunction{
 		Name:  "index_any",
 		Value: FuncASSRI(strings.IndexAny),
 	}, // index_any(s, chars) => int
-	"join": &gst.UserFunction{
+	"join": &value.UserFunction{
 		Name:  "join",
 		Value: textJoin,
 	}, // join(arr, sep) => string
-	"last_index": &gst.UserFunction{
+	"last_index": &value.UserFunction{
 		Name:  "last_index",
 		Value: FuncASSRI(strings.LastIndex),
 	}, // last_index(s, substr) => int
-	"last_index_any": &gst.UserFunction{
+	"last_index_any": &value.UserFunction{
 		Name:  "last_index_any",
 		Value: FuncASSRI(strings.LastIndexAny),
 	}, // last_index_any(s, chars) => int
-	"repeat": &gst.UserFunction{
+	"repeat": &value.UserFunction{
 		Name:  "repeat",
 		Value: textRepeat,
 	}, // repeat(s, count) => string
-	"replace": &gst.UserFunction{
+	"replace": &value.UserFunction{
 		Name:  "replace",
 		Value: textReplace,
 	}, // replace(s, old, new, n) => string
-	"substr": &gst.UserFunction{
+	"substr": &value.UserFunction{
 		Name:  "substr",
 		Value: textSubstring,
 	}, // substr(s, lower, upper) => string
-	"split": &gst.UserFunction{
+	"split": &value.UserFunction{
 		Name:  "split",
 		Value: FuncASSRSs(strings.Split),
 	}, // split(s, sep) => [string]
-	"split_after": &gst.UserFunction{
+	"split_after": &value.UserFunction{
 		Name:  "split_after",
 		Value: FuncASSRSs(strings.SplitAfter),
 	}, // split_after(s, sep) => [string]
-	"split_after_n": &gst.UserFunction{
+	"split_after_n": &value.UserFunction{
 		Name:  "split_after_n",
 		Value: FuncASSIRSs(strings.SplitAfterN),
 	}, // split_after_n(s, sep, n) => [string]
-	"split_n": &gst.UserFunction{
+	"split_n": &value.UserFunction{
 		Name:  "split_n",
 		Value: FuncASSIRSs(strings.SplitN),
 	}, // split_n(s, sep, n) => [string]
-	"title": &gst.UserFunction{
+	"title": &value.UserFunction{
 		Name:  "title",
 		Value: FuncASRS(strings.Title),
 	}, // title(s) => string
-	"to_lower": &gst.UserFunction{
+	"to_lower": &value.UserFunction{
 		Name:  "to_lower",
 		Value: FuncASRS(strings.ToLower),
 	}, // to_lower(s) => string
-	"to_title": &gst.UserFunction{
+	"to_title": &value.UserFunction{
 		Name:  "to_title",
 		Value: FuncASRS(strings.ToTitle),
 	}, // to_title(s) => string
-	"to_upper": &gst.UserFunction{
+	"to_upper": &value.UserFunction{
 		Name:  "to_upper",
 		Value: FuncASRS(strings.ToUpper),
 	}, // to_upper(s) => string
-	"pad_left": &gst.UserFunction{
+	"pad_left": &value.UserFunction{
 		Name:  "pad_left",
 		Value: textPadLeft,
 	}, // pad_left(s, pad_len, pad_with) => string
-	"pad_right": &gst.UserFunction{
+	"pad_right": &value.UserFunction{
 		Name:  "pad_right",
 		Value: textPadRight,
 	}, // pad_right(s, pad_len, pad_with) => string
-	"trim": &gst.UserFunction{
+	"trim": &value.UserFunction{
 		Name:  "trim",
 		Value: FuncASSRS(strings.Trim),
 	}, // trim(s, cutset) => string
-	"trim_left": &gst.UserFunction{
+	"trim_left": &value.UserFunction{
 		Name:  "trim_left",
 		Value: FuncASSRS(strings.TrimLeft),
 	}, // trim_left(s, cutset) => string
-	"trim_prefix": &gst.UserFunction{
+	"trim_prefix": &value.UserFunction{
 		Name:  "trim_prefix",
 		Value: FuncASSRS(strings.TrimPrefix),
 	}, // trim_prefix(s, prefix) => string
-	"trim_right": &gst.UserFunction{
+	"trim_right": &value.UserFunction{
 		Name:  "trim_right",
 		Value: FuncASSRS(strings.TrimRight),
 	}, // trim_right(s, cutset) => string
-	"trim_space": &gst.UserFunction{
+	"trim_space": &value.UserFunction{
 		Name:  "trim_space",
 		Value: FuncASRS(strings.TrimSpace),
 	}, // trim_space(s) => string
-	"trim_suffix": &gst.UserFunction{
+	"trim_suffix": &value.UserFunction{
 		Name:  "trim_suffix",
 		Value: FuncASSRS(strings.TrimSuffix),
 	}, // trim_suffix(s, suffix) => string
-	"atoi": &gst.UserFunction{
+	"atoi": &value.UserFunction{
 		Name:  "atoi",
 		Value: FuncASRIE(strconv.Atoi),
 	}, // atoi(str) => int/error
-	"format_bool": &gst.UserFunction{
+	"format_bool": &value.UserFunction{
 		Name:  "format_bool",
 		Value: textFormatBool,
 	}, // format_bool(b) => string
-	"format_float": &gst.UserFunction{
+	"format_float": &value.UserFunction{
 		Name:  "format_float",
 		Value: textFormatFloat,
 	}, // format_float(f, fmt, prec, bits) => string
-	"format_int": &gst.UserFunction{
+	"format_int": &value.UserFunction{
 		Name:  "format_int",
 		Value: textFormatInt,
 	}, // format_int(i, base) => string
-	"itoa": &gst.UserFunction{
+	"itoa": &value.UserFunction{
 		Name:  "itoa",
 		Value: FuncAIRS(strconv.Itoa),
 	}, // itoa(i) => string
-	"parse_bool": &gst.UserFunction{
+	"parse_bool": &value.UserFunction{
 		Name:  "parse_bool",
 		Value: textParseBool,
 	}, // parse_bool(str) => bool/error
-	"parse_float": &gst.UserFunction{
+	"parse_float": &value.UserFunction{
 		Name:  "parse_float",
 		Value: textParseFloat,
 	}, // parse_float(str, bits) => float/error
-	"parse_int": &gst.UserFunction{
+	"parse_int": &value.UserFunction{
 		Name:  "parse_int",
 		Value: textParseInt,
 	}, // parse_int(str, base, bits) => int/error
-	"quote": &gst.UserFunction{
+	"quote": &value.UserFunction{
 		Name:  "quote",
 		Value: FuncASRS(strconv.Quote),
 	}, // quote(str) => string
-	"unquote": &gst.UserFunction{
+	"unquote": &value.UserFunction{
 		Name:  "unquote",
 		Value: FuncASRSE(strconv.Unquote),
 	}, // unquote(str) => string/error
 }
 
-func textREMatch(args ...gst.Object) (ret gst.Object, err error) {
+func textREMatch(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -235,15 +235,15 @@ func textREMatch(args ...gst.Object) (ret gst.Object, err error) {
 	}
 
 	if matched {
-		ret = gst.TrueValue
+		ret = value.TrueValue
 	} else {
-		ret = gst.FalseValue
+		ret = value.FalseValue
 	}
 
 	return
 }
 
-func textREFind(args ...gst.Object) (ret gst.Object, err error) {
+func textREFind(args ...value.Object) (ret value.Object, err error) {
 	numArgs := len(args)
 	if numArgs != 2 && numArgs != 3 {
 		err = gse.ErrWrongNumArguments
@@ -279,23 +279,23 @@ func textREFind(args ...gst.Object) (ret gst.Object, err error) {
 	if numArgs < 3 {
 		m := re.FindStringSubmatchIndex(s2)
 		if m == nil {
-			ret = gst.UndefinedValue
+			ret = value.UndefinedValue
 			return
 		}
 
-		arr := &gst.Array{}
+		arr := &value.Array{}
 		for i := 0; i < len(m); i += 2 {
 			if m[i] >= 0 && m[i+1] >= 0 {
 				arr.Value = append(arr.Value,
-					&gst.ImmutableMap{Value: map[string]gst.Object{
-						"text":  &gst.String{Value: s2[m[i]:m[i+1]]},
-						"begin": &gst.Int{Value: int64(m[i])},
-						"end":   &gst.Int{Value: int64(m[i+1])},
+					&value.ImmutableMap{Value: map[string]value.Object{
+						"text":  &value.String{Value: s2[m[i]:m[i+1]]},
+						"begin": &value.Int{Value: int64(m[i])},
+						"end":   &value.Int{Value: int64(m[i+1])},
 					}})
 			}
 		}
 
-		ret = &gst.Array{Value: []gst.Object{arr}}
+		ret = &value.Array{Value: []value.Object{arr}}
 
 		return
 	}
@@ -311,20 +311,20 @@ func textREFind(args ...gst.Object) (ret gst.Object, err error) {
 	}
 	m := re.FindAllStringSubmatchIndex(s2, i3)
 	if m == nil {
-		ret = gst.UndefinedValue
+		ret = value.UndefinedValue
 		return
 	}
 
-	arr := &gst.Array{}
+	arr := &value.Array{}
 	for _, m := range m {
-		subMatch := &gst.Array{}
+		subMatch := &value.Array{}
 		for i := 0; i < len(m); i += 2 {
 			if m[i] >= 0 && m[i+1] >= 0 {
 				subMatch.Value = append(subMatch.Value,
-					&gst.ImmutableMap{Value: map[string]gst.Object{
-						"text":  &gst.String{Value: s2[m[i]:m[i+1]]},
-						"begin": &gst.Int{Value: int64(m[i])},
-						"end":   &gst.Int{Value: int64(m[i+1])},
+					&value.ImmutableMap{Value: map[string]value.Object{
+						"text":  &value.String{Value: s2[m[i]:m[i+1]]},
+						"begin": &value.Int{Value: int64(m[i])},
+						"end":   &value.Int{Value: int64(m[i+1])},
 					}})
 			}
 		}
@@ -337,7 +337,7 @@ func textREFind(args ...gst.Object) (ret gst.Object, err error) {
 	return
 }
 
-func textREReplace(args ...gst.Object) (ret gst.Object, err error) {
+func textREReplace(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 3 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -382,13 +382,13 @@ func textREReplace(args ...gst.Object) (ret gst.Object, err error) {
 			return nil, gse.ErrStringLimit
 		}
 
-		ret = &gst.String{Value: s}
+		ret = &value.String{Value: s}
 	}
 
 	return
 }
 
-func textRESplit(args ...gst.Object) (ret gst.Object, err error) {
+func textRESplit(args ...value.Object) (ret value.Object, err error) {
 	numArgs := len(args)
 	if numArgs != 2 && numArgs != 3 {
 		err = gse.ErrWrongNumArguments
@@ -434,9 +434,9 @@ func textRESplit(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	arr := &gst.Array{}
+	arr := &value.Array{}
 	for _, s := range re.Split(s2, i3) {
-		arr.Value = append(arr.Value, &gst.String{Value: s})
+		arr.Value = append(arr.Value, &value.String{Value: s})
 	}
 
 	ret = arr
@@ -444,7 +444,7 @@ func textRESplit(args ...gst.Object) (ret gst.Object, err error) {
 	return
 }
 
-func textRECompile(args ...gst.Object) (ret gst.Object, err error) {
+func textRECompile(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -470,7 +470,7 @@ func textRECompile(args ...gst.Object) (ret gst.Object, err error) {
 	return
 }
 
-func textReplace(args ...gst.Object) (ret gst.Object, err error) {
+func textReplace(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 4 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -522,12 +522,12 @@ func textReplace(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.String{Value: s}
+	ret = &value.String{Value: s}
 
 	return
 }
 
-func textSubstring(args ...gst.Object) (ret gst.Object, err error) {
+func textSubstring(args ...value.Object) (ret value.Object, err error) {
 	argslen := len(args)
 	if argslen != 2 && argslen != 3 {
 		err = gse.ErrWrongNumArguments
@@ -585,12 +585,12 @@ func textSubstring(args ...gst.Object) (ret gst.Object, err error) {
 		i3 = strlen
 	}
 
-	ret = &gst.String{Value: s1[i2:i3]}
+	ret = &value.String{Value: s1[i2:i3]}
 
 	return
 }
 
-func textPadLeft(args ...gst.Object) (ret gst.Object, err error) {
+func textPadLeft(args ...value.Object) (ret value.Object, err error) {
 	argslen := len(args)
 	if argslen != 2 && argslen != 3 {
 		err = gse.ErrWrongNumArguments
@@ -617,13 +617,13 @@ func textPadLeft(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	if i2 > gst.MaxStringLen {
+	if i2 > value.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 
 	sLen := len(s1)
 	if sLen >= i2 {
-		ret = &gst.String{Value: s1}
+		ret = &value.String{Value: s1}
 		return
 	}
 
@@ -642,18 +642,18 @@ func textPadLeft(args ...gst.Object) (ret gst.Object, err error) {
 
 	padStrLen := len(s3)
 	if padStrLen == 0 {
-		ret = &gst.String{Value: s1}
+		ret = &value.String{Value: s1}
 		return
 	}
 
 	padCount := ((i2 - padStrLen) / padStrLen) + 1
 	retStr := strings.Repeat(s3, padCount) + s1
-	ret = &gst.String{Value: retStr[len(retStr)-i2:]}
+	ret = &value.String{Value: retStr[len(retStr)-i2:]}
 
 	return
 }
 
-func textPadRight(args ...gst.Object) (ret gst.Object, err error) {
+func textPadRight(args ...value.Object) (ret value.Object, err error) {
 	argslen := len(args)
 	if argslen != 2 && argslen != 3 {
 		err = gse.ErrWrongNumArguments
@@ -680,13 +680,13 @@ func textPadRight(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	if i2 > gst.MaxStringLen {
+	if i2 > value.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 
 	sLen := len(s1)
 	if sLen >= i2 {
-		ret = &gst.String{Value: s1}
+		ret = &value.String{Value: s1}
 		return
 	}
 
@@ -705,18 +705,18 @@ func textPadRight(args ...gst.Object) (ret gst.Object, err error) {
 
 	padStrLen := len(s3)
 	if padStrLen == 0 {
-		ret = &gst.String{Value: s1}
+		ret = &value.String{Value: s1}
 		return
 	}
 
 	padCount := ((i2 - padStrLen) / padStrLen) + 1
 	retStr := s1 + strings.Repeat(s3, padCount)
-	ret = &gst.String{Value: retStr[:i2]}
+	ret = &value.String{Value: retStr[:i2]}
 
 	return
 }
 
-func textRepeat(args ...gst.Object) (ret gst.Object, err error) {
+func textRepeat(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 2 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -739,14 +739,14 @@ func textRepeat(args ...gst.Object) (ret gst.Object, err error) {
 		}
 	}
 
-	if len(s1)*i2 > gst.MaxStringLen {
+	if len(s1)*i2 > value.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 
-	return &gst.String{Value: strings.Repeat(s1, i2)}, nil
+	return &value.String{Value: strings.Repeat(s1, i2)}, nil
 }
 
-func textJoin(args ...gst.Object) (ret gst.Object, err error) {
+func textJoin(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 2 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -754,7 +754,7 @@ func textJoin(args ...gst.Object) (ret gst.Object, err error) {
 	var slen int
 	var ss1 []string
 	switch arg0 := args[0].(type) {
-	case *gst.Array:
+	case *value.Array:
 		for idx, a := range arg0.Value {
 			as, ok := a.ToString()
 			if !ok {
@@ -767,7 +767,7 @@ func textJoin(args ...gst.Object) (ret gst.Object, err error) {
 			slen += len(as)
 			ss1 = append(ss1, as)
 		}
-	case *gst.ImmutableArray:
+	case *value.ImmutableArray:
 		for idx, a := range arg0.Value {
 			as, ok := a.ToString()
 			if !ok {
@@ -798,20 +798,20 @@ func textJoin(args ...gst.Object) (ret gst.Object, err error) {
 	}
 
 	// make sure output length does not exceed the limit
-	if slen+len(s2)*(len(ss1)-1) > gst.MaxStringLen {
+	if slen+len(s2)*(len(ss1)-1) > value.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 
-	return &gst.String{Value: strings.Join(ss1, s2)}, nil
+	return &value.String{Value: strings.Join(ss1, s2)}, nil
 }
 
-func textFormatBool(args ...gst.Object) (ret gst.Object, err error) {
+func textFormatBool(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
 	}
 
-	b1, ok := args[0].(*gst.Bool)
+	b1, ok := args[0].(*value.Bool)
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -821,22 +821,22 @@ func textFormatBool(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	if b1 == gst.TrueValue {
-		ret = &gst.String{Value: "true"}
+	if b1 == value.TrueValue {
+		ret = &value.String{Value: "true"}
 	} else {
-		ret = &gst.String{Value: "false"}
+		ret = &value.String{Value: "false"}
 	}
 
 	return
 }
 
-func textFormatFloat(args ...gst.Object) (ret gst.Object, err error) {
+func textFormatFloat(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 4 {
 		err = gse.ErrWrongNumArguments
 		return
 	}
 
-	f1, ok := args[0].(*gst.Float)
+	f1, ok := args[0].(*value.Float)
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -876,18 +876,18 @@ func textFormatFloat(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.String{Value: strconv.FormatFloat(f1.Value, s2[0], i3, i4)}
+	ret = &value.String{Value: strconv.FormatFloat(f1.Value, s2[0], i3, i4)}
 
 	return
 }
 
-func textFormatInt(args ...gst.Object) (ret gst.Object, err error) {
+func textFormatInt(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
 	}
 
-	i1, ok := args[0].(*gst.Int)
+	i1, ok := args[0].(*value.Int)
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -907,18 +907,18 @@ func textFormatInt(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.String{Value: strconv.FormatInt(i1.Value, i2)}
+	ret = &value.String{Value: strconv.FormatInt(i1.Value, i2)}
 
 	return
 }
 
-func textParseBool(args ...gst.Object) (ret gst.Object, err error) {
+func textParseBool(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
 	}
 
-	s1, ok := args[0].(*gst.String)
+	s1, ok := args[0].(*value.String)
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -935,21 +935,21 @@ func textParseBool(args ...gst.Object) (ret gst.Object, err error) {
 	}
 
 	if parsed {
-		ret = gst.TrueValue
+		ret = value.TrueValue
 	} else {
-		ret = gst.FalseValue
+		ret = value.FalseValue
 	}
 
 	return
 }
 
-func textParseFloat(args ...gst.Object) (ret gst.Object, err error) {
+func textParseFloat(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
 	}
 
-	s1, ok := args[0].(*gst.String)
+	s1, ok := args[0].(*value.String)
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -975,18 +975,18 @@ func textParseFloat(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Float{Value: parsed}
+	ret = &value.Float{Value: parsed}
 
 	return
 }
 
-func textParseInt(args ...gst.Object) (ret gst.Object, err error) {
+func textParseInt(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 3 {
 		err = gse.ErrWrongNumArguments
 		return
 	}
 
-	s1, ok := args[0].(*gst.String)
+	s1, ok := args[0].(*value.String)
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -1022,7 +1022,7 @@ func textParseInt(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Int{Value: parsed}
+	ret = &value.Int{Value: parsed}
 
 	return
 }
@@ -1057,7 +1057,7 @@ func doTextReplace(s, old, new string, n int) (string, bool) {
 		}
 
 		ssj := s[start:j]
-		if w+len(ssj)+len(new) > gst.MaxStringLen {
+		if w+len(ssj)+len(new) > value.MaxStringLen {
 			return "", false
 		}
 
@@ -1067,7 +1067,7 @@ func doTextReplace(s, old, new string, n int) (string, bool) {
 	}
 
 	ss := s[start:]
-	if w+len(ss) > gst.MaxStringLen {
+	if w+len(ss) > value.MaxStringLen {
 		return "", false
 	}
 

@@ -16,7 +16,7 @@ import (
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/token"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 func TestScript_Add(t *testing.T) {
@@ -24,15 +24,15 @@ func TestScript_Add(t *testing.T) {
 	require.NoError(t, s.Add("b", 5))     // b = 5
 	require.NoError(t, s.Add("b", "foo")) // b = "foo"  (re-define before compilation)
 	require.NoError(t, s.Add("test",
-		func(args ...gst.Object) (ret gst.Object, err error) {
+		func(args ...value.Object) (ret value.Object, err error) {
 			if len(args) > 0 {
 				switch arg := args[0].(type) {
-				case *gst.Int:
-					return &gst.Int{Value: arg.Value + 1}, nil
+				case *value.Int:
+					return &value.Int{Value: arg.Value + 1}, nil
 				}
 			}
 
-			return &gst.Int{Value: 0}, nil
+			return &value.Int{Value: 0}, nil
 		}))
 	c, err := s.Compile()
 	require.NoError(t, err)
@@ -173,14 +173,14 @@ for i:=1; i<=d; i++ {
 
 e := mod1.double(s)
 `)
-	mod1 := map[string]gst.Object{
-		"double": &gst.UserFunction{
-			Value: func(args ...gst.Object) (
-				ret gst.Object,
+	mod1 := map[string]value.Object{
+		"double": &value.UserFunction{
+			Value: func(args ...value.Object) (
+				ret value.Object,
 				err error,
 			) {
 				arg0, _ := args[0].ToInt64()
-				ret = &gst.Int{Value: arg0 * 2}
+				ret = &value.Int{Value: arg0 * 2}
 				return
 			},
 		},
@@ -230,7 +230,7 @@ e := mod1.double(s)
 }
 
 type Counter struct {
-	gst.ObjectImpl
+	value.ObjectImpl
 	value int64
 }
 
@@ -246,7 +246,7 @@ func (o *Counter) ToString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Counter) BinaryOp(op token.Token, rhs gst.Object) (gst.Object, error) {
+func (o *Counter) BinaryOp(op token.Token, rhs value.Object) (value.Object, error) {
 	switch rhs := rhs.(type) {
 	case *Counter:
 		switch op {
@@ -255,7 +255,7 @@ func (o *Counter) BinaryOp(op token.Token, rhs gst.Object) (gst.Object, error) {
 		case token.Sub:
 			return &Counter{value: o.value - rhs.value}, nil
 		}
-	case *gst.Int:
+	case *value.Int:
 		switch op {
 		case token.Add:
 			return &Counter{value: o.value + rhs.Value}, nil
@@ -271,7 +271,7 @@ func (o *Counter) IsFalsy() bool {
 	return o.value == 0
 }
 
-func (o *Counter) Equals(t gst.Object) bool {
+func (o *Counter) Equals(t value.Object) bool {
 	if tc, ok := t.(*Counter); ok {
 		return o.value == tc.value
 	}
@@ -279,12 +279,12 @@ func (o *Counter) Equals(t gst.Object) bool {
 	return false
 }
 
-func (o *Counter) Copy() gst.Object {
+func (o *Counter) Copy() value.Object {
 	return &Counter{value: o.value}
 }
 
-func (o *Counter) Call(_ ...gst.Object) (gst.Object, error) {
-	return &gst.Int{Value: o.value}, nil
+func (o *Counter) Call(_ ...value.Object) (value.Object, error) {
+	return &value.Int{Value: o.value}, nil
 }
 
 func (o *Counter) CanCall() bool {
@@ -350,12 +350,12 @@ func TestScriptSourceModule(t *testing.T) {
 	mods.AddSourceModule("mod",
 		[]byte(`text := import("text"); export text.title("foo")`))
 	mods.AddBuiltinModule("text",
-		map[string]gst.Object{
-			"title": &gst.UserFunction{
+		map[string]value.Object{
+			"title": &value.UserFunction{
 				Name: "title",
-				Value: func(args ...gst.Object) (gst.Object, error) {
+				Value: func(args ...value.Object) (value.Object, error) {
 					s, _ := args[0].ToString()
-					return &gst.String{Value: strings.Title(s)}, nil
+					return &value.String{Value: strings.Title(s)}, nil
 				}},
 		})
 	scr.SetImports(mods)
@@ -491,10 +491,10 @@ func TestCompiled_CustomObject(t *testing.T) {
 	compiledGet(t, c, "r", true)
 }
 
-// customNumber is a user defined object that can compare to gst.Int
+// customNumber is a user defined object that can compare to value.Int
 // very shitty implementation, just to test that token.Less and token.Greater in BinaryOp works
 type customNumber struct {
-	gst.ObjectImpl
+	value.ObjectImpl
 	value int64
 }
 
@@ -506,38 +506,38 @@ func (n *customNumber) String() string {
 	return strconv.FormatInt(n.value, 10)
 }
 
-func (n *customNumber) BinaryOp(op token.Token, rhs gst.Object) (gst.Object, error) {
-	i, ok := rhs.(*gst.Int)
+func (n *customNumber) BinaryOp(op token.Token, rhs value.Object) (value.Object, error) {
+	i, ok := rhs.(*value.Int)
 	if !ok {
 		return nil, gse.ErrInvalidOperator
 	}
 	return n.binaryOpInt(op, i)
 }
 
-func (n *customNumber) binaryOpInt(op token.Token, rhs *gst.Int) (gst.Object, error) {
+func (n *customNumber) binaryOpInt(op token.Token, rhs *value.Int) (value.Object, error) {
 	i := n.value
 
 	switch op {
 	case token.Less:
 		if i < rhs.Value {
-			return gst.TrueValue, nil
+			return value.TrueValue, nil
 		}
-		return gst.FalseValue, nil
+		return value.FalseValue, nil
 	case token.Greater:
 		if i > rhs.Value {
-			return gst.TrueValue, nil
+			return value.TrueValue, nil
 		}
-		return gst.FalseValue, nil
+		return value.FalseValue, nil
 	case token.LessEq:
 		if i <= rhs.Value {
-			return gst.TrueValue, nil
+			return value.TrueValue, nil
 		}
-		return gst.FalseValue, nil
+		return value.FalseValue, nil
 	case token.GreaterEq:
 		if i >= rhs.Value {
-			return gst.TrueValue, nil
+			return value.TrueValue, nil
 		}
-		return gst.FalseValue, nil
+		return value.FalseValue, nil
 	}
 	return nil, gse.ErrInvalidOperator
 }

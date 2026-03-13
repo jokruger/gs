@@ -12,7 +12,8 @@ import (
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 // compilationScope represents a compiled instructions and the last two
@@ -20,7 +21,7 @@ import (
 type compilationScope struct {
 	Instructions []byte
 	SymbolInit   map[string]bool
-	SourceMap    map[int]gst.Pos
+	SourceMap    map[int]types.Pos
 }
 
 // loop represents a loop construct that the compiler uses to track the current
@@ -49,12 +50,12 @@ type Compiler struct {
 	modulePath      string
 	importDir       string
 	importFileExt   []string
-	constants       []gst.Object
+	constants       []value.Object
 	symbolTable     *SymbolTable
 	scopes          []compilationScope
 	scopeIndex      int
 	modules         ModuleGetter
-	compiledModules map[string]*gst.CompiledFunction
+	compiledModules map[string]*value.CompiledFunction
 	allowFileImport bool
 	loops           []*loop
 	loopIndex       int
@@ -66,13 +67,13 @@ type Compiler struct {
 func NewCompiler(
 	file *parser.SourceFile,
 	symbolTable *SymbolTable,
-	constants []gst.Object,
+	constants []value.Object,
 	modules ModuleGetter,
 	trace io.Writer,
 ) *Compiler {
 	mainScope := compilationScope{
 		SymbolInit: make(map[string]bool),
-		SourceMap:  make(map[int]gst.Pos),
+		SourceMap:  make(map[int]types.Pos),
 	}
 
 	// symbol table
@@ -99,7 +100,7 @@ func NewCompiler(
 		loopIndex:       -1,
 		trace:           trace,
 		modules:         modules,
-		compiledModules: make(map[string]*gst.CompiledFunction),
+		compiledModules: make(map[string]*value.CompiledFunction),
 		importFileExt:   []string{SourceFileExtDefault},
 	}
 }
@@ -190,9 +191,9 @@ func (c *Compiler) Compile(node parser.Node) error {
 				node.Token.String())
 		}
 	case *parser.IntLit:
-		c.emit(node, parser.OpConstant, c.addConstant(&gst.Int{Value: node.Value}))
+		c.emit(node, parser.OpConstant, c.addConstant(&value.Int{Value: node.Value}))
 	case *parser.FloatLit:
-		c.emit(node, parser.OpConstant, c.addConstant(&gst.Float{Value: node.Value}))
+		c.emit(node, parser.OpConstant, c.addConstant(&value.Float{Value: node.Value}))
 	case *parser.BoolLit:
 		if node.Value {
 			c.emit(node, parser.OpTrue)
@@ -200,12 +201,12 @@ func (c *Compiler) Compile(node parser.Node) error {
 			c.emit(node, parser.OpFalse)
 		}
 	case *parser.StringLit:
-		if len(node.Value) > gst.MaxStringLen {
+		if len(node.Value) > value.MaxStringLen {
 			return c.error(node, gse.ErrStringLimit)
 		}
-		c.emit(node, parser.OpConstant, c.addConstant(&gst.String{Value: node.Value}))
+		c.emit(node, parser.OpConstant, c.addConstant(&value.String{Value: node.Value}))
 	case *parser.CharLit:
-		c.emit(node, parser.OpConstant, c.addConstant(&gst.Char{Value: node.Value}))
+		c.emit(node, parser.OpConstant, c.addConstant(&value.Char{Value: node.Value}))
 	case *parser.UndefinedLit:
 		c.emit(node, parser.OpNull)
 	case *parser.UnaryExpr:
@@ -335,11 +336,11 @@ func (c *Compiler) Compile(node parser.Node) error {
 	case *parser.MapLit:
 		for _, elt := range node.Elements {
 			// key
-			if len(elt.Key) > gst.MaxStringLen {
+			if len(elt.Key) > value.MaxStringLen {
 				return c.error(node, gse.ErrStringLimit)
 			}
 			c.emit(node, parser.OpConstant,
-				c.addConstant(&gst.String{Value: elt.Key}))
+				c.addConstant(&value.String{Value: elt.Key}))
 
 			// value
 			if err := c.Compile(elt.Value); err != nil {
@@ -457,7 +458,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			}
 		}
 
-		compiledFunction := &gst.CompiledFunction{
+		compiledFunction := &value.CompiledFunction{
 			Instructions:  instructions,
 			NumLocals:     numLocals,
 			NumParameters: len(node.Type.Params.List),
@@ -518,7 +519,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 				}
 				c.emit(node, parser.OpConstant, c.addConstant(compiled))
 				c.emit(node, parser.OpCall, 0, 0)
-			case gst.Object: // builtin module
+			case value.Object: // builtin module
 				c.emit(node, parser.OpConstant, c.addConstant(v))
 			default:
 				panic(fmt.Errorf("invalid import value type: %T", v))
@@ -604,7 +605,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 func (c *Compiler) Bytecode() *Bytecode {
 	return &Bytecode{
 		FileSet: c.file.Set(),
-		MainFunction: &gst.CompiledFunction{
+		MainFunction: &value.CompiledFunction{
 			Instructions: append(c.currentInstructions(), parser.OpSuspend),
 			SourceMap:    c.currentSourceMap(),
 		},
@@ -982,7 +983,7 @@ func (c *Compiler) compileModule(
 	modulePath string,
 	src []byte,
 	isFile bool,
-) (*gst.CompiledFunction, error) {
+) (*value.CompiledFunction, error) {
 	if err := c.checkCyclicImports(node, modulePath); err != nil {
 		return nil, err
 	}
@@ -1024,7 +1025,7 @@ func (c *Compiler) compileModule(
 
 func (c *Compiler) loadCompiledModule(
 	modulePath string,
-) (mod *gst.CompiledFunction, ok bool) {
+) (mod *value.CompiledFunction, ok bool) {
 	if c.parent != nil {
 		return c.parent.loadCompiledModule(modulePath)
 	}
@@ -1034,7 +1035,7 @@ func (c *Compiler) loadCompiledModule(
 
 func (c *Compiler) storeCompiledModule(
 	modulePath string,
-	module *gst.CompiledFunction,
+	module *value.CompiledFunction,
 ) {
 	if c.parent != nil {
 		c.parent.storeCompiledModule(modulePath, module)
@@ -1071,14 +1072,14 @@ func (c *Compiler) currentInstructions() []byte {
 	return c.scopes[c.scopeIndex].Instructions
 }
 
-func (c *Compiler) currentSourceMap() map[int]gst.Pos {
+func (c *Compiler) currentSourceMap() map[int]types.Pos {
 	return c.scopes[c.scopeIndex].SourceMap
 }
 
 func (c *Compiler) enterScope() {
 	scope := compilationScope{
 		SymbolInit: make(map[string]bool),
-		SourceMap:  make(map[int]gst.Pos),
+		SourceMap:  make(map[int]types.Pos),
 	}
 	c.scopes = append(c.scopes, scope)
 	c.scopeIndex++
@@ -1090,7 +1091,7 @@ func (c *Compiler) enterScope() {
 
 func (c *Compiler) leaveScope() (
 	instructions []byte,
-	sourceMap map[int]gst.Pos,
+	sourceMap map[int]types.Pos,
 ) {
 	instructions = c.currentInstructions()
 	sourceMap = c.currentSourceMap()
@@ -1141,7 +1142,7 @@ func (c *Compiler) errorf(
 	}
 }
 
-func (c *Compiler) addConstant(o gst.Object) int {
+func (c *Compiler) addConstant(o value.Object) int {
 	if c.parent != nil {
 		// module compilers will use their parent's constants array
 		return c.parent.addConstant(o)
@@ -1253,7 +1254,7 @@ func (c *Compiler) optimizeFunc(node parser.Node) {
 	}
 
 	// pass 4. update source map
-	newSourceMap := make(map[int]gst.Pos)
+	newSourceMap := make(map[int]types.Pos)
 	for pos, srcPos := range c.scopes[c.scopeIndex].SourceMap {
 		newPos, ok := posMap[pos]
 		if ok {
@@ -1269,12 +1270,8 @@ func (c *Compiler) optimizeFunc(node parser.Node) {
 	}
 }
 
-func (c *Compiler) emit(
-	node parser.Node,
-	opcode parser.Opcode,
-	operands ...int,
-) int {
-	filePos := gst.NoPos
+func (c *Compiler) emit(node parser.Node, opcode parser.Opcode, operands ...int) int {
+	filePos := types.NoPos
 	if node != nil {
 		filePos = node.Pos()
 	}

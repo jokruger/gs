@@ -8,7 +8,7 @@ import (
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/tests/require"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 type srcfile struct {
@@ -21,16 +21,16 @@ func TestBytecode(t *testing.T) {
 
 	testBytecodeSerialization(t, bytecode(
 		concatInsts(), objectsArray(
-			&gst.Char{Value: 'y'},
-			&gst.Float{Value: 93.11},
+			&value.Char{Value: 'y'},
+			&value.Float{Value: 93.11},
 			compiledFunction(1, 0,
 				gs.MakeInstruction(parser.OpConstant, 3),
 				gs.MakeInstruction(parser.OpSetLocal, 0),
 				gs.MakeInstruction(parser.OpGetGlobal, 0),
 				gs.MakeInstruction(parser.OpGetFree, 0)),
-			&gst.Float{Value: 39.2},
-			&gst.Int{Value: 192},
-			&gst.String{Value: "bar"})))
+			&value.Float{Value: 39.2},
+			&value.Int{Value: 192},
+			&value.String{Value: "bar"})))
 
 	testBytecodeSerialization(t, bytecodeFileSet(
 		concatInsts(
@@ -39,64 +39,64 @@ func TestBytecode(t *testing.T) {
 			gs.MakeInstruction(parser.OpConstant, 6),
 			gs.MakeInstruction(parser.OpPop)),
 		objectsArray(
-			&gst.Int{Value: 55},
-			&gst.Int{Value: 66},
-			&gst.Int{Value: 77},
-			&gst.Int{Value: 88},
-			&gst.ImmutableMap{
-				Value: map[string]gst.Object{
-					"array": &gst.ImmutableArray{
-						Value: []gst.Object{
-							&gst.Int{Value: 1},
-							&gst.Int{Value: 2},
-							&gst.Int{Value: 3},
-							gst.TrueValue,
-							gst.FalseValue,
-							gst.UndefinedValue,
+			&value.Int{Value: 55},
+			&value.Int{Value: 66},
+			&value.Int{Value: 77},
+			&value.Int{Value: 88},
+			&value.ImmutableMap{
+				Value: map[string]value.Object{
+					"array": &value.ImmutableArray{
+						Value: []value.Object{
+							&value.Int{Value: 1},
+							&value.Int{Value: 2},
+							&value.Int{Value: 3},
+							value.TrueValue,
+							value.FalseValue,
+							value.UndefinedValue,
 						},
 					},
-					"true":  gst.TrueValue,
-					"false": gst.FalseValue,
-					"bytes": &gst.Bytes{Value: make([]byte, 16)},
-					"char":  &gst.Char{Value: 'Y'},
-					"error": &gst.Error{Value: &gst.String{
+					"true":  value.TrueValue,
+					"false": value.FalseValue,
+					"bytes": &value.Bytes{Value: make([]byte, 16)},
+					"char":  &value.Char{Value: 'Y'},
+					"error": &value.Error{Value: &value.String{
 						Value: "some error",
 					}},
-					"float": &gst.Float{Value: -19.84},
-					"immutable_array": &gst.ImmutableArray{
-						Value: []gst.Object{
-							&gst.Int{Value: 1},
-							&gst.Int{Value: 2},
-							&gst.Int{Value: 3},
-							gst.TrueValue,
-							gst.FalseValue,
-							gst.UndefinedValue,
+					"float": &value.Float{Value: -19.84},
+					"immutable_array": &value.ImmutableArray{
+						Value: []value.Object{
+							&value.Int{Value: 1},
+							&value.Int{Value: 2},
+							&value.Int{Value: 3},
+							value.TrueValue,
+							value.FalseValue,
+							value.UndefinedValue,
 						},
 					},
-					"immutable_map": &gst.ImmutableMap{
-						Value: map[string]gst.Object{
-							"a": &gst.Int{Value: 1},
-							"b": &gst.Int{Value: 2},
-							"c": &gst.Int{Value: 3},
-							"d": gst.TrueValue,
-							"e": gst.FalseValue,
-							"f": gst.UndefinedValue,
+					"immutable_map": &value.ImmutableMap{
+						Value: map[string]value.Object{
+							"a": &value.Int{Value: 1},
+							"b": &value.Int{Value: 2},
+							"c": &value.Int{Value: 3},
+							"d": value.TrueValue,
+							"e": value.FalseValue,
+							"f": value.UndefinedValue,
 						},
 					},
-					"int": &gst.Int{Value: 91},
-					"map": &gst.Map{
-						Value: map[string]gst.Object{
-							"a": &gst.Int{Value: 1},
-							"b": &gst.Int{Value: 2},
-							"c": &gst.Int{Value: 3},
-							"d": gst.TrueValue,
-							"e": gst.FalseValue,
-							"f": gst.UndefinedValue,
+					"int": &value.Int{Value: 91},
+					"map": &value.Map{
+						Value: map[string]value.Object{
+							"a": &value.Int{Value: 1},
+							"b": &value.Int{Value: 2},
+							"c": &value.Int{Value: 3},
+							"d": value.TrueValue,
+							"e": value.FalseValue,
+							"f": value.UndefinedValue,
 						},
 					},
-					"string":    &gst.String{Value: "foo bar"},
-					"time":      &gst.Time{Value: time.Now()},
-					"undefined": gst.UndefinedValue,
+					"string":    &value.String{Value: "foo bar"},
+					"time":      &value.Time{Value: time.Now()},
+					"undefined": value.UndefinedValue,
 				},
 			},
 			compiledFunction(1, 0,
@@ -131,28 +131,28 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 	testBytecodeRemoveDuplicates(t,
 		bytecode(
 			concatInsts(), objectsArray(
-				&gst.Char{Value: 'y'},
-				&gst.Float{Value: 93.11},
+				&value.Char{Value: 'y'},
+				&value.Float{Value: 93.11},
 				compiledFunction(1, 0,
 					gs.MakeInstruction(parser.OpConstant, 3),
 					gs.MakeInstruction(parser.OpSetLocal, 0),
 					gs.MakeInstruction(parser.OpGetGlobal, 0),
 					gs.MakeInstruction(parser.OpGetFree, 0)),
-				&gst.Float{Value: 39.2},
-				&gst.Int{Value: 192},
-				&gst.String{Value: "bar"})),
+				&value.Float{Value: 39.2},
+				&value.Int{Value: 192},
+				&value.String{Value: "bar"})),
 		bytecode(
 			concatInsts(), objectsArray(
-				&gst.Char{Value: 'y'},
-				&gst.Float{Value: 93.11},
+				&value.Char{Value: 'y'},
+				&value.Float{Value: 93.11},
 				compiledFunction(1, 0,
 					gs.MakeInstruction(parser.OpConstant, 3),
 					gs.MakeInstruction(parser.OpSetLocal, 0),
 					gs.MakeInstruction(parser.OpGetGlobal, 0),
 					gs.MakeInstruction(parser.OpGetFree, 0)),
-				&gst.Float{Value: 39.2},
-				&gst.Int{Value: 192},
-				&gst.String{Value: "bar"})))
+				&value.Float{Value: 39.2},
+				&value.Int{Value: 192},
+				&value.String{Value: "bar"})))
 
 	testBytecodeRemoveDuplicates(t,
 		bytecode(
@@ -168,20 +168,20 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 				gs.MakeInstruction(parser.OpConstant, 8),
 				gs.MakeInstruction(parser.OpClosure, 4, 1)),
 			objectsArray(
-				&gst.Int{Value: 1},
-				&gst.Float{Value: 2.0},
-				&gst.Char{Value: '3'},
-				&gst.String{Value: "four"},
+				&value.Int{Value: 1},
+				&value.Float{Value: 2.0},
+				&value.Char{Value: '3'},
+				&value.String{Value: "four"},
 				compiledFunction(1, 0,
 					gs.MakeInstruction(parser.OpConstant, 3),
 					gs.MakeInstruction(parser.OpConstant, 7),
 					gs.MakeInstruction(parser.OpSetLocal, 0),
 					gs.MakeInstruction(parser.OpGetGlobal, 0),
 					gs.MakeInstruction(parser.OpGetFree, 0)),
-				&gst.Int{Value: 1},
-				&gst.Float{Value: 2.0},
-				&gst.Char{Value: '3'},
-				&gst.String{Value: "four"})),
+				&value.Int{Value: 1},
+				&value.Float{Value: 2.0},
+				&value.Char{Value: '3'},
+				&value.String{Value: "four"})),
 		bytecode(
 			concatInsts(
 				gs.MakeInstruction(parser.OpConstant, 0),
@@ -195,10 +195,10 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 				gs.MakeInstruction(parser.OpConstant, 3),
 				gs.MakeInstruction(parser.OpClosure, 4, 1)),
 			objectsArray(
-				&gst.Int{Value: 1},
-				&gst.Float{Value: 2.0},
-				&gst.Char{Value: '3'},
-				&gst.String{Value: "four"},
+				&value.Int{Value: 1},
+				&value.Float{Value: 2.0},
+				&value.Char{Value: '3'},
+				&value.String{Value: "four"},
 				compiledFunction(1, 0,
 					gs.MakeInstruction(parser.OpConstant, 3),
 					gs.MakeInstruction(parser.OpConstant, 2),
@@ -215,11 +215,11 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 				gs.MakeInstruction(parser.OpConstant, 3),
 				gs.MakeInstruction(parser.OpConstant, 4)),
 			objectsArray(
-				&gst.Int{Value: 1},
-				&gst.Int{Value: 2},
-				&gst.Int{Value: 3},
-				&gst.Int{Value: 1},
-				&gst.Int{Value: 3})),
+				&value.Int{Value: 1},
+				&value.Int{Value: 2},
+				&value.Int{Value: 3},
+				&value.Int{Value: 1},
+				&value.Int{Value: 3})),
 		bytecode(
 			concatInsts(
 				gs.MakeInstruction(parser.OpConstant, 0),
@@ -228,19 +228,19 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 				gs.MakeInstruction(parser.OpConstant, 0),
 				gs.MakeInstruction(parser.OpConstant, 2)),
 			objectsArray(
-				&gst.Int{Value: 1},
-				&gst.Int{Value: 2},
-				&gst.Int{Value: 3})))
+				&value.Int{Value: 1},
+				&value.Int{Value: 2},
+				&value.Int{Value: 3})))
 }
 
 func TestBytecode_CountObjects(t *testing.T) {
 	b := bytecode(
 		concatInsts(),
 		objectsArray(
-			&gst.Int{Value: 55},
-			&gst.Int{Value: 66},
-			&gst.Int{Value: 77},
-			&gst.Int{Value: 88},
+			&value.Int{Value: 55},
+			&value.Int{Value: 66},
+			&value.Int{Value: 77},
+			&value.Int{Value: 88},
 			compiledFunction(1, 0,
 				gs.MakeInstruction(parser.OpConstant, 3),
 				gs.MakeInstruction(parser.OpReturn, 1)),
@@ -263,12 +263,12 @@ func fileSet(files ...srcfile) *parser.SourceFileSet {
 
 func bytecodeFileSet(
 	instructions []byte,
-	constants []gst.Object,
+	constants []value.Object,
 	fileSet *parser.SourceFileSet,
 ) *gs.Bytecode {
 	return &gs.Bytecode{
 		FileSet:      fileSet,
-		MainFunction: &gst.CompiledFunction{Instructions: instructions},
+		MainFunction: &value.CompiledFunction{Instructions: instructions},
 		Constants:    constants,
 	}
 }

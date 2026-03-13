@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/jokruger/gs/parser"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 // Script can simplify compilation and execution of embedded scripts.
@@ -167,7 +167,7 @@ func (s *Script) RunContext(
 
 func (s *Script) prepCompile() (
 	symbolTable *SymbolTable,
-	globals []gst.Object,
+	globals []value.Object,
 	err error,
 ) {
 	var names []string
@@ -180,7 +180,7 @@ func (s *Script) prepCompile() (
 		symbolTable.DefineBuiltin(idx, fn.Name)
 	}
 
-	globals = make([]gst.Object, GlobalsSize)
+	globals = make([]value.Object, GlobalsSize)
 
 	for idx, name := range names {
 		symbol := symbolTable.Define(name)
@@ -198,7 +198,7 @@ func (s *Script) prepCompile() (
 type Compiled struct {
 	globalIndexes map[string]int // global symbol name to index
 	bytecode      *Bytecode
-	globals       []gst.Object
+	globals       []value.Object
 	maxAllocs     int64
 	lock          sync.RWMutex
 }
@@ -263,7 +263,7 @@ func (c *Compiled) Clone() *Compiled {
 	clone := &Compiled{
 		globalIndexes: c.globalIndexes,
 		bytecode:      c.bytecode,
-		globals:       make([]gst.Object, len(c.globals)),
+		globals:       make([]value.Object, len(c.globals)),
 		maxAllocs:     c.maxAllocs,
 	}
 	// copy global objects
@@ -289,7 +289,7 @@ func (c *Compiled) IsDefined(name string) bool {
 	if v == nil {
 		return false
 	}
-	return v != gst.UndefinedValue
+	return v != value.UndefinedValue
 }
 
 // Get returns a variable identified by the name.
@@ -297,16 +297,16 @@ func (c *Compiled) Get(name string) *Variable {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	value := gst.UndefinedValue
+	v := value.UndefinedValue
 	if idx, ok := c.globalIndexes[name]; ok {
-		value = c.globals[idx]
-		if value == nil {
-			value = gst.UndefinedValue
+		v = c.globals[idx]
+		if v == nil {
+			v = value.UndefinedValue
 		}
 	}
 	return &Variable{
 		name:  name,
-		value: value,
+		value: v,
 	}
 }
 
@@ -317,13 +317,13 @@ func (c *Compiled) GetAll() []*Variable {
 
 	var vars []*Variable
 	for name, idx := range c.globalIndexes {
-		value := c.globals[idx]
-		if value == nil {
-			value = gst.UndefinedValue
+		v := c.globals[idx]
+		if v == nil {
+			v = value.UndefinedValue
 		}
 		vars = append(vars, &Variable{
 			name:  name,
-			value: value,
+			value: v,
 		})
 	}
 	return vars

@@ -4,190 +4,190 @@ import (
 	"time"
 
 	gse "github.com/jokruger/gs/error"
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
-var timesModule = map[string]gst.Object{
-	"format_ansic":        &gst.String{Value: time.ANSIC},
-	"format_unix_date":    &gst.String{Value: time.UnixDate},
-	"format_ruby_date":    &gst.String{Value: time.RubyDate},
-	"format_rfc822":       &gst.String{Value: time.RFC822},
-	"format_rfc822z":      &gst.String{Value: time.RFC822Z},
-	"format_rfc850":       &gst.String{Value: time.RFC850},
-	"format_rfc1123":      &gst.String{Value: time.RFC1123},
-	"format_rfc1123z":     &gst.String{Value: time.RFC1123Z},
-	"format_rfc3339":      &gst.String{Value: time.RFC3339},
-	"format_rfc3339_nano": &gst.String{Value: time.RFC3339Nano},
-	"format_kitchen":      &gst.String{Value: time.Kitchen},
-	"format_stamp":        &gst.String{Value: time.Stamp},
-	"format_stamp_milli":  &gst.String{Value: time.StampMilli},
-	"format_stamp_micro":  &gst.String{Value: time.StampMicro},
-	"format_stamp_nano":   &gst.String{Value: time.StampNano},
-	"nanosecond":          &gst.Int{Value: int64(time.Nanosecond)},
-	"microsecond":         &gst.Int{Value: int64(time.Microsecond)},
-	"millisecond":         &gst.Int{Value: int64(time.Millisecond)},
-	"second":              &gst.Int{Value: int64(time.Second)},
-	"minute":              &gst.Int{Value: int64(time.Minute)},
-	"hour":                &gst.Int{Value: int64(time.Hour)},
-	"january":             &gst.Int{Value: int64(time.January)},
-	"february":            &gst.Int{Value: int64(time.February)},
-	"march":               &gst.Int{Value: int64(time.March)},
-	"april":               &gst.Int{Value: int64(time.April)},
-	"may":                 &gst.Int{Value: int64(time.May)},
-	"june":                &gst.Int{Value: int64(time.June)},
-	"july":                &gst.Int{Value: int64(time.July)},
-	"august":              &gst.Int{Value: int64(time.August)},
-	"september":           &gst.Int{Value: int64(time.September)},
-	"october":             &gst.Int{Value: int64(time.October)},
-	"november":            &gst.Int{Value: int64(time.November)},
-	"december":            &gst.Int{Value: int64(time.December)},
-	"sleep": &gst.UserFunction{
+var timesModule = map[string]value.Object{
+	"format_ansic":        &value.String{Value: time.ANSIC},
+	"format_unix_date":    &value.String{Value: time.UnixDate},
+	"format_ruby_date":    &value.String{Value: time.RubyDate},
+	"format_rfc822":       &value.String{Value: time.RFC822},
+	"format_rfc822z":      &value.String{Value: time.RFC822Z},
+	"format_rfc850":       &value.String{Value: time.RFC850},
+	"format_rfc1123":      &value.String{Value: time.RFC1123},
+	"format_rfc1123z":     &value.String{Value: time.RFC1123Z},
+	"format_rfc3339":      &value.String{Value: time.RFC3339},
+	"format_rfc3339_nano": &value.String{Value: time.RFC3339Nano},
+	"format_kitchen":      &value.String{Value: time.Kitchen},
+	"format_stamp":        &value.String{Value: time.Stamp},
+	"format_stamp_milli":  &value.String{Value: time.StampMilli},
+	"format_stamp_micro":  &value.String{Value: time.StampMicro},
+	"format_stamp_nano":   &value.String{Value: time.StampNano},
+	"nanosecond":          &value.Int{Value: int64(time.Nanosecond)},
+	"microsecond":         &value.Int{Value: int64(time.Microsecond)},
+	"millisecond":         &value.Int{Value: int64(time.Millisecond)},
+	"second":              &value.Int{Value: int64(time.Second)},
+	"minute":              &value.Int{Value: int64(time.Minute)},
+	"hour":                &value.Int{Value: int64(time.Hour)},
+	"january":             &value.Int{Value: int64(time.January)},
+	"february":            &value.Int{Value: int64(time.February)},
+	"march":               &value.Int{Value: int64(time.March)},
+	"april":               &value.Int{Value: int64(time.April)},
+	"may":                 &value.Int{Value: int64(time.May)},
+	"june":                &value.Int{Value: int64(time.June)},
+	"july":                &value.Int{Value: int64(time.July)},
+	"august":              &value.Int{Value: int64(time.August)},
+	"september":           &value.Int{Value: int64(time.September)},
+	"october":             &value.Int{Value: int64(time.October)},
+	"november":            &value.Int{Value: int64(time.November)},
+	"december":            &value.Int{Value: int64(time.December)},
+	"sleep": &value.UserFunction{
 		Name:  "sleep",
 		Value: timesSleep,
 	}, // sleep(int)
-	"parse_duration": &gst.UserFunction{
+	"parse_duration": &value.UserFunction{
 		Name:  "parse_duration",
 		Value: timesParseDuration,
 	}, // parse_duration(str) => int
-	"since": &gst.UserFunction{
+	"since": &value.UserFunction{
 		Name:  "since",
 		Value: timesSince,
 	}, // since(time) => int
-	"until": &gst.UserFunction{
+	"until": &value.UserFunction{
 		Name:  "until",
 		Value: timesUntil,
 	}, // until(time) => int
-	"duration_hours": &gst.UserFunction{
+	"duration_hours": &value.UserFunction{
 		Name:  "duration_hours",
 		Value: timesDurationHours,
 	}, // duration_hours(int) => float
-	"duration_minutes": &gst.UserFunction{
+	"duration_minutes": &value.UserFunction{
 		Name:  "duration_minutes",
 		Value: timesDurationMinutes,
 	}, // duration_minutes(int) => float
-	"duration_nanoseconds": &gst.UserFunction{
+	"duration_nanoseconds": &value.UserFunction{
 		Name:  "duration_nanoseconds",
 		Value: timesDurationNanoseconds,
 	}, // duration_nanoseconds(int) => int
-	"duration_seconds": &gst.UserFunction{
+	"duration_seconds": &value.UserFunction{
 		Name:  "duration_seconds",
 		Value: timesDurationSeconds,
 	}, // duration_seconds(int) => float
-	"duration_string": &gst.UserFunction{
+	"duration_string": &value.UserFunction{
 		Name:  "duration_string",
 		Value: timesDurationString,
 	}, // duration_string(int) => string
-	"month_string": &gst.UserFunction{
+	"month_string": &value.UserFunction{
 		Name:  "month_string",
 		Value: timesMonthString,
 	}, // month_string(int) => string
-	"date": &gst.UserFunction{
+	"date": &value.UserFunction{
 		Name:  "date",
 		Value: timesDate,
 	}, // date(year, month, day, hour, min, sec, nsec) => time
-	"now": &gst.UserFunction{
+	"now": &value.UserFunction{
 		Name:  "now",
 		Value: timesNow,
 	}, // now() => time
-	"parse": &gst.UserFunction{
+	"parse": &value.UserFunction{
 		Name:  "parse",
 		Value: timesParse,
 	}, // parse(format, str) => time
-	"unix": &gst.UserFunction{
+	"unix": &value.UserFunction{
 		Name:  "unix",
 		Value: timesUnix,
 	}, // unix(sec, nsec) => time
-	"add": &gst.UserFunction{
+	"add": &value.UserFunction{
 		Name:  "add",
 		Value: timesAdd,
 	}, // add(time, int) => time
-	"add_date": &gst.UserFunction{
+	"add_date": &value.UserFunction{
 		Name:  "add_date",
 		Value: timesAddDate,
 	}, // add_date(time, years, months, days) => time
-	"sub": &gst.UserFunction{
+	"sub": &value.UserFunction{
 		Name:  "sub",
 		Value: timesSub,
 	}, // sub(t time, u time) => int
-	"after": &gst.UserFunction{
+	"after": &value.UserFunction{
 		Name:  "after",
 		Value: timesAfter,
 	}, // after(t time, u time) => bool
-	"before": &gst.UserFunction{
+	"before": &value.UserFunction{
 		Name:  "before",
 		Value: timesBefore,
 	}, // before(t time, u time) => bool
-	"time_year": &gst.UserFunction{
+	"time_year": &value.UserFunction{
 		Name:  "time_year",
 		Value: timesTimeYear,
 	}, // time_year(time) => int
-	"time_month": &gst.UserFunction{
+	"time_month": &value.UserFunction{
 		Name:  "time_month",
 		Value: timesTimeMonth,
 	}, // time_month(time) => int
-	"time_day": &gst.UserFunction{
+	"time_day": &value.UserFunction{
 		Name:  "time_day",
 		Value: timesTimeDay,
 	}, // time_day(time) => int
-	"time_weekday": &gst.UserFunction{
+	"time_weekday": &value.UserFunction{
 		Name:  "time_weekday",
 		Value: timesTimeWeekday,
 	}, // time_weekday(time) => int
-	"time_hour": &gst.UserFunction{
+	"time_hour": &value.UserFunction{
 		Name:  "time_hour",
 		Value: timesTimeHour,
 	}, // time_hour(time) => int
-	"time_minute": &gst.UserFunction{
+	"time_minute": &value.UserFunction{
 		Name:  "time_minute",
 		Value: timesTimeMinute,
 	}, // time_minute(time) => int
-	"time_second": &gst.UserFunction{
+	"time_second": &value.UserFunction{
 		Name:  "time_second",
 		Value: timesTimeSecond,
 	}, // time_second(time) => int
-	"time_nanosecond": &gst.UserFunction{
+	"time_nanosecond": &value.UserFunction{
 		Name:  "time_nanosecond",
 		Value: timesTimeNanosecond,
 	}, // time_nanosecond(time) => int
-	"time_unix": &gst.UserFunction{
+	"time_unix": &value.UserFunction{
 		Name:  "time_unix",
 		Value: timesTimeUnix,
 	}, // time_unix(time) => int
-	"time_unix_nano": &gst.UserFunction{
+	"time_unix_nano": &value.UserFunction{
 		Name:  "time_unix_nano",
 		Value: timesTimeUnixNano,
 	}, // time_unix_nano(time) => int
-	"time_format": &gst.UserFunction{
+	"time_format": &value.UserFunction{
 		Name:  "time_format",
 		Value: timesTimeFormat,
 	}, // time_format(time, format) => string
-	"time_location": &gst.UserFunction{
+	"time_location": &value.UserFunction{
 		Name:  "time_location",
 		Value: timesTimeLocation,
 	}, // time_location(time) => string
-	"time_string": &gst.UserFunction{
+	"time_string": &value.UserFunction{
 		Name:  "time_string",
 		Value: timesTimeString,
 	}, // time_string(time) => string
-	"is_zero": &gst.UserFunction{
+	"is_zero": &value.UserFunction{
 		Name:  "is_zero",
 		Value: timesIsZero,
 	}, // is_zero(time) => bool
-	"to_local": &gst.UserFunction{
+	"to_local": &value.UserFunction{
 		Name:  "to_local",
 		Value: timesToLocal,
 	}, // to_local(time) => time
-	"to_utc": &gst.UserFunction{
+	"to_utc": &value.UserFunction{
 		Name:  "to_utc",
 		Value: timesToUTC,
 	}, // to_utc(time) => time
-	"in_location": &gst.UserFunction{
+	"in_location": &value.UserFunction{
 		Name:  "in_location",
 		Value: timesInLocation,
 	}, // in_location(time, location) => time
 }
 
-func timesSleep(args ...gst.Object) (ret gst.Object, err error) {
+func timesSleep(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -204,13 +204,13 @@ func timesSleep(args ...gst.Object) (ret gst.Object, err error) {
 	}
 
 	time.Sleep(time.Duration(i1))
-	ret = gst.UndefinedValue
+	ret = value.UndefinedValue
 
 	return
 }
 
-func timesParseDuration(args ...gst.Object) (
-	ret gst.Object,
+func timesParseDuration(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -234,13 +234,13 @@ func timesParseDuration(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.Int{Value: int64(dur)}
+	ret = &value.Int{Value: int64(dur)}
 
 	return
 }
 
-func timesSince(args ...gst.Object) (
-	ret gst.Object,
+func timesSince(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -258,13 +258,13 @@ func timesSince(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.Int{Value: int64(time.Since(t1))}
+	ret = &value.Int{Value: int64(time.Since(t1))}
 
 	return
 }
 
-func timesUntil(args ...gst.Object) (
-	ret gst.Object,
+func timesUntil(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -282,13 +282,13 @@ func timesUntil(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.Int{Value: int64(time.Until(t1))}
+	ret = &value.Int{Value: int64(time.Until(t1))}
 
 	return
 }
 
-func timesDurationHours(args ...gst.Object) (
-	ret gst.Object,
+func timesDurationHours(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -306,13 +306,13 @@ func timesDurationHours(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.Float{Value: time.Duration(i1).Hours()}
+	ret = &value.Float{Value: time.Duration(i1).Hours()}
 
 	return
 }
 
-func timesDurationMinutes(args ...gst.Object) (
-	ret gst.Object,
+func timesDurationMinutes(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -330,13 +330,13 @@ func timesDurationMinutes(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.Float{Value: time.Duration(i1).Minutes()}
+	ret = &value.Float{Value: time.Duration(i1).Minutes()}
 
 	return
 }
 
-func timesDurationNanoseconds(args ...gst.Object) (
-	ret gst.Object,
+func timesDurationNanoseconds(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -354,13 +354,13 @@ func timesDurationNanoseconds(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.Int{Value: time.Duration(i1).Nanoseconds()}
+	ret = &value.Int{Value: time.Duration(i1).Nanoseconds()}
 
 	return
 }
 
-func timesDurationSeconds(args ...gst.Object) (
-	ret gst.Object,
+func timesDurationSeconds(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -378,13 +378,13 @@ func timesDurationSeconds(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.Float{Value: time.Duration(i1).Seconds()}
+	ret = &value.Float{Value: time.Duration(i1).Seconds()}
 
 	return
 }
 
-func timesDurationString(args ...gst.Object) (
-	ret gst.Object,
+func timesDurationString(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -402,13 +402,13 @@ func timesDurationString(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.String{Value: time.Duration(i1).String()}
+	ret = &value.String{Value: time.Duration(i1).String()}
 
 	return
 }
 
-func timesMonthString(args ...gst.Object) (
-	ret gst.Object,
+func timesMonthString(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -426,13 +426,13 @@ func timesMonthString(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.String{Value: time.Month(i1).String()}
+	ret = &value.String{Value: time.Month(i1).String()}
 
 	return
 }
 
-func timesDate(args ...gst.Object) (
-	ret gst.Object,
+func timesDate(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) < 7 || len(args) > 8 {
@@ -524,7 +524,7 @@ func timesDate(args ...gst.Object) (
 		loc = time.Now().Location()
 	}
 
-	ret = &gst.Time{
+	ret = &value.Time{
 		Value: time.Date(i1,
 			time.Month(i2), i3, i4, i5, i6, i7, loc),
 	}
@@ -532,18 +532,18 @@ func timesDate(args ...gst.Object) (
 	return
 }
 
-func timesNow(args ...gst.Object) (ret gst.Object, err error) {
+func timesNow(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 0 {
 		err = gse.ErrWrongNumArguments
 		return
 	}
 
-	ret = &gst.Time{Value: time.Now()}
+	ret = &value.Time{Value: time.Now()}
 
 	return
 }
 
-func timesParse(args ...gst.Object) (ret gst.Object, err error) {
+func timesParse(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -575,12 +575,12 @@ func timesParse(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Time{Value: parsed}
+	ret = &value.Time{Value: parsed}
 
 	return
 }
 
-func timesUnix(args ...gst.Object) (ret gst.Object, err error) {
+func timesUnix(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -606,12 +606,12 @@ func timesUnix(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Time{Value: time.Unix(i1, i2)}
+	ret = &value.Time{Value: time.Unix(i1, i2)}
 
 	return
 }
 
-func timesAdd(args ...gst.Object) (ret gst.Object, err error) {
+func timesAdd(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -637,12 +637,12 @@ func timesAdd(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Time{Value: t1.Add(time.Duration(i2))}
+	ret = &value.Time{Value: t1.Add(time.Duration(i2))}
 
 	return
 }
 
-func timesSub(args ...gst.Object) (ret gst.Object, err error) {
+func timesSub(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -668,12 +668,12 @@ func timesSub(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Int{Value: int64(t1.Sub(t2))}
+	ret = &value.Int{Value: int64(t1.Sub(t2))}
 
 	return
 }
 
-func timesAddDate(args ...gst.Object) (ret gst.Object, err error) {
+func timesAddDate(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 4 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -719,12 +719,12 @@ func timesAddDate(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Time{Value: t1.AddDate(i2, i3, i4)}
+	ret = &value.Time{Value: t1.AddDate(i2, i3, i4)}
 
 	return
 }
 
-func timesAfter(args ...gst.Object) (ret gst.Object, err error) {
+func timesAfter(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -751,15 +751,15 @@ func timesAfter(args ...gst.Object) (ret gst.Object, err error) {
 	}
 
 	if t1.After(t2) {
-		ret = gst.TrueValue
+		ret = value.TrueValue
 	} else {
-		ret = gst.FalseValue
+		ret = value.FalseValue
 	}
 
 	return
 }
 
-func timesBefore(args ...gst.Object) (ret gst.Object, err error) {
+func timesBefore(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -786,15 +786,15 @@ func timesBefore(args ...gst.Object) (ret gst.Object, err error) {
 	}
 
 	if t1.Before(t2) {
-		ret = gst.TrueValue
+		ret = value.TrueValue
 	} else {
-		ret = gst.FalseValue
+		ret = value.FalseValue
 	}
 
 	return
 }
 
-func timesTimeYear(args ...gst.Object) (ret gst.Object, err error) {
+func timesTimeYear(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -810,12 +810,12 @@ func timesTimeYear(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Int{Value: int64(t1.Year())}
+	ret = &value.Int{Value: int64(t1.Year())}
 
 	return
 }
 
-func timesTimeMonth(args ...gst.Object) (ret gst.Object, err error) {
+func timesTimeMonth(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -831,12 +831,12 @@ func timesTimeMonth(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Int{Value: int64(t1.Month())}
+	ret = &value.Int{Value: int64(t1.Month())}
 
 	return
 }
 
-func timesTimeDay(args ...gst.Object) (ret gst.Object, err error) {
+func timesTimeDay(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -852,12 +852,12 @@ func timesTimeDay(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Int{Value: int64(t1.Day())}
+	ret = &value.Int{Value: int64(t1.Day())}
 
 	return
 }
 
-func timesTimeWeekday(args ...gst.Object) (ret gst.Object, err error) {
+func timesTimeWeekday(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -873,12 +873,12 @@ func timesTimeWeekday(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Int{Value: int64(t1.Weekday())}
+	ret = &value.Int{Value: int64(t1.Weekday())}
 
 	return
 }
 
-func timesTimeHour(args ...gst.Object) (ret gst.Object, err error) {
+func timesTimeHour(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -894,12 +894,12 @@ func timesTimeHour(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Int{Value: int64(t1.Hour())}
+	ret = &value.Int{Value: int64(t1.Hour())}
 
 	return
 }
 
-func timesTimeMinute(args ...gst.Object) (ret gst.Object, err error) {
+func timesTimeMinute(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -915,12 +915,12 @@ func timesTimeMinute(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Int{Value: int64(t1.Minute())}
+	ret = &value.Int{Value: int64(t1.Minute())}
 
 	return
 }
 
-func timesTimeSecond(args ...gst.Object) (ret gst.Object, err error) {
+func timesTimeSecond(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -936,13 +936,13 @@ func timesTimeSecond(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Int{Value: int64(t1.Second())}
+	ret = &value.Int{Value: int64(t1.Second())}
 
 	return
 }
 
-func timesTimeNanosecond(args ...gst.Object) (
-	ret gst.Object,
+func timesTimeNanosecond(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -960,12 +960,12 @@ func timesTimeNanosecond(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.Int{Value: int64(t1.Nanosecond())}
+	ret = &value.Int{Value: int64(t1.Nanosecond())}
 
 	return
 }
 
-func timesTimeUnix(args ...gst.Object) (ret gst.Object, err error) {
+func timesTimeUnix(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -981,13 +981,13 @@ func timesTimeUnix(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Int{Value: t1.Unix()}
+	ret = &value.Int{Value: t1.Unix()}
 
 	return
 }
 
-func timesTimeUnixNano(args ...gst.Object) (
-	ret gst.Object,
+func timesTimeUnixNano(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -1005,12 +1005,12 @@ func timesTimeUnixNano(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.Int{Value: t1.UnixNano()}
+	ret = &value.Int{Value: t1.UnixNano()}
 
 	return
 }
 
-func timesTimeFormat(args ...gst.Object) (ret gst.Object, err error) {
+func timesTimeFormat(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -1037,17 +1037,17 @@ func timesTimeFormat(args ...gst.Object) (ret gst.Object, err error) {
 	}
 
 	s := t1.Format(s2)
-	if len(s) > gst.MaxStringLen {
+	if len(s) > value.MaxStringLen {
 
 		return nil, gse.ErrStringLimit
 	}
 
-	ret = &gst.String{Value: s}
+	ret = &value.String{Value: s}
 
 	return
 }
 
-func timesIsZero(args ...gst.Object) (ret gst.Object, err error) {
+func timesIsZero(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -1064,15 +1064,15 @@ func timesIsZero(args ...gst.Object) (ret gst.Object, err error) {
 	}
 
 	if t1.IsZero() {
-		ret = gst.TrueValue
+		ret = value.TrueValue
 	} else {
-		ret = gst.FalseValue
+		ret = value.FalseValue
 	}
 
 	return
 }
 
-func timesToLocal(args ...gst.Object) (ret gst.Object, err error) {
+func timesToLocal(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -1088,12 +1088,12 @@ func timesToLocal(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Time{Value: t1.Local()}
+	ret = &value.Time{Value: t1.Local()}
 
 	return
 }
 
-func timesToUTC(args ...gst.Object) (ret gst.Object, err error) {
+func timesToUTC(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -1109,13 +1109,13 @@ func timesToUTC(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.Time{Value: t1.UTC()}
+	ret = &value.Time{Value: t1.UTC()}
 
 	return
 }
 
-func timesTimeLocation(args ...gst.Object) (
-	ret gst.Object,
+func timesTimeLocation(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -1133,13 +1133,13 @@ func timesTimeLocation(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.String{Value: t1.Location().String()}
+	ret = &value.String{Value: t1.Location().String()}
 
 	return
 }
 
-func timesInLocation(args ...gst.Object) (
-	ret gst.Object,
+func timesInLocation(args ...value.Object) (
+	ret value.Object,
 	err error,
 ) {
 	if len(args) != 2 {
@@ -1173,12 +1173,12 @@ func timesInLocation(args ...gst.Object) (
 		return
 	}
 
-	ret = &gst.Time{Value: t1.In(location)}
+	ret = &value.Time{Value: t1.In(location)}
 
 	return
 }
 
-func timesTimeString(args ...gst.Object) (ret gst.Object, err error) {
+func timesTimeString(args ...value.Object) (ret value.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -1194,7 +1194,7 @@ func timesTimeString(args ...gst.Object) (ret gst.Object, err error) {
 		return
 	}
 
-	ret = &gst.String{Value: t1.String()}
+	ret = &value.String{Value: t1.String()}
 
 	return
 }

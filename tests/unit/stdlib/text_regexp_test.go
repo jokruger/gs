@@ -3,7 +3,7 @@ package stdlib_test
 import (
 	"testing"
 
-	gst "github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/value"
 )
 
 func TestTextREAlternation(t *testing.T) {
@@ -21,9 +21,9 @@ func TestTextREAlternation(t *testing.T) {
 		},
 	}, "alternation with number")
 
-	module(t, "text").call("re_find", "([a-zA-Z])|([0-9])", "").expect(gst.UndefinedValue, "empty input")
+	module(t, "text").call("re_find", "([a-zA-Z])|([0-9])", "").expect(value.UndefinedValue, "empty input")
 
-	module(t, "text").call("re_find", "([a-zA-Z])|([0-9])", "!").expect(gst.UndefinedValue, "non-matching input")
+	module(t, "text").call("re_find", "([a-zA-Z])|([0-9])", "!").expect(value.UndefinedValue, "non-matching input")
 
 	module(t, "text").call("re_find", "(?:([a-zA-Z])|([0-9]))+", "a5b").expect(ARR{
 		ARR{

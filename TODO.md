@@ -1,0 +1,11 @@
+- refactor stdlib to use specific implementations or wrappers instead of generic Func* wrappers - it will help with logging and error handling
+- implement built-in functions, member functions and constants opcodes so we can refer to built-in functions by IDs instead of names
+- implement Record type and make it default when using {} syntax
+- make it possible to construct map from record
+- use memory pools and arenas inside VM to reduce allocations
+- implement lambdas
+- implement monad style member functions for collections (map, filter, reduce)
+- CanIterate => IsIterable
+- CanCall => IsCallable
+- IsUndefined
+- get rid of Immutable* types, use IsImmutable flag on types instead

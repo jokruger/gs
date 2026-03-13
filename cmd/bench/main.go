@@ -6,6 +6,7 @@ import (
 
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/parser"
+	gst "github.com/jokruger/gs/types"
 )
 
 func main() {
@@ -36,9 +37,8 @@ fib := func(x) {
 		panic(err)
 	}
 
-	if nativeResult != int(result.(*gs.Int).Value) {
-		panic(fmt.Errorf("wrong result: %d != %d", nativeResult,
-			int(result.(*gs.Int).Value)))
+	if nativeResult != int(result.(*gst.Int).Value) {
+		panic(fmt.Errorf("wrong result: %d != %d", nativeResult, int(result.(*gst.Int).Value)))
 	}
 
 	fmt.Println("-------------------------------------")
@@ -73,9 +73,8 @@ fib := func(x, s) {
 		panic(err)
 	}
 
-	if nativeResult != int(result.(*gs.Int).Value) {
-		panic(fmt.Errorf("wrong result: %d != %d", nativeResult,
-			int(result.(*gs.Int).Value)))
+	if nativeResult != int(result.(*gst.Int).Value) {
+		panic(fmt.Errorf("wrong result: %d != %d", nativeResult, int(result.(*gst.Int).Value)))
 	}
 
 	fmt.Println("-------------------------------------")
@@ -110,9 +109,8 @@ fib := func(x, a, b) {
 		panic(err)
 	}
 
-	if nativeResult != int(result.(*gs.Int).Value) {
-		panic(fmt.Errorf("wrong result: %d != %d", nativeResult,
-			int(result.(*gs.Int).Value)))
+	if nativeResult != int(result.(*gst.Int).Value) {
+		panic(fmt.Errorf("wrong result: %d != %d", nativeResult, int(result.(*gst.Int).Value)))
 	}
 
 	fmt.Println("-------------------------------------")
@@ -160,7 +158,7 @@ func runBench(
 	parseTime time.Duration,
 	compileTime time.Duration,
 	runTime time.Duration,
-	result gs.Object,
+	result gst.Object,
 	err error,
 ) {
 	var astFile *parser.File
@@ -212,10 +210,8 @@ func compileFile(file *parser.File) (time.Duration, *gs.Bytecode, error) {
 	return time.Since(start), bytecode, nil
 }
 
-func runVM(
-	bytecode *gs.Bytecode,
-) (time.Duration, gs.Object, error) {
-	globals := make([]gs.Object, gs.GlobalsSize)
+func runVM(bytecode *gs.Bytecode) (time.Duration, gst.Object, error) {
+	globals := make([]gst.Object, gs.GlobalsSize)
 
 	start := time.Now()
 

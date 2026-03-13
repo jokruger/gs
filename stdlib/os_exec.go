@@ -3,46 +3,46 @@ package stdlib
 import (
 	"os/exec"
 
-	"github.com/jokruger/gs"
 	gse "github.com/jokruger/gs/error"
+	gst "github.com/jokruger/gs/types"
 )
 
-func makeOSExecCommand(cmd *exec.Cmd) *gs.ImmutableMap {
-	return &gs.ImmutableMap{
-		Value: map[string]gs.Object{
+func makeOSExecCommand(cmd *exec.Cmd) *gst.ImmutableMap {
+	return &gst.ImmutableMap{
+		Value: map[string]gst.Object{
 			// combined_output() => bytes/error
-			"combined_output": &gs.UserFunction{
+			"combined_output": &gst.UserFunction{
 				Name:  "combined_output",
 				Value: FuncARYE(cmd.CombinedOutput),
 			},
 			// output() => bytes/error
-			"output": &gs.UserFunction{
+			"output": &gst.UserFunction{
 				Name:  "output",
 				Value: FuncARYE(cmd.Output),
 			}, //
 			// run() => error
-			"run": &gs.UserFunction{
+			"run": &gst.UserFunction{
 				Name:  "run",
 				Value: FuncARE(cmd.Run),
 			}, //
 			// start() => error
-			"start": &gs.UserFunction{
+			"start": &gst.UserFunction{
 				Name:  "start",
 				Value: FuncARE(cmd.Start),
 			}, //
 			// wait() => error
-			"wait": &gs.UserFunction{
+			"wait": &gst.UserFunction{
 				Name:  "wait",
 				Value: FuncARE(cmd.Wait),
 			}, //
 			// set_path(path string)
-			"set_path": &gs.UserFunction{
+			"set_path": &gst.UserFunction{
 				Name: "set_path",
-				Value: func(args ...gs.Object) (gs.Object, error) {
+				Value: func(args ...gst.Object) (gst.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
-					s1, ok := gs.ToString(args[0])
+					s1, ok := args[0].ToString()
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -51,17 +51,17 @@ func makeOSExecCommand(cmd *exec.Cmd) *gs.ImmutableMap {
 						}
 					}
 					cmd.Path = s1
-					return gs.UndefinedValue, nil
+					return gst.UndefinedValue, nil
 				},
 			},
 			// set_dir(dir string)
-			"set_dir": &gs.UserFunction{
+			"set_dir": &gst.UserFunction{
 				Name: "set_dir",
-				Value: func(args ...gs.Object) (gs.Object, error) {
+				Value: func(args ...gst.Object) (gst.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
-					s1, ok := gs.ToString(args[0])
+					s1, ok := args[0].ToString()
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -70,13 +70,13 @@ func makeOSExecCommand(cmd *exec.Cmd) *gs.ImmutableMap {
 						}
 					}
 					cmd.Dir = s1
-					return gs.UndefinedValue, nil
+					return gst.UndefinedValue, nil
 				},
 			},
 			// set_env(env array(string))
-			"set_env": &gs.UserFunction{
+			"set_env": &gst.UserFunction{
 				Name: "set_env",
-				Value: func(args ...gs.Object) (gs.Object, error) {
+				Value: func(args ...gst.Object) (gst.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
@@ -84,12 +84,12 @@ func makeOSExecCommand(cmd *exec.Cmd) *gs.ImmutableMap {
 					var env []string
 					var err error
 					switch arg0 := args[0].(type) {
-					case *gs.Array:
+					case *gst.Array:
 						env, err = stringArray(arg0.Value, "first")
 						if err != nil {
 							return nil, err
 						}
-					case *gs.ImmutableArray:
+					case *gst.ImmutableArray:
 						env, err = stringArray(arg0.Value, "first")
 						if err != nil {
 							return nil, err
@@ -102,13 +102,13 @@ func makeOSExecCommand(cmd *exec.Cmd) *gs.ImmutableMap {
 						}
 					}
 					cmd.Env = env
-					return gs.UndefinedValue, nil
+					return gst.UndefinedValue, nil
 				},
 			},
 			// process() => imap(process)
-			"process": &gs.UserFunction{
+			"process": &gst.UserFunction{
 				Name: "process",
-				Value: func(args ...gs.Object) (gs.Object, error) {
+				Value: func(args ...gst.Object) (gst.Object, error) {
 					if len(args) != 0 {
 						return nil, gse.ErrWrongNumArguments
 					}

@@ -1,12 +1,12 @@
 package stdlib
 
 import (
-	"github.com/jokruger/gs"
+	gst "github.com/jokruger/gs/types"
 )
 
-func wrapError(err error) gs.Object {
+func wrapError(err error) gst.Object {
 	if err == nil {
-		return gs.TrueValue
+		return gst.TrueValue
 	}
-	return &gs.Error{Value: &gs.String{Value: err.Error()}}
+	return &gst.Error{Value: &gst.String{Value: err.Error()}}
 }

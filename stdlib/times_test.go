@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/require"
+	gst "github.com/jokruger/gs/types"
 )
 
 func TestTimes(t *testing.T) {
@@ -14,14 +14,14 @@ func TestTimes(t *testing.T) {
 	location, _ := time.LoadLocation("Pacific/Auckland")
 	time3 := time.Date(1982, 9, 28, 19, 21, 44, 999, location)
 
-	module(t, "times").call("sleep", 1).expect(gs.UndefinedValue)
+	module(t, "times").call("sleep", 1).expect(gst.UndefinedValue)
 
 	require.True(t, module(t, "times").
 		call("since", time.Now().Add(-time.Hour)).
-		o.(*gs.Int).Value > 3600000000000)
+		o.(*gst.Int).Value > 3600000000000)
 	require.True(t, module(t, "times").
 		call("until", time.Now().Add(time.Hour)).
-		o.(*gs.Int).Value < 3600000000000)
+		o.(*gst.Int).Value < 3600000000000)
 
 	module(t, "times").call("parse_duration", "1ns").expect(1)
 	module(t, "times").call("parse_duration", "1ms").expect(1000000)
@@ -41,7 +41,7 @@ func TestTimes(t *testing.T) {
 		expect(time3)
 
 	nowD := time.Until(module(t, "times").call("now").
-		o.(*gs.Time).Value).Nanoseconds()
+		o.(*gst.Time).Value).Nanoseconds()
 	require.True(t, 0 > nowD && nowD > -100000000) // within 100ms
 	parsed, _ := time.Parse(time.RFC3339, "1982-09-28T19:21:44+07:00")
 	module(t, "times").

@@ -4,26 +4,26 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/jokruger/gs"
 	gse "github.com/jokruger/gs/error"
+	gst "github.com/jokruger/gs/types"
 )
 
-func makeOSProcessState(state *os.ProcessState) *gs.ImmutableMap {
-	return &gs.ImmutableMap{
-		Value: map[string]gs.Object{
-			"exited": &gs.UserFunction{
+func makeOSProcessState(state *os.ProcessState) *gst.ImmutableMap {
+	return &gst.ImmutableMap{
+		Value: map[string]gst.Object{
+			"exited": &gst.UserFunction{
 				Name:  "exited",
 				Value: FuncARB(state.Exited),
 			},
-			"pid": &gs.UserFunction{
+			"pid": &gst.UserFunction{
 				Name:  "pid",
 				Value: FuncARI(state.Pid),
 			},
-			"string": &gs.UserFunction{
+			"string": &gst.UserFunction{
 				Name:  "string",
 				Value: FuncARS(state.String),
 			},
-			"success": &gs.UserFunction{
+			"success": &gst.UserFunction{
 				Name:  "success",
 				Value: FuncARB(state.Success),
 			},
@@ -31,24 +31,24 @@ func makeOSProcessState(state *os.ProcessState) *gs.ImmutableMap {
 	}
 }
 
-func makeOSProcess(proc *os.Process) *gs.ImmutableMap {
-	return &gs.ImmutableMap{
-		Value: map[string]gs.Object{
-			"kill": &gs.UserFunction{
+func makeOSProcess(proc *os.Process) *gst.ImmutableMap {
+	return &gst.ImmutableMap{
+		Value: map[string]gst.Object{
+			"kill": &gst.UserFunction{
 				Name:  "kill",
 				Value: FuncARE(proc.Kill),
 			},
-			"release": &gs.UserFunction{
+			"release": &gst.UserFunction{
 				Name:  "release",
 				Value: FuncARE(proc.Release),
 			},
-			"signal": &gs.UserFunction{
+			"signal": &gst.UserFunction{
 				Name: "signal",
-				Value: func(args ...gs.Object) (gs.Object, error) {
+				Value: func(args ...gst.Object) (gst.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
-					i1, ok := gs.ToInt64(args[0])
+					i1, ok := args[0].ToInt64()
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -59,9 +59,9 @@ func makeOSProcess(proc *os.Process) *gs.ImmutableMap {
 					return wrapError(proc.Signal(syscall.Signal(i1))), nil
 				},
 			},
-			"wait": &gs.UserFunction{
+			"wait": &gst.UserFunction{
 				Name: "wait",
-				Value: func(args ...gs.Object) (gs.Object, error) {
+				Value: func(args ...gst.Object) (gst.Object, error) {
 					if len(args) != 0 {
 						return nil, gse.ErrWrongNumArguments
 					}

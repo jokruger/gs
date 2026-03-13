@@ -3,32 +3,32 @@ package stdlib
 import (
 	"encoding/base64"
 
-	"github.com/jokruger/gs"
+	gst "github.com/jokruger/gs/types"
 )
 
-var base64Module = map[string]gs.Object{
-	"encode": &gs.UserFunction{
+var base64Module = map[string]gst.Object{
+	"encode": &gst.UserFunction{
 		Value: FuncAYRS(base64.StdEncoding.EncodeToString),
 	},
-	"decode": &gs.UserFunction{
+	"decode": &gst.UserFunction{
 		Value: FuncASRYE(base64.StdEncoding.DecodeString),
 	},
-	"raw_encode": &gs.UserFunction{
+	"raw_encode": &gst.UserFunction{
 		Value: FuncAYRS(base64.RawStdEncoding.EncodeToString),
 	},
-	"raw_decode": &gs.UserFunction{
+	"raw_decode": &gst.UserFunction{
 		Value: FuncASRYE(base64.RawStdEncoding.DecodeString),
 	},
-	"url_encode": &gs.UserFunction{
+	"url_encode": &gst.UserFunction{
 		Value: FuncAYRS(base64.URLEncoding.EncodeToString),
 	},
-	"url_decode": &gs.UserFunction{
+	"url_decode": &gst.UserFunction{
 		Value: FuncASRYE(base64.URLEncoding.DecodeString),
 	},
-	"raw_url_encode": &gs.UserFunction{
+	"raw_url_encode": &gst.UserFunction{
 		Value: FuncAYRS(base64.RawURLEncoding.EncodeToString),
 	},
-	"raw_url_decode": &gs.UserFunction{
+	"raw_url_decode": &gst.UserFunction{
 		Value: FuncASRYE(base64.RawURLEncoding.DecodeString),
 	},
 }

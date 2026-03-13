@@ -3,66 +3,66 @@ package stdlib
 import (
 	"os"
 
-	"github.com/jokruger/gs"
 	gse "github.com/jokruger/gs/error"
+	gst "github.com/jokruger/gs/types"
 )
 
-func makeOSFile(file *os.File) *gs.ImmutableMap {
-	return &gs.ImmutableMap{
-		Value: map[string]gs.Object{
+func makeOSFile(file *os.File) *gst.ImmutableMap {
+	return &gst.ImmutableMap{
+		Value: map[string]gst.Object{
 			// chdir() => true/error
-			"chdir": &gs.UserFunction{
+			"chdir": &gst.UserFunction{
 				Name:  "chdir",
 				Value: FuncARE(file.Chdir),
 			}, //
 			// chown(uid int, gid int) => true/error
-			"chown": &gs.UserFunction{
+			"chown": &gst.UserFunction{
 				Name:  "chown",
 				Value: FuncAIIRE(file.Chown),
 			}, //
 			// close() => error
-			"close": &gs.UserFunction{
+			"close": &gst.UserFunction{
 				Name:  "close",
 				Value: FuncARE(file.Close),
 			}, //
 			// name() => string
-			"name": &gs.UserFunction{
+			"name": &gst.UserFunction{
 				Name:  "name",
 				Value: FuncARS(file.Name),
 			}, //
 			// readdirnames(n int) => array(string)/error
-			"readdirnames": &gs.UserFunction{
+			"readdirnames": &gst.UserFunction{
 				Name:  "readdirnames",
 				Value: FuncAIRSsE(file.Readdirnames),
 			}, //
 			// sync() => error
-			"sync": &gs.UserFunction{
+			"sync": &gst.UserFunction{
 				Name:  "sync",
 				Value: FuncARE(file.Sync),
 			}, //
 			// write(bytes) => int/error
-			"write": &gs.UserFunction{
+			"write": &gst.UserFunction{
 				Name:  "write",
 				Value: FuncAYRIE(file.Write),
 			}, //
 			// write(string) => int/error
-			"write_string": &gs.UserFunction{
+			"write_string": &gst.UserFunction{
 				Name:  "write_string",
 				Value: FuncASRIE(file.WriteString),
 			}, //
 			// read(bytes) => int/error
-			"read": &gs.UserFunction{
+			"read": &gst.UserFunction{
 				Name:  "read",
 				Value: FuncAYRIE(file.Read),
 			}, //
 			// chmod(mode int) => error
-			"chmod": &gs.UserFunction{
+			"chmod": &gst.UserFunction{
 				Name: "chmod",
-				Value: func(args ...gs.Object) (gs.Object, error) {
+				Value: func(args ...gst.Object) (gst.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
-					i1, ok := gs.ToInt64(args[0])
+					i1, ok := args[0].ToInt64()
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -74,13 +74,13 @@ func makeOSFile(file *os.File) *gs.ImmutableMap {
 				},
 			},
 			// seek(offset int, whence int) => int/error
-			"seek": &gs.UserFunction{
+			"seek": &gst.UserFunction{
 				Name: "seek",
-				Value: func(args ...gs.Object) (gs.Object, error) {
+				Value: func(args ...gst.Object) (gst.Object, error) {
 					if len(args) != 2 {
 						return nil, gse.ErrWrongNumArguments
 					}
-					i1, ok := gs.ToInt64(args[0])
+					i1, ok := args[0].ToInt64()
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -88,7 +88,7 @@ func makeOSFile(file *os.File) *gs.ImmutableMap {
 							Found:    args[0].TypeName(),
 						}
 					}
-					i2, ok := gs.ToInt(args[1])
+					i2, ok := args[1].ToInt()
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "second",
@@ -100,17 +100,17 @@ func makeOSFile(file *os.File) *gs.ImmutableMap {
 					if err != nil {
 						return wrapError(err), nil
 					}
-					return &gs.Int{Value: res}, nil
+					return &gst.Int{Value: res}, nil
 				},
 			},
 			// stat() => imap(fileinfo)/error
-			"stat": &gs.UserFunction{
+			"stat": &gst.UserFunction{
 				Name: "stat",
-				Value: func(args ...gs.Object) (gs.Object, error) {
+				Value: func(args ...gst.Object) (gst.Object, error) {
 					if len(args) != 0 {
 						return nil, gse.ErrWrongNumArguments
 					}
-					return osStat(&gs.String{Value: file.Name()})
+					return osStat(&gst.String{Value: file.Name()})
 				},
 			},
 		},

@@ -5,16 +5,17 @@ import (
 
 	"github.com/jokruger/gs"
 	gse "github.com/jokruger/gs/error"
+	gst "github.com/jokruger/gs/types"
 )
 
-var fmtModule = map[string]gs.Object{
-	"print":   &gs.UserFunction{Name: "print", Value: fmtPrint},
-	"printf":  &gs.UserFunction{Name: "printf", Value: fmtPrintf},
-	"println": &gs.UserFunction{Name: "println", Value: fmtPrintln},
-	"sprintf": &gs.UserFunction{Name: "sprintf", Value: fmtSprintf},
+var fmtModule = map[string]gst.Object{
+	"print":   &gst.UserFunction{Name: "print", Value: fmtPrint},
+	"printf":  &gst.UserFunction{Name: "printf", Value: fmtPrintf},
+	"println": &gst.UserFunction{Name: "println", Value: fmtPrintln},
+	"sprintf": &gst.UserFunction{Name: "sprintf", Value: fmtSprintf},
 }
 
-func fmtPrint(args ...gs.Object) (ret gs.Object, err error) {
+func fmtPrint(args ...gst.Object) (ret gst.Object, err error) {
 	printArgs, err := getPrintArgs(args...)
 	if err != nil {
 		return nil, err
@@ -23,13 +24,13 @@ func fmtPrint(args ...gs.Object) (ret gs.Object, err error) {
 	return nil, nil
 }
 
-func fmtPrintf(args ...gs.Object) (ret gs.Object, err error) {
+func fmtPrintf(args ...gst.Object) (ret gst.Object, err error) {
 	numArgs := len(args)
 	if numArgs == 0 {
 		return nil, gse.ErrWrongNumArguments
 	}
 
-	format, ok := args[0].(*gs.String)
+	format, ok := args[0].(*gst.String)
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "format",
@@ -50,7 +51,7 @@ func fmtPrintf(args ...gs.Object) (ret gs.Object, err error) {
 	return nil, nil
 }
 
-func fmtPrintln(args ...gs.Object) (ret gs.Object, err error) {
+func fmtPrintln(args ...gst.Object) (ret gst.Object, err error) {
 	printArgs, err := getPrintArgs(args...)
 	if err != nil {
 		return nil, err
@@ -60,13 +61,13 @@ func fmtPrintln(args ...gs.Object) (ret gs.Object, err error) {
 	return nil, nil
 }
 
-func fmtSprintf(args ...gs.Object) (ret gs.Object, err error) {
+func fmtSprintf(args ...gst.Object) (ret gst.Object, err error) {
 	numArgs := len(args)
 	if numArgs == 0 {
 		return nil, gse.ErrWrongNumArguments
 	}
 
-	format, ok := args[0].(*gs.String)
+	format, ok := args[0].(*gst.String)
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "format",
@@ -82,17 +83,18 @@ func fmtSprintf(args ...gs.Object) (ret gs.Object, err error) {
 	if err != nil {
 		return nil, err
 	}
-	return &gs.String{Value: s}, nil
+	return &gst.String{Value: s}, nil
 }
 
-func getPrintArgs(args ...gs.Object) ([]interface{}, error) {
+func getPrintArgs(args ...gst.Object) ([]interface{}, error) {
 	var printArgs []interface{}
 	l := 0
 	for _, arg := range args {
-		s, _ := gs.ToString(arg)
+		// TODO: shell we check if arg cannot be converted to string?
+		s, _ := arg.ToString()
 		slen := len(s)
 		// make sure length does not exceed the limit
-		if l+slen > gs.MaxStringLen {
+		if l+slen > gst.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		l += slen

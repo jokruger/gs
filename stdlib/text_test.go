@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/jokruger/gs"
+	gst "github.com/jokruger/gs/types"
 )
 
 func TestTextRE(t *testing.T) {
@@ -33,7 +33,7 @@ func TestTextRE(t *testing.T) {
 		text     string
 		expected interface{}
 	}{
-		{"a(b)", "", gs.UndefinedValue},
+		{"a(b)", "", gst.UndefinedValue},
 		{"a(b)", "ab", ARR{
 			ARR{
 				IMAP{"text": "ab", "begin": 0, "end": 2},
@@ -67,7 +67,7 @@ func TestTextRE(t *testing.T) {
 		count    int
 		expected interface{}
 	}{
-		{"a(b)", "", -1, gs.UndefinedValue},
+		{"a(b)", "", -1, gst.UndefinedValue},
 		{"a(b)", "ab", -1, ARR{
 			ARR{
 				IMAP{"text": "ab", "begin": 0, "end": 2},
@@ -96,7 +96,7 @@ func TestTextRE(t *testing.T) {
 				IMAP{"text": "c", "begin": 9, "end": 10},
 			},
 		}},
-		{"(a)b(c)d", "abcdefgabcd", 0, gs.UndefinedValue},
+		{"(a)b(c)d", "abcdefgabcd", 0, gst.UndefinedValue},
 		{"(a)b(c)d", "abcdefgabcd", 1, ARR{
 			ARR{
 				IMAP{"text": "abcd", "begin": 0, "end": 4},
@@ -232,9 +232,9 @@ func TestText(t *testing.T) {
 }
 
 func TestReplaceLimit(t *testing.T) {
-	curMaxStringLen := gs.MaxStringLen
-	defer func() { gs.MaxStringLen = curMaxStringLen }()
-	gs.MaxStringLen = 12
+	curMaxStringLen := gst.MaxStringLen
+	defer func() { gst.MaxStringLen = curMaxStringLen }()
+	gst.MaxStringLen = 12
 
 	module(t, "text").call("replace", "123456789012", "1", "x", -1).
 		expect("x234567890x2")
@@ -264,9 +264,9 @@ func TestReplaceLimit(t *testing.T) {
 }
 
 func TestTextRepeat(t *testing.T) {
-	curMaxStringLen := gs.MaxStringLen
-	defer func() { gs.MaxStringLen = curMaxStringLen }()
-	gs.MaxStringLen = 12
+	curMaxStringLen := gst.MaxStringLen
+	defer func() { gst.MaxStringLen = curMaxStringLen }()
+	gst.MaxStringLen = 12
 
 	module(t, "text").call("repeat", "1234", "3").
 		expect("123412341234")

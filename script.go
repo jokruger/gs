@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/jokruger/gs/parser"
+	gst "github.com/jokruger/gs/types"
 )
 
 // Script can simplify compilation and execution of embedded scripts.
@@ -166,7 +167,7 @@ func (s *Script) RunContext(
 
 func (s *Script) prepCompile() (
 	symbolTable *SymbolTable,
-	globals []Object,
+	globals []gst.Object,
 	err error,
 ) {
 	var names []string
@@ -179,7 +180,7 @@ func (s *Script) prepCompile() (
 		symbolTable.DefineBuiltin(idx, fn.Name)
 	}
 
-	globals = make([]Object, GlobalsSize)
+	globals = make([]gst.Object, GlobalsSize)
 
 	for idx, name := range names {
 		symbol := symbolTable.Define(name)
@@ -197,7 +198,7 @@ func (s *Script) prepCompile() (
 type Compiled struct {
 	globalIndexes map[string]int // global symbol name to index
 	bytecode      *Bytecode
-	globals       []Object
+	globals       []gst.Object
 	maxAllocs     int64
 	lock          sync.RWMutex
 }
@@ -262,7 +263,7 @@ func (c *Compiled) Clone() *Compiled {
 	clone := &Compiled{
 		globalIndexes: c.globalIndexes,
 		bytecode:      c.bytecode,
-		globals:       make([]Object, len(c.globals)),
+		globals:       make([]gst.Object, len(c.globals)),
 		maxAllocs:     c.maxAllocs,
 	}
 	// copy global objects
@@ -288,7 +289,7 @@ func (c *Compiled) IsDefined(name string) bool {
 	if v == nil {
 		return false
 	}
-	return v != UndefinedValue
+	return v != gst.UndefinedValue
 }
 
 // Get returns a variable identified by the name.
@@ -296,11 +297,11 @@ func (c *Compiled) Get(name string) *Variable {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	value := UndefinedValue
+	value := gst.UndefinedValue
 	if idx, ok := c.globalIndexes[name]; ok {
 		value = c.globals[idx]
 		if value == nil {
-			value = UndefinedValue
+			value = gst.UndefinedValue
 		}
 	}
 	return &Variable{
@@ -318,7 +319,7 @@ func (c *Compiled) GetAll() []*Variable {
 	for name, idx := range c.globalIndexes {
 		value := c.globals[idx]
 		if value == nil {
-			value = UndefinedValue
+			value = gst.UndefinedValue
 		}
 		vars = append(vars, &Variable{
 			name:  name,

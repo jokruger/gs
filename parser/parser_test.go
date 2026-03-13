@@ -11,6 +11,7 @@ import (
 	. "github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/require"
 	"github.com/jokruger/gs/token"
+	gst "github.com/jokruger/gs/types"
 )
 
 func TestParserError(t *testing.T) {
@@ -291,7 +292,7 @@ func TestParseCall(t *testing.T) {
 			exprStmt(
 				callExpr(
 					ident("add", p(1, 1)),
-					p(1, 4), p(1, 12), NoPos,
+					p(1, 4), p(1, 12), gst.NoPos,
 					intLit(1, p(1, 5)),
 					intLit(2, p(1, 8)),
 					intLit(3, p(1, 11)))))
@@ -316,7 +317,7 @@ func TestParseCall(t *testing.T) {
 				exprs(
 					callExpr(
 						ident("add", p(1, 5)),
-						p(1, 8), p(1, 16), NoPos,
+						p(1, 8), p(1, 16), gst.NoPos,
 						intLit(1, p(1, 9)),
 						intLit(2, p(1, 12)),
 						intLit(3, p(1, 15)))),
@@ -333,7 +334,7 @@ func TestParseCall(t *testing.T) {
 				exprs(
 					callExpr(
 						ident("add", p(1, 8)),
-						p(1, 11), p(1, 19), NoPos,
+						p(1, 11), p(1, 19), gst.NoPos,
 						intLit(1, p(1, 12)),
 						intLit(2, p(1, 15)),
 						intLit(3, p(1, 18)))),
@@ -346,7 +347,7 @@ func TestParseCall(t *testing.T) {
 			exprStmt(
 				callExpr(
 					ident("add", p(1, 1)),
-					p(1, 4), p(1, 26), NoPos,
+					p(1, 4), p(1, 26), gst.NoPos,
 					binaryExpr(
 						ident("a", p(1, 5)),
 						intLit(1, p(1, 9)),
@@ -393,7 +394,7 @@ func TestParseCall(t *testing.T) {
 									ident("b", p(1, 18)),
 									token.Add,
 									p(1, 16))))),
-					p(1, 21), p(1, 26), NoPos,
+					p(1, 21), p(1, 26), gst.NoPos,
 					intLit(1, p(1, 22)),
 					intLit(2, p(1, 25)))))
 	})
@@ -405,7 +406,7 @@ func TestParseCall(t *testing.T) {
 					selectorExpr(
 						ident("a", p(1, 1)),
 						stringLit("b", p(1, 3))),
-					p(1, 4), p(1, 5), NoPos)))
+					p(1, 4), p(1, 5), gst.NoPos)))
 	})
 
 	expectParse(t, `a.b.c()`, func(p pfn) []Stmt {
@@ -417,7 +418,7 @@ func TestParseCall(t *testing.T) {
 							ident("a", p(1, 1)),
 							stringLit("b", p(1, 3))),
 						stringLit("c", p(1, 5))),
-					p(1, 6), p(1, 7), NoPos)))
+					p(1, 6), p(1, 7), gst.NoPos)))
 	})
 
 	expectParse(t, `a["b"].c()`, func(p pfn) []Stmt {
@@ -430,7 +431,7 @@ func TestParseCall(t *testing.T) {
 							stringLit("b", p(1, 3)),
 							p(1, 2), p(1, 6)),
 						stringLit("c", p(1, 8))),
-					p(1, 9), p(1, 10), NoPos)))
+					p(1, 9), p(1, 10), gst.NoPos)))
 	})
 
 	expectParseError(t, `add(...a, 1)`)
@@ -1022,7 +1023,7 @@ func TestParseImport(t *testing.T) {
 					selectorExpr(
 						importExpr("mod1", p(1, 1)),
 						stringLit("func1", p(1, 16))),
-					p(1, 21), p(1, 22), NoPos)))
+					p(1, 21), p(1, 22), gst.NoPos)))
 	})
 
 	expectParse(t, `for x, y in import("mod1") {}`, func(p pfn) []Stmt {
@@ -1667,7 +1668,7 @@ func TestParseNumberExpressions(t *testing.T) {
 	})
 }
 
-type pfn func(int, int) Pos          // position conversion function
+type pfn func(int, int) gst.Pos      // position conversion function
 type expectedFn func(pos pfn) []Stmt // callback function to return expected results
 
 type parseTracer struct {
@@ -1710,8 +1711,8 @@ func expectParse(t *testing.T, input string, fn expectedFn) {
 	actual, err := p.ParseFile()
 	require.NoError(t, err)
 
-	expected := fn(func(line, column int) Pos {
-		return Pos(int(testFile.LineStart(line)) + (column - 1))
+	expected := fn(func(line, column int) gst.Pos {
+		return gst.Pos(int(testFile.LineStart(line)) + (column - 1))
 	})
 	require.Equal(t, len(expected), len(actual.Stmts))
 
@@ -1771,16 +1772,16 @@ func exprStmt(x Expr) *ExprStmt {
 func assignStmt(
 	lhs, rhs []Expr,
 	token token.Token,
-	pos Pos,
+	pos gst.Pos,
 ) *AssignStmt {
 	return &AssignStmt{LHS: lhs, RHS: rhs, Token: token, TokenPos: pos}
 }
 
-func emptyStmt(implicit bool, pos Pos) *EmptyStmt {
+func emptyStmt(implicit bool, pos gst.Pos) *EmptyStmt {
 	return &EmptyStmt{Implicit: implicit, Semicolon: pos}
 }
 
-func returnStmt(pos Pos, result Expr) *ReturnStmt {
+func returnStmt(pos gst.Pos, result Expr) *ReturnStmt {
 	return &ReturnStmt{Result: result, ReturnPos: pos}
 }
 
@@ -1789,7 +1790,7 @@ func forStmt(
 	cond Expr,
 	post Stmt,
 	body *BlockStmt,
-	pos Pos,
+	pos gst.Pos,
 ) *ForStmt {
 	return &ForStmt{
 		Cond: cond, Init: init, Post: post, Body: body, ForPos: pos,
@@ -1800,7 +1801,7 @@ func forInStmt(
 	key, value *Ident,
 	seq Expr,
 	body *BlockStmt,
-	pos Pos,
+	pos gst.Pos,
 ) *ForInStmt {
 	return &ForInStmt{
 		Key: key, Value: value, Iterable: seq, Body: body, ForPos: pos,
@@ -1812,7 +1813,7 @@ func ifStmt(
 	cond Expr,
 	body *BlockStmt,
 	elseStmt Stmt,
-	pos Pos,
+	pos gst.Pos,
 ) *IfStmt {
 	return &IfStmt{
 		Init: init, Cond: cond, Body: body, Else: elseStmt, IfPos: pos,
@@ -1822,25 +1823,25 @@ func ifStmt(
 func incDecStmt(
 	expr Expr,
 	tok token.Token,
-	pos Pos,
+	pos gst.Pos,
 ) *IncDecStmt {
 	return &IncDecStmt{Expr: expr, Token: tok, TokenPos: pos}
 }
 
-func funcType(params *IdentList, pos Pos) *FuncType {
+func funcType(params *IdentList, pos gst.Pos) *FuncType {
 	return &FuncType{Params: params, FuncPos: pos}
 }
 
-func blockStmt(lbrace, rbrace Pos, list ...Stmt) *BlockStmt {
+func blockStmt(lbrace, rbrace gst.Pos, list ...Stmt) *BlockStmt {
 	return &BlockStmt{Stmts: list, LBrace: lbrace, RBrace: rbrace}
 }
 
-func ident(name string, pos Pos) *Ident {
+func ident(name string, pos gst.Pos) *Ident {
 	return &Ident{Name: name, NamePos: pos}
 }
 
 func identList(
-	opening, closing Pos,
+	opening, closing gst.Pos,
 	varArgs bool,
 	list ...*Ident,
 ) *IdentList {
@@ -1852,14 +1853,14 @@ func identList(
 func binaryExpr(
 	x, y Expr,
 	op token.Token,
-	pos Pos,
+	pos gst.Pos,
 ) *BinaryExpr {
 	return &BinaryExpr{LHS: x, RHS: y, Token: op, TokenPos: pos}
 }
 
 func condExpr(
 	cond, trueExpr, falseExpr Expr,
-	questionPos, colonPos Pos,
+	questionPos, colonPos gst.Pos,
 ) *CondExpr {
 	return &CondExpr{
 		Cond: cond, True: trueExpr, False: falseExpr,
@@ -1867,11 +1868,11 @@ func condExpr(
 	}
 }
 
-func unaryExpr(x Expr, op token.Token, pos Pos) *UnaryExpr {
+func unaryExpr(x Expr, op token.Token, pos gst.Pos) *UnaryExpr {
 	return &UnaryExpr{Expr: x, Token: op, TokenPos: pos}
 }
 
-func importExpr(moduleName string, pos Pos) *ImportExpr {
+func importExpr(moduleName string, pos gst.Pos) *ImportExpr {
 	return &ImportExpr{
 		ModuleName: moduleName, Token: token.Import, TokenPos: pos,
 	}
@@ -1881,36 +1882,36 @@ func exprs(list ...Expr) []Expr {
 	return list
 }
 
-func intLit(value int64, pos Pos) *IntLit {
+func intLit(value int64, pos gst.Pos) *IntLit {
 	return &IntLit{Value: value, ValuePos: pos}
 }
 
-func floatLit(value float64, pos Pos) *FloatLit {
+func floatLit(value float64, pos gst.Pos) *FloatLit {
 	return &FloatLit{Value: value, ValuePos: pos}
 }
 
-func stringLit(value string, pos Pos) *StringLit {
+func stringLit(value string, pos gst.Pos) *StringLit {
 	return &StringLit{Value: value, ValuePos: pos}
 }
 
-func charLit(value rune, pos Pos) *CharLit {
+func charLit(value rune, pos gst.Pos) *CharLit {
 	return &CharLit{
 		Value: value, ValuePos: pos, Literal: fmt.Sprintf("'%c'", value),
 	}
 }
 
-func boolLit(value bool, pos Pos) *BoolLit {
+func boolLit(value bool, pos gst.Pos) *BoolLit {
 	return &BoolLit{Value: value, ValuePos: pos}
 }
 
-func arrayLit(lbracket, rbracket Pos, list ...Expr) *ArrayLit {
+func arrayLit(lbracket, rbracket gst.Pos, list ...Expr) *ArrayLit {
 	return &ArrayLit{LBrack: lbracket, RBrack: rbracket, Elements: list}
 }
 
 func mapElementLit(
 	key string,
-	keyPos Pos,
-	colonPos Pos,
+	keyPos gst.Pos,
+	colonPos gst.Pos,
 	value Expr,
 ) *MapElementLit {
 	return &MapElementLit{
@@ -1919,7 +1920,7 @@ func mapElementLit(
 }
 
 func mapLit(
-	lbrace, rbrace Pos,
+	lbrace, rbrace gst.Pos,
 	list ...*MapElementLit,
 ) *MapLit {
 	return &MapLit{LBrace: lbrace, RBrace: rbrace, Elements: list}
@@ -1929,13 +1930,13 @@ func funcLit(funcType *FuncType, body *BlockStmt) *FuncLit {
 	return &FuncLit{Type: funcType, Body: body}
 }
 
-func parenExpr(x Expr, lparen, rparen Pos) *ParenExpr {
+func parenExpr(x Expr, lparen, rparen gst.Pos) *ParenExpr {
 	return &ParenExpr{Expr: x, LParen: lparen, RParen: rparen}
 }
 
 func callExpr(
 	f Expr,
-	lparen, rparen, ellipsis Pos,
+	lparen, rparen, ellipsis gst.Pos,
 	args ...Expr,
 ) *CallExpr {
 	return &CallExpr{Func: f, LParen: lparen, RParen: rparen,
@@ -1944,7 +1945,7 @@ func callExpr(
 
 func indexExpr(
 	x, index Expr,
-	lbrack, rbrack Pos,
+	lbrack, rbrack gst.Pos,
 ) *IndexExpr {
 	return &IndexExpr{
 		Expr: x, Index: index, LBrack: lbrack, RBrack: rbrack,
@@ -1953,7 +1954,7 @@ func indexExpr(
 
 func sliceExpr(
 	x, low, high Expr,
-	lbrack, rbrack Pos,
+	lbrack, rbrack gst.Pos,
 ) *SliceExpr {
 	return &SliceExpr{
 		Expr: x, Low: low, High: high, LBrack: lbrack, RBrack: rbrack,
@@ -1961,9 +1962,9 @@ func sliceExpr(
 }
 
 func errorExpr(
-	pos Pos,
+	pos gst.Pos,
 	x Expr,
-	lparen, rparen Pos,
+	lparen, rparen gst.Pos,
 ) *ErrorExpr {
 	return &ErrorExpr{
 		Expr: x, ErrorPos: pos, LParen: lparen, RParen: rparen,

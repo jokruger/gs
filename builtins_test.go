@@ -7,10 +7,11 @@ import (
 
 	"github.com/jokruger/gs"
 	gse "github.com/jokruger/gs/error"
+	gst "github.com/jokruger/gs/types"
 )
 
 func Test_builtinDelete(t *testing.T) {
-	var builtinDelete func(args ...gs.Object) (gs.Object, error)
+	var builtinDelete func(args ...gst.Object) (gst.Object, error)
 	for _, f := range gs.GetAllBuiltinFunctions() {
 		if f.Name == "delete" {
 			builtinDelete = f.Value
@@ -21,18 +22,18 @@ func Test_builtinDelete(t *testing.T) {
 		t.Fatal("builtin delete not found")
 	}
 	type args struct {
-		args []gs.Object
+		args []gst.Object
 	}
 	tests := []struct {
 		name      string
 		args      args
-		want      gs.Object
+		want      gst.Object
 		wantErr   bool
 		wantedErr error
 		target    interface{}
 	}{
-		{name: "invalid-arg", args: args{[]gs.Object{&gs.String{},
-			&gs.String{}}}, wantErr: true,
+		{name: "invalid-arg", args: args{[]gst.Object{&gst.String{},
+			&gst.String{}}}, wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name:     "first",
 				Expected: "map",
@@ -40,61 +41,61 @@ func Test_builtinDelete(t *testing.T) {
 		},
 		{name: "no-args",
 			wantErr: true, wantedErr: gse.ErrWrongNumArguments},
-		{name: "empty-args", args: args{[]gs.Object{}}, wantErr: true,
+		{name: "empty-args", args: args{[]gst.Object{}}, wantErr: true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
-		{name: "3-args", args: args{[]gs.Object{
-			(*gs.Map)(nil), (*gs.String)(nil), (*gs.String)(nil)}},
+		{name: "3-args", args: args{[]gst.Object{
+			(*gst.Map)(nil), (*gst.String)(nil), (*gst.String)(nil)}},
 			wantErr: true, wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "nil-map-empty-key",
-			args: args{[]gs.Object{&gs.Map{}, &gs.String{}}},
-			want: gs.UndefinedValue,
+			args: args{[]gst.Object{&gst.Map{}, &gst.String{}}},
+			want: gst.UndefinedValue,
 		},
 		{name: "nil-map-nonstr-key",
-			args: args{[]gs.Object{
-				&gs.Map{}, &gs.Int{}}}, wantErr: true,
+			args: args{[]gst.Object{
+				&gst.Map{}, &gst.Int{}}}, wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "second", Expected: "string", Found: "int"},
 		},
 		{name: "nil-map-no-key",
-			args: args{[]gs.Object{&gs.Map{}}}, wantErr: true,
+			args: args{[]gst.Object{&gst.Map{}}}, wantErr: true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "map-missing-key",
 			args: args{
-				[]gs.Object{
-					&gs.Map{Value: map[string]gs.Object{
-						"key": &gs.String{Value: "value"},
+				[]gst.Object{
+					&gst.Map{Value: map[string]gst.Object{
+						"key": &gst.String{Value: "value"},
 					}},
-					&gs.String{Value: "key1"}}},
-			want: gs.UndefinedValue,
-			target: &gs.Map{
-				Value: map[string]gs.Object{
-					"key": &gs.String{
+					&gst.String{Value: "key1"}}},
+			want: gst.UndefinedValue,
+			target: &gst.Map{
+				Value: map[string]gst.Object{
+					"key": &gst.String{
 						Value: "value"}}},
 		},
 		{name: "map-emptied",
 			args: args{
-				[]gs.Object{
-					&gs.Map{Value: map[string]gs.Object{
-						"key": &gs.String{Value: "value"},
+				[]gst.Object{
+					&gst.Map{Value: map[string]gst.Object{
+						"key": &gst.String{Value: "value"},
 					}},
-					&gs.String{Value: "key"}}},
-			want:   gs.UndefinedValue,
-			target: &gs.Map{Value: map[string]gs.Object{}},
+					&gst.String{Value: "key"}}},
+			want:   gst.UndefinedValue,
+			target: &gst.Map{Value: map[string]gst.Object{}},
 		},
 		{name: "map-multi-keys",
 			args: args{
-				[]gs.Object{
-					&gs.Map{Value: map[string]gs.Object{
-						"key1": &gs.String{Value: "value1"},
-						"key2": &gs.Int{Value: 10},
+				[]gst.Object{
+					&gst.Map{Value: map[string]gst.Object{
+						"key1": &gst.String{Value: "value1"},
+						"key2": &gst.Int{Value: 10},
 					}},
-					&gs.String{Value: "key1"}}},
-			want: gs.UndefinedValue,
-			target: &gs.Map{Value: map[string]gs.Object{
-				"key2": &gs.Int{Value: 10}}},
+					&gst.String{Value: "key1"}}},
+			want: gst.UndefinedValue,
+			target: &gst.Map{Value: map[string]gst.Object{
+				"key2": &gst.Int{Value: 10}}},
 		},
 	}
 	for _, tt := range tests {
@@ -118,7 +119,7 @@ func Test_builtinDelete(t *testing.T) {
 			}
 			if !tt.wantErr && tt.target != nil {
 				switch v := tt.args.args[0].(type) {
-				case *gs.Map, *gs.Array:
+				case *gst.Map, *gst.Array:
 					if !reflect.DeepEqual(tt.target, tt.args.args[0]) {
 						t.Errorf("builtinDelete() objects are not equal "+
 							"got: %+v, want: %+v", tt.args.args[0], tt.target)
@@ -134,7 +135,7 @@ func Test_builtinDelete(t *testing.T) {
 }
 
 func Test_builtinSplice(t *testing.T) {
-	var builtinSplice func(args ...gs.Object) (gs.Object, error)
+	var builtinSplice func(args ...gst.Object) (gst.Object, error)
 	for _, f := range gs.GetAllBuiltinFunctions() {
 		if f.Name == "splice" {
 			builtinSplice = f.Value
@@ -146,188 +147,188 @@ func Test_builtinSplice(t *testing.T) {
 	}
 	tests := []struct {
 		name      string
-		args      []gs.Object
-		deleted   gs.Object
-		Array     *gs.Array
+		args      []gst.Object
+		deleted   gst.Object
+		Array     *gst.Array
 		wantErr   bool
 		wantedErr error
 	}{
-		{name: "no args", args: []gs.Object{}, wantErr: true,
+		{name: "no args", args: []gst.Object{}, wantErr: true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
-		{name: "invalid args", args: []gs.Object{&gs.Map{}},
+		{name: "invalid args", args: []gst.Object{&gst.Map{}},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "first", Expected: "array", Found: "map"},
 		},
 		{name: "invalid args",
-			args:    []gs.Object{&gs.Array{}, &gs.String{}},
+			args:    []gst.Object{&gst.Array{}, &gst.String{}},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "second", Expected: "int", Found: "string"},
 		},
 		{name: "negative index",
-			args:      []gs.Object{&gs.Array{}, &gs.Int{Value: -1}},
+			args:      []gst.Object{&gst.Array{}, &gst.Int{Value: -1}},
 			wantErr:   true,
 			wantedErr: gse.ErrIndexOutOfBounds},
 		{name: "non int count",
-			args: []gs.Object{
-				&gs.Array{}, &gs.Int{Value: 0},
-				&gs.String{Value: ""}},
+			args: []gst.Object{
+				&gst.Array{}, &gst.Int{Value: 0},
+				&gst.String{Value: ""}},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "third", Expected: "int", Found: "string"},
 		},
 		{name: "negative count",
-			args: []gs.Object{
-				&gs.Array{Value: []gs.Object{
-					&gs.Int{Value: 0},
-					&gs.Int{Value: 1},
-					&gs.Int{Value: 2}}},
-				&gs.Int{Value: 0},
-				&gs.Int{Value: -1}},
+			args: []gst.Object{
+				&gst.Array{Value: []gst.Object{
+					&gst.Int{Value: 0},
+					&gst.Int{Value: 1},
+					&gst.Int{Value: 2}}},
+				&gst.Int{Value: 0},
+				&gst.Int{Value: -1}},
 			wantErr:   true,
 			wantedErr: gse.ErrIndexOutOfBounds,
 		},
 		{name: "insert with zero count",
-			args: []gs.Object{
-				&gs.Array{Value: []gs.Object{
-					&gs.Int{Value: 0},
-					&gs.Int{Value: 1},
-					&gs.Int{Value: 2}}},
-				&gs.Int{Value: 0},
-				&gs.Int{Value: 0},
-				&gs.String{Value: "b"}},
-			deleted: &gs.Array{Value: []gs.Object{}},
-			Array: &gs.Array{Value: []gs.Object{
-				&gs.String{Value: "b"},
-				&gs.Int{Value: 0},
-				&gs.Int{Value: 1},
-				&gs.Int{Value: 2}}},
+			args: []gst.Object{
+				&gst.Array{Value: []gst.Object{
+					&gst.Int{Value: 0},
+					&gst.Int{Value: 1},
+					&gst.Int{Value: 2}}},
+				&gst.Int{Value: 0},
+				&gst.Int{Value: 0},
+				&gst.String{Value: "b"}},
+			deleted: &gst.Array{Value: []gst.Object{}},
+			Array: &gst.Array{Value: []gst.Object{
+				&gst.String{Value: "b"},
+				&gst.Int{Value: 0},
+				&gst.Int{Value: 1},
+				&gst.Int{Value: 2}}},
 		},
 		{name: "insert",
-			args: []gs.Object{
-				&gs.Array{Value: []gs.Object{
-					&gs.Int{Value: 0},
-					&gs.Int{Value: 1},
-					&gs.Int{Value: 2}}},
-				&gs.Int{Value: 1},
-				&gs.Int{Value: 0},
-				&gs.String{Value: "c"},
-				&gs.String{Value: "d"}},
-			deleted: &gs.Array{Value: []gs.Object{}},
-			Array: &gs.Array{Value: []gs.Object{
-				&gs.Int{Value: 0},
-				&gs.String{Value: "c"},
-				&gs.String{Value: "d"},
-				&gs.Int{Value: 1},
-				&gs.Int{Value: 2}}},
+			args: []gst.Object{
+				&gst.Array{Value: []gst.Object{
+					&gst.Int{Value: 0},
+					&gst.Int{Value: 1},
+					&gst.Int{Value: 2}}},
+				&gst.Int{Value: 1},
+				&gst.Int{Value: 0},
+				&gst.String{Value: "c"},
+				&gst.String{Value: "d"}},
+			deleted: &gst.Array{Value: []gst.Object{}},
+			Array: &gst.Array{Value: []gst.Object{
+				&gst.Int{Value: 0},
+				&gst.String{Value: "c"},
+				&gst.String{Value: "d"},
+				&gst.Int{Value: 1},
+				&gst.Int{Value: 2}}},
 		},
 		{name: "insert with zero count",
-			args: []gs.Object{
-				&gs.Array{Value: []gs.Object{
-					&gs.Int{Value: 0},
-					&gs.Int{Value: 1},
-					&gs.Int{Value: 2}}},
-				&gs.Int{Value: 1},
-				&gs.Int{Value: 0},
-				&gs.String{Value: "c"},
-				&gs.String{Value: "d"}},
-			deleted: &gs.Array{Value: []gs.Object{}},
-			Array: &gs.Array{Value: []gs.Object{
-				&gs.Int{Value: 0},
-				&gs.String{Value: "c"},
-				&gs.String{Value: "d"},
-				&gs.Int{Value: 1},
-				&gs.Int{Value: 2}}},
+			args: []gst.Object{
+				&gst.Array{Value: []gst.Object{
+					&gst.Int{Value: 0},
+					&gst.Int{Value: 1},
+					&gst.Int{Value: 2}}},
+				&gst.Int{Value: 1},
+				&gst.Int{Value: 0},
+				&gst.String{Value: "c"},
+				&gst.String{Value: "d"}},
+			deleted: &gst.Array{Value: []gst.Object{}},
+			Array: &gst.Array{Value: []gst.Object{
+				&gst.Int{Value: 0},
+				&gst.String{Value: "c"},
+				&gst.String{Value: "d"},
+				&gst.Int{Value: 1},
+				&gst.Int{Value: 2}}},
 		},
 		{name: "insert with delete",
-			args: []gs.Object{
-				&gs.Array{Value: []gs.Object{
-					&gs.Int{Value: 0},
-					&gs.Int{Value: 1},
-					&gs.Int{Value: 2}}},
-				&gs.Int{Value: 1},
-				&gs.Int{Value: 1},
-				&gs.String{Value: "c"},
-				&gs.String{Value: "d"}},
-			deleted: &gs.Array{
-				Value: []gs.Object{&gs.Int{Value: 1}}},
-			Array: &gs.Array{Value: []gs.Object{
-				&gs.Int{Value: 0},
-				&gs.String{Value: "c"},
-				&gs.String{Value: "d"},
-				&gs.Int{Value: 2}}},
+			args: []gst.Object{
+				&gst.Array{Value: []gst.Object{
+					&gst.Int{Value: 0},
+					&gst.Int{Value: 1},
+					&gst.Int{Value: 2}}},
+				&gst.Int{Value: 1},
+				&gst.Int{Value: 1},
+				&gst.String{Value: "c"},
+				&gst.String{Value: "d"}},
+			deleted: &gst.Array{
+				Value: []gst.Object{&gst.Int{Value: 1}}},
+			Array: &gst.Array{Value: []gst.Object{
+				&gst.Int{Value: 0},
+				&gst.String{Value: "c"},
+				&gst.String{Value: "d"},
+				&gst.Int{Value: 2}}},
 		},
 		{name: "insert with delete multi",
-			args: []gs.Object{
-				&gs.Array{Value: []gs.Object{
-					&gs.Int{Value: 0},
-					&gs.Int{Value: 1},
-					&gs.Int{Value: 2}}},
-				&gs.Int{Value: 1},
-				&gs.Int{Value: 2},
-				&gs.String{Value: "c"},
-				&gs.String{Value: "d"}},
-			deleted: &gs.Array{Value: []gs.Object{
-				&gs.Int{Value: 1},
-				&gs.Int{Value: 2}}},
-			Array: &gs.Array{
-				Value: []gs.Object{
-					&gs.Int{Value: 0},
-					&gs.String{Value: "c"},
-					&gs.String{Value: "d"}}},
+			args: []gst.Object{
+				&gst.Array{Value: []gst.Object{
+					&gst.Int{Value: 0},
+					&gst.Int{Value: 1},
+					&gst.Int{Value: 2}}},
+				&gst.Int{Value: 1},
+				&gst.Int{Value: 2},
+				&gst.String{Value: "c"},
+				&gst.String{Value: "d"}},
+			deleted: &gst.Array{Value: []gst.Object{
+				&gst.Int{Value: 1},
+				&gst.Int{Value: 2}}},
+			Array: &gst.Array{
+				Value: []gst.Object{
+					&gst.Int{Value: 0},
+					&gst.String{Value: "c"},
+					&gst.String{Value: "d"}}},
 		},
 		{name: "delete all with positive count",
-			args: []gs.Object{
-				&gs.Array{Value: []gs.Object{
-					&gs.Int{Value: 0},
-					&gs.Int{Value: 1},
-					&gs.Int{Value: 2}}},
-				&gs.Int{Value: 0},
-				&gs.Int{Value: 3}},
-			deleted: &gs.Array{Value: []gs.Object{
-				&gs.Int{Value: 0},
-				&gs.Int{Value: 1},
-				&gs.Int{Value: 2}}},
-			Array: &gs.Array{Value: []gs.Object{}},
+			args: []gst.Object{
+				&gst.Array{Value: []gst.Object{
+					&gst.Int{Value: 0},
+					&gst.Int{Value: 1},
+					&gst.Int{Value: 2}}},
+				&gst.Int{Value: 0},
+				&gst.Int{Value: 3}},
+			deleted: &gst.Array{Value: []gst.Object{
+				&gst.Int{Value: 0},
+				&gst.Int{Value: 1},
+				&gst.Int{Value: 2}}},
+			Array: &gst.Array{Value: []gst.Object{}},
 		},
 		{name: "delete all with big count",
-			args: []gs.Object{
-				&gs.Array{Value: []gs.Object{
-					&gs.Int{Value: 0},
-					&gs.Int{Value: 1},
-					&gs.Int{Value: 2}}},
-				&gs.Int{Value: 0},
-				&gs.Int{Value: 5}},
-			deleted: &gs.Array{Value: []gs.Object{
-				&gs.Int{Value: 0},
-				&gs.Int{Value: 1},
-				&gs.Int{Value: 2}}},
-			Array: &gs.Array{Value: []gs.Object{}},
+			args: []gst.Object{
+				&gst.Array{Value: []gst.Object{
+					&gst.Int{Value: 0},
+					&gst.Int{Value: 1},
+					&gst.Int{Value: 2}}},
+				&gst.Int{Value: 0},
+				&gst.Int{Value: 5}},
+			deleted: &gst.Array{Value: []gst.Object{
+				&gst.Int{Value: 0},
+				&gst.Int{Value: 1},
+				&gst.Int{Value: 2}}},
+			Array: &gst.Array{Value: []gst.Object{}},
 		},
 		{name: "nothing2",
-			args: []gs.Object{
-				&gs.Array{Value: []gs.Object{
-					&gs.Int{Value: 0},
-					&gs.Int{Value: 1},
-					&gs.Int{Value: 2}}}},
-			Array: &gs.Array{Value: []gs.Object{}},
-			deleted: &gs.Array{Value: []gs.Object{
-				&gs.Int{Value: 0},
-				&gs.Int{Value: 1},
-				&gs.Int{Value: 2}}},
+			args: []gst.Object{
+				&gst.Array{Value: []gst.Object{
+					&gst.Int{Value: 0},
+					&gst.Int{Value: 1},
+					&gst.Int{Value: 2}}}},
+			Array: &gst.Array{Value: []gst.Object{}},
+			deleted: &gst.Array{Value: []gst.Object{
+				&gst.Int{Value: 0},
+				&gst.Int{Value: 1},
+				&gst.Int{Value: 2}}},
 		},
 		{name: "pop without count",
-			args: []gs.Object{
-				&gs.Array{Value: []gs.Object{
-					&gs.Int{Value: 0},
-					&gs.Int{Value: 1},
-					&gs.Int{Value: 2}}},
-				&gs.Int{Value: 2}},
-			deleted: &gs.Array{Value: []gs.Object{&gs.Int{Value: 2}}},
-			Array: &gs.Array{Value: []gs.Object{
-				&gs.Int{Value: 0}, &gs.Int{Value: 1}}},
+			args: []gst.Object{
+				&gst.Array{Value: []gst.Object{
+					&gst.Int{Value: 0},
+					&gst.Int{Value: 1},
+					&gst.Int{Value: 2}}},
+				&gst.Int{Value: 2}},
+			deleted: &gst.Array{Value: []gst.Object{&gst.Int{Value: 2}}},
+			Array: &gst.Array{Value: []gst.Object{
+				&gst.Int{Value: 0}, &gst.Int{Value: 1}}},
 		},
 	}
 	for _, tt := range tests {
@@ -347,14 +348,14 @@ func Test_builtinSplice(t *testing.T) {
 			}
 			if tt.Array != nil && !reflect.DeepEqual(tt.Array, tt.args[0]) {
 				t.Errorf("builtinSplice() arrays are not equal expected"+
-					" %s, got %s", tt.Array, tt.args[0].(*gs.Array))
+					" %s, got %s", tt.Array, tt.args[0].(*gst.Array))
 			}
 		})
 	}
 }
 
 func Test_builtinRange(t *testing.T) {
-	var builtinRange func(args ...gs.Object) (gs.Object, error)
+	var builtinRange func(args ...gst.Object) (gst.Object, error)
 	for _, f := range gs.GetAllBuiltinFunctions() {
 		if f.Name == "range" {
 			builtinRange = f.Value
@@ -366,62 +367,62 @@ func Test_builtinRange(t *testing.T) {
 	}
 	tests := []struct {
 		name      string
-		args      []gs.Object
-		result    *gs.Array
+		args      []gst.Object
+		result    *gst.Array
 		wantErr   bool
 		wantedErr error
 	}{
-		{name: "no args", args: []gs.Object{}, wantErr: true,
+		{name: "no args", args: []gst.Object{}, wantErr: true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
-		{name: "single args", args: []gs.Object{&gs.Map{}},
+		{name: "single args", args: []gst.Object{&gst.Map{}},
 			wantErr:   true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
-		{name: "4 args", args: []gs.Object{&gs.Map{}, &gs.String{}, &gs.String{}, &gs.String{}},
+		{name: "4 args", args: []gst.Object{&gst.Map{}, &gst.String{}, &gst.String{}, &gst.String{}},
 			wantErr:   true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "invalid start",
-			args:    []gs.Object{&gs.String{}, &gs.String{}},
+			args:    []gst.Object{&gst.String{}, &gst.String{}},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "start", Expected: "int", Found: "string"},
 		},
 		{name: "invalid stop",
-			args:    []gs.Object{&gs.Int{}, &gs.String{}},
+			args:    []gst.Object{&gst.Int{}, &gst.String{}},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "stop", Expected: "int", Found: "string"},
 		},
 		{name: "invalid step",
-			args:    []gs.Object{&gs.Int{}, &gs.Int{}, &gs.String{}},
+			args:    []gst.Object{&gst.Int{}, &gst.Int{}, &gst.String{}},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "step", Expected: "int", Found: "string"},
 		},
 		{name: "zero step",
-			args:      []gs.Object{&gs.Int{}, &gs.Int{}, &gs.Int{}}, //must greate than 0
+			args:      []gst.Object{&gst.Int{}, &gst.Int{}, &gst.Int{}}, //must greate than 0
 			wantErr:   true,
 			wantedErr: gse.ErrInvalidRangeStep,
 		},
 		{name: "negative step",
-			args:      []gs.Object{&gs.Int{}, &gs.Int{}, intObject(-2)}, //must greate than 0
+			args:      []gst.Object{&gst.Int{}, &gst.Int{}, intObject(-2)}, //must greate than 0
 			wantErr:   true,
 			wantedErr: gse.ErrInvalidRangeStep,
 		},
 		{name: "same bound",
-			args:    []gs.Object{&gs.Int{}, &gs.Int{}},
+			args:    []gst.Object{&gst.Int{}, &gst.Int{}},
 			wantErr: false,
-			result: &gs.Array{
+			result: &gst.Array{
 				Value: nil,
 			},
 		},
 		{name: "positive range",
-			args:    []gs.Object{&gs.Int{}, &gs.Int{Value: 5}},
+			args:    []gst.Object{&gst.Int{}, &gst.Int{Value: 5}},
 			wantErr: false,
-			result: &gs.Array{
-				Value: []gs.Object{
+			result: &gst.Array{
+				Value: []gst.Object{
 					intObject(0),
 					intObject(1),
 					intObject(2),
@@ -431,10 +432,10 @@ func Test_builtinRange(t *testing.T) {
 			},
 		},
 		{name: "negative range",
-			args:    []gs.Object{&gs.Int{}, &gs.Int{Value: -5}},
+			args:    []gst.Object{&gst.Int{}, &gst.Int{Value: -5}},
 			wantErr: false,
-			result: &gs.Array{
-				Value: []gs.Object{
+			result: &gst.Array{
+				Value: []gst.Object{
 					intObject(0),
 					intObject(-1),
 					intObject(-2),
@@ -445,10 +446,10 @@ func Test_builtinRange(t *testing.T) {
 		},
 
 		{name: "positive with step",
-			args:    []gs.Object{&gs.Int{}, &gs.Int{Value: 5}, &gs.Int{Value: 2}},
+			args:    []gst.Object{&gst.Int{}, &gst.Int{Value: 5}, &gst.Int{Value: 2}},
 			wantErr: false,
-			result: &gs.Array{
-				Value: []gs.Object{
+			result: &gst.Array{
+				Value: []gst.Object{
 					intObject(0),
 					intObject(2),
 					intObject(4),
@@ -457,10 +458,10 @@ func Test_builtinRange(t *testing.T) {
 		},
 
 		{name: "negative with step",
-			args:    []gs.Object{&gs.Int{}, &gs.Int{Value: -10}, &gs.Int{Value: 2}},
+			args:    []gst.Object{&gst.Int{}, &gst.Int{Value: -10}, &gst.Int{Value: 2}},
 			wantErr: false,
-			result: &gs.Array{
-				Value: []gs.Object{
+			result: &gst.Array{
+				Value: []gst.Object{
 					intObject(0),
 					intObject(-2),
 					intObject(-4),
@@ -471,10 +472,10 @@ func Test_builtinRange(t *testing.T) {
 		},
 
 		{name: "large range",
-			args:    []gs.Object{intObject(-10), intObject(10), &gs.Int{Value: 3}},
+			args:    []gst.Object{intObject(-10), intObject(10), &gst.Int{Value: 3}},
 			wantErr: false,
-			result: &gs.Array{
-				Value: []gs.Object{
+			result: &gst.Array{
+				Value: []gst.Object{
 					intObject(-10),
 					intObject(-7),
 					intObject(-4),
@@ -500,7 +501,7 @@ func Test_builtinRange(t *testing.T) {
 			}
 			if tt.result != nil && !reflect.DeepEqual(tt.result, got) {
 				t.Errorf("builtinRange() arrays are not equal expected"+
-					" %s, got %s", tt.result, got.(*gs.Array))
+					" %s, got %s", tt.result, got.(*gst.Array))
 			}
 		})
 	}

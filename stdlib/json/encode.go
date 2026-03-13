@@ -14,7 +14,7 @@ import (
 	"strconv"
 	"unicode/utf8"
 
-	"github.com/jokruger/gs"
+	gst "github.com/jokruger/gs/types"
 )
 
 // safeSet holds the value true if the ASCII character with the given array
@@ -125,11 +125,11 @@ var safeSet = [utf8.RuneSelf]bool{
 var hex = "0123456789abcdef"
 
 // Encode returns the JSON encoding of the object.
-func Encode(o gs.Object) ([]byte, error) {
+func Encode(o gst.Object) ([]byte, error) {
 	var b []byte
 
 	switch o := o.(type) {
-	case *gs.Array:
+	case *gst.Array:
 		b = append(b, '[')
 		len1 := len(o.Value) - 1
 		for idx, elem := range o.Value {
@@ -143,7 +143,7 @@ func Encode(o gs.Object) ([]byte, error) {
 			}
 		}
 		b = append(b, ']')
-	case *gs.ImmutableArray:
+	case *gst.ImmutableArray:
 		b = append(b, '[')
 		len1 := len(o.Value) - 1
 		for idx, elem := range o.Value {
@@ -157,7 +157,7 @@ func Encode(o gs.Object) ([]byte, error) {
 			}
 		}
 		b = append(b, ']')
-	case *gs.Map:
+	case *gst.Map:
 		b = append(b, '{')
 		len1 := len(o.Value) - 1
 		idx := 0
@@ -175,7 +175,7 @@ func Encode(o gs.Object) ([]byte, error) {
 			idx++
 		}
 		b = append(b, '}')
-	case *gs.ImmutableMap:
+	case *gst.ImmutableMap:
 		b = append(b, '{')
 		len1 := len(o.Value) - 1
 		idx := 0
@@ -193,22 +193,22 @@ func Encode(o gs.Object) ([]byte, error) {
 			idx++
 		}
 		b = append(b, '}')
-	case *gs.Bool:
+	case *gst.Bool:
 		if o.IsFalsy() {
 			b = strconv.AppendBool(b, false)
 		} else {
 			b = strconv.AppendBool(b, true)
 		}
-	case *gs.Bytes:
+	case *gst.Bytes:
 		b = append(b, '"')
 		encodedLen := base64.StdEncoding.EncodedLen(len(o.Value))
 		dst := make([]byte, encodedLen)
 		base64.StdEncoding.Encode(dst, o.Value)
 		b = append(b, dst...)
 		b = append(b, '"')
-	case *gs.Char:
+	case *gst.Char:
 		b = strconv.AppendInt(b, int64(o.Value), 10)
-	case *gs.Float:
+	case *gst.Float:
 		var y []byte
 
 		f := o.Value
@@ -236,17 +236,17 @@ func Encode(o gs.Object) ([]byte, error) {
 		}
 
 		b = append(b, y...)
-	case *gs.Int:
+	case *gst.Int:
 		b = strconv.AppendInt(b, o.Value, 10)
-	case *gs.String:
+	case *gst.String:
 		b = encodeString(b, o.Value)
-	case *gs.Time:
+	case *gst.Time:
 		y, err := o.Value.MarshalJSON()
 		if err != nil {
 			return nil, err
 		}
 		b = append(b, y...)
-	case *gs.Undefined:
+	case *gst.Undefined:
 		b = append(b, "null"...)
 	default:
 		// unknown type: ignore

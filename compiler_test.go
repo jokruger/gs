@@ -11,6 +11,7 @@ import (
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/require"
 	"github.com/jokruger/gs/stdlib"
+	gst "github.com/jokruger/gs/types"
 )
 
 func TestCompiler_Compile(t *testing.T) {
@@ -1337,11 +1338,11 @@ func concatInsts(instructions ...[]byte) []byte {
 
 func bytecode(
 	instructions []byte,
-	constants []gs.Object,
+	constants []gst.Object,
 ) *gs.Bytecode {
 	return &gs.Bytecode{
 		FileSet:      parser.NewFileSet(),
-		MainFunction: &gs.CompiledFunction{Instructions: instructions},
+		MainFunction: &gst.CompiledFunction{Instructions: instructions},
 		Constants:    constants,
 	}
 }
@@ -1390,7 +1391,7 @@ func equalBytecode(t *testing.T, expected, actual *gs.Bytecode) {
 	equalConstants(t, expected.Constants, actual.Constants)
 }
 
-func equalConstants(t *testing.T, expected, actual []gs.Object) {
+func equalConstants(t *testing.T, expected, actual []gst.Object) {
 	require.Equal(t, len(expected), len(actual))
 	for i := 0; i < len(expected); i++ {
 		require.Equal(t, expected[i], actual[i])
@@ -1408,7 +1409,7 @@ func (o *compileTracer) Write(p []byte) (n int, err error) {
 
 func traceCompile(
 	input string,
-	symbols map[string]gs.Object,
+	symbols map[string]gst.Object,
 ) (res *gs.Bytecode, trace []string, err error) {
 	fileSet := parser.NewFileSet()
 	file := fileSet.AddFile("test", -1, len(input))
@@ -1447,23 +1448,20 @@ func traceCompile(
 	return
 }
 
-func objectsArray(o ...gs.Object) []gs.Object {
+func objectsArray(o ...gst.Object) []gst.Object {
 	return o
 }
 
-func intObject(v int64) *gs.Int {
-	return &gs.Int{Value: v}
+func intObject(v int64) *gst.Int {
+	return &gst.Int{Value: v}
 }
 
-func stringObject(v string) *gs.String {
-	return &gs.String{Value: v}
+func stringObject(v string) *gst.String {
+	return &gst.String{Value: v}
 }
 
-func compiledFunction(
-	numLocals, numParams int,
-	insts ...[]byte,
-) *gs.CompiledFunction {
-	return &gs.CompiledFunction{
+func compiledFunction(numLocals, numParams int, insts ...[]byte) *gst.CompiledFunction {
+	return &gst.CompiledFunction{
 		Instructions:  concatInsts(insts...),
 		NumLocals:     numLocals,
 		NumParameters: numParams,

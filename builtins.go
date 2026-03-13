@@ -2,9 +2,10 @@ package gs
 
 import (
 	gse "github.com/jokruger/gs/error"
+	gst "github.com/jokruger/gs/types"
 )
 
-var builtinFuncs = []*BuiltinFunction{
+var builtinFuncs = []*gst.BuiltinFunction{
 	{Name: "len", Value: builtinLen},
 	{Name: "copy", Value: builtinCopy},
 	{Name: "append", Value: builtinAppend},
@@ -39,196 +40,196 @@ var builtinFuncs = []*BuiltinFunction{
 }
 
 // GetAllBuiltinFunctions returns all builtin function objects.
-func GetAllBuiltinFunctions() []*BuiltinFunction {
-	return append([]*BuiltinFunction{}, builtinFuncs...)
+func GetAllBuiltinFunctions() []*gst.BuiltinFunction {
+	return append([]*gst.BuiltinFunction{}, builtinFuncs...)
 }
 
-func builtinTypeName(args ...Object) (Object, error) {
+func builtinTypeName(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	return &String{Value: args[0].TypeName()}, nil
+	return &gst.String{Value: args[0].TypeName()}, nil
 }
 
-func builtinIsString(args ...Object) (Object, error) {
+func builtinIsString(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*String); ok {
-		return TrueValue, nil
+	if _, ok := args[0].(*gst.String); ok {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsInt(args ...Object) (Object, error) {
+func builtinIsInt(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Int); ok {
-		return TrueValue, nil
+	if _, ok := args[0].(*gst.Int); ok {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsFloat(args ...Object) (Object, error) {
+func builtinIsFloat(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Float); ok {
-		return TrueValue, nil
+	if _, ok := args[0].(*gst.Float); ok {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsBool(args ...Object) (Object, error) {
+func builtinIsBool(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Bool); ok {
-		return TrueValue, nil
+	if _, ok := args[0].(*gst.Bool); ok {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsChar(args ...Object) (Object, error) {
+func builtinIsChar(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Char); ok {
-		return TrueValue, nil
+	if _, ok := args[0].(*gst.Char); ok {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsBytes(args ...Object) (Object, error) {
+func builtinIsBytes(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Bytes); ok {
-		return TrueValue, nil
+	if _, ok := args[0].(*gst.Bytes); ok {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsArray(args ...Object) (Object, error) {
+func builtinIsArray(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Array); ok {
-		return TrueValue, nil
+	if _, ok := args[0].(*gst.Array); ok {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsImmutableArray(args ...Object) (Object, error) {
+func builtinIsImmutableArray(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*ImmutableArray); ok {
-		return TrueValue, nil
+	if _, ok := args[0].(*gst.ImmutableArray); ok {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsMap(args ...Object) (Object, error) {
+func builtinIsMap(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Map); ok {
-		return TrueValue, nil
+	if _, ok := args[0].(*gst.Map); ok {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsImmutableMap(args ...Object) (Object, error) {
+func builtinIsImmutableMap(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*ImmutableMap); ok {
-		return TrueValue, nil
+	if _, ok := args[0].(*gst.ImmutableMap); ok {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsTime(args ...Object) (Object, error) {
+func builtinIsTime(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Time); ok {
-		return TrueValue, nil
+	if _, ok := args[0].(*gst.Time); ok {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsError(args ...Object) (Object, error) {
+func builtinIsError(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Error); ok {
-		return TrueValue, nil
+	if _, ok := args[0].(*gst.Error); ok {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsUndefined(args ...Object) (Object, error) {
+func builtinIsUndefined(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if args[0] == UndefinedValue {
-		return TrueValue, nil
+	if args[0] == gst.UndefinedValue {
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsFunction(args ...Object) (Object, error) {
+func builtinIsFunction(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
 	switch args[0].(type) {
-	case *CompiledFunction:
-		return TrueValue, nil
+	case *gst.CompiledFunction:
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsCallable(args ...Object) (Object, error) {
+func builtinIsCallable(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
 	if args[0].CanCall() {
-		return TrueValue, nil
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
-func builtinIsIterable(args ...Object) (Object, error) {
+func builtinIsIterable(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
 	if args[0].CanIterate() {
-		return TrueValue, nil
+		return gst.TrueValue, nil
 	}
-	return FalseValue, nil
+	return gst.FalseValue, nil
 }
 
 // len(obj object) => int
-func builtinLen(args ...Object) (Object, error) {
+func builtinLen(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
 	switch arg := args[0].(type) {
-	case *Array:
-		return &Int{Value: int64(len(arg.Value))}, nil
-	case *ImmutableArray:
-		return &Int{Value: int64(len(arg.Value))}, nil
-	case *String:
-		return &Int{Value: int64(len(arg.Value))}, nil
-	case *Bytes:
-		return &Int{Value: int64(len(arg.Value))}, nil
-	case *Map:
-		return &Int{Value: int64(len(arg.Value))}, nil
-	case *ImmutableMap:
-		return &Int{Value: int64(len(arg.Value))}, nil
+	case *gst.Array:
+		return &gst.Int{Value: int64(len(arg.Value))}, nil
+	case *gst.ImmutableArray:
+		return &gst.Int{Value: int64(len(arg.Value))}, nil
+	case *gst.String:
+		return &gst.Int{Value: int64(len(arg.Value))}, nil
+	case *gst.Bytes:
+		return &gst.Int{Value: int64(len(arg.Value))}, nil
+	case *gst.Map:
+		return &gst.Int{Value: int64(len(arg.Value))}, nil
+	case *gst.ImmutableMap:
+		return &gst.Int{Value: int64(len(arg.Value))}, nil
 	default:
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -239,15 +240,15 @@ func builtinLen(args ...Object) (Object, error) {
 }
 
 // range(start, stop[, step])
-func builtinRange(args ...Object) (Object, error) {
+func builtinRange(args ...gst.Object) (gst.Object, error) {
 	numArgs := len(args)
 	if numArgs < 2 || numArgs > 3 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	var start, stop, step *Int
+	var start, stop, step *gst.Int
 
 	for i, arg := range args {
-		v, ok := args[i].(*Int)
+		v, ok := args[i].(*gst.Int)
 		if !ok {
 			var name string
 			switch i {
@@ -279,23 +280,23 @@ func builtinRange(args ...Object) (Object, error) {
 	}
 
 	if step == nil {
-		step = &Int{Value: int64(1)}
+		step = &gst.Int{Value: int64(1)}
 	}
 
 	return buildRange(start.Value, stop.Value, step.Value), nil
 }
 
-func buildRange(start, stop, step int64) *Array {
-	array := &Array{}
+func buildRange(start, stop, step int64) *gst.Array {
+	array := &gst.Array{}
 	if start <= stop {
 		for i := start; i < stop; i += step {
-			array.Value = append(array.Value, &Int{
+			array.Value = append(array.Value, &gst.Int{
 				Value: i,
 			})
 		}
 	} else {
 		for i := start; i > stop; i -= step {
-			array.Value = append(array.Value, &Int{
+			array.Value = append(array.Value, &gst.Int{
 				Value: i,
 			})
 		}
@@ -303,12 +304,12 @@ func buildRange(start, stop, step int64) *Array {
 	return array
 }
 
-func builtinFormat(args ...Object) (Object, error) {
+func builtinFormat(args ...gst.Object) (gst.Object, error) {
 	numArgs := len(args)
 	if numArgs == 0 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	format, ok := args[0].(*String)
+	format, ok := args[0].(*gst.String)
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "format",
@@ -324,162 +325,162 @@ func builtinFormat(args ...Object) (Object, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &String{Value: s}, nil
+	return &gst.String{Value: s}, nil
 }
 
-func builtinCopy(args ...Object) (Object, error) {
+func builtinCopy(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
 	return args[0].Copy(), nil
 }
 
-func builtinString(args ...Object) (Object, error) {
+func builtinString(args ...gst.Object) (gst.Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*String); ok {
+	if _, ok := args[0].(*gst.String); ok {
 		return args[0], nil
 	}
-	v, ok := ToString(args[0])
+	v, ok := args[0].ToString()
 	if ok {
-		if len(v) > MaxStringLen {
+		if len(v) > gst.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
-		return &String{Value: v}, nil
+		return &gst.String{Value: v}, nil
 	}
 	if argsLen == 2 {
 		return args[1], nil
 	}
-	return UndefinedValue, nil
+	return gst.UndefinedValue, nil
 }
 
-func builtinInt(args ...Object) (Object, error) {
+func builtinInt(args ...gst.Object) (gst.Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Int); ok {
+	if _, ok := args[0].(*gst.Int); ok {
 		return args[0], nil
 	}
-	v, ok := ToInt64(args[0])
+	v, ok := args[0].ToInt64()
 	if ok {
-		return &Int{Value: v}, nil
+		return &gst.Int{Value: v}, nil
 	}
 	if argsLen == 2 {
 		return args[1], nil
 	}
-	return UndefinedValue, nil
+	return gst.UndefinedValue, nil
 }
 
-func builtinFloat(args ...Object) (Object, error) {
+func builtinFloat(args ...gst.Object) (gst.Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Float); ok {
+	if _, ok := args[0].(*gst.Float); ok {
 		return args[0], nil
 	}
-	v, ok := ToFloat64(args[0])
+	v, ok := args[0].ToFloat64()
 	if ok {
-		return &Float{Value: v}, nil
+		return &gst.Float{Value: v}, nil
 	}
 	if argsLen == 2 {
 		return args[1], nil
 	}
-	return UndefinedValue, nil
+	return gst.UndefinedValue, nil
 }
 
-func builtinBool(args ...Object) (Object, error) {
+func builtinBool(args ...gst.Object) (gst.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Bool); ok {
+	if _, ok := args[0].(*gst.Bool); ok {
 		return args[0], nil
 	}
-	v, ok := ToBool(args[0])
+	v, ok := args[0].ToBool()
 	if ok {
 		if v {
-			return TrueValue, nil
+			return gst.TrueValue, nil
 		}
-		return FalseValue, nil
+		return gst.FalseValue, nil
 	}
-	return UndefinedValue, nil
+	return gst.UndefinedValue, nil
 }
 
-func builtinChar(args ...Object) (Object, error) {
+func builtinChar(args ...gst.Object) (gst.Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Char); ok {
+	if _, ok := args[0].(*gst.Char); ok {
 		return args[0], nil
 	}
-	v, ok := ToRune(args[0])
+	v, ok := args[0].ToRune()
 	if ok {
-		return &Char{Value: v}, nil
+		return &gst.Char{Value: v}, nil
 	}
 	if argsLen == 2 {
 		return args[1], nil
 	}
-	return UndefinedValue, nil
+	return gst.UndefinedValue, nil
 }
 
-func builtinBytes(args ...Object) (Object, error) {
+func builtinBytes(args ...gst.Object) (gst.Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, gse.ErrWrongNumArguments
 	}
 
 	// bytes(N) => create a new bytes with given size N
-	if n, ok := args[0].(*Int); ok {
-		if n.Value > int64(MaxBytesLen) {
+	if n, ok := args[0].(*gst.Int); ok {
+		if n.Value > int64(gst.MaxBytesLen) {
 			return nil, gse.ErrBytesLimit
 		}
-		return &Bytes{Value: make([]byte, int(n.Value))}, nil
+		return &gst.Bytes{Value: make([]byte, int(n.Value))}, nil
 	}
-	v, ok := ToByteSlice(args[0])
+	v, ok := args[0].ToByteSlice()
 	if ok {
-		if len(v) > MaxBytesLen {
+		if len(v) > gst.MaxBytesLen {
 			return nil, gse.ErrBytesLimit
 		}
-		return &Bytes{Value: v}, nil
+		return &gst.Bytes{Value: v}, nil
 	}
 	if argsLen == 2 {
 		return args[1], nil
 	}
-	return UndefinedValue, nil
+	return gst.UndefinedValue, nil
 }
 
-func builtinTime(args ...Object) (Object, error) {
+func builtinTime(args ...gst.Object) (gst.Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*Time); ok {
+	if _, ok := args[0].(*gst.Time); ok {
 		return args[0], nil
 	}
-	v, ok := ToTime(args[0])
+	v, ok := args[0].ToTime()
 	if ok {
-		return &Time{Value: v}, nil
+		return &gst.Time{Value: v}, nil
 	}
 	if argsLen == 2 {
 		return args[1], nil
 	}
-	return UndefinedValue, nil
+	return gst.UndefinedValue, nil
 }
 
 // append(arr, items...)
-func builtinAppend(args ...Object) (Object, error) {
+func builtinAppend(args ...gst.Object) (gst.Object, error) {
 	if len(args) < 2 {
 		return nil, gse.ErrWrongNumArguments
 	}
 	switch arg := args[0].(type) {
-	case *Array:
-		return &Array{Value: append(arg.Value, args[1:]...)}, nil
-	case *ImmutableArray:
-		return &Array{Value: append(arg.Value, args[1:]...)}, nil
+	case *gst.Array:
+		return &gst.Array{Value: append(arg.Value, args[1:]...)}, nil
+	case *gst.ImmutableArray:
+		return &gst.Array{Value: append(arg.Value, args[1:]...)}, nil
 	default:
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -492,16 +493,16 @@ func builtinAppend(args ...Object) (Object, error) {
 // builtinDelete deletes Map keys
 // usage: delete(map, "key")
 // key must be a string
-func builtinDelete(args ...Object) (Object, error) {
+func builtinDelete(args ...gst.Object) (gst.Object, error) {
 	argsLen := len(args)
 	if argsLen != 2 {
 		return nil, gse.ErrWrongNumArguments
 	}
 	switch arg := args[0].(type) {
-	case *Map:
-		if key, ok := args[1].(*String); ok {
+	case *gst.Map:
+		if key, ok := args[1].(*gst.String); ok {
 			delete(arg.Value, key.Value)
-			return UndefinedValue, nil
+			return gst.UndefinedValue, nil
 		}
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -520,13 +521,13 @@ func builtinDelete(args ...Object) (Object, error) {
 // builtinSplice deletes and changes given Array, returns deleted items.
 // usage:
 // deleted_items := splice(array[,start[,delete_count[,item1[,item2[,...]]]])
-func builtinSplice(args ...Object) (Object, error) {
+func builtinSplice(args ...gst.Object) (gst.Object, error) {
 	argsLen := len(args)
 	if argsLen == 0 {
 		return nil, gse.ErrWrongNumArguments
 	}
 
-	array, ok := args[0].(*Array)
+	array, ok := args[0].(*gst.Array)
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -538,7 +539,7 @@ func builtinSplice(args ...Object) (Object, error) {
 
 	var startIdx int
 	if argsLen > 1 {
-		arg1, ok := args[1].(*Int)
+		arg1, ok := args[1].(*gst.Int)
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -554,7 +555,7 @@ func builtinSplice(args ...Object) (Object, error) {
 
 	delCount := len(array.Value)
 	if argsLen > 2 {
-		arg2, ok := args[2].(*Int)
+		arg2, ok := args[2].(*gst.Int)
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "third",
@@ -573,12 +574,12 @@ func builtinSplice(args ...Object) (Object, error) {
 	}
 	// delete items
 	endIdx := startIdx + delCount
-	deleted := append([]Object{}, array.Value[startIdx:endIdx]...)
+	deleted := append([]gst.Object{}, array.Value[startIdx:endIdx]...)
 
 	head := array.Value[:startIdx]
-	var items []Object
+	var items []gst.Object
 	if argsLen > 3 {
-		items = make([]Object, 0, argsLen-3)
+		items = make([]gst.Object, 0, argsLen-3)
 		for i := 3; i < argsLen; i++ {
 			items = append(items, args[i])
 		}
@@ -587,5 +588,5 @@ func builtinSplice(args ...Object) (Object, error) {
 	array.Value = append(head, items...)
 
 	// return deleted items
-	return &Array{Value: deleted}, nil
+	return &gst.Array{Value: deleted}, nil
 }

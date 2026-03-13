@@ -8,6 +8,7 @@ import (
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/require"
+	gst "github.com/jokruger/gs/types"
 )
 
 func TestInstructions_String(t *testing.T) {
@@ -57,59 +58,59 @@ func TestMakeInstruction(t *testing.T) {
 }
 
 func TestNumObjects(t *testing.T) {
-	testCountObjects(t, &gs.Array{}, 1)
-	testCountObjects(t, &gs.Array{Value: []gs.Object{
-		&gs.Int{Value: 1},
-		&gs.Int{Value: 2},
-		&gs.Array{Value: []gs.Object{
-			&gs.Int{Value: 3},
-			&gs.Int{Value: 4},
-			&gs.Int{Value: 5},
+	testCountObjects(t, &gst.Array{}, 1)
+	testCountObjects(t, &gst.Array{Value: []gst.Object{
+		&gst.Int{Value: 1},
+		&gst.Int{Value: 2},
+		&gst.Array{Value: []gst.Object{
+			&gst.Int{Value: 3},
+			&gst.Int{Value: 4},
+			&gst.Int{Value: 5},
 		}},
 	}}, 7)
-	testCountObjects(t, gs.TrueValue, 1)
-	testCountObjects(t, gs.FalseValue, 1)
-	testCountObjects(t, &gs.BuiltinFunction{}, 1)
-	testCountObjects(t, &gs.Bytes{Value: []byte("foobar")}, 1)
-	testCountObjects(t, &gs.Char{Value: '가'}, 1)
-	testCountObjects(t, &gs.CompiledFunction{}, 1)
-	testCountObjects(t, &gs.Error{Value: &gs.Int{Value: 5}}, 2)
-	testCountObjects(t, &gs.Float{Value: 19.84}, 1)
-	testCountObjects(t, &gs.ImmutableArray{Value: []gs.Object{
-		&gs.Int{Value: 1},
-		&gs.Int{Value: 2},
-		&gs.ImmutableArray{Value: []gs.Object{
-			&gs.Int{Value: 3},
-			&gs.Int{Value: 4},
-			&gs.Int{Value: 5},
+	testCountObjects(t, gst.TrueValue, 1)
+	testCountObjects(t, gst.FalseValue, 1)
+	testCountObjects(t, &gst.BuiltinFunction{}, 1)
+	testCountObjects(t, &gst.Bytes{Value: []byte("foobar")}, 1)
+	testCountObjects(t, &gst.Char{Value: '가'}, 1)
+	testCountObjects(t, &gst.CompiledFunction{}, 1)
+	testCountObjects(t, &gst.Error{Value: &gst.Int{Value: 5}}, 2)
+	testCountObjects(t, &gst.Float{Value: 19.84}, 1)
+	testCountObjects(t, &gst.ImmutableArray{Value: []gst.Object{
+		&gst.Int{Value: 1},
+		&gst.Int{Value: 2},
+		&gst.ImmutableArray{Value: []gst.Object{
+			&gst.Int{Value: 3},
+			&gst.Int{Value: 4},
+			&gst.Int{Value: 5},
 		}},
 	}}, 7)
-	testCountObjects(t, &gs.ImmutableMap{
-		Value: map[string]gs.Object{
-			"k1": &gs.Int{Value: 1},
-			"k2": &gs.Int{Value: 2},
-			"k3": &gs.Array{Value: []gs.Object{
-				&gs.Int{Value: 3},
-				&gs.Int{Value: 4},
-				&gs.Int{Value: 5},
+	testCountObjects(t, &gst.ImmutableMap{
+		Value: map[string]gst.Object{
+			"k1": &gst.Int{Value: 1},
+			"k2": &gst.Int{Value: 2},
+			"k3": &gst.Array{Value: []gst.Object{
+				&gst.Int{Value: 3},
+				&gst.Int{Value: 4},
+				&gst.Int{Value: 5},
 			}},
 		}}, 7)
-	testCountObjects(t, &gs.Int{Value: 1984}, 1)
-	testCountObjects(t, &gs.Map{Value: map[string]gs.Object{
-		"k1": &gs.Int{Value: 1},
-		"k2": &gs.Int{Value: 2},
-		"k3": &gs.Array{Value: []gs.Object{
-			&gs.Int{Value: 3},
-			&gs.Int{Value: 4},
-			&gs.Int{Value: 5},
+	testCountObjects(t, &gst.Int{Value: 1984}, 1)
+	testCountObjects(t, &gst.Map{Value: map[string]gst.Object{
+		"k1": &gst.Int{Value: 1},
+		"k2": &gst.Int{Value: 2},
+		"k3": &gst.Array{Value: []gst.Object{
+			&gst.Int{Value: 3},
+			&gst.Int{Value: 4},
+			&gst.Int{Value: 5},
 		}},
 	}}, 7)
-	testCountObjects(t, &gs.String{Value: "foo bar"}, 1)
-	testCountObjects(t, &gs.Time{Value: time.Now()}, 1)
-	testCountObjects(t, gs.UndefinedValue, 1)
+	testCountObjects(t, &gst.String{Value: "foo bar"}, 1)
+	testCountObjects(t, &gst.Time{Value: time.Now()}, 1)
+	testCountObjects(t, gst.UndefinedValue, 1)
 }
 
-func testCountObjects(t *testing.T, o gs.Object, expected int) {
+func testCountObjects(t *testing.T, o gst.Object, expected int) {
 	require.Equal(t, expected, gs.CountObjects(o))
 }
 

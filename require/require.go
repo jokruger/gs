@@ -13,6 +13,7 @@ import (
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
+	gst "github.com/jokruger/gs/types"
 )
 
 // NoError asserts err is not an error.
@@ -124,56 +125,51 @@ func Equal(
 		if !equalSymbol(expected, actual.(*gs.Symbol)) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
-	case parser.Pos:
-		if expected != actual.(parser.Pos) {
+	case gst.Pos:
+		if expected != actual.(gst.Pos) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
 	case token.Token:
 		if expected != actual.(token.Token) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
-	case []gs.Object:
-		equalObjectSlice(t, expected, actual.([]gs.Object), msg...)
-	case *gs.Int:
-		Equal(t, expected.Value, actual.(*gs.Int).Value, msg...)
-	case *gs.Float:
-		Equal(t, expected.Value, actual.(*gs.Float).Value, msg...)
-	case *gs.String:
-		Equal(t, expected.Value, actual.(*gs.String).Value, msg...)
-	case *gs.Char:
-		Equal(t, expected.Value, actual.(*gs.Char).Value, msg...)
-	case *gs.Bool:
+	case []gst.Object:
+		equalObjectSlice(t, expected, actual.([]gst.Object), msg...)
+	case *gst.Int:
+		Equal(t, expected.Value, actual.(*gst.Int).Value, msg...)
+	case *gst.Float:
+		Equal(t, expected.Value, actual.(*gst.Float).Value, msg...)
+	case *gst.String:
+		Equal(t, expected.Value, actual.(*gst.String).Value, msg...)
+	case *gst.Char:
+		Equal(t, expected.Value, actual.(*gst.Char).Value, msg...)
+	case *gst.Bool:
 		if expected != actual {
 			failExpectedActual(t, expected, actual, msg...)
 		}
-	case *gs.Array:
+	case *gst.Array:
 		equalObjectSlice(t, expected.Value,
-			actual.(*gs.Array).Value, msg...)
-	case *gs.ImmutableArray:
-		equalObjectSlice(t, expected.Value,
-			actual.(*gs.ImmutableArray).Value, msg...)
-	case *gs.Bytes:
-		if !bytes.Equal(expected.Value, actual.(*gs.Bytes).Value) {
-			failExpectedActual(t, string(expected.Value),
-				string(actual.(*gs.Bytes).Value), msg...)
+			actual.(*gst.Array).Value, msg...)
+	case *gst.ImmutableArray:
+		equalObjectSlice(t, expected.Value, actual.(*gst.ImmutableArray).Value, msg...)
+	case *gst.Bytes:
+		if !bytes.Equal(expected.Value, actual.(*gst.Bytes).Value) {
+			failExpectedActual(t, string(expected.Value), string(actual.(*gst.Bytes).Value), msg...)
 		}
-	case *gs.Map:
-		equalObjectMap(t, expected.Value,
-			actual.(*gs.Map).Value, msg...)
-	case *gs.ImmutableMap:
-		equalObjectMap(t, expected.Value,
-			actual.(*gs.ImmutableMap).Value, msg...)
-	case *gs.CompiledFunction:
-		equalCompiledFunction(t, expected,
-			actual.(*gs.CompiledFunction), msg...)
-	case *gs.Undefined:
+	case *gst.Map:
+		equalObjectMap(t, expected.Value, actual.(*gst.Map).Value, msg...)
+	case *gst.ImmutableMap:
+		equalObjectMap(t, expected.Value, actual.(*gst.ImmutableMap).Value, msg...)
+	case *gst.CompiledFunction:
+		equalCompiledFunction(t, expected, actual.(*gst.CompiledFunction), msg...)
+	case *gst.Undefined:
 		if expected != actual {
 			failExpectedActual(t, expected, actual, msg...)
 		}
-	case *gs.Error:
-		Equal(t, expected.Value, actual.(*gs.Error).Value, msg...)
-	case gs.Object:
-		if !expected.Equals(actual.(gs.Object)) {
+	case *gst.Error:
+		Equal(t, expected.Value, actual.(*gst.Error).Value, msg...)
+	case gst.Object:
+		if !expected.Equals(actual.(gst.Object)) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
 	case *parser.SourceFileSet:
@@ -182,8 +178,7 @@ func Equal(
 		Equal(t, expected.Name, actual.(*parser.SourceFile).Name, msg...)
 		Equal(t, expected.Base, actual.(*parser.SourceFile).Base, msg...)
 		Equal(t, expected.Size, actual.(*parser.SourceFile).Size, msg...)
-		True(t, equalIntSlice(expected.Lines,
-			actual.(*parser.SourceFile).Lines), msg...)
+		True(t, equalIntSlice(expected.Lines, actual.(*parser.SourceFile).Lines), msg...)
 	case error:
 		if expected != actual.(error) {
 			failExpectedActual(t, expected, actual, msg...)
@@ -195,8 +190,7 @@ func Equal(
 
 // Fail marks the function as having failed but continues execution.
 func Fail(t *testing.T, msg ...interface{}) {
-	t.Logf("\nError trace:\n\t%s\n%s", strings.Join(errorTrace(), "\n\t"),
-		message(msg...))
+	t.Logf("\nError trace:\n\t%s\n%s", strings.Join(errorTrace(), "\n\t"), message(msg...))
 	t.Fail()
 }
 
@@ -259,22 +253,14 @@ func equalSymbol(a, b *gs.Symbol) bool {
 		a.Scope == b.Scope
 }
 
-func equalObjectSlice(
-	t *testing.T,
-	expected, actual []gs.Object,
-	msg ...interface{},
-) {
+func equalObjectSlice(t *testing.T, expected, actual []gst.Object, msg ...interface{}) {
 	Equal(t, len(expected), len(actual), msg...)
 	for i := 0; i < len(expected); i++ {
 		Equal(t, expected[i], actual[i], msg...)
 	}
 }
 
-func equalFileSet(
-	t *testing.T,
-	expected, actual *parser.SourceFileSet,
-	msg ...interface{},
-) {
+func equalFileSet(t *testing.T, expected, actual *parser.SourceFileSet, msg ...interface{}) {
 	Equal(t, len(expected.Files), len(actual.Files), msg...)
 	for i, f := range expected.Files {
 		Equal(t, f, actual.Files[i], msg...)
@@ -283,11 +269,7 @@ func equalFileSet(
 	Equal(t, expected.LastFile, actual.LastFile)
 }
 
-func equalObjectMap(
-	t *testing.T,
-	expected, actual map[string]gs.Object,
-	msg ...interface{},
-) {
+func equalObjectMap(t *testing.T, expected, actual map[string]gst.Object, msg ...interface{}) {
 	Equal(t, len(expected), len(actual), msg...)
 	for key, expectedVal := range expected {
 		actualVal := actual[key]
@@ -295,16 +277,10 @@ func equalObjectMap(
 	}
 }
 
-func equalCompiledFunction(
-	t *testing.T,
-	expected, actual gs.Object,
-	msg ...interface{},
-) {
-	expectedT := expected.(*gs.CompiledFunction)
-	actualT := actual.(*gs.CompiledFunction)
-	Equal(t,
-		gs.FormatInstructions(expectedT.Instructions, 0),
-		gs.FormatInstructions(actualT.Instructions, 0), msg...)
+func equalCompiledFunction(t *testing.T, expected, actual gst.Object, msg ...interface{}) {
+	expectedT := expected.(*gst.CompiledFunction)
+	actualT := actual.(*gst.CompiledFunction)
+	Equal(t, gs.FormatInstructions(expectedT.Instructions, 0), gs.FormatInstructions(actualT.Instructions, 0), msg...)
 }
 
 func isNil(v interface{}) bool {

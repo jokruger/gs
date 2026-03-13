@@ -20,8 +20,6 @@ func TestBase64(t *testing.T) {
 	module(t, `base64`).call("url_decode", base64URL).expect(base64Bytes1)
 	module(t, `base64`).call("raw_encode", base64Bytes1).expect(base64RawStd)
 	module(t, `base64`).call("raw_decode", base64RawStd).expect(base64Bytes1)
-	module(t, `base64`).call("raw_url_encode", base64Bytes1).
-		expect(base64RawURL)
-	module(t, `base64`).call("raw_url_decode", base64RawURL).
-		expect(base64Bytes1)
+	module(t, `base64`).call("raw_url_encode", base64Bytes1).expect(base64RawURL)
+	module(t, `base64`).call("raw_url_decode", base64RawURL).expect(base64Bytes1)
 }

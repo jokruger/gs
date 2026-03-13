@@ -16,6 +16,7 @@ import (
 	"github.com/jokruger/gs/require"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/token"
+	gst "github.com/jokruger/gs/types"
 )
 
 func TestScript_Add(t *testing.T) {
@@ -23,15 +24,15 @@ func TestScript_Add(t *testing.T) {
 	require.NoError(t, s.Add("b", 5))     // b = 5
 	require.NoError(t, s.Add("b", "foo")) // b = "foo"  (re-define before compilation)
 	require.NoError(t, s.Add("test",
-		func(args ...gs.Object) (ret gs.Object, err error) {
+		func(args ...gst.Object) (ret gst.Object, err error) {
 			if len(args) > 0 {
 				switch arg := args[0].(type) {
-				case *gs.Int:
-					return &gs.Int{Value: arg.Value + 1}, nil
+				case *gst.Int:
+					return &gst.Int{Value: arg.Value + 1}, nil
 				}
 			}
 
-			return &gs.Int{Value: 0}, nil
+			return &gst.Int{Value: 0}, nil
 		}))
 	c, err := s.Compile()
 	require.NoError(t, err)
@@ -172,14 +173,14 @@ for i:=1; i<=d; i++ {
 
 e := mod1.double(s)
 `)
-	mod1 := map[string]gs.Object{
-		"double": &gs.UserFunction{
-			Value: func(args ...gs.Object) (
-				ret gs.Object,
+	mod1 := map[string]gst.Object{
+		"double": &gst.UserFunction{
+			Value: func(args ...gst.Object) (
+				ret gst.Object,
 				err error,
 			) {
-				arg0, _ := gs.ToInt64(args[0])
-				ret = &gs.Int{Value: arg0 * 2}
+				arg0, _ := args[0].ToInt64()
+				ret = &gst.Int{Value: arg0 * 2}
 				return
 			},
 		},
@@ -229,7 +230,7 @@ e := mod1.double(s)
 }
 
 type Counter struct {
-	gs.ObjectImpl
+	gst.ObjectImpl
 	value int64
 }
 
@@ -241,10 +242,11 @@ func (o *Counter) String() string {
 	return fmt.Sprintf("Counter(%d)", o.value)
 }
 
-func (o *Counter) BinaryOp(
-	op token.Token,
-	rhs gs.Object,
-) (gs.Object, error) {
+func (o *Counter) ToString() (string, bool) {
+	return o.String(), true
+}
+
+func (o *Counter) BinaryOp(op token.Token, rhs gst.Object) (gst.Object, error) {
 	switch rhs := rhs.(type) {
 	case *Counter:
 		switch op {
@@ -253,7 +255,7 @@ func (o *Counter) BinaryOp(
 		case token.Sub:
 			return &Counter{value: o.value - rhs.value}, nil
 		}
-	case *gs.Int:
+	case *gst.Int:
 		switch op {
 		case token.Add:
 			return &Counter{value: o.value + rhs.Value}, nil
@@ -269,7 +271,7 @@ func (o *Counter) IsFalsy() bool {
 	return o.value == 0
 }
 
-func (o *Counter) Equals(t gs.Object) bool {
+func (o *Counter) Equals(t gst.Object) bool {
 	if tc, ok := t.(*Counter); ok {
 		return o.value == tc.value
 	}
@@ -277,12 +279,12 @@ func (o *Counter) Equals(t gs.Object) bool {
 	return false
 }
 
-func (o *Counter) Copy() gs.Object {
+func (o *Counter) Copy() gst.Object {
 	return &Counter{value: o.value}
 }
 
-func (o *Counter) Call(_ ...gs.Object) (gs.Object, error) {
-	return &gs.Int{Value: o.value}, nil
+func (o *Counter) Call(_ ...gst.Object) (gst.Object, error) {
+	return &gst.Int{Value: o.value}, nil
 }
 
 func (o *Counter) CanCall() bool {
@@ -290,9 +292,7 @@ func (o *Counter) CanCall() bool {
 }
 
 func TestScript_CustomObjects(t *testing.T) {
-	c := compile(t, `a := c1(); s := string(c1); c2 := c1; c2++`, M{
-		"c1": &Counter{value: 5},
-	})
+	c := compile(t, `a := c1(); s := string(c1); c2 := c1; c2++`, M{"c1": &Counter{value: 5}})
 	compiledRun(t, c)
 	compiledGet(t, c, "a", int64(5))
 	compiledGet(t, c, "s", "Counter(5)")
@@ -350,12 +350,12 @@ func TestScriptSourceModule(t *testing.T) {
 	mods.AddSourceModule("mod",
 		[]byte(`text := import("text"); export text.title("foo")`))
 	mods.AddBuiltinModule("text",
-		map[string]gs.Object{
-			"title": &gs.UserFunction{
+		map[string]gst.Object{
+			"title": &gst.UserFunction{
 				Name: "title",
-				Value: func(args ...gs.Object) (gs.Object, error) {
-					s, _ := gs.ToString(args[0])
-					return &gs.String{Value: strings.Title(s)}, nil
+				Value: func(args ...gst.Object) (gst.Object, error) {
+					s, _ := args[0].ToString()
+					return &gst.String{Value: strings.Title(s)}, nil
 				}},
 		})
 	scr.SetImports(mods)
@@ -491,10 +491,10 @@ func TestCompiled_CustomObject(t *testing.T) {
 	compiledGet(t, c, "r", true)
 }
 
-// customNumber is a user defined object that can compare to gs.Int
+// customNumber is a user defined object that can compare to gst.Int
 // very shitty implementation, just to test that token.Less and token.Greater in BinaryOp works
 type customNumber struct {
-	gs.ObjectImpl
+	gst.ObjectImpl
 	value int64
 }
 
@@ -506,38 +506,38 @@ func (n *customNumber) String() string {
 	return strconv.FormatInt(n.value, 10)
 }
 
-func (n *customNumber) BinaryOp(op token.Token, rhs gs.Object) (gs.Object, error) {
-	i, ok := rhs.(*gs.Int)
+func (n *customNumber) BinaryOp(op token.Token, rhs gst.Object) (gst.Object, error) {
+	i, ok := rhs.(*gst.Int)
 	if !ok {
 		return nil, gse.ErrInvalidOperator
 	}
 	return n.binaryOpInt(op, i)
 }
 
-func (n *customNumber) binaryOpInt(op token.Token, rhs *gs.Int) (gs.Object, error) {
+func (n *customNumber) binaryOpInt(op token.Token, rhs *gst.Int) (gst.Object, error) {
 	i := n.value
 
 	switch op {
 	case token.Less:
 		if i < rhs.Value {
-			return gs.TrueValue, nil
+			return gst.TrueValue, nil
 		}
-		return gs.FalseValue, nil
+		return gst.FalseValue, nil
 	case token.Greater:
 		if i > rhs.Value {
-			return gs.TrueValue, nil
+			return gst.TrueValue, nil
 		}
-		return gs.FalseValue, nil
+		return gst.FalseValue, nil
 	case token.LessEq:
 		if i <= rhs.Value {
-			return gs.TrueValue, nil
+			return gst.TrueValue, nil
 		}
-		return gs.FalseValue, nil
+		return gst.FalseValue, nil
 	case token.GreaterEq:
 		if i >= rhs.Value {
-			return gs.TrueValue, nil
+			return gst.TrueValue, nil
 		}
-		return gs.FalseValue, nil
+		return gst.FalseValue, nil
 	}
 	return nil, gse.ErrInvalidOperator
 }

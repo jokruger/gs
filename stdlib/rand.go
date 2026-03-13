@@ -3,46 +3,46 @@ package stdlib
 import (
 	"math/rand"
 
-	"github.com/jokruger/gs"
 	gse "github.com/jokruger/gs/error"
+	gst "github.com/jokruger/gs/types"
 )
 
-var randModule = map[string]gs.Object{
-	"int": &gs.UserFunction{
+var randModule = map[string]gst.Object{
+	"int": &gst.UserFunction{
 		Name:  "int",
 		Value: FuncARI64(rand.Int63),
 	},
-	"float": &gs.UserFunction{
+	"float": &gst.UserFunction{
 		Name:  "float",
 		Value: FuncARF(rand.Float64),
 	},
-	"intn": &gs.UserFunction{
+	"intn": &gst.UserFunction{
 		Name:  "intn",
 		Value: FuncAI64RI64(rand.Int63n),
 	},
-	"exp_float": &gs.UserFunction{
+	"exp_float": &gst.UserFunction{
 		Name:  "exp_float",
 		Value: FuncARF(rand.ExpFloat64),
 	},
-	"norm_float": &gs.UserFunction{
+	"norm_float": &gst.UserFunction{
 		Name:  "norm_float",
 		Value: FuncARF(rand.NormFloat64),
 	},
-	"perm": &gs.UserFunction{
+	"perm": &gst.UserFunction{
 		Name:  "perm",
 		Value: FuncAIRIs(rand.Perm),
 	},
-	"seed": &gs.UserFunction{
+	"seed": &gst.UserFunction{
 		Name:  "seed",
 		Value: FuncAI64R(rand.Seed),
 	},
-	"read": &gs.UserFunction{
+	"read": &gst.UserFunction{
 		Name: "read",
-		Value: func(args ...gs.Object) (ret gs.Object, err error) {
+		Value: func(args ...gst.Object) (ret gst.Object, err error) {
 			if len(args) != 1 {
 				return nil, gse.ErrWrongNumArguments
 			}
-			y1, ok := args[0].(*gs.Bytes)
+			y1, ok := args[0].(*gst.Bytes)
 			if !ok {
 				return nil, gse.ErrInvalidArgumentType{
 					Name:     "first",
@@ -55,16 +55,16 @@ var randModule = map[string]gs.Object{
 				ret = wrapError(err)
 				return
 			}
-			return &gs.Int{Value: int64(res)}, nil
+			return &gst.Int{Value: int64(res)}, nil
 		},
 	},
-	"rand": &gs.UserFunction{
+	"rand": &gst.UserFunction{
 		Name: "rand",
-		Value: func(args ...gs.Object) (gs.Object, error) {
+		Value: func(args ...gst.Object) (gst.Object, error) {
 			if len(args) != 1 {
 				return nil, gse.ErrWrongNumArguments
 			}
-			i1, ok := gs.ToInt64(args[0])
+			i1, ok := args[0].ToInt64()
 			if !ok {
 				return nil, gse.ErrInvalidArgumentType{
 					Name:     "first",
@@ -78,47 +78,47 @@ var randModule = map[string]gs.Object{
 	},
 }
 
-func randRand(r *rand.Rand) *gs.ImmutableMap {
-	return &gs.ImmutableMap{
-		Value: map[string]gs.Object{
-			"int": &gs.UserFunction{
+func randRand(r *rand.Rand) *gst.ImmutableMap {
+	return &gst.ImmutableMap{
+		Value: map[string]gst.Object{
+			"int": &gst.UserFunction{
 				Name:  "int",
 				Value: FuncARI64(r.Int63),
 			},
-			"float": &gs.UserFunction{
+			"float": &gst.UserFunction{
 				Name:  "float",
 				Value: FuncARF(r.Float64),
 			},
-			"intn": &gs.UserFunction{
+			"intn": &gst.UserFunction{
 				Name:  "intn",
 				Value: FuncAI64RI64(r.Int63n),
 			},
-			"exp_float": &gs.UserFunction{
+			"exp_float": &gst.UserFunction{
 				Name:  "exp_float",
 				Value: FuncARF(r.ExpFloat64),
 			},
-			"norm_float": &gs.UserFunction{
+			"norm_float": &gst.UserFunction{
 				Name:  "norm_float",
 				Value: FuncARF(r.NormFloat64),
 			},
-			"perm": &gs.UserFunction{
+			"perm": &gst.UserFunction{
 				Name:  "perm",
 				Value: FuncAIRIs(r.Perm),
 			},
-			"seed": &gs.UserFunction{
+			"seed": &gst.UserFunction{
 				Name:  "seed",
 				Value: FuncAI64R(r.Seed),
 			},
-			"read": &gs.UserFunction{
+			"read": &gst.UserFunction{
 				Name: "read",
-				Value: func(args ...gs.Object) (
-					ret gs.Object,
+				Value: func(args ...gst.Object) (
+					ret gst.Object,
 					err error,
 				) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
-					y1, ok := args[0].(*gs.Bytes)
+					y1, ok := args[0].(*gst.Bytes)
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -131,7 +131,7 @@ func randRand(r *rand.Rand) *gs.ImmutableMap {
 						ret = wrapError(err)
 						return
 					}
-					return &gs.Int{Value: int64(res)}, nil
+					return &gst.Int{Value: int64(res)}, nil
 				},
 			},
 		},

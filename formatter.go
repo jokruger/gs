@@ -6,6 +6,7 @@ import (
 	"unicode/utf8"
 
 	gse "github.com/jokruger/gs/error"
+	gst "github.com/jokruger/gs/types"
 )
 
 // Strings for use with fmtbuf.WriteString. This is less overhead than using
@@ -87,7 +88,7 @@ func (f *formatter) writePadding(n int) {
 	oldLen := len(buf)
 	newLen := oldLen + n
 
-	if newLen > MaxStringLen {
+	if newLen > gst.MaxStringLen {
 		panic(gse.ErrStringLimit)
 	}
 
@@ -622,7 +623,7 @@ func (f *formatter) fmtFloat(v float64, size int, verb rune, prec int) {
 type fmtbuf []byte
 
 func (b *fmtbuf) Write(p []byte) {
-	if len(*b)+len(p) > MaxStringLen {
+	if len(*b)+len(p) > gst.MaxStringLen {
 		panic(gse.ErrStringLimit)
 	}
 
@@ -630,7 +631,7 @@ func (b *fmtbuf) Write(p []byte) {
 }
 
 func (b *fmtbuf) WriteString(s string) {
-	if len(*b)+len(s) > MaxStringLen {
+	if len(*b)+len(s) > gst.MaxStringLen {
 		panic(gse.ErrStringLimit)
 	}
 
@@ -638,7 +639,7 @@ func (b *fmtbuf) WriteString(s string) {
 }
 
 func (b *fmtbuf) WriteSingleByte(c byte) {
-	if len(*b) >= MaxStringLen {
+	if len(*b) >= gst.MaxStringLen {
 		panic(gse.ErrStringLimit)
 	}
 
@@ -646,7 +647,7 @@ func (b *fmtbuf) WriteSingleByte(c byte) {
 }
 
 func (b *fmtbuf) WriteRune(r rune) {
-	if len(*b)+utf8.RuneLen(r) > MaxStringLen {
+	if len(*b)+utf8.RuneLen(r) > gst.MaxStringLen {
 		panic(gse.ErrStringLimit)
 	}
 
@@ -670,7 +671,7 @@ type pp struct {
 	buf fmtbuf
 
 	// arg holds the current item.
-	arg Object
+	arg gst.Object
 
 	// fmt is used to format basic items such as integers or strings.
 	fmt formatter
@@ -798,7 +799,7 @@ func (p *pp) badVerb(verb rune) {
 		_, _ = p.WriteSingleByte('=')
 		p.printArg(p.arg, 'v')
 	default:
-		_, _ = p.WriteString(UndefinedValue.String())
+		_, _ = p.WriteString(gst.UndefinedValue.String())
 	}
 	_, _ = p.WriteSingleByte(')')
 	p.erroring = false
@@ -932,11 +933,11 @@ func (p *pp) fmtBytes(v []byte, verb rune, typeString string) {
 	}
 }
 
-func (p *pp) printArg(arg Object, verb rune) {
+func (p *pp) printArg(arg gst.Object, verb rune) {
 	p.arg = arg
 
 	if arg == nil {
-		arg = UndefinedValue
+		arg = gst.UndefinedValue
 	}
 
 	// Special processing considerations.
@@ -953,15 +954,15 @@ func (p *pp) printArg(arg Object, verb rune) {
 
 	// Some types can be done without reflection.
 	switch f := arg.(type) {
-	case *Bool:
+	case *gst.Bool:
 		p.fmtBool(!f.IsFalsy(), verb)
-	case *Float:
+	case *gst.Float:
 		p.fmtFloat(f.Value, 64, verb)
-	case *Int:
+	case *gst.Int:
 		p.fmtInteger(uint64(f.Value), signed, verb)
-	case *String:
+	case *gst.String:
 		p.fmtString(f.Value, verb)
-	case *Bytes:
+	case *gst.Bytes:
 		p.fmtBytes(f.Value, verb, "[]byte")
 	default:
 		p.fmtString(f.String(), verb)
@@ -970,11 +971,11 @@ func (p *pp) printArg(arg Object, verb rune) {
 
 // intFromArg gets the argNumth element of a. On return, isInt reports whether
 // the argument has integer type.
-func intFromArg(a []Object, argNum int) (num int, isInt bool, newArgNum int) {
+func intFromArg(a []gst.Object, argNum int) (num int, isInt bool, newArgNum int) {
 	newArgNum = argNum
 	if argNum < len(a) {
 		var num64 int64
-		num64, isInt = ToInt64(a[argNum])
+		num64, isInt = a[argNum].ToInt64()
 		num = int(num64)
 		newArgNum = argNum + 1
 		if tooLarge(num) {
@@ -1045,7 +1046,7 @@ func (p *pp) missingArg(verb rune) {
 	_, _ = p.WriteString(missingString)
 }
 
-func (p *pp) doFormat(format string, a []Object) (err error) {
+func (p *pp) doFormat(format string, a []gst.Object) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			if e, ok := r.(error); ok && e == gse.ErrStringLimit {
@@ -1223,7 +1224,7 @@ formatLoop:
 				_, _ = p.WriteString(commaSpaceString)
 			}
 			if arg == nil {
-				_, _ = p.WriteString(UndefinedValue.String())
+				_, _ = p.WriteString(gst.UndefinedValue.String())
 			} else {
 				_, _ = p.WriteString(arg.TypeName())
 				_, _ = p.WriteSingleByte('=')
@@ -1237,7 +1238,7 @@ formatLoop:
 }
 
 // Format is like fmt.Sprintf but using Objects.
-func Format(format string, a ...Object) (string, error) {
+func Format(format string, a ...gst.Object) (string, error) {
 	p := newPrinter()
 	err := p.doFormat(format, a)
 	s := string(p.buf)

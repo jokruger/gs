@@ -1,0 +1,124 @@
+package types
+
+import (
+	"time"
+
+	"github.com/jokruger/gs/token"
+)
+
+const (
+	// NoPos represents an invalid position.
+	NoPos Pos = 0
+
+	// TrueString is a string representation of the boolean value true.
+	TrueString = "true"
+
+	// FalseString is a string representation of the boolean value false.
+	FalseString = "false"
+)
+
+var (
+	// TrueValue is the singleton instance representing the boolean value true.
+	TrueValue Object = &Bool{value: true}
+
+	// FalseValue is the singleton instance representing the boolean value false.
+	FalseValue Object = &Bool{value: false}
+
+	// UndefinedValue is the singleton instance representing the undefined value.
+	UndefinedValue Object = &Undefined{}
+
+	// MaxStringLen is the maximum byte-length for string value. Note this limit applies to all compiler/VM instances in the process.
+	MaxStringLen = 2147483647
+
+	// MaxBytesLen is the maximum length for bytes value. Note this limit applies to all compiler/VM instances in the process.
+	MaxBytesLen = 2147483647
+)
+
+// CallableFunc is a function signature for the callable functions.
+type CallableFunc = func(args ...Object) (ret Object, err error)
+
+// Object represents an object in the VM.
+type Object interface {
+	// TypeName should return the name of the type.
+	TypeName() string
+
+	// String should return a string representation of the type's value.
+	String() string
+
+	// BinaryOp should return another object that is the result of a given binary operator and a right-hand side object.
+	// If BinaryOp returns an error, the VM will treat it as a run-time error.
+	BinaryOp(token.Token, Object) (Object, error)
+
+	// IsFalsy should return true if the value of the type should be considered as falsy.
+	IsFalsy() bool
+
+	// Equals should return true if the value of the type should be considered as equal to the value of another object.
+	Equals(Object) bool
+
+	// Copy should return a copy of the type (and its value).
+	// Copy function will be used for copy() builtin function which is expected to deep-copy the values generally.
+	Copy() Object
+
+	// IndexGet should take an index Object and return a result Object or an error for indexable objects.
+	// Indexable is an object that can take an index and return an object.
+	// If error is returned, the runtime will treat it as a run-time error and ignore returned value.
+	// If Object is not indexable, ErrNotIndexable should be returned as error.
+	// If nil is returned as value, it will be converted to Undefined value by the runtime.
+	IndexGet(Object) (Object, error)
+
+	// IndexSet should take an index Object and a value Object for index assignable objects.
+	// Index assignable is an object that can take an index and a value on the left-hand side of the assignment statement.
+	// If Object is not index assignable, ErrNotIndexAssignable should be returned as error.
+	// If an error is returned, it will be treated as a run-time error.
+	IndexSet(index, value Object) error
+
+	// Iterate should return an Iterator for the type.
+	Iterate() Iterator
+
+	// CanIterate should return whether the Object can be Iterated.
+	CanIterate() bool
+
+	// Call should take an arbitrary number of arguments and returns a return value and/or an error, which the VM will consider as a run-time error.
+	Call(...Object) (Object, error)
+
+	// CanCall should return whether the Object can be Called.
+	CanCall() bool
+
+	// ToString will try to convert object to string value.
+	ToString() (string, bool)
+
+	// ToInt will try to convert object to int value.
+	ToInt() (int, bool)
+
+	// ToInt64 will try to convert object to int64 value.
+	ToInt64() (int64, bool)
+
+	// ToFloat64 will try to convert object to float64 value.
+	ToFloat64() (float64, bool)
+
+	// ToBool will try to convert object to bool value.
+	ToBool() (bool, bool)
+
+	// ToRune will try to convert object to rune value.
+	ToRune() (rune, bool)
+
+	// ToByteSlice will try to convert object to []byte value.
+	ToByteSlice() ([]byte, bool)
+
+	// ToTime will try to convert object to time.Time value.
+	ToTime() (time.Time, bool)
+}
+
+// Iterator represents an iterator for underlying data type.
+type Iterator interface {
+	Object
+
+	// Next returns true if there are more elements to iterate.
+	Next() bool
+
+	// Key returns the key or index value of the current element.
+	Key() Object
+
+	// Value returns the value of the current element.
+	Value() Object
+}

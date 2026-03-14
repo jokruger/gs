@@ -3,6 +3,7 @@ package stdlib
 import (
 	"time"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
@@ -1037,7 +1038,7 @@ func timesTimeFormat(args ...value.Object) (ret value.Object, err error) {
 	}
 
 	s := t1.Format(s2)
-	if len(s) > value.MaxStringLen {
+	if len(s) > core.MaxStringLen {
 
 		return nil, gse.ErrStringLimit
 	}

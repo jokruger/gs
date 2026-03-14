@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
@@ -219,7 +220,7 @@ func osReadFile(args ...value.Object) (ret value.Object, err error) {
 	if err != nil {
 		return wrapError(err), nil
 	}
-	if len(bytes) > value.MaxBytesLen {
+	if len(bytes) > core.MaxBytesLen {
 		return nil, gse.ErrBytesLimit
 	}
 	return &value.Bytes{Value: bytes}, nil
@@ -336,7 +337,7 @@ func osArgs(args ...value.Object) (value.Object, error) {
 	}
 	arr := &value.Array{}
 	for _, osArg := range os.Args {
-		if len(osArg) > value.MaxStringLen {
+		if len(osArg) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		arr.Value = append(arr.Value, &value.String{Value: osArg})
@@ -391,7 +392,7 @@ func osLookupEnv(args ...value.Object) (value.Object, error) {
 	if !ok {
 		return value.FalseValue, nil
 	}
-	if len(res) > value.MaxStringLen {
+	if len(res) > core.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 	return &value.String{Value: res}, nil
@@ -420,13 +421,13 @@ func osExpandEnv(args ...value.Object) (value.Object, error) {
 		// this does not count the other texts that are not being replaced
 		// but the code checks the final length at the end
 		vlen += len(v)
-		if vlen > value.MaxStringLen {
+		if vlen > core.MaxStringLen {
 			failed = true
 			return ""
 		}
 		return v
 	})
-	if failed || len(s) > value.MaxStringLen {
+	if failed || len(s) > core.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 	return &value.String{Value: s}, nil

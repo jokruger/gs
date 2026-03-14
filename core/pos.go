@@ -1,4 +1,4 @@
-package types
+package core
 
 // NoPos represents an invalid position.
 const NoPos Pos = 0

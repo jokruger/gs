@@ -11,9 +11,9 @@ import (
 	"unicode/utf8"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
-	"github.com/jokruger/gs/types"
 	"github.com/jokruger/gs/value"
 )
 
@@ -126,8 +126,8 @@ func Equal(
 		if !equalSymbol(expected, actual.(*gs.Symbol)) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
-	case types.Pos:
-		if expected != actual.(types.Pos) {
+	case core.Pos:
+		if expected != actual.(core.Pos) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
 	case token.Token:

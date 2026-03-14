@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
@@ -94,7 +95,7 @@ func getPrintArgs(args ...value.Object) ([]interface{}, error) {
 		s, _ := arg.ToString()
 		slen := len(s)
 		// make sure length does not exceed the limit
-		if l+slen > value.MaxStringLen {
+		if l+slen > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		l += slen

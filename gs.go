@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
@@ -104,7 +105,7 @@ func FromInterface(v interface{}) (value.Object, error) {
 	case nil:
 		return value.UndefinedValue, nil
 	case string:
-		if len(v) > value.MaxStringLen {
+		if len(v) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		return &value.String{Value: v}, nil
@@ -124,7 +125,7 @@ func FromInterface(v interface{}) (value.Object, error) {
 	case float64:
 		return &value.Float{Value: v}, nil
 	case []byte:
-		if len(v) > value.MaxBytesLen {
+		if len(v) > core.MaxBytesLen {
 			return nil, gse.ErrBytesLimit
 		}
 		return &value.Bytes{Value: v}, nil

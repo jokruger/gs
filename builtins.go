@@ -1,6 +1,7 @@
 package gs
 
 import (
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
@@ -345,7 +346,7 @@ func builtinString(args ...value.Object) (value.Object, error) {
 	}
 	v, ok := args[0].ToString()
 	if ok {
-		if len(v) > value.MaxStringLen {
+		if len(v) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		return &value.String{Value: v}, nil
@@ -435,14 +436,14 @@ func builtinBytes(args ...value.Object) (value.Object, error) {
 
 	// bytes(N) => create a new bytes with given size N
 	if n, ok := args[0].(*value.Int); ok {
-		if n.Value > int64(value.MaxBytesLen) {
+		if n.Value > int64(core.MaxBytesLen) {
 			return nil, gse.ErrBytesLimit
 		}
 		return &value.Bytes{Value: make([]byte, int(n.Value))}, nil
 	}
 	v, ok := args[0].ToByteSlice()
 	if ok {
-		if len(v) > value.MaxBytesLen {
+		if len(v) > core.MaxBytesLen {
 			return nil, gse.ErrBytesLimit
 		}
 		return &value.Bytes{Value: v}, nil

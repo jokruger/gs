@@ -7,6 +7,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
@@ -617,7 +618,7 @@ func textPadLeft(args ...value.Object) (ret value.Object, err error) {
 		return
 	}
 
-	if i2 > value.MaxStringLen {
+	if i2 > core.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 
@@ -680,7 +681,7 @@ func textPadRight(args ...value.Object) (ret value.Object, err error) {
 		return
 	}
 
-	if i2 > value.MaxStringLen {
+	if i2 > core.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 
@@ -739,7 +740,7 @@ func textRepeat(args ...value.Object) (ret value.Object, err error) {
 		}
 	}
 
-	if len(s1)*i2 > value.MaxStringLen {
+	if len(s1)*i2 > core.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 
@@ -798,7 +799,7 @@ func textJoin(args ...value.Object) (ret value.Object, err error) {
 	}
 
 	// make sure output length does not exceed the limit
-	if slen+len(s2)*(len(ss1)-1) > value.MaxStringLen {
+	if slen+len(s2)*(len(ss1)-1) > core.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 
@@ -1057,7 +1058,7 @@ func doTextReplace(s, old, new string, n int) (string, bool) {
 		}
 
 		ssj := s[start:j]
-		if w+len(ssj)+len(new) > value.MaxStringLen {
+		if w+len(ssj)+len(new) > core.MaxStringLen {
 			return "", false
 		}
 
@@ -1067,7 +1068,7 @@ func doTextReplace(s, old, new string, n int) (string, bool) {
 	}
 
 	ss := s[start:]
-	if w+len(ss) > value.MaxStringLen {
+	if w+len(ss) > core.MaxStringLen {
 		return "", false
 	}
 

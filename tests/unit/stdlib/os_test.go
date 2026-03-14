@@ -4,6 +4,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/value"
 )
@@ -76,9 +77,9 @@ func TestFileStatDir(t *testing.T) {
 }
 
 func TestOSExpandEnv(t *testing.T) {
-	curMaxStringLen := value.MaxStringLen
-	defer func() { value.MaxStringLen = curMaxStringLen }()
-	value.MaxStringLen = 12
+	curMaxStringLen := core.MaxStringLen
+	defer func() { core.MaxStringLen = curMaxStringLen }()
+	core.MaxStringLen = 12
 
 	_ = os.Setenv("GS", "FOO BAR")
 	module(t, "os").call("expand_env", "$GS").expect("FOO BAR")

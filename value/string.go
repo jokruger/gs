@@ -3,6 +3,7 @@ package value
 import (
 	"strconv"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
@@ -26,13 +27,13 @@ func (o *String) BinaryOp(op token.Token, rhs Object) (Object, error) {
 	case token.Add:
 		switch rhs := rhs.(type) {
 		case *String:
-			if len(o.Value)+len(rhs.Value) > MaxStringLen {
+			if len(o.Value)+len(rhs.Value) > core.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
 			return &String{Value: o.Value + rhs.Value}, nil
 		default:
 			rhsStr := rhs.String()
-			if len(o.Value)+len(rhsStr) > MaxStringLen {
+			if len(o.Value)+len(rhsStr) > core.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
 			return &String{Value: o.Value + rhsStr}, nil

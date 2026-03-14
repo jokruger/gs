@@ -5,8 +5,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/token"
-	"github.com/jokruger/gs/types"
 )
 
 // byte order mark
@@ -72,7 +72,7 @@ func (s *Scanner) ErrorCount() int {
 }
 
 // Scan returns a token, token literal and its position.
-func (s *Scanner) Scan() (tok token.Token, literal string, pos types.Pos) {
+func (s *Scanner) Scan() (tok token.Token, literal string, pos core.Pos) {
 	s.skipWhitespace()
 
 	pos = s.file.FileSetPos(s.offset)

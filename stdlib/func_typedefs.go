@@ -3,6 +3,7 @@ package stdlib
 import (
 	"fmt"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
@@ -114,7 +115,7 @@ func FuncARS(fn func() string) value.CallableFunc {
 			return nil, gse.ErrWrongNumArguments
 		}
 		s := fn()
-		if len(s) > value.MaxStringLen {
+		if len(s) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		return &value.String{Value: s}, nil
@@ -132,7 +133,7 @@ func FuncARSE(fn func() (string, error)) value.CallableFunc {
 		if err != nil {
 			return wrapError(err), nil
 		}
-		if len(res) > value.MaxStringLen {
+		if len(res) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		return &value.String{Value: res}, nil
@@ -150,7 +151,7 @@ func FuncARYE(fn func() ([]byte, error)) value.CallableFunc {
 		if err != nil {
 			return wrapError(err), nil
 		}
-		if len(res) > value.MaxBytesLen {
+		if len(res) > core.MaxBytesLen {
 			return nil, gse.ErrBytesLimit
 		}
 		return &value.Bytes{Value: res}, nil
@@ -177,7 +178,7 @@ func FuncARSs(fn func() []string) value.CallableFunc {
 		}
 		arr := &value.Array{}
 		for _, elem := range fn() {
-			if len(elem) > value.MaxStringLen {
+			if len(elem) > core.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
 			arr.Value = append(arr.Value, &value.String{Value: elem})
@@ -455,7 +456,7 @@ func FuncASRS(fn func(string) string) value.CallableFunc {
 			}
 		}
 		s := fn(s1)
-		if len(s) > value.MaxStringLen {
+		if len(s) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		return &value.String{Value: s}, nil
@@ -480,7 +481,7 @@ func FuncASRSs(fn func(string) []string) value.CallableFunc {
 		res := fn(s1)
 		arr := &value.Array{}
 		for _, elem := range res {
-			if len(elem) > value.MaxStringLen {
+			if len(elem) > core.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
 			arr.Value = append(arr.Value, &value.String{Value: elem})
@@ -509,7 +510,7 @@ func FuncASRSE(fn func(string) (string, error)) value.CallableFunc {
 		if err != nil {
 			return wrapError(err), nil
 		}
-		if len(res) > value.MaxStringLen {
+		if len(res) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		return &value.String{Value: res}, nil
@@ -589,7 +590,7 @@ func FuncASSRSs(fn func(string, string) []string) value.CallableFunc {
 		}
 		arr := &value.Array{}
 		for _, res := range fn(s1, s2) {
-			if len(res) > value.MaxStringLen {
+			if len(res) > core.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
 			arr.Value = append(arr.Value, &value.String{Value: res})
@@ -631,7 +632,7 @@ func FuncASSIRSs(fn func(string, string, int) []string) value.CallableFunc {
 		}
 		arr := &value.Array{}
 		for _, res := range fn(s1, s2, i3) {
-			if len(res) > value.MaxStringLen {
+			if len(res) > core.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
 			arr.Value = append(arr.Value, &value.String{Value: res})
@@ -691,7 +692,7 @@ func FuncASSRS(fn func(string, string) string) value.CallableFunc {
 			}
 		}
 		s := fn(s1, s2)
-		if len(s) > value.MaxStringLen {
+		if len(s) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		return &value.String{Value: s}, nil
@@ -777,7 +778,7 @@ func FuncASsSRS(fn func([]string, string) string) value.CallableFunc {
 			}
 		}
 		s := fn(ss1, s2)
-		if len(s) > value.MaxStringLen {
+		if len(s) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		return &value.String{Value: s}, nil
@@ -862,7 +863,7 @@ func FuncASIRS(fn func(string, int) string) value.CallableFunc {
 			}
 		}
 		s := fn(s1, i2)
-		if len(s) > value.MaxStringLen {
+		if len(s) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		return &value.String{Value: s}, nil
@@ -989,7 +990,7 @@ func FuncASRYE(fn func(string) ([]byte, error)) value.CallableFunc {
 		if err != nil {
 			return wrapError(err), nil
 		}
-		if len(res) > value.MaxBytesLen {
+		if len(res) > core.MaxBytesLen {
 			return nil, gse.ErrBytesLimit
 		}
 		return &value.Bytes{Value: res}, nil
@@ -1017,7 +1018,7 @@ func FuncAIRSsE(fn func(int) ([]string, error)) value.CallableFunc {
 		}
 		arr := &value.Array{}
 		for _, r := range res {
-			if len(r) > value.MaxStringLen {
+			if len(r) > core.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
 			arr.Value = append(arr.Value, &value.String{Value: r})
@@ -1042,7 +1043,7 @@ func FuncAIRS(fn func(int) string) value.CallableFunc {
 			}
 		}
 		s := fn(i1)
-		if len(s) > value.MaxStringLen {
+		if len(s) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
 		return &value.String{Value: s}, nil

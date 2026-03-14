@@ -9,10 +9,10 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
-	"github.com/jokruger/gs/types"
 	"github.com/jokruger/gs/value"
 )
 
@@ -21,7 +21,7 @@ import (
 type compilationScope struct {
 	Instructions []byte
 	SymbolInit   map[string]bool
-	SourceMap    map[int]types.Pos
+	SourceMap    map[int]core.Pos
 }
 
 // loop represents a loop construct that the compiler uses to track the current
@@ -73,7 +73,7 @@ func NewCompiler(
 ) *Compiler {
 	mainScope := compilationScope{
 		SymbolInit: make(map[string]bool),
-		SourceMap:  make(map[int]types.Pos),
+		SourceMap:  make(map[int]core.Pos),
 	}
 
 	// symbol table
@@ -201,7 +201,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			c.emit(node, parser.OpFalse)
 		}
 	case *parser.StringLit:
-		if len(node.Value) > value.MaxStringLen {
+		if len(node.Value) > core.MaxStringLen {
 			return c.error(node, gse.ErrStringLimit)
 		}
 		c.emit(node, parser.OpConstant, c.addConstant(&value.String{Value: node.Value}))
@@ -336,7 +336,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 	case *parser.MapLit:
 		for _, elt := range node.Elements {
 			// key
-			if len(elt.Key) > value.MaxStringLen {
+			if len(elt.Key) > core.MaxStringLen {
 				return c.error(node, gse.ErrStringLimit)
 			}
 			c.emit(node, parser.OpConstant,
@@ -1072,14 +1072,14 @@ func (c *Compiler) currentInstructions() []byte {
 	return c.scopes[c.scopeIndex].Instructions
 }
 
-func (c *Compiler) currentSourceMap() map[int]types.Pos {
+func (c *Compiler) currentSourceMap() map[int]core.Pos {
 	return c.scopes[c.scopeIndex].SourceMap
 }
 
 func (c *Compiler) enterScope() {
 	scope := compilationScope{
 		SymbolInit: make(map[string]bool),
-		SourceMap:  make(map[int]types.Pos),
+		SourceMap:  make(map[int]core.Pos),
 	}
 	c.scopes = append(c.scopes, scope)
 	c.scopeIndex++
@@ -1091,7 +1091,7 @@ func (c *Compiler) enterScope() {
 
 func (c *Compiler) leaveScope() (
 	instructions []byte,
-	sourceMap map[int]types.Pos,
+	sourceMap map[int]core.Pos,
 ) {
 	instructions = c.currentInstructions()
 	sourceMap = c.currentSourceMap()
@@ -1254,7 +1254,7 @@ func (c *Compiler) optimizeFunc(node parser.Node) {
 	}
 
 	// pass 4. update source map
-	newSourceMap := make(map[int]types.Pos)
+	newSourceMap := make(map[int]core.Pos)
 	for pos, srcPos := range c.scopes[c.scopeIndex].SourceMap {
 		newPos, ok := posMap[pos]
 		if ok {
@@ -1271,7 +1271,7 @@ func (c *Compiler) optimizeFunc(node parser.Node) {
 }
 
 func (c *Compiler) emit(node parser.Node, opcode parser.Opcode, operands ...int) int {
-	filePos := types.NoPos
+	filePos := core.NoPos
 	if node != nil {
 		filePos = node.Pos()
 	}

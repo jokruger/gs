@@ -1,6 +1,8 @@
 package value
 
-import "github.com/jokruger/gs/types"
+import (
+	"github.com/jokruger/gs/core"
+)
 
 type CompiledFunction struct {
 	ObjectImpl
@@ -8,7 +10,7 @@ type CompiledFunction struct {
 	NumLocals     int // number of local variables (including function parameters)
 	NumParameters int
 	VarArgs       bool
-	SourceMap     map[int]types.Pos
+	SourceMap     map[int]core.Pos
 	Free          []*ObjectPtr
 }
 
@@ -38,14 +40,14 @@ func (o *CompiledFunction) Equals(_ Object) bool {
 	return false
 }
 
-func (o *CompiledFunction) SourcePos(ip int) types.Pos {
+func (o *CompiledFunction) SourcePos(ip int) core.Pos {
 	for ip >= 0 {
 		if p, ok := o.SourceMap[ip]; ok {
 			return p
 		}
 		ip--
 	}
-	return types.NoPos
+	return core.NoPos
 }
 
 func (o *CompiledFunction) CanCall() bool {

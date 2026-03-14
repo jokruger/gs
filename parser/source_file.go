@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/jokruger/gs/types"
+	"github.com/jokruger/gs/core"
 )
 
 // SourceFilePos represents a position information in the file.
@@ -96,16 +96,16 @@ func (s *SourceFileSet) AddFile(filename string, base, size int) *SourceFile {
 
 // File returns the file that contains the position p. If no such file is
 // found (for instance for p == NoPos), the result is nil.
-func (s *SourceFileSet) File(p types.Pos) (f *SourceFile) {
-	if p != types.NoPos {
+func (s *SourceFileSet) File(p core.Pos) (f *SourceFile) {
+	if p != core.NoPos {
 		f = s.file(p)
 	}
 	return
 }
 
 // Position converts a SourcePos p in the fileset into a SourceFilePos value.
-func (s *SourceFileSet) Position(p types.Pos) (pos SourceFilePos) {
-	if p != types.NoPos {
+func (s *SourceFileSet) Position(p core.Pos) (pos SourceFilePos) {
+	if p != core.NoPos {
 		if f := s.file(p); f != nil {
 			return f.position(p)
 		}
@@ -113,7 +113,7 @@ func (s *SourceFileSet) Position(p types.Pos) (pos SourceFilePos) {
 	return
 }
 
-func (s *SourceFileSet) file(p types.Pos) *SourceFile {
+func (s *SourceFileSet) file(p core.Pos) *SourceFile {
 	// common case: p is in last file
 	f := s.LastFile
 	if f != nil && f.Base <= int(p) && int(p) <= f.Base+f.Size {
@@ -171,26 +171,26 @@ func (f *SourceFile) AddLine(offset int) {
 }
 
 // LineStart returns the position of the first character in the line.
-func (f *SourceFile) LineStart(line int) types.Pos {
+func (f *SourceFile) LineStart(line int) core.Pos {
 	if line < 1 {
 		panic("illegal line number (line numbering starts at 1)")
 	}
 	if line > len(f.Lines) {
 		panic("illegal line number")
 	}
-	return types.Pos(f.Base + f.Lines[line-1])
+	return core.Pos(f.Base + f.Lines[line-1])
 }
 
 // FileSetPos returns the position in the file set.
-func (f *SourceFile) FileSetPos(offset int) types.Pos {
+func (f *SourceFile) FileSetPos(offset int) core.Pos {
 	if offset > f.Size {
 		panic("illegal file offset")
 	}
-	return types.Pos(f.Base + offset)
+	return core.Pos(f.Base + offset)
 }
 
 // Offset translates the file set position into the file offset.
-func (f *SourceFile) Offset(p types.Pos) int {
+func (f *SourceFile) Offset(p core.Pos) int {
 	if int(p) < f.Base || int(p) > f.Base+f.Size {
 		panic("illegal SourcePos value")
 	}
@@ -198,8 +198,8 @@ func (f *SourceFile) Offset(p types.Pos) int {
 }
 
 // Position translates the file set position into the file position.
-func (f *SourceFile) Position(p types.Pos) (pos SourceFilePos) {
-	if p != types.NoPos {
+func (f *SourceFile) Position(p core.Pos) (pos SourceFilePos) {
+	if p != core.NoPos {
 		if int(p) < f.Base || int(p) > f.Base+f.Size {
 			panic("illegal SourcePos value")
 		}
@@ -208,7 +208,7 @@ func (f *SourceFile) Position(p types.Pos) (pos SourceFilePos) {
 	return
 }
 
-func (f *SourceFile) position(p types.Pos) (pos SourceFilePos) {
+func (f *SourceFile) position(p core.Pos) (pos SourceFilePos) {
 	offset := int(p) - f.Base
 	pos.Offset = offset
 	pos.Filename, pos.Line, pos.Column = f.unpack(offset)

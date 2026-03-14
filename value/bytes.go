@@ -3,6 +3,7 @@ package value
 import (
 	"bytes"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
@@ -25,7 +26,7 @@ func (o *Bytes) BinaryOp(op token.Token, rhs Object) (Object, error) {
 	case token.Add:
 		switch rhs := rhs.(type) {
 		case *Bytes:
-			if len(o.Value)+len(rhs.Value) > MaxBytesLen {
+			if len(o.Value)+len(rhs.Value) > core.MaxBytesLen {
 				return nil, gse.ErrBytesLimit
 			}
 			return &Bytes{Value: append(o.Value, rhs.Value...)}, nil

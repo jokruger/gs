@@ -5,6 +5,7 @@ import (
 	"sync"
 	"unicode/utf8"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
@@ -88,7 +89,7 @@ func (f *formatter) writePadding(n int) {
 	oldLen := len(buf)
 	newLen := oldLen + n
 
-	if newLen > value.MaxStringLen {
+	if newLen > core.MaxStringLen {
 		panic(gse.ErrStringLimit)
 	}
 
@@ -623,7 +624,7 @@ func (f *formatter) fmtFloat(v float64, size int, verb rune, prec int) {
 type fmtbuf []byte
 
 func (b *fmtbuf) Write(p []byte) {
-	if len(*b)+len(p) > value.MaxStringLen {
+	if len(*b)+len(p) > core.MaxStringLen {
 		panic(gse.ErrStringLimit)
 	}
 
@@ -631,7 +632,7 @@ func (b *fmtbuf) Write(p []byte) {
 }
 
 func (b *fmtbuf) WriteString(s string) {
-	if len(*b)+len(s) > value.MaxStringLen {
+	if len(*b)+len(s) > core.MaxStringLen {
 		panic(gse.ErrStringLimit)
 	}
 
@@ -639,7 +640,7 @@ func (b *fmtbuf) WriteString(s string) {
 }
 
 func (b *fmtbuf) WriteSingleByte(c byte) {
-	if len(*b) >= value.MaxStringLen {
+	if len(*b) >= core.MaxStringLen {
 		panic(gse.ErrStringLimit)
 	}
 
@@ -647,7 +648,7 @@ func (b *fmtbuf) WriteSingleByte(c byte) {
 }
 
 func (b *fmtbuf) WriteRune(r rune) {
-	if len(*b)+utf8.RuneLen(r) > value.MaxStringLen {
+	if len(*b)+utf8.RuneLen(r) > core.MaxStringLen {
 		panic(gse.ErrStringLimit)
 	}
 

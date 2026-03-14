@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strconv"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/token"
-	"github.com/jokruger/gs/types"
 )
 
 type bailout struct{}
@@ -95,12 +95,12 @@ type Parser struct {
 	file      *SourceFile
 	errors    ErrorList
 	scanner   *Scanner
-	pos       types.Pos
+	pos       core.Pos
 	token     token.Token
 	tokenLit  string
-	exprLevel int       // < 0: in control clause, >= 0: in expression
-	syncPos   types.Pos // last sync position
-	syncCount int       // number of advance calls without progress
+	exprLevel int      // < 0: in control clause, >= 0: in expression
+	syncPos   core.Pos // last sync position
+	syncCount int      // number of advance calls without progress
 	trace     bool
 	indent    int
 	traceOut  io.Writer
@@ -271,7 +271,7 @@ func (p *Parser) parseCall(x Expr) *CallExpr {
 	p.exprLevel++
 
 	var list []Expr
-	var ellipsis types.Pos
+	var ellipsis core.Pos
 	for p.token != token.RParen && p.token != token.EOF && !ellipsis.IsValid() {
 		list = append(list, p.parseExpr())
 		if p.token == token.Ellipsis {
@@ -1086,7 +1086,7 @@ func (p *Parser) parseMapLit() *MapLit {
 	}
 }
 
-func (p *Parser) expect(token token.Token) types.Pos {
+func (p *Parser) expect(token token.Token) core.Pos {
 	pos := p.pos
 
 	if p.token != token {
@@ -1128,7 +1128,7 @@ func (p *Parser) advance(to map[token.Token]bool) {
 	}
 }
 
-func (p *Parser) error(pos types.Pos, msg string) {
+func (p *Parser) error(pos core.Pos, msg string) {
 	filePos := p.file.Position(pos)
 
 	n := len(p.errors)
@@ -1143,7 +1143,7 @@ func (p *Parser) error(pos types.Pos, msg string) {
 	p.errors.Add(filePos, msg)
 }
 
-func (p *Parser) errorExpected(pos types.Pos, msg string) {
+func (p *Parser) errorExpected(pos core.Pos, msg string) {
 	msg = "expected " + msg
 	if pos == p.pos {
 		// error happened at the current position: provide more specific
@@ -1192,12 +1192,12 @@ func (p *Parser) printTrace(a ...interface{}) {
 	_, _ = fmt.Fprintln(p.traceOut, a...)
 }
 
-func (p *Parser) safePos(pos types.Pos) types.Pos {
+func (p *Parser) safePos(pos core.Pos) core.Pos {
 	fileBase := p.file.Base
 	fileSize := p.file.Size
 
 	if int(pos) < fileBase || int(pos) > fileBase+fileSize {
-		return types.Pos(fileBase + fileSize)
+		return core.Pos(fileBase + fileSize)
 	}
 	return pos
 }

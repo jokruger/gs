@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/value"
 )
 
@@ -232,9 +233,9 @@ func TestText(t *testing.T) {
 }
 
 func TestReplaceLimit(t *testing.T) {
-	curMaxStringLen := value.MaxStringLen
-	defer func() { value.MaxStringLen = curMaxStringLen }()
-	value.MaxStringLen = 12
+	curMaxStringLen := core.MaxStringLen
+	defer func() { core.MaxStringLen = curMaxStringLen }()
+	core.MaxStringLen = 12
 
 	module(t, "text").call("replace", "123456789012", "1", "x", -1).
 		expect("x234567890x2")
@@ -264,9 +265,9 @@ func TestReplaceLimit(t *testing.T) {
 }
 
 func TestTextRepeat(t *testing.T) {
-	curMaxStringLen := value.MaxStringLen
-	defer func() { value.MaxStringLen = curMaxStringLen }()
-	value.MaxStringLen = 12
+	curMaxStringLen := core.MaxStringLen
+	defer func() { core.MaxStringLen = curMaxStringLen }()
+	core.MaxStringLen = 12
 
 	module(t, "text").call("repeat", "1234", "3").
 		expect("123412341234")

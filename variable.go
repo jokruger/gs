@@ -3,13 +3,14 @@ package gs
 import (
 	"errors"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/value"
 )
 
 // Variable is a user-defined variable for the script.
 type Variable struct {
 	name  string
-	value value.Object
+	value core.Object
 }
 
 // NewVariable creates a Variable.
@@ -128,7 +129,7 @@ func (v *Variable) Error() error {
 
 // Object returns an underlying Object of the variable value. Note that
 // returned Object is a copy of an actual Object used in the script.
-func (v *Variable) Object() value.Object {
+func (v *Variable) Object() core.Object {
 	return v.value
 }
 

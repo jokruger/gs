@@ -12,7 +12,7 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-var osModule = map[string]value.Object{
+var osModule = map[string]core.Object{
 	"platform":            &value.String{Value: runtime.GOOS},
 	"arch":                &value.String{Value: runtime.GOARCH},
 	"o_rdonly":            &value.Int{Value: int64(os.O_RDONLY)},
@@ -204,7 +204,7 @@ var osModule = map[string]value.Object{
 	}, // readfile(name) => array(byte)/error
 }
 
-func osReadFile(args ...value.Object) (ret value.Object, err error) {
+func osReadFile(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -226,7 +226,7 @@ func osReadFile(args ...value.Object) (ret value.Object, err error) {
 	return &value.Bytes{Value: bytes}, nil
 }
 
-func osStat(args ...value.Object) (ret value.Object, err error) {
+func osStat(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -243,7 +243,7 @@ func osStat(args ...value.Object) (ret value.Object, err error) {
 		return wrapError(err), nil
 	}
 	fstat := &value.ImmutableMap{
-		Value: map[string]value.Object{
+		Value: map[string]core.Object{
 			"name":  &value.String{Value: stat.Name()},
 			"mtime": &value.Time{Value: stat.ModTime()},
 			"size":  &value.Int{Value: stat.Size()},
@@ -258,7 +258,7 @@ func osStat(args ...value.Object) (ret value.Object, err error) {
 	return fstat, nil
 }
 
-func osCreate(args ...value.Object) (value.Object, error) {
+func osCreate(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -277,7 +277,7 @@ func osCreate(args ...value.Object) (value.Object, error) {
 	return makeOSFile(res), nil
 }
 
-func osOpen(args ...value.Object) (value.Object, error) {
+func osOpen(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -296,7 +296,7 @@ func osOpen(args ...value.Object) (value.Object, error) {
 	return makeOSFile(res), nil
 }
 
-func osOpenFile(args ...value.Object) (value.Object, error) {
+func osOpenFile(args ...core.Object) (core.Object, error) {
 	if len(args) != 3 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -331,7 +331,7 @@ func osOpenFile(args ...value.Object) (value.Object, error) {
 	return makeOSFile(res), nil
 }
 
-func osArgs(args ...value.Object) (value.Object, error) {
+func osArgs(args ...core.Object) (core.Object, error) {
 	if len(args) != 0 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -351,7 +351,7 @@ func osFuncASFmRE(
 ) *value.UserFunction {
 	return &value.UserFunction{
 		Name: name,
-		Value: func(args ...value.Object) (value.Object, error) {
+		Value: func(args ...core.Object) (core.Object, error) {
 			if len(args) != 2 {
 				return nil, gse.ErrWrongNumArguments
 			}
@@ -376,7 +376,7 @@ func osFuncASFmRE(
 	}
 }
 
-func osLookupEnv(args ...value.Object) (value.Object, error) {
+func osLookupEnv(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -398,7 +398,7 @@ func osLookupEnv(args ...value.Object) (value.Object, error) {
 	return &value.String{Value: res}, nil
 }
 
-func osExpandEnv(args ...value.Object) (value.Object, error) {
+func osExpandEnv(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -433,7 +433,7 @@ func osExpandEnv(args ...value.Object) (value.Object, error) {
 	return &value.String{Value: s}, nil
 }
 
-func osExec(args ...value.Object) (value.Object, error) {
+func osExec(args ...core.Object) (core.Object, error) {
 	if len(args) == 0 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -460,7 +460,7 @@ func osExec(args ...value.Object) (value.Object, error) {
 	return makeOSExecCommand(exec.Command(name, execArgs...)), nil
 }
 
-func osFindProcess(args ...value.Object) (value.Object, error) {
+func osFindProcess(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -479,7 +479,7 @@ func osFindProcess(args ...value.Object) (value.Object, error) {
 	return makeOSProcess(proc), nil
 }
 
-func osStartProcess(args ...value.Object) (value.Object, error) {
+func osStartProcess(args ...core.Object) (core.Object, error) {
 	if len(args) != 4 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -551,7 +551,7 @@ func osStartProcess(args ...value.Object) (value.Object, error) {
 	return makeOSProcess(proc), nil
 }
 
-func stringArray(arr []value.Object, argName string) ([]string, error) {
+func stringArray(arr []core.Object, argName string) ([]string, error) {
 	var sarr []string
 	for idx, elem := range arr {
 		str, ok := elem.(*value.String)

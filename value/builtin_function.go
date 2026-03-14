@@ -1,9 +1,11 @@
 package value
 
+import "github.com/jokruger/gs/core"
+
 type BuiltinFunction struct {
 	ObjectImpl
 	Name  string
-	Value CallableFunc
+	Value core.CallableFunction
 }
 
 func (o *BuiltinFunction) TypeName() string {
@@ -14,15 +16,15 @@ func (o *BuiltinFunction) String() string {
 	return "<builtin-function>"
 }
 
-func (o *BuiltinFunction) Copy() Object {
+func (o *BuiltinFunction) Copy() core.Object {
 	return &BuiltinFunction{Value: o.Value}
 }
 
-func (o *BuiltinFunction) Equals(Object) bool {
+func (o *BuiltinFunction) Equals(core.Object) bool {
 	return false
 }
 
-func (o *BuiltinFunction) Call(args ...Object) (Object, error) {
+func (o *BuiltinFunction) Call(args ...core.Object) (core.Object, error) {
 	return o.Value(args...)
 }
 

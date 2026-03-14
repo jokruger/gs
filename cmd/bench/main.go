@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/value"
 )
@@ -158,7 +159,7 @@ func runBench(
 	parseTime time.Duration,
 	compileTime time.Duration,
 	runTime time.Duration,
-	result value.Object,
+	result core.Object,
 	err error,
 ) {
 	var astFile *parser.File
@@ -210,8 +211,8 @@ func compileFile(file *parser.File) (time.Duration, *gs.Bytecode, error) {
 	return time.Since(start), bytecode, nil
 }
 
-func runVM(bytecode *gs.Bytecode) (time.Duration, value.Object, error) {
-	globals := make([]value.Object, gs.GlobalsSize)
+func runVM(bytecode *gs.Bytecode) (time.Duration, core.Object, error) {
+	globals := make([]core.Object, gs.GlobalsSize)
 
 	start := time.Now()
 

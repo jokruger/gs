@@ -4,6 +4,7 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
@@ -21,7 +22,7 @@ func (o *Float) TypeName() string {
 	return "float"
 }
 
-func (o *Float) BinaryOp(op token.Token, rhs Object) (Object, error) {
+func (o *Float) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	switch rhs := rhs.(type) {
 	case *Float:
 		switch op {
@@ -121,7 +122,7 @@ func (o *Float) BinaryOp(op token.Token, rhs Object) (Object, error) {
 	return nil, gse.ErrInvalidOperator
 }
 
-func (o *Float) Copy() Object {
+func (o *Float) Copy() core.Object {
 	return &Float{Value: o.Value}
 }
 
@@ -129,7 +130,7 @@ func (o *Float) IsFalsy() bool {
 	return math.IsNaN(o.Value)
 }
 
-func (o *Float) Equals(x Object) bool {
+func (o *Float) Equals(x core.Object) bool {
 	t, ok := x.(*Float)
 	if !ok {
 		return false

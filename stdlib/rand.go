@@ -3,11 +3,12 @@ package stdlib
 import (
 	"math/rand"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
 
-var randModule = map[string]value.Object{
+var randModule = map[string]core.Object{
 	"int": &value.UserFunction{
 		Name:  "int",
 		Value: FuncARI64(rand.Int63),
@@ -38,7 +39,7 @@ var randModule = map[string]value.Object{
 	},
 	"read": &value.UserFunction{
 		Name: "read",
-		Value: func(args ...value.Object) (ret value.Object, err error) {
+		Value: func(args ...core.Object) (ret core.Object, err error) {
 			if len(args) != 1 {
 				return nil, gse.ErrWrongNumArguments
 			}
@@ -60,7 +61,7 @@ var randModule = map[string]value.Object{
 	},
 	"rand": &value.UserFunction{
 		Name: "rand",
-		Value: func(args ...value.Object) (value.Object, error) {
+		Value: func(args ...core.Object) (core.Object, error) {
 			if len(args) != 1 {
 				return nil, gse.ErrWrongNumArguments
 			}
@@ -80,7 +81,7 @@ var randModule = map[string]value.Object{
 
 func randRand(r *rand.Rand) *value.ImmutableMap {
 	return &value.ImmutableMap{
-		Value: map[string]value.Object{
+		Value: map[string]core.Object{
 			"int": &value.UserFunction{
 				Name:  "int",
 				Value: FuncARI64(r.Int63),
@@ -111,8 +112,8 @@ func randRand(r *rand.Rand) *value.ImmutableMap {
 			},
 			"read": &value.UserFunction{
 				Name: "read",
-				Value: func(args ...value.Object) (
-					ret value.Object,
+				Value: func(args ...core.Object) (
+					ret core.Object,
 					err error,
 				) {
 					if len(args) != 1 {

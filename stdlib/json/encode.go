@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"unicode/utf8"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/value"
 )
 
@@ -125,7 +126,7 @@ var safeSet = [utf8.RuneSelf]bool{
 var hex = "0123456789abcdef"
 
 // Encode returns the JSON encoding of the object.
-func Encode(o value.Object) ([]byte, error) {
+func Encode(o core.Object) ([]byte, error) {
 	var b []byte
 
 	switch o := o.(type) {

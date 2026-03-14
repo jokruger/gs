@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
 
 type ImmutableArray struct {
 	ObjectImpl
-	Value []Object
+	Value []core.Object
 }
 
 func (o *ImmutableArray) TypeName() string {
@@ -25,7 +26,7 @@ func (o *ImmutableArray) String() string {
 	return fmt.Sprintf("[%s]", strings.Join(elements, ", "))
 }
 
-func (o *ImmutableArray) BinaryOp(op token.Token, rhs Object) (Object, error) {
+func (o *ImmutableArray) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	if rhs, ok := rhs.(*ImmutableArray); ok {
 		switch op {
 		case token.Add:
@@ -35,8 +36,8 @@ func (o *ImmutableArray) BinaryOp(op token.Token, rhs Object) (Object, error) {
 	return nil, gse.ErrInvalidOperator
 }
 
-func (o *ImmutableArray) Copy() Object {
-	var c []Object
+func (o *ImmutableArray) Copy() core.Object {
+	var c []core.Object
 	for _, elem := range o.Value {
 		c = append(c, elem.Copy())
 	}
@@ -47,8 +48,8 @@ func (o *ImmutableArray) IsFalsy() bool {
 	return len(o.Value) == 0
 }
 
-func (o *ImmutableArray) Equals(x Object) bool {
-	var xVal []Object
+func (o *ImmutableArray) Equals(x core.Object) bool {
+	var xVal []core.Object
 	switch x := x.(type) {
 	case *Array:
 		xVal = x.Value
@@ -68,7 +69,7 @@ func (o *ImmutableArray) Equals(x Object) bool {
 	return true
 }
 
-func (o *ImmutableArray) IndexGet(index Object) (res Object, err error) {
+func (o *ImmutableArray) IndexGet(index core.Object) (res core.Object, err error) {
 	intIdx, ok := index.(*Int)
 	if !ok {
 		err = gse.ErrInvalidIndexType
@@ -83,7 +84,7 @@ func (o *ImmutableArray) IndexGet(index Object) (res Object, err error) {
 	return
 }
 
-func (o *ImmutableArray) Iterate() Iterator {
+func (o *ImmutableArray) Iterate() core.Iterator {
 	return &ArrayIterator{
 		v: o.Value,
 		l: len(o.Value),

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/value"
@@ -59,10 +60,10 @@ func TestMakeInstruction(t *testing.T) {
 
 func TestNumObjects(t *testing.T) {
 	testCountObjects(t, &value.Array{}, 1)
-	testCountObjects(t, &value.Array{Value: []value.Object{
+	testCountObjects(t, &value.Array{Value: []core.Object{
 		&value.Int{Value: 1},
 		&value.Int{Value: 2},
-		&value.Array{Value: []value.Object{
+		&value.Array{Value: []core.Object{
 			&value.Int{Value: 3},
 			&value.Int{Value: 4},
 			&value.Int{Value: 5},
@@ -76,30 +77,30 @@ func TestNumObjects(t *testing.T) {
 	testCountObjects(t, &value.CompiledFunction{}, 1)
 	testCountObjects(t, &value.Error{Value: &value.Int{Value: 5}}, 2)
 	testCountObjects(t, &value.Float{Value: 19.84}, 1)
-	testCountObjects(t, &value.ImmutableArray{Value: []value.Object{
+	testCountObjects(t, &value.ImmutableArray{Value: []core.Object{
 		&value.Int{Value: 1},
 		&value.Int{Value: 2},
-		&value.ImmutableArray{Value: []value.Object{
+		&value.ImmutableArray{Value: []core.Object{
 			&value.Int{Value: 3},
 			&value.Int{Value: 4},
 			&value.Int{Value: 5},
 		}},
 	}}, 7)
 	testCountObjects(t, &value.ImmutableMap{
-		Value: map[string]value.Object{
+		Value: map[string]core.Object{
 			"k1": &value.Int{Value: 1},
 			"k2": &value.Int{Value: 2},
-			"k3": &value.Array{Value: []value.Object{
+			"k3": &value.Array{Value: []core.Object{
 				&value.Int{Value: 3},
 				&value.Int{Value: 4},
 				&value.Int{Value: 5},
 			}},
 		}}, 7)
 	testCountObjects(t, &value.Int{Value: 1984}, 1)
-	testCountObjects(t, &value.Map{Value: map[string]value.Object{
+	testCountObjects(t, &value.Map{Value: map[string]core.Object{
 		"k1": &value.Int{Value: 1},
 		"k2": &value.Int{Value: 2},
-		"k3": &value.Array{Value: []value.Object{
+		"k3": &value.Array{Value: []core.Object{
 			&value.Int{Value: 3},
 			&value.Int{Value: 4},
 			&value.Int{Value: 5},
@@ -110,7 +111,7 @@ func TestNumObjects(t *testing.T) {
 	testCountObjects(t, value.UndefinedValue, 1)
 }
 
-func testCountObjects(t *testing.T, o value.Object, expected int) {
+func testCountObjects(t *testing.T, o core.Object, expected int) {
 	require.Equal(t, expected, gs.CountObjects(o))
 }
 

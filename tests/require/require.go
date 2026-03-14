@@ -134,8 +134,8 @@ func Equal(
 		if expected != actual.(token.Token) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
-	case []value.Object:
-		equalObjectSlice(t, expected, actual.([]value.Object), msg...)
+	case []core.Object:
+		equalObjectSlice(t, expected, actual.([]core.Object), msg...)
 	case *value.Int:
 		Equal(t, expected.Value, actual.(*value.Int).Value, msg...)
 	case *value.Float:
@@ -169,8 +169,8 @@ func Equal(
 		}
 	case *value.Error:
 		Equal(t, expected.Value, actual.(*value.Error).Value, msg...)
-	case value.Object:
-		if !expected.Equals(actual.(value.Object)) {
+	case core.Object:
+		if !expected.Equals(actual.(core.Object)) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
 	case *parser.SourceFileSet:
@@ -254,7 +254,7 @@ func equalSymbol(a, b *gs.Symbol) bool {
 		a.Scope == b.Scope
 }
 
-func equalObjectSlice(t *testing.T, expected, actual []value.Object, msg ...interface{}) {
+func equalObjectSlice(t *testing.T, expected, actual []core.Object, msg ...interface{}) {
 	Equal(t, len(expected), len(actual), msg...)
 	for i := 0; i < len(expected); i++ {
 		Equal(t, expected[i], actual[i], msg...)
@@ -270,7 +270,7 @@ func equalFileSet(t *testing.T, expected, actual *parser.SourceFileSet, msg ...i
 	Equal(t, expected.LastFile, actual.LastFile)
 }
 
-func equalObjectMap(t *testing.T, expected, actual map[string]value.Object, msg ...interface{}) {
+func equalObjectMap(t *testing.T, expected, actual map[string]core.Object, msg ...interface{}) {
 	Equal(t, len(expected), len(actual), msg...)
 	for key, expectedVal := range expected {
 		actualVal := actual[key]
@@ -278,7 +278,7 @@ func equalObjectMap(t *testing.T, expected, actual map[string]value.Object, msg 
 	}
 }
 
-func equalCompiledFunction(t *testing.T, expected, actual value.Object, msg ...interface{}) {
+func equalCompiledFunction(t *testing.T, expected, actual core.Object, msg ...interface{}) {
 	expectedT := expected.(*value.CompiledFunction)
 	actualT := actual.(*value.CompiledFunction)
 	Equal(t, gs.FormatInstructions(expectedT.Instructions, 0), gs.FormatInstructions(actualT.Instructions, 0), msg...)

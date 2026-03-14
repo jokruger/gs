@@ -9,14 +9,14 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-var fmtModule = map[string]value.Object{
+var fmtModule = map[string]core.Object{
 	"print":   &value.UserFunction{Name: "print", Value: fmtPrint},
 	"printf":  &value.UserFunction{Name: "printf", Value: fmtPrintf},
 	"println": &value.UserFunction{Name: "println", Value: fmtPrintln},
 	"sprintf": &value.UserFunction{Name: "sprintf", Value: fmtSprintf},
 }
 
-func fmtPrint(args ...value.Object) (ret value.Object, err error) {
+func fmtPrint(args ...core.Object) (ret core.Object, err error) {
 	printArgs, err := getPrintArgs(args...)
 	if err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func fmtPrint(args ...value.Object) (ret value.Object, err error) {
 	return nil, nil
 }
 
-func fmtPrintf(args ...value.Object) (ret value.Object, err error) {
+func fmtPrintf(args ...core.Object) (ret core.Object, err error) {
 	numArgs := len(args)
 	if numArgs == 0 {
 		return nil, gse.ErrWrongNumArguments
@@ -52,7 +52,7 @@ func fmtPrintf(args ...value.Object) (ret value.Object, err error) {
 	return nil, nil
 }
 
-func fmtPrintln(args ...value.Object) (ret value.Object, err error) {
+func fmtPrintln(args ...core.Object) (ret core.Object, err error) {
 	printArgs, err := getPrintArgs(args...)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func fmtPrintln(args ...value.Object) (ret value.Object, err error) {
 	return nil, nil
 }
 
-func fmtSprintf(args ...value.Object) (ret value.Object, err error) {
+func fmtSprintf(args ...core.Object) (ret core.Object, err error) {
 	numArgs := len(args)
 	if numArgs == 0 {
 		return nil, gse.ErrWrongNumArguments
@@ -87,7 +87,7 @@ func fmtSprintf(args ...value.Object) (ret value.Object, err error) {
 	return &value.String{Value: s}, nil
 }
 
-func getPrintArgs(args ...value.Object) ([]interface{}, error) {
+func getPrintArgs(args ...core.Object) ([]interface{}, error) {
 	var printArgs []interface{}
 	l := 0
 	for _, arg := range args {

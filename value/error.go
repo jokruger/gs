@@ -3,12 +3,13 @@ package value
 import (
 	"fmt"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 )
 
 type Error struct {
 	ObjectImpl
-	Value Object
+	Value core.Object
 }
 
 func (o *Error) TypeName() string {
@@ -26,15 +27,15 @@ func (o *Error) IsFalsy() bool {
 	return true // error is always false.
 }
 
-func (o *Error) Copy() Object {
+func (o *Error) Copy() core.Object {
 	return &Error{Value: o.Value.Copy()}
 }
 
-func (o *Error) Equals(x Object) bool {
+func (o *Error) Equals(x core.Object) bool {
 	return o == x // pointer equality
 }
 
-func (o *Error) IndexGet(index Object) (res Object, err error) {
+func (o *Error) IndexGet(index core.Object) (res core.Object, err error) {
 	if strIdx, _ := index.ToString(); strIdx != "value" {
 		err = gse.ErrInvalidIndexOnError
 		return

@@ -1,8 +1,10 @@
 package value
 
+import "github.com/jokruger/gs/core"
+
 type MapIterator struct {
 	ObjectImpl
-	v map[string]Object
+	v map[string]core.Object
 	k []string
 	i int
 	l int
@@ -20,11 +22,11 @@ func (i *MapIterator) IsFalsy() bool {
 	return true
 }
 
-func (i *MapIterator) Equals(Object) bool {
+func (i *MapIterator) Equals(core.Object) bool {
 	return false
 }
 
-func (i *MapIterator) Copy() Object {
+func (i *MapIterator) Copy() core.Object {
 	return &MapIterator{v: i.v, k: i.k, i: i.i, l: i.l}
 }
 
@@ -33,12 +35,12 @@ func (i *MapIterator) Next() bool {
 	return i.i <= i.l
 }
 
-func (i *MapIterator) Key() Object {
+func (i *MapIterator) Key() core.Object {
 	k := i.k[i.i-1]
 	return &String{Value: k}
 }
 
-func (i *MapIterator) Value() Object {
+func (i *MapIterator) Value() core.Object {
 	k := i.k[i.i-1]
 	return i.v[k]
 }

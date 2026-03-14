@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/tests/require"
@@ -1338,7 +1339,7 @@ func concatInsts(instructions ...[]byte) []byte {
 
 func bytecode(
 	instructions []byte,
-	constants []value.Object,
+	constants []core.Object,
 ) *gs.Bytecode {
 	return &gs.Bytecode{
 		FileSet:      parser.NewFileSet(),
@@ -1391,7 +1392,7 @@ func equalBytecode(t *testing.T, expected, actual *gs.Bytecode) {
 	equalConstants(t, expected.Constants, actual.Constants)
 }
 
-func equalConstants(t *testing.T, expected, actual []value.Object) {
+func equalConstants(t *testing.T, expected, actual []core.Object) {
 	require.Equal(t, len(expected), len(actual))
 	for i := 0; i < len(expected); i++ {
 		require.Equal(t, expected[i], actual[i])
@@ -1409,7 +1410,7 @@ func (o *compileTracer) Write(p []byte) (n int, err error) {
 
 func traceCompile(
 	input string,
-	symbols map[string]value.Object,
+	symbols map[string]core.Object,
 ) (res *gs.Bytecode, trace []string, err error) {
 	fileSet := parser.NewFileSet()
 	file := fileSet.AddFile("test", -1, len(input))
@@ -1448,7 +1449,7 @@ func traceCompile(
 	return
 }
 
-func objectsArray(o ...value.Object) []value.Object {
+func objectsArray(o ...core.Object) []core.Object {
 	return o
 }
 

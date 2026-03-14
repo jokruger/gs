@@ -3,6 +3,7 @@ package value
 import (
 	"time"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
@@ -18,11 +19,11 @@ func (o *ObjectImpl) String() string {
 	panic(gse.ErrNotImplemented)
 }
 
-func (o *ObjectImpl) BinaryOp(token.Token, Object) (Object, error) {
+func (o *ObjectImpl) BinaryOp(token.Token, core.Object) (core.Object, error) {
 	return nil, gse.ErrInvalidOperator
 }
 
-func (o *ObjectImpl) Copy() Object {
+func (o *ObjectImpl) Copy() core.Object {
 	return nil
 }
 
@@ -30,19 +31,19 @@ func (o *ObjectImpl) IsFalsy() bool {
 	return false
 }
 
-func (o *ObjectImpl) Equals(x Object) bool {
+func (o *ObjectImpl) Equals(x core.Object) bool {
 	return o == x
 }
 
-func (o *ObjectImpl) IndexGet(Object) (res Object, err error) {
+func (o *ObjectImpl) IndexGet(core.Object) (core.Object, error) {
 	return nil, gse.ErrNotIndexable
 }
 
-func (o *ObjectImpl) IndexSet(Object, Object) (err error) {
+func (o *ObjectImpl) IndexSet(core.Object, core.Object) error {
 	return gse.ErrNotIndexAssignable
 }
 
-func (o *ObjectImpl) Iterate() Iterator {
+func (o *ObjectImpl) Iterate() core.Iterator {
 	return nil
 }
 
@@ -50,7 +51,7 @@ func (o *ObjectImpl) CanIterate() bool {
 	return false
 }
 
-func (o *ObjectImpl) Call(...Object) (ret Object, err error) {
+func (o *ObjectImpl) Call(...core.Object) (core.Object, error) {
 	return nil, nil
 }
 

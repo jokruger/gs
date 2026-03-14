@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/value"
@@ -106,7 +107,7 @@ func (c callres) call(funcName string, args ...interface{}) callres {
 		return c
 	}
 
-	var oargs []value.Object
+	var oargs []core.Object
 	for _, v := range args {
 		oargs = append(oargs, object(v))
 	}
@@ -166,9 +167,9 @@ func module(t *testing.T, moduleName string) callres {
 	return callres{t: t, o: mod}
 }
 
-func object(v interface{}) value.Object {
+func object(v interface{}) core.Object {
 	switch v := v.(type) {
-	case value.Object:
+	case core.Object:
 		return v
 	case string:
 		return &value.String{Value: v}
@@ -190,28 +191,28 @@ func object(v interface{}) value.Object {
 	case []byte:
 		return &value.Bytes{Value: v}
 	case MAP:
-		objs := make(map[string]value.Object)
+		objs := make(map[string]core.Object)
 		for k, v := range v {
 			objs[k] = object(v)
 		}
 
 		return &value.Map{Value: objs}
 	case ARR:
-		var objs []value.Object
+		var objs []core.Object
 		for _, e := range v {
 			objs = append(objs, object(e))
 		}
 
 		return &value.Array{Value: objs}
 	case IMAP:
-		objs := make(map[string]value.Object)
+		objs := make(map[string]core.Object)
 		for k, v := range v {
 			objs[k] = object(v)
 		}
 
 		return &value.ImmutableMap{Value: objs}
 	case IARR:
-		var objs []value.Object
+		var objs []core.Object
 		for _, e := range v {
 			objs = append(objs, object(e))
 		}
@@ -220,7 +221,7 @@ func object(v interface{}) value.Object {
 	case time.Time:
 		return &value.Time{Value: v}
 	case []int:
-		var objs []value.Object
+		var objs []core.Object
 		for _, e := range v {
 			objs = append(objs, &value.Int{Value: int64(e)})
 		}

@@ -1,8 +1,10 @@
 package value
 
+import "github.com/jokruger/gs/core"
+
 type ObjectPtr struct {
 	ObjectImpl
-	Value *Object
+	Value *core.Object
 }
 
 func (o *ObjectPtr) TypeName() string {
@@ -13,7 +15,7 @@ func (o *ObjectPtr) String() string {
 	return "free-var"
 }
 
-func (o *ObjectPtr) Copy() Object {
+func (o *ObjectPtr) Copy() core.Object {
 	return o
 }
 
@@ -21,7 +23,7 @@ func (o *ObjectPtr) IsFalsy() bool {
 	return o.Value == nil
 }
 
-func (o *ObjectPtr) Equals(x Object) bool {
+func (o *ObjectPtr) Equals(x core.Object) bool {
 	return o == x
 }
 

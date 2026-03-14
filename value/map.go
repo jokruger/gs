@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 )
 
 type Map struct {
 	ObjectImpl
-	Value map[string]Object
+	Value map[string]core.Object
 }
 
 func (o *Map) TypeName() string {
@@ -24,8 +25,8 @@ func (o *Map) String() string {
 	return fmt.Sprintf("{%s}", strings.Join(pairs, ", "))
 }
 
-func (o *Map) Copy() Object {
-	c := make(map[string]Object)
+func (o *Map) Copy() core.Object {
+	c := make(map[string]core.Object)
 	for k, v := range o.Value {
 		c[k] = v.Copy()
 	}
@@ -36,8 +37,8 @@ func (o *Map) IsFalsy() bool {
 	return len(o.Value) == 0
 }
 
-func (o *Map) Equals(x Object) bool {
-	var xVal map[string]Object
+func (o *Map) Equals(x core.Object) bool {
+	var xVal map[string]core.Object
 	switch x := x.(type) {
 	case *Map:
 		xVal = x.Value
@@ -58,7 +59,7 @@ func (o *Map) Equals(x Object) bool {
 	return true
 }
 
-func (o *Map) IndexGet(index Object) (res Object, err error) {
+func (o *Map) IndexGet(index core.Object) (res core.Object, err error) {
 	strIdx, ok := index.ToString()
 	if !ok {
 		err = gse.ErrInvalidIndexType
@@ -71,7 +72,7 @@ func (o *Map) IndexGet(index Object) (res Object, err error) {
 	return
 }
 
-func (o *Map) IndexSet(index, value Object) (err error) {
+func (o *Map) IndexSet(index, value core.Object) (err error) {
 	strIdx, ok := index.ToString()
 	if !ok {
 		err = gse.ErrInvalidIndexType
@@ -81,7 +82,7 @@ func (o *Map) IndexSet(index, value Object) (err error) {
 	return nil
 }
 
-func (o *Map) Iterate() Iterator {
+func (o *Map) Iterate() core.Iterator {
 	var keys []string
 	for k := range o.Value {
 		keys = append(keys, k)

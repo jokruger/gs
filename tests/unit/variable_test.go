@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/value"
 )
@@ -18,7 +19,7 @@ type VariableTest struct {
 	CharValue   rune
 	BoolValue   bool
 	StringValue string
-	Object      value.Object
+	Object      core.Object
 	IsUndefined bool
 }
 

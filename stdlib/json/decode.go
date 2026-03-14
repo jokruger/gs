@@ -12,11 +12,12 @@ import (
 	"unicode/utf16"
 	"unicode/utf8"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/value"
 )
 
 // Decode parses the JSON-encoded data and returns the result object.
-func Decode(data []byte) (value.Object, error) {
+func Decode(data []byte) (core.Object, error) {
 	var d decodeState
 	err := checkValid(data, &d.scan)
 	if err != nil {
@@ -82,7 +83,7 @@ func (d *decodeState) scanWhile(op int) (isFloat bool) {
 	return
 }
 
-func (d *decodeState) value() (value.Object, error) {
+func (d *decodeState) value() (core.Object, error) {
 	switch d.opcode {
 	default:
 		panic(phasePanicMsg)
@@ -105,8 +106,8 @@ func (d *decodeState) value() (value.Object, error) {
 	}
 }
 
-func (d *decodeState) array() (value.Object, error) {
-	var arr []value.Object
+func (d *decodeState) array() (core.Object, error) {
+	var arr []core.Object
 	for {
 		// Look ahead for ] - can only happen on first iteration.
 		d.scanWhile(scanSkipSpace)
@@ -133,8 +134,8 @@ func (d *decodeState) array() (value.Object, error) {
 	return &value.Array{Value: arr}, nil
 }
 
-func (d *decodeState) object() (value.Object, error) {
-	m := make(map[string]value.Object)
+func (d *decodeState) object() (core.Object, error) {
+	m := make(map[string]core.Object)
 	for {
 		// Read opening " of string key or closing }.
 		d.scanWhile(scanSkipSpace)
@@ -186,7 +187,7 @@ func (d *decodeState) object() (value.Object, error) {
 	return &value.Map{Value: m}, nil
 }
 
-func (d *decodeState) literal() (value.Object, error) {
+func (d *decodeState) literal() (core.Object, error) {
 	// All bytes inside literal return scanContinue op code.
 	start := d.readIndex()
 	isFloat := d.scanWhile(scanContinue)

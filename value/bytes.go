@@ -21,7 +21,7 @@ func (o *Bytes) TypeName() string {
 	return "bytes"
 }
 
-func (o *Bytes) BinaryOp(op token.Token, rhs Object) (Object, error) {
+func (o *Bytes) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	switch op {
 	case token.Add:
 		switch rhs := rhs.(type) {
@@ -35,7 +35,7 @@ func (o *Bytes) BinaryOp(op token.Token, rhs Object) (Object, error) {
 	return nil, gse.ErrInvalidOperator
 }
 
-func (o *Bytes) Copy() Object {
+func (o *Bytes) Copy() core.Object {
 	return &Bytes{Value: append([]byte{}, o.Value...)}
 }
 
@@ -43,7 +43,7 @@ func (o *Bytes) IsFalsy() bool {
 	return len(o.Value) == 0
 }
 
-func (o *Bytes) Equals(x Object) bool {
+func (o *Bytes) Equals(x core.Object) bool {
 	t, ok := x.(*Bytes)
 	if !ok {
 		return false
@@ -51,7 +51,7 @@ func (o *Bytes) Equals(x Object) bool {
 	return bytes.Equal(o.Value, t.Value)
 }
 
-func (o *Bytes) IndexGet(index Object) (res Object, err error) {
+func (o *Bytes) IndexGet(index core.Object) (res core.Object, err error) {
 	intIdx, ok := index.(*Int)
 	if !ok {
 		err = gse.ErrInvalidIndexType
@@ -66,7 +66,7 @@ func (o *Bytes) IndexGet(index Object) (res Object, err error) {
 	return
 }
 
-func (o *Bytes) Iterate() Iterator {
+func (o *Bytes) Iterate() core.Iterator {
 	return &BytesIterator{
 		v: o.Value,
 		l: len(o.Value),

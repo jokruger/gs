@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/value"
 )
@@ -167,7 +168,7 @@ func (s *Script) RunContext(
 
 func (s *Script) prepCompile() (
 	symbolTable *SymbolTable,
-	globals []value.Object,
+	globals []core.Object,
 	err error,
 ) {
 	var names []string
@@ -180,7 +181,7 @@ func (s *Script) prepCompile() (
 		symbolTable.DefineBuiltin(idx, fn.Name)
 	}
 
-	globals = make([]value.Object, GlobalsSize)
+	globals = make([]core.Object, GlobalsSize)
 
 	for idx, name := range names {
 		symbol := symbolTable.Define(name)
@@ -198,7 +199,7 @@ func (s *Script) prepCompile() (
 type Compiled struct {
 	globalIndexes map[string]int // global symbol name to index
 	bytecode      *Bytecode
-	globals       []value.Object
+	globals       []core.Object
 	maxAllocs     int64
 	lock          sync.RWMutex
 }
@@ -263,7 +264,7 @@ func (c *Compiled) Clone() *Compiled {
 	clone := &Compiled{
 		globalIndexes: c.globalIndexes,
 		bytecode:      c.bytecode,
-		globals:       make([]value.Object, len(c.globals)),
+		globals:       make([]core.Object, len(c.globals)),
 		maxAllocs:     c.maxAllocs,
 	}
 	// copy global objects

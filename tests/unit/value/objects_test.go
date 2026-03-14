@@ -3,13 +3,14 @@ package value_test
 import (
 	"testing"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/token"
 	"github.com/jokruger/gs/value"
 )
 
 func TestObject_TypeName(t *testing.T) {
-	var o value.Object = &value.Int{}
+	var o core.Object = &value.Int{}
 	require.Equal(t, "int", o.TypeName())
 	o = &value.Float{}
 	require.Equal(t, "float", o.TypeName())
@@ -44,7 +45,7 @@ func TestObject_TypeName(t *testing.T) {
 }
 
 func TestObject_IsFalsy(t *testing.T) {
-	var o value.Object = &value.Int{Value: 0}
+	var o core.Object = &value.Int{Value: 0}
 	require.True(t, o.IsFalsy())
 	o = &value.Int{Value: 1}
 	require.False(t, o.IsFalsy())
@@ -62,11 +63,11 @@ func TestObject_IsFalsy(t *testing.T) {
 	require.False(t, o.IsFalsy())
 	o = &value.Array{Value: nil}
 	require.True(t, o.IsFalsy())
-	o = &value.Array{Value: []value.Object{nil}} // nil is not valid but still count as 1 element
+	o = &value.Array{Value: []core.Object{nil}} // nil is not valid but still count as 1 element
 	require.False(t, o.IsFalsy())
 	o = &value.Map{Value: nil}
 	require.True(t, o.IsFalsy())
-	o = &value.Map{Value: map[string]value.Object{"a": nil}} // nil is not valid but still count as 1 element
+	o = &value.Map{Value: map[string]core.Object{"a": nil}} // nil is not valid but still count as 1 element
 	require.False(t, o.IsFalsy())
 	o = &value.StringIterator{}
 	require.True(t, o.IsFalsy())
@@ -89,7 +90,7 @@ func TestObject_IsFalsy(t *testing.T) {
 }
 
 func TestObject_String(t *testing.T) {
-	var o value.Object = &value.Int{Value: 0}
+	var o core.Object = &value.Int{Value: 0}
 	require.Equal(t, "0", o.String())
 	o = &value.Int{Value: 1}
 	require.Equal(t, "1", o.String())
@@ -128,7 +129,7 @@ func TestObject_String(t *testing.T) {
 }
 
 func TestObject_BinaryOp(t *testing.T) {
-	var o value.Object = &value.Char{}
+	var o core.Object = &value.Char{}
 	_, err := o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
 	o = &value.Bool{}
@@ -164,47 +165,47 @@ func TestArray_BinaryOp(t *testing.T) {
 	testBinaryOp(t, &value.Array{Value: nil}, token.Add,
 		&value.Array{Value: nil}, &value.Array{Value: nil})
 	testBinaryOp(t, &value.Array{Value: nil}, token.Add,
-		&value.Array{Value: []value.Object{}}, &value.Array{Value: nil})
-	testBinaryOp(t, &value.Array{Value: []value.Object{}}, token.Add,
-		&value.Array{Value: nil}, &value.Array{Value: []value.Object{}})
-	testBinaryOp(t, &value.Array{Value: []value.Object{}}, token.Add,
-		&value.Array{Value: []value.Object{}},
-		&value.Array{Value: []value.Object{}})
+		&value.Array{Value: []core.Object{}}, &value.Array{Value: nil})
+	testBinaryOp(t, &value.Array{Value: []core.Object{}}, token.Add,
+		&value.Array{Value: nil}, &value.Array{Value: []core.Object{}})
+	testBinaryOp(t, &value.Array{Value: []core.Object{}}, token.Add,
+		&value.Array{Value: []core.Object{}},
+		&value.Array{Value: []core.Object{}})
 	testBinaryOp(t, &value.Array{Value: nil}, token.Add,
-		&value.Array{Value: []value.Object{
+		&value.Array{Value: []core.Object{
 			&value.Int{Value: 1},
-		}}, &value.Array{Value: []value.Object{
+		}}, &value.Array{Value: []core.Object{
 			&value.Int{Value: 1},
 		}})
 	testBinaryOp(t, &value.Array{Value: nil}, token.Add,
-		&value.Array{Value: []value.Object{
+		&value.Array{Value: []core.Object{
 			&value.Int{Value: 1},
 			&value.Int{Value: 2},
 			&value.Int{Value: 3},
-		}}, &value.Array{Value: []value.Object{
+		}}, &value.Array{Value: []core.Object{
 			&value.Int{Value: 1},
 			&value.Int{Value: 2},
 			&value.Int{Value: 3},
 		}})
-	testBinaryOp(t, &value.Array{Value: []value.Object{
+	testBinaryOp(t, &value.Array{Value: []core.Object{
 		&value.Int{Value: 1},
 		&value.Int{Value: 2},
 		&value.Int{Value: 3},
 	}}, token.Add, &value.Array{Value: nil},
-		&value.Array{Value: []value.Object{
+		&value.Array{Value: []core.Object{
 			&value.Int{Value: 1},
 			&value.Int{Value: 2},
 			&value.Int{Value: 3},
 		}})
-	testBinaryOp(t, &value.Array{Value: []value.Object{
+	testBinaryOp(t, &value.Array{Value: []core.Object{
 		&value.Int{Value: 1},
 		&value.Int{Value: 2},
 		&value.Int{Value: 3},
-	}}, token.Add, &value.Array{Value: []value.Object{
+	}}, token.Add, &value.Array{Value: []core.Object{
 		&value.Int{Value: 4},
 		&value.Int{Value: 5},
 		&value.Int{Value: 6},
-	}}, &value.Array{Value: []value.Object{
+	}}, &value.Array{Value: []core.Object{
 		&value.Int{Value: 1},
 		&value.Int{Value: 2},
 		&value.Int{Value: 3},
@@ -684,7 +685,7 @@ func TestInt_BinaryOp(t *testing.T) {
 }
 
 func TestMap_Index(t *testing.T) {
-	m := &value.Map{Value: make(map[string]value.Object)}
+	m := &value.Map{Value: make(map[string]core.Object)}
 	k := &value.Int{Value: 1}
 	v := &value.String{Value: "abcdef"}
 	err := m.IndexSet(k, v)
@@ -717,10 +718,10 @@ func TestString_BinaryOp(t *testing.T) {
 
 func testBinaryOp(
 	t *testing.T,
-	lhs value.Object,
+	lhs core.Object,
 	op token.Token,
-	rhs value.Object,
-	expected value.Object,
+	rhs core.Object,
+	expected core.Object,
 ) {
 	t.Helper()
 	actual, err := lhs.BinaryOp(op, rhs)
@@ -728,7 +729,7 @@ func testBinaryOp(
 	require.Equal(t, expected, actual)
 }
 
-func boolValue(b bool) value.Object {
+func boolValue(b bool) core.Object {
 	if b {
 		return value.TrueValue
 	}

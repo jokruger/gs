@@ -3,10 +3,11 @@ package stdlib
 import (
 	"encoding/base64"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/value"
 )
 
-var base64Module = map[string]value.Object{
+var base64Module = map[string]core.Object{
 	"encode": &value.UserFunction{
 		Value: FuncAYRS(base64.StdEncoding.EncodeToString),
 	},

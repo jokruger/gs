@@ -8,7 +8,7 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-var timesModule = map[string]value.Object{
+var timesModule = map[string]core.Object{
 	"format_ansic":        &value.String{Value: time.ANSIC},
 	"format_unix_date":    &value.String{Value: time.UnixDate},
 	"format_ruby_date":    &value.String{Value: time.RubyDate},
@@ -188,7 +188,7 @@ var timesModule = map[string]value.Object{
 	}, // in_location(time, location) => time
 }
 
-func timesSleep(args ...value.Object) (ret value.Object, err error) {
+func timesSleep(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -210,8 +210,8 @@ func timesSleep(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesParseDuration(args ...value.Object) (
-	ret value.Object,
+func timesParseDuration(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -240,8 +240,8 @@ func timesParseDuration(args ...value.Object) (
 	return
 }
 
-func timesSince(args ...value.Object) (
-	ret value.Object,
+func timesSince(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -264,8 +264,8 @@ func timesSince(args ...value.Object) (
 	return
 }
 
-func timesUntil(args ...value.Object) (
-	ret value.Object,
+func timesUntil(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -288,8 +288,8 @@ func timesUntil(args ...value.Object) (
 	return
 }
 
-func timesDurationHours(args ...value.Object) (
-	ret value.Object,
+func timesDurationHours(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -312,8 +312,8 @@ func timesDurationHours(args ...value.Object) (
 	return
 }
 
-func timesDurationMinutes(args ...value.Object) (
-	ret value.Object,
+func timesDurationMinutes(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -336,8 +336,8 @@ func timesDurationMinutes(args ...value.Object) (
 	return
 }
 
-func timesDurationNanoseconds(args ...value.Object) (
-	ret value.Object,
+func timesDurationNanoseconds(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -360,8 +360,8 @@ func timesDurationNanoseconds(args ...value.Object) (
 	return
 }
 
-func timesDurationSeconds(args ...value.Object) (
-	ret value.Object,
+func timesDurationSeconds(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -384,8 +384,8 @@ func timesDurationSeconds(args ...value.Object) (
 	return
 }
 
-func timesDurationString(args ...value.Object) (
-	ret value.Object,
+func timesDurationString(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -408,8 +408,8 @@ func timesDurationString(args ...value.Object) (
 	return
 }
 
-func timesMonthString(args ...value.Object) (
-	ret value.Object,
+func timesMonthString(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -432,8 +432,8 @@ func timesMonthString(args ...value.Object) (
 	return
 }
 
-func timesDate(args ...value.Object) (
-	ret value.Object,
+func timesDate(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) < 7 || len(args) > 8 {
@@ -533,7 +533,7 @@ func timesDate(args ...value.Object) (
 	return
 }
 
-func timesNow(args ...value.Object) (ret value.Object, err error) {
+func timesNow(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -544,7 +544,7 @@ func timesNow(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesParse(args ...value.Object) (ret value.Object, err error) {
+func timesParse(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -581,7 +581,7 @@ func timesParse(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesUnix(args ...value.Object) (ret value.Object, err error) {
+func timesUnix(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -612,7 +612,7 @@ func timesUnix(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesAdd(args ...value.Object) (ret value.Object, err error) {
+func timesAdd(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -643,7 +643,7 @@ func timesAdd(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesSub(args ...value.Object) (ret value.Object, err error) {
+func timesSub(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -674,7 +674,7 @@ func timesSub(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesAddDate(args ...value.Object) (ret value.Object, err error) {
+func timesAddDate(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 4 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -725,7 +725,7 @@ func timesAddDate(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesAfter(args ...value.Object) (ret value.Object, err error) {
+func timesAfter(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -760,7 +760,7 @@ func timesAfter(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesBefore(args ...value.Object) (ret value.Object, err error) {
+func timesBefore(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -795,7 +795,7 @@ func timesBefore(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesTimeYear(args ...value.Object) (ret value.Object, err error) {
+func timesTimeYear(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -816,7 +816,7 @@ func timesTimeYear(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesTimeMonth(args ...value.Object) (ret value.Object, err error) {
+func timesTimeMonth(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -837,7 +837,7 @@ func timesTimeMonth(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesTimeDay(args ...value.Object) (ret value.Object, err error) {
+func timesTimeDay(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -858,7 +858,7 @@ func timesTimeDay(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesTimeWeekday(args ...value.Object) (ret value.Object, err error) {
+func timesTimeWeekday(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -879,7 +879,7 @@ func timesTimeWeekday(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesTimeHour(args ...value.Object) (ret value.Object, err error) {
+func timesTimeHour(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -900,7 +900,7 @@ func timesTimeHour(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesTimeMinute(args ...value.Object) (ret value.Object, err error) {
+func timesTimeMinute(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -921,7 +921,7 @@ func timesTimeMinute(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesTimeSecond(args ...value.Object) (ret value.Object, err error) {
+func timesTimeSecond(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -942,8 +942,8 @@ func timesTimeSecond(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesTimeNanosecond(args ...value.Object) (
-	ret value.Object,
+func timesTimeNanosecond(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -966,7 +966,7 @@ func timesTimeNanosecond(args ...value.Object) (
 	return
 }
 
-func timesTimeUnix(args ...value.Object) (ret value.Object, err error) {
+func timesTimeUnix(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -987,8 +987,8 @@ func timesTimeUnix(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesTimeUnixNano(args ...value.Object) (
-	ret value.Object,
+func timesTimeUnixNano(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -1011,7 +1011,7 @@ func timesTimeUnixNano(args ...value.Object) (
 	return
 }
 
-func timesTimeFormat(args ...value.Object) (ret value.Object, err error) {
+func timesTimeFormat(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -1048,7 +1048,7 @@ func timesTimeFormat(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesIsZero(args ...value.Object) (ret value.Object, err error) {
+func timesIsZero(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -1073,7 +1073,7 @@ func timesIsZero(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesToLocal(args ...value.Object) (ret value.Object, err error) {
+func timesToLocal(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -1094,7 +1094,7 @@ func timesToLocal(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesToUTC(args ...value.Object) (ret value.Object, err error) {
+func timesToUTC(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -1115,8 +1115,8 @@ func timesToUTC(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func timesTimeLocation(args ...value.Object) (
-	ret value.Object,
+func timesTimeLocation(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 1 {
@@ -1139,8 +1139,8 @@ func timesTimeLocation(args ...value.Object) (
 	return
 }
 
-func timesInLocation(args ...value.Object) (
-	ret value.Object,
+func timesInLocation(args ...core.Object) (
+	ret core.Object,
 	err error,
 ) {
 	if len(args) != 2 {
@@ -1179,7 +1179,7 @@ func timesInLocation(args ...value.Object) (
 	return
 }
 
-func timesTimeString(args ...value.Object) (ret value.Object, err error) {
+func timesTimeString(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return

@@ -27,7 +27,7 @@ const (
 // CountObjects returns the number of objects that a given object o contains.
 // For scalar value types, it will always be 1. For compound value types,
 // this will include its elements and all of their elements recursively.
-func CountObjects(o value.Object) (c int) {
+func CountObjects(o core.Object) (c int) {
 	c = 1
 	switch o := o.(type) {
 	case *value.Array:
@@ -53,7 +53,7 @@ func CountObjects(o value.Object) (c int) {
 }
 
 // ToInterface attempts to convert an object o to an interface{} value
-func ToInterface(o value.Object) (res interface{}) {
+func ToInterface(o core.Object) (res interface{}) {
 	switch o := o.(type) {
 	case *value.Int:
 		res = o.Value
@@ -93,14 +93,14 @@ func ToInterface(o value.Object) (res interface{}) {
 		res = errors.New(o.String())
 	case *value.Undefined:
 		res = nil
-	case value.Object:
+	case core.Object:
 		return o
 	}
 	return
 }
 
 // FromInterface will attempt to convert an interface{} v to a Gs Object
-func FromInterface(v interface{}) (value.Object, error) {
+func FromInterface(v interface{}) (core.Object, error) {
 	switch v := v.(type) {
 	case nil:
 		return value.UndefinedValue, nil
@@ -131,10 +131,10 @@ func FromInterface(v interface{}) (value.Object, error) {
 		return &value.Bytes{Value: v}, nil
 	case error:
 		return &value.Error{Value: &value.String{Value: v.Error()}}, nil
-	case map[string]value.Object:
+	case map[string]core.Object:
 		return &value.Map{Value: v}, nil
 	case map[string]interface{}:
-		kv := make(map[string]value.Object)
+		kv := make(map[string]core.Object)
 		for vk, vv := range v {
 			vo, err := FromInterface(vv)
 			if err != nil {
@@ -143,10 +143,10 @@ func FromInterface(v interface{}) (value.Object, error) {
 			kv[vk] = vo
 		}
 		return &value.Map{Value: kv}, nil
-	case []value.Object:
+	case []core.Object:
 		return &value.Array{Value: v}, nil
 	case []interface{}:
-		arr := make([]value.Object, len(v))
+		arr := make([]core.Object, len(v))
 		for i, e := range v {
 			vo, err := FromInterface(e)
 			if err != nil {
@@ -157,9 +157,9 @@ func FromInterface(v interface{}) (value.Object, error) {
 		return &value.Array{Value: arr}, nil
 	case time.Time:
 		return &value.Time{Value: v}, nil
-	case value.Object:
+	case core.Object:
 		return v, nil
-	case value.CallableFunc:
+	case core.CallableFunction:
 		return &value.UserFunction{Value: v}, nil
 	}
 	return nil, fmt.Errorf("cannot convert to object: %T", v)

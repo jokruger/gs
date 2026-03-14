@@ -1,5 +1,7 @@
 package value
 
+import "github.com/jokruger/gs/core"
+
 const (
 	// TrueString is a string representation of the boolean value true.
 	TrueString = "true"
@@ -10,14 +12,11 @@ const (
 
 var (
 	// TrueValue is the singleton instance representing the boolean value true.
-	TrueValue Object = &Bool{value: true}
+	TrueValue core.Object = &Bool{value: true}
 
 	// FalseValue is the singleton instance representing the boolean value false.
-	FalseValue Object = &Bool{value: false}
+	FalseValue core.Object = &Bool{value: false}
 
 	// UndefinedValue is the singleton instance representing the undefined value.
-	UndefinedValue Object = &Undefined{}
+	UndefinedValue core.Object = &Undefined{}
 )
-
-// CallableFunc is a function signature for the callable functions.
-type CallableFunc = func(args ...Object) (ret Object, err error)

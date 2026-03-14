@@ -12,7 +12,7 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-var textModule = map[string]value.Object{
+var textModule = map[string]core.Object{
 	"re_match": &value.UserFunction{
 		Name:  "re_match",
 		Value: textREMatch,
@@ -203,7 +203,7 @@ var textModule = map[string]value.Object{
 	}, // unquote(str) => string/error
 }
 
-func textREMatch(args ...value.Object) (ret value.Object, err error) {
+func textREMatch(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -244,7 +244,7 @@ func textREMatch(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textREFind(args ...value.Object) (ret value.Object, err error) {
+func textREFind(args ...core.Object) (ret core.Object, err error) {
 	numArgs := len(args)
 	if numArgs != 2 && numArgs != 3 {
 		err = gse.ErrWrongNumArguments
@@ -288,7 +288,7 @@ func textREFind(args ...value.Object) (ret value.Object, err error) {
 		for i := 0; i < len(m); i += 2 {
 			if m[i] >= 0 && m[i+1] >= 0 {
 				arr.Value = append(arr.Value,
-					&value.ImmutableMap{Value: map[string]value.Object{
+					&value.ImmutableMap{Value: map[string]core.Object{
 						"text":  &value.String{Value: s2[m[i]:m[i+1]]},
 						"begin": &value.Int{Value: int64(m[i])},
 						"end":   &value.Int{Value: int64(m[i+1])},
@@ -296,7 +296,7 @@ func textREFind(args ...value.Object) (ret value.Object, err error) {
 			}
 		}
 
-		ret = &value.Array{Value: []value.Object{arr}}
+		ret = &value.Array{Value: []core.Object{arr}}
 
 		return
 	}
@@ -322,7 +322,7 @@ func textREFind(args ...value.Object) (ret value.Object, err error) {
 		for i := 0; i < len(m); i += 2 {
 			if m[i] >= 0 && m[i+1] >= 0 {
 				subMatch.Value = append(subMatch.Value,
-					&value.ImmutableMap{Value: map[string]value.Object{
+					&value.ImmutableMap{Value: map[string]core.Object{
 						"text":  &value.String{Value: s2[m[i]:m[i+1]]},
 						"begin": &value.Int{Value: int64(m[i])},
 						"end":   &value.Int{Value: int64(m[i+1])},
@@ -338,7 +338,7 @@ func textREFind(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textREReplace(args ...value.Object) (ret value.Object, err error) {
+func textREReplace(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 3 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -389,7 +389,7 @@ func textREReplace(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textRESplit(args ...value.Object) (ret value.Object, err error) {
+func textRESplit(args ...core.Object) (ret core.Object, err error) {
 	numArgs := len(args)
 	if numArgs != 2 && numArgs != 3 {
 		err = gse.ErrWrongNumArguments
@@ -445,7 +445,7 @@ func textRESplit(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textRECompile(args ...value.Object) (ret value.Object, err error) {
+func textRECompile(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -471,7 +471,7 @@ func textRECompile(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textReplace(args ...value.Object) (ret value.Object, err error) {
+func textReplace(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 4 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -528,7 +528,7 @@ func textReplace(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textSubstring(args ...value.Object) (ret value.Object, err error) {
+func textSubstring(args ...core.Object) (ret core.Object, err error) {
 	argslen := len(args)
 	if argslen != 2 && argslen != 3 {
 		err = gse.ErrWrongNumArguments
@@ -591,7 +591,7 @@ func textSubstring(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textPadLeft(args ...value.Object) (ret value.Object, err error) {
+func textPadLeft(args ...core.Object) (ret core.Object, err error) {
 	argslen := len(args)
 	if argslen != 2 && argslen != 3 {
 		err = gse.ErrWrongNumArguments
@@ -654,7 +654,7 @@ func textPadLeft(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textPadRight(args ...value.Object) (ret value.Object, err error) {
+func textPadRight(args ...core.Object) (ret core.Object, err error) {
 	argslen := len(args)
 	if argslen != 2 && argslen != 3 {
 		err = gse.ErrWrongNumArguments
@@ -717,7 +717,7 @@ func textPadRight(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textRepeat(args ...value.Object) (ret value.Object, err error) {
+func textRepeat(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -747,7 +747,7 @@ func textRepeat(args ...value.Object) (ret value.Object, err error) {
 	return &value.String{Value: strings.Repeat(s1, i2)}, nil
 }
 
-func textJoin(args ...value.Object) (ret value.Object, err error) {
+func textJoin(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -806,7 +806,7 @@ func textJoin(args ...value.Object) (ret value.Object, err error) {
 	return &value.String{Value: strings.Join(ss1, s2)}, nil
 }
 
-func textFormatBool(args ...value.Object) (ret value.Object, err error) {
+func textFormatBool(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -831,7 +831,7 @@ func textFormatBool(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textFormatFloat(args ...value.Object) (ret value.Object, err error) {
+func textFormatFloat(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 4 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -882,7 +882,7 @@ func textFormatFloat(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textFormatInt(args ...value.Object) (ret value.Object, err error) {
+func textFormatInt(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -913,7 +913,7 @@ func textFormatInt(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textParseBool(args ...value.Object) (ret value.Object, err error) {
+func textParseBool(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -944,7 +944,7 @@ func textParseBool(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textParseFloat(args ...value.Object) (ret value.Object, err error) {
+func textParseFloat(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		err = gse.ErrWrongNumArguments
 		return
@@ -981,7 +981,7 @@ func textParseFloat(args ...value.Object) (ret value.Object, err error) {
 	return
 }
 
-func textParseInt(args ...value.Object) (ret value.Object, err error) {
+func textParseInt(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 3 {
 		err = gse.ErrWrongNumArguments
 		return

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/tests/require"
@@ -24,7 +25,7 @@ func TestScript_Add(t *testing.T) {
 	require.NoError(t, s.Add("b", 5))     // b = 5
 	require.NoError(t, s.Add("b", "foo")) // b = "foo"  (re-define before compilation)
 	require.NoError(t, s.Add("test",
-		func(args ...value.Object) (ret value.Object, err error) {
+		func(args ...core.Object) (ret core.Object, err error) {
 			if len(args) > 0 {
 				switch arg := args[0].(type) {
 				case *value.Int:
@@ -173,10 +174,10 @@ for i:=1; i<=d; i++ {
 
 e := mod1.double(s)
 `)
-	mod1 := map[string]value.Object{
+	mod1 := map[string]core.Object{
 		"double": &value.UserFunction{
-			Value: func(args ...value.Object) (
-				ret value.Object,
+			Value: func(args ...core.Object) (
+				ret core.Object,
 				err error,
 			) {
 				arg0, _ := args[0].ToInt64()
@@ -246,7 +247,7 @@ func (o *Counter) ToString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Counter) BinaryOp(op token.Token, rhs value.Object) (value.Object, error) {
+func (o *Counter) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	switch rhs := rhs.(type) {
 	case *Counter:
 		switch op {
@@ -271,7 +272,7 @@ func (o *Counter) IsFalsy() bool {
 	return o.value == 0
 }
 
-func (o *Counter) Equals(t value.Object) bool {
+func (o *Counter) Equals(t core.Object) bool {
 	if tc, ok := t.(*Counter); ok {
 		return o.value == tc.value
 	}
@@ -279,11 +280,11 @@ func (o *Counter) Equals(t value.Object) bool {
 	return false
 }
 
-func (o *Counter) Copy() value.Object {
+func (o *Counter) Copy() core.Object {
 	return &Counter{value: o.value}
 }
 
-func (o *Counter) Call(_ ...value.Object) (value.Object, error) {
+func (o *Counter) Call(_ ...core.Object) (core.Object, error) {
 	return &value.Int{Value: o.value}, nil
 }
 
@@ -350,10 +351,10 @@ func TestScriptSourceModule(t *testing.T) {
 	mods.AddSourceModule("mod",
 		[]byte(`text := import("text"); export text.title("foo")`))
 	mods.AddBuiltinModule("text",
-		map[string]value.Object{
+		map[string]core.Object{
 			"title": &value.UserFunction{
 				Name: "title",
-				Value: func(args ...value.Object) (value.Object, error) {
+				Value: func(args ...core.Object) (core.Object, error) {
 					s, _ := args[0].ToString()
 					return &value.String{Value: strings.Title(s)}, nil
 				}},
@@ -506,7 +507,7 @@ func (n *customNumber) String() string {
 	return strconv.FormatInt(n.value, 10)
 }
 
-func (n *customNumber) BinaryOp(op token.Token, rhs value.Object) (value.Object, error) {
+func (n *customNumber) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	i, ok := rhs.(*value.Int)
 	if !ok {
 		return nil, gse.ErrInvalidOperator
@@ -514,7 +515,7 @@ func (n *customNumber) BinaryOp(op token.Token, rhs value.Object) (value.Object,
 	return n.binaryOpInt(op, i)
 }
 
-func (n *customNumber) binaryOpInt(op token.Token, rhs *value.Int) (value.Object, error) {
+func (n *customNumber) binaryOpInt(op token.Token, rhs *value.Int) (core.Object, error) {
 	i := n.value
 
 	switch op {

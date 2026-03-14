@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/value"
@@ -151,7 +152,7 @@ func RunCompiled(modules *gs.ModuleMap, data []byte) (err error) {
 func RunREPL(modules *gs.ModuleMap, in io.Reader, out io.Writer) {
 	stdin := bufio.NewScanner(in)
 	fileSet := parser.NewFileSet()
-	globals := make([]value.Object, gs.GlobalsSize)
+	globals := make([]core.Object, gs.GlobalsSize)
 	symbolTable := gs.NewSymbolTable()
 	for idx, fn := range gs.GetAllBuiltinFunctions() {
 		symbolTable.DefineBuiltin(idx, fn.Name)
@@ -161,7 +162,7 @@ func RunREPL(modules *gs.ModuleMap, in io.Reader, out io.Writer) {
 	symbol := symbolTable.Define("__repl_println__")
 	globals[symbol.Index] = &value.UserFunction{
 		Name: "println",
-		Value: func(args ...value.Object) (ret value.Object, err error) {
+		Value: func(args ...core.Object) (ret core.Object, err error) {
 			var printArgs []interface{}
 			for _, arg := range args {
 				if _, isUndefined := arg.(*value.Undefined); isUndefined {
@@ -177,7 +178,7 @@ func RunREPL(modules *gs.ModuleMap, in io.Reader, out io.Writer) {
 		},
 	}
 
-	var constants []value.Object
+	var constants []core.Object
 	for {
 		_, _ = fmt.Fprint(out, replPrompt)
 		scanned := stdin.Scan()

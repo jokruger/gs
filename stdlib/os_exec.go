@@ -3,13 +3,14 @@ package stdlib
 import (
 	"os/exec"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
 
 func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
 	return &value.ImmutableMap{
-		Value: map[string]value.Object{
+		Value: map[string]core.Object{
 			// combined_output() => bytes/error
 			"combined_output": &value.UserFunction{
 				Name:  "combined_output",
@@ -38,7 +39,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
 			// set_path(path string)
 			"set_path": &value.UserFunction{
 				Name: "set_path",
-				Value: func(args ...value.Object) (value.Object, error) {
+				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
@@ -57,7 +58,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
 			// set_dir(dir string)
 			"set_dir": &value.UserFunction{
 				Name: "set_dir",
-				Value: func(args ...value.Object) (value.Object, error) {
+				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
@@ -76,7 +77,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
 			// set_env(env array(string))
 			"set_env": &value.UserFunction{
 				Name: "set_env",
-				Value: func(args ...value.Object) (value.Object, error) {
+				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
@@ -108,7 +109,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
 			// process() => imap(process)
 			"process": &value.UserFunction{
 				Name: "process",
-				Value: func(args ...value.Object) (value.Object, error) {
+				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 0 {
 						return nil, gse.ErrWrongNumArguments
 					}

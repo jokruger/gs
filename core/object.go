@@ -1,4 +1,4 @@
-package value
+package core
 
 import (
 	"time"

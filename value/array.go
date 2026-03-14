@@ -4,13 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
 
 type Array struct {
 	ObjectImpl
-	Value []Object
+	Value []core.Object
 }
 
 func (o *Array) TypeName() string {
@@ -25,7 +26,7 @@ func (o *Array) String() string {
 	return fmt.Sprintf("[%s]", strings.Join(elements, ", "))
 }
 
-func (o *Array) BinaryOp(op token.Token, rhs Object) (Object, error) {
+func (o *Array) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	if rhs, ok := rhs.(*Array); ok {
 		switch op {
 		case token.Add:
@@ -38,8 +39,8 @@ func (o *Array) BinaryOp(op token.Token, rhs Object) (Object, error) {
 	return nil, gse.ErrInvalidOperator
 }
 
-func (o *Array) Copy() Object {
-	var c []Object
+func (o *Array) Copy() core.Object {
+	var c []core.Object
 	for _, elem := range o.Value {
 		c = append(c, elem.Copy())
 	}
@@ -50,8 +51,8 @@ func (o *Array) IsFalsy() bool {
 	return len(o.Value) == 0
 }
 
-func (o *Array) Equals(x Object) bool {
-	var xVal []Object
+func (o *Array) Equals(x core.Object) bool {
+	var xVal []core.Object
 	switch x := x.(type) {
 	case *Array:
 		xVal = x.Value
@@ -71,7 +72,7 @@ func (o *Array) Equals(x Object) bool {
 	return true
 }
 
-func (o *Array) IndexGet(index Object) (res Object, err error) {
+func (o *Array) IndexGet(index core.Object) (res core.Object, err error) {
 	intIdx, ok := index.(*Int)
 	if !ok {
 		err = gse.ErrInvalidIndexType
@@ -86,7 +87,7 @@ func (o *Array) IndexGet(index Object) (res Object, err error) {
 	return
 }
 
-func (o *Array) IndexSet(index, value Object) (err error) {
+func (o *Array) IndexSet(index, value core.Object) (err error) {
 	intIdx, ok := index.ToInt()
 	if !ok {
 		err = gse.ErrInvalidIndexType
@@ -100,7 +101,7 @@ func (o *Array) IndexSet(index, value Object) (err error) {
 	return nil
 }
 
-func (o *Array) Iterate() Iterator {
+func (o *Array) Iterate() core.Iterator {
 	return &ArrayIterator{
 		v: o.Value,
 		l: len(o.Value),

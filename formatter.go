@@ -672,7 +672,7 @@ type pp struct {
 	buf fmtbuf
 
 	// arg holds the current item.
-	arg value.Object
+	arg core.Object
 
 	// fmt is used to format basic items such as integers or strings.
 	fmt formatter
@@ -934,7 +934,7 @@ func (p *pp) fmtBytes(v []byte, verb rune, typeString string) {
 	}
 }
 
-func (p *pp) printArg(arg value.Object, verb rune) {
+func (p *pp) printArg(arg core.Object, verb rune) {
 	p.arg = arg
 
 	if arg == nil {
@@ -972,7 +972,7 @@ func (p *pp) printArg(arg value.Object, verb rune) {
 
 // intFromArg gets the argNumth element of a. On return, isInt reports whether
 // the argument has integer type.
-func intFromArg(a []value.Object, argNum int) (num int, isInt bool, newArgNum int) {
+func intFromArg(a []core.Object, argNum int) (num int, isInt bool, newArgNum int) {
 	newArgNum = argNum
 	if argNum < len(a) {
 		var num64 int64
@@ -1047,7 +1047,7 @@ func (p *pp) missingArg(verb rune) {
 	_, _ = p.WriteString(missingString)
 }
 
-func (p *pp) doFormat(format string, a []value.Object) (err error) {
+func (p *pp) doFormat(format string, a []core.Object) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			if e, ok := r.(error); ok && e == gse.ErrStringLimit {
@@ -1239,7 +1239,7 @@ formatLoop:
 }
 
 // Format is like fmt.Sprintf but using Objects.
-func Format(format string, a ...value.Object) (string, error) {
+func Format(format string, a ...core.Object) (string, error) {
 	p := newPrinter()
 	err := p.doFormat(format, a)
 	s := string(p.buf)

@@ -22,7 +22,7 @@ func (o *String) String() string {
 	return strconv.Quote(o.Value)
 }
 
-func (o *String) BinaryOp(op token.Token, rhs Object) (Object, error) {
+func (o *String) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	switch op {
 	case token.Add:
 		switch rhs := rhs.(type) {
@@ -78,11 +78,11 @@ func (o *String) IsFalsy() bool {
 	return len(o.Value) == 0
 }
 
-func (o *String) Copy() Object {
+func (o *String) Copy() core.Object {
 	return &String{Value: o.Value}
 }
 
-func (o *String) Equals(x Object) bool {
+func (o *String) Equals(x core.Object) bool {
 	t, ok := x.(*String)
 	if !ok {
 		return false
@@ -90,7 +90,7 @@ func (o *String) Equals(x Object) bool {
 	return o.Value == t.Value
 }
 
-func (o *String) IndexGet(index Object) (res Object, err error) {
+func (o *String) IndexGet(index core.Object) (res core.Object, err error) {
 	intIdx, ok := index.(*Int)
 	if !ok {
 		err = gse.ErrInvalidIndexType
@@ -108,7 +108,7 @@ func (o *String) IndexGet(index Object) (res Object, err error) {
 	return
 }
 
-func (o *String) Iterate() Iterator {
+func (o *String) Iterate() core.Iterator {
 	if o.runeStr == nil {
 		o.runeStr = []rune(o.Value)
 	}

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/value"
@@ -44,9 +45,9 @@ func TestBytecode(t *testing.T) {
 			&value.Int{Value: 77},
 			&value.Int{Value: 88},
 			&value.ImmutableMap{
-				Value: map[string]value.Object{
+				Value: map[string]core.Object{
 					"array": &value.ImmutableArray{
-						Value: []value.Object{
+						Value: []core.Object{
 							&value.Int{Value: 1},
 							&value.Int{Value: 2},
 							&value.Int{Value: 3},
@@ -64,7 +65,7 @@ func TestBytecode(t *testing.T) {
 					}},
 					"float": &value.Float{Value: -19.84},
 					"immutable_array": &value.ImmutableArray{
-						Value: []value.Object{
+						Value: []core.Object{
 							&value.Int{Value: 1},
 							&value.Int{Value: 2},
 							&value.Int{Value: 3},
@@ -74,7 +75,7 @@ func TestBytecode(t *testing.T) {
 						},
 					},
 					"immutable_map": &value.ImmutableMap{
-						Value: map[string]value.Object{
+						Value: map[string]core.Object{
 							"a": &value.Int{Value: 1},
 							"b": &value.Int{Value: 2},
 							"c": &value.Int{Value: 3},
@@ -85,7 +86,7 @@ func TestBytecode(t *testing.T) {
 					},
 					"int": &value.Int{Value: 91},
 					"map": &value.Map{
-						Value: map[string]value.Object{
+						Value: map[string]core.Object{
 							"a": &value.Int{Value: 1},
 							"b": &value.Int{Value: 2},
 							"c": &value.Int{Value: 3},
@@ -263,7 +264,7 @@ func fileSet(files ...srcfile) *parser.SourceFileSet {
 
 func bytecodeFileSet(
 	instructions []byte,
-	constants []value.Object,
+	constants []core.Object,
 	fileSet *parser.SourceFileSet,
 ) *gs.Bytecode {
 	return &gs.Bytecode{

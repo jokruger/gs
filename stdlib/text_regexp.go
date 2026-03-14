@@ -10,11 +10,11 @@ import (
 
 func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 	return &value.ImmutableMap{
-		Value: map[string]value.Object{
+		Value: map[string]core.Object{
 			// match(text) => bool
 			"match": &value.UserFunction{
-				Value: func(args ...value.Object) (
-					ret value.Object,
+				Value: func(args ...core.Object) (
+					ret core.Object,
 					err error,
 				) {
 					if len(args) != 1 {
@@ -45,8 +45,8 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 			// find(text) 			=> array(array({text:,begin:,end:}))/undefined
 			// find(text, maxCount) => array(array({text:,begin:,end:}))/undefined
 			"find": &value.UserFunction{
-				Value: func(args ...value.Object) (
-					ret value.Object,
+				Value: func(args ...core.Object) (
+					ret core.Object,
 					err error,
 				) {
 					numArgs := len(args)
@@ -76,7 +76,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 						for i := 0; i < len(m); i += 2 {
 							arr.Value = append(arr.Value,
 								&value.ImmutableMap{
-									Value: map[string]value.Object{
+									Value: map[string]core.Object{
 										"text": &value.String{
 											Value: s1[m[i]:m[i+1]],
 										},
@@ -89,7 +89,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 									}})
 						}
 
-						ret = &value.Array{Value: []value.Object{arr}}
+						ret = &value.Array{Value: []core.Object{arr}}
 
 						return
 					}
@@ -115,7 +115,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 						for i := 0; i < len(m); i += 2 {
 							subMatch.Value = append(subMatch.Value,
 								&value.ImmutableMap{
-									Value: map[string]value.Object{
+									Value: map[string]core.Object{
 										"text": &value.String{
 											Value: s1[m[i]:m[i+1]],
 										},
@@ -139,8 +139,8 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 
 			// replace(src, repl) => string
 			"replace": &value.UserFunction{
-				Value: func(args ...value.Object) (
-					ret value.Object,
+				Value: func(args ...core.Object) (
+					ret core.Object,
 					err error,
 				) {
 					if len(args) != 2 {
@@ -182,8 +182,8 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 			// split(text) 			 => array(string)
 			// split(text, maxCount) => array(string)
 			"split": &value.UserFunction{
-				Value: func(args ...value.Object) (
-					ret value.Object,
+				Value: func(args ...core.Object) (
+					ret core.Object,
 					err error,
 				) {
 					numArgs := len(args)

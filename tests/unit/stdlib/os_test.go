@@ -47,7 +47,7 @@ func TestFileStatFile(t *testing.T) {
 	}
 
 	module(t, "os").call("stat", tf.Name()).expect(&value.ImmutableMap{
-		Value: map[string]value.Object{
+		Value: map[string]core.Object{
 			"name":      &value.String{Value: stat.Name()},
 			"mtime":     &value.Time{Value: stat.ModTime()},
 			"size":      &value.Int{Value: stat.Size()},
@@ -66,7 +66,7 @@ func TestFileStatDir(t *testing.T) {
 	require.NoError(t, err)
 
 	module(t, "os").call("stat", td).expect(&value.ImmutableMap{
-		Value: map[string]value.Object{
+		Value: map[string]core.Object{
 			"name":      &value.String{Value: stat.Name()},
 			"mtime":     &value.Time{Value: stat.ModTime()},
 			"size":      &value.Int{Value: stat.Size()},

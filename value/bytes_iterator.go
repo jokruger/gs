@@ -1,5 +1,7 @@
 package value
 
+import "github.com/jokruger/gs/core"
+
 type BytesIterator struct {
 	ObjectImpl
 	v []byte
@@ -15,11 +17,11 @@ func (i *BytesIterator) String() string {
 	return "<bytes-iterator>"
 }
 
-func (i *BytesIterator) Equals(Object) bool {
+func (i *BytesIterator) Equals(core.Object) bool {
 	return false
 }
 
-func (i *BytesIterator) Copy() Object {
+func (i *BytesIterator) Copy() core.Object {
 	return &BytesIterator{v: i.v, i: i.i, l: i.l}
 }
 
@@ -28,11 +30,11 @@ func (i *BytesIterator) Next() bool {
 	return i.i <= i.l
 }
 
-func (i *BytesIterator) Key() Object {
+func (i *BytesIterator) Key() core.Object {
 	return &Int{Value: int64(i.i - 1)}
 }
 
-func (i *BytesIterator) Value() Object {
+func (i *BytesIterator) Value() core.Object {
 	return &Int{Value: int64(i.v[i.i-1])}
 }
 

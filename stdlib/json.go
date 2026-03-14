@@ -4,12 +4,13 @@ import (
 	"bytes"
 	gojson "encoding/json"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/stdlib/json"
 	"github.com/jokruger/gs/value"
 )
 
-var jsonModule = map[string]value.Object{
+var jsonModule = map[string]core.Object{
 	"decode": &value.UserFunction{
 		Name:  "decode",
 		Value: jsonDecode,
@@ -28,7 +29,7 @@ var jsonModule = map[string]value.Object{
 	},
 }
 
-func jsonDecode(args ...value.Object) (ret value.Object, err error) {
+func jsonDecode(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -59,7 +60,7 @@ func jsonDecode(args ...value.Object) (ret value.Object, err error) {
 	}
 }
 
-func jsonEncode(args ...value.Object) (ret value.Object, err error) {
+func jsonEncode(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -72,7 +73,7 @@ func jsonEncode(args ...value.Object) (ret value.Object, err error) {
 	return &value.Bytes{Value: b}, nil
 }
 
-func jsonIndent(args ...value.Object) (ret value.Object, err error) {
+func jsonIndent(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 3 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -123,7 +124,7 @@ func jsonIndent(args ...value.Object) (ret value.Object, err error) {
 	}
 }
 
-func jsonHTMLEscape(args ...value.Object) (ret value.Object, err error) {
+func jsonHTMLEscape(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}

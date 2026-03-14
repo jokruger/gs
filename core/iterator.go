@@ -1,4 +1,4 @@
-package value
+package core
 
 // Iterator represents an iterator for underlying data type.
 type Iterator interface {

@@ -29,7 +29,7 @@ type ARR = []interface{}
 
 type testopts struct {
 	modules     *gs.ModuleMap
-	symbols     map[string]value.Object
+	symbols     map[string]core.Object
 	maxAllocs   int64
 	skip2ndPass bool
 }
@@ -37,7 +37,7 @@ type testopts struct {
 func Opts() *testopts {
 	return &testopts{
 		modules:     gs.NewModuleMap(),
-		symbols:     make(map[string]value.Object),
+		symbols:     make(map[string]core.Object),
 		maxAllocs:   -1,
 		skip2ndPass: false,
 	}
@@ -46,7 +46,7 @@ func Opts() *testopts {
 func (o *testopts) copy() *testopts {
 	c := &testopts{
 		modules:     o.modules.Copy(),
-		symbols:     make(map[string]value.Object),
+		symbols:     make(map[string]core.Object),
 		maxAllocs:   o.maxAllocs,
 		skip2ndPass: o.skip2ndPass,
 	}
@@ -76,7 +76,7 @@ func (o *testopts) Module(name string, mod interface{}) *testopts {
 	return c
 }
 
-func (o *testopts) Symbol(name string, value value.Object) *testopts {
+func (o *testopts) Symbol(name string, value core.Object) *testopts {
 	c := o.copy()
 	c.symbols[name] = value
 	return c
@@ -1071,16 +1071,16 @@ export func() {
 func TestVMErrorUnwrap(t *testing.T) {
 	userErr := errors.New("user runtime error")
 	userFunc := func(err error) *value.UserFunction {
-		return &value.UserFunction{Name: "user_func", Value: func(args ...value.Object) (value.Object, error) {
+		return &value.UserFunction{Name: "user_func", Value: func(args ...core.Object) (core.Object, error) {
 			return nil, err
 		}}
 	}
 	userModule := func(err error) *value.BuiltinModule {
 		return &value.BuiltinModule{
-			Attrs: map[string]value.Object{
+			Attrs: map[string]core.Object{
 				"afunction": &value.UserFunction{
 					Name: "afunction",
-					Value: func(a ...value.Object) (value.Object, error) {
+					Value: func(a ...core.Object) (core.Object, error) {
 						return nil, err
 					},
 				},
@@ -1454,7 +1454,7 @@ func TestFunction(t *testing.T) {
 		nil, ARR{"a", ARR{"b"}, 7})
 
 	expectRun(t, `f := func(...x) { return x; }; out = f();`,
-		nil, &value.Array{Value: []value.Object{}})
+		nil, &value.Array{Value: []core.Object{}})
 
 	expectRun(t, `f := func(a, b, ...x) { return [a, b, x]; }; out = f(8, 9);`,
 		nil, ARR{8, 9, ARR{}})
@@ -2079,7 +2079,7 @@ func (o *StringDict) TypeName() string {
 	return "string-dict"
 }
 
-func (o *StringDict) IndexGet(index value.Object) (value.Object, error) {
+func (o *StringDict) IndexGet(index core.Object) (core.Object, error) {
 	strIdx, ok := index.(*value.String)
 	if !ok {
 		return nil, gse.ErrInvalidIndexType
@@ -2094,7 +2094,7 @@ func (o *StringDict) IndexGet(index value.Object) (value.Object, error) {
 	return value.UndefinedValue, nil
 }
 
-func (o *StringDict) IndexSet(i, v value.Object) error {
+func (o *StringDict) IndexSet(i, v core.Object) error {
 	strIdx, ok := i.(*value.String)
 	if !ok {
 		return gse.ErrInvalidIndexType
@@ -2123,7 +2123,7 @@ func (o *StringCircle) String() string {
 	return ""
 }
 
-func (o *StringCircle) IndexGet(index value.Object) (value.Object, error) {
+func (o *StringCircle) IndexGet(index core.Object) (core.Object, error) {
 	intIdx, ok := index.(*value.Int)
 	if !ok {
 		return nil, gse.ErrInvalidIndexType
@@ -2137,7 +2137,7 @@ func (o *StringCircle) IndexGet(index value.Object) (value.Object, error) {
 	return &value.String{Value: o.Value[r]}, nil
 }
 
-func (o *StringCircle) IndexSet(i, v value.Object) error {
+func (o *StringCircle) IndexSet(i, v core.Object) error {
 	intIdx, ok := i.(*value.Int)
 	if !ok {
 		return gse.ErrInvalidIndexType
@@ -2169,8 +2169,8 @@ func (o *StringArray) String() string {
 
 func (o *StringArray) BinaryOp(
 	op token.Token,
-	rhs value.Object,
-) (value.Object, error) {
+	rhs core.Object,
+) (core.Object, error) {
 	if rhs, ok := rhs.(*StringArray); ok {
 		switch op {
 		case token.Add:
@@ -2188,7 +2188,7 @@ func (o *StringArray) IsFalsy() bool {
 	return len(o.Value) == 0
 }
 
-func (o *StringArray) Equals(x value.Object) bool {
+func (o *StringArray) Equals(x core.Object) bool {
 	if x, ok := x.(*StringArray); ok {
 		if len(o.Value) != len(x.Value) {
 			return false
@@ -2206,7 +2206,7 @@ func (o *StringArray) Equals(x value.Object) bool {
 	return false
 }
 
-func (o *StringArray) Copy() value.Object {
+func (o *StringArray) Copy() core.Object {
 	return &StringArray{
 		Value: append([]string{}, o.Value...),
 	}
@@ -2216,7 +2216,7 @@ func (o *StringArray) TypeName() string {
 	return "string-array"
 }
 
-func (o *StringArray) IndexGet(index value.Object) (value.Object, error) {
+func (o *StringArray) IndexGet(index core.Object) (core.Object, error) {
 	intIdx, ok := index.(*value.Int)
 	if ok {
 		if intIdx.Value >= 0 && intIdx.Value < int64(len(o.Value)) {
@@ -2240,7 +2240,7 @@ func (o *StringArray) IndexGet(index value.Object) (value.Object, error) {
 	return nil, gse.ErrInvalidIndexType
 }
 
-func (o *StringArray) IndexSet(i, v value.Object) error {
+func (o *StringArray) IndexSet(i, v core.Object) error {
 	strVal, ok := v.ToString()
 	if !ok {
 		return gse.ErrInvalidIndexValueType
@@ -2260,8 +2260,8 @@ func (o *StringArray) IndexSet(i, v value.Object) error {
 }
 
 func (o *StringArray) Call(
-	args ...value.Object,
-) (ret value.Object, err error) {
+	args ...core.Object,
+) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -2416,15 +2416,15 @@ func (i *StringArrayIterator) Next() bool {
 	return i.idx <= len(i.strArr.Value)
 }
 
-func (i *StringArrayIterator) Key() value.Object {
+func (i *StringArrayIterator) Key() core.Object {
 	return &value.Int{Value: int64(i.idx - 1)}
 }
 
-func (i *StringArrayIterator) Value() value.Object {
+func (i *StringArrayIterator) Value() core.Object {
 	return &value.String{Value: i.strArr.Value[i.idx-1]}
 }
 
-func (o *StringArray) Iterate() value.Iterator {
+func (o *StringArray) Iterate() core.Iterator {
 	return &StringArrayIterator{
 		strArr: o,
 	}
@@ -2543,10 +2543,10 @@ out = m["foo"](2) + m["foo"](3)
 func TestBuiltin(t *testing.T) {
 	m := Opts().Module("math",
 		&value.BuiltinModule{
-			Attrs: map[string]value.Object{
+			Attrs: map[string]core.Object{
 				"abs": &value.UserFunction{
 					Name: "abs",
-					Value: func(a ...value.Object) (value.Object, error) {
+					Value: func(a ...core.Object) (core.Object, error) {
 						v, _ := a[0].ToFloat64()
 						return &value.Float{Value: math.Abs(v)}, nil
 					},
@@ -2749,10 +2749,10 @@ export { x: 1 }
 func TestModuleBlockScopes(t *testing.T) {
 	m := Opts().Module("rand",
 		&value.BuiltinModule{
-			Attrs: map[string]value.Object{
+			Attrs: map[string]core.Object{
 				"intn": &value.UserFunction{
 					Name: "abs",
-					Value: func(a ...value.Object) (value.Object, error) {
+					Value: func(a ...core.Object) (core.Object, error) {
 						v, _ := a[0].ToInt64()
 						return &value.Int{Value: rand.Int63n(v)}, nil
 					},
@@ -3624,7 +3624,7 @@ func expectRun(
 	expectedObj := toObject(expected)
 
 	if symbols == nil {
-		symbols = make(map[string]value.Object)
+		symbols = make(map[string]core.Object)
 	}
 	symbols[testOut] = objectZeroCopy(expectedObj)
 
@@ -3766,10 +3766,10 @@ func (o *vmTracer) Write(p []byte) (n int, err error) {
 
 func traceCompileRun(
 	file *parser.File,
-	symbols map[string]value.Object,
+	symbols map[string]core.Object,
 	modules *gs.ModuleMap,
 	maxAllocs int64,
-) (res map[string]value.Object, trace []string, err error) {
+) (res map[string]core.Object, trace []string, err error) {
 	var v *gs.VM
 
 	defer func() {
@@ -3793,7 +3793,7 @@ func traceCompileRun(
 		}
 	}()
 
-	globals := make([]value.Object, gs.GlobalsSize)
+	globals := make([]core.Object, gs.GlobalsSize)
 
 	symTable := gs.NewSymbolTable()
 	for name, value := range symbols {
@@ -3829,7 +3829,7 @@ func traceCompileRun(
 
 	err = v.Run()
 	{
-		res = make(map[string]value.Object)
+		res = make(map[string]core.Object)
 		for name := range symbols {
 			sym, depth, ok := symTable.Resolve(name, false)
 			if !ok || depth != 0 {
@@ -3849,7 +3849,7 @@ func traceCompileRun(
 	return
 }
 
-func formatGlobals(globals []value.Object) (formatted []string) {
+func formatGlobals(globals []core.Object) (formatted []string) {
 	for idx, global := range globals {
 		if global == nil {
 			return
@@ -3874,9 +3874,9 @@ func errorObject(v interface{}) *value.Error {
 	return &value.Error{Value: toObject(v)}
 }
 
-func toObject(v interface{}) value.Object {
+func toObject(v interface{}) core.Object {
 	switch v := v.(type) {
-	case value.Object:
+	case core.Object:
 		return v
 	case string:
 		return &value.String{Value: v}
@@ -3898,28 +3898,28 @@ func toObject(v interface{}) value.Object {
 	case []byte:
 		return &value.Bytes{Value: v}
 	case MAP:
-		objs := make(map[string]value.Object)
+		objs := make(map[string]core.Object)
 		for k, v := range v {
 			objs[k] = toObject(v)
 		}
 
 		return &value.Map{Value: objs}
 	case ARR:
-		var objs []value.Object
+		var objs []core.Object
 		for _, e := range v {
 			objs = append(objs, toObject(e))
 		}
 
 		return &value.Array{Value: objs}
 	case IMAP:
-		objs := make(map[string]value.Object)
+		objs := make(map[string]core.Object)
 		for k, v := range v {
 			objs[k] = toObject(v)
 		}
 
 		return &value.ImmutableMap{Value: objs}
 	case IARR:
-		var objs []value.Object
+		var objs []core.Object
 		for _, e := range v {
 			objs = append(objs, toObject(e))
 		}
@@ -3930,7 +3930,7 @@ func toObject(v interface{}) value.Object {
 	panic(fmt.Errorf("unknown type: %T", v))
 }
 
-func objectZeroCopy(o value.Object) value.Object {
+func objectZeroCopy(o core.Object) core.Object {
 	switch o.(type) {
 	case *value.Int:
 		return &value.Int{}

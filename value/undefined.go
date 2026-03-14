@@ -1,5 +1,7 @@
 package value
 
+import "github.com/jokruger/gs/core"
+
 type Undefined struct {
 	ObjectImpl
 }
@@ -12,7 +14,7 @@ func (o *Undefined) String() string {
 	return "<undefined>"
 }
 
-func (o *Undefined) Copy() Object {
+func (o *Undefined) Copy() core.Object {
 	return o
 }
 
@@ -20,15 +22,15 @@ func (o *Undefined) IsFalsy() bool {
 	return true
 }
 
-func (o *Undefined) Equals(x Object) bool {
+func (o *Undefined) Equals(x core.Object) bool {
 	return o == x
 }
 
-func (o *Undefined) IndexGet(Object) (Object, error) {
+func (o *Undefined) IndexGet(core.Object) (core.Object, error) {
 	return UndefinedValue, nil
 }
 
-func (o *Undefined) Iterate() Iterator {
+func (o *Undefined) Iterate() core.Iterator {
 	return o
 }
 
@@ -40,11 +42,11 @@ func (o *Undefined) Next() bool {
 	return false
 }
 
-func (o *Undefined) Key() Object {
+func (o *Undefined) Key() core.Object {
 	return o
 }
 
-func (o *Undefined) Value() Object {
+func (o *Undefined) Value() core.Object {
 	return o
 }
 

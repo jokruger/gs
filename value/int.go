@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
@@ -21,7 +22,7 @@ func (o *Int) String() string {
 	return strconv.FormatInt(o.Value, 10)
 }
 
-func (o *Int) BinaryOp(op token.Token, rhs Object) (Object, error) {
+func (o *Int) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	switch rhs := rhs.(type) {
 	case *Int:
 		switch op {
@@ -174,7 +175,7 @@ func (o *Int) BinaryOp(op token.Token, rhs Object) (Object, error) {
 	return nil, gse.ErrInvalidOperator
 }
 
-func (o *Int) Copy() Object {
+func (o *Int) Copy() core.Object {
 	return &Int{Value: o.Value}
 }
 
@@ -182,7 +183,7 @@ func (o *Int) IsFalsy() bool {
 	return o.Value == 0
 }
 
-func (o *Int) Equals(x Object) bool {
+func (o *Int) Equals(x core.Object) bool {
 	t, ok := x.(*Int)
 	if !ok {
 		return false

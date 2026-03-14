@@ -3,10 +3,11 @@ package stdlib
 import (
 	"math"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/value"
 )
 
-var mathModule = map[string]value.Object{
+var mathModule = map[string]core.Object{
 	"e":                      &value.Float{Value: math.E},
 	"pi":                     &value.Float{Value: math.Pi},
 	"phi":                    &value.Float{Value: math.Phi},

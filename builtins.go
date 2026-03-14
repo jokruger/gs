@@ -45,14 +45,14 @@ func GetAllBuiltinFunctions() []*value.BuiltinFunction {
 	return append([]*value.BuiltinFunction{}, builtinFuncs...)
 }
 
-func builtinTypeName(args ...value.Object) (value.Object, error) {
+func builtinTypeName(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
 	return &value.String{Value: args[0].TypeName()}, nil
 }
 
-func builtinIsString(args ...value.Object) (value.Object, error) {
+func builtinIsString(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -62,7 +62,7 @@ func builtinIsString(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsInt(args ...value.Object) (value.Object, error) {
+func builtinIsInt(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -72,7 +72,7 @@ func builtinIsInt(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsFloat(args ...value.Object) (value.Object, error) {
+func builtinIsFloat(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -82,7 +82,7 @@ func builtinIsFloat(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsBool(args ...value.Object) (value.Object, error) {
+func builtinIsBool(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -92,7 +92,7 @@ func builtinIsBool(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsChar(args ...value.Object) (value.Object, error) {
+func builtinIsChar(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -102,7 +102,7 @@ func builtinIsChar(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsBytes(args ...value.Object) (value.Object, error) {
+func builtinIsBytes(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -112,7 +112,7 @@ func builtinIsBytes(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsArray(args ...value.Object) (value.Object, error) {
+func builtinIsArray(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -122,7 +122,7 @@ func builtinIsArray(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsImmutableArray(args ...value.Object) (value.Object, error) {
+func builtinIsImmutableArray(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -132,7 +132,7 @@ func builtinIsImmutableArray(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsMap(args ...value.Object) (value.Object, error) {
+func builtinIsMap(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -142,7 +142,7 @@ func builtinIsMap(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsImmutableMap(args ...value.Object) (value.Object, error) {
+func builtinIsImmutableMap(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -152,7 +152,7 @@ func builtinIsImmutableMap(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsTime(args ...value.Object) (value.Object, error) {
+func builtinIsTime(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -162,7 +162,7 @@ func builtinIsTime(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsError(args ...value.Object) (value.Object, error) {
+func builtinIsError(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -172,7 +172,7 @@ func builtinIsError(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsUndefined(args ...value.Object) (value.Object, error) {
+func builtinIsUndefined(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -182,7 +182,7 @@ func builtinIsUndefined(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsFunction(args ...value.Object) (value.Object, error) {
+func builtinIsFunction(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -193,7 +193,7 @@ func builtinIsFunction(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsCallable(args ...value.Object) (value.Object, error) {
+func builtinIsCallable(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -203,7 +203,7 @@ func builtinIsCallable(args ...value.Object) (value.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsIterable(args ...value.Object) (value.Object, error) {
+func builtinIsIterable(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -214,7 +214,7 @@ func builtinIsIterable(args ...value.Object) (value.Object, error) {
 }
 
 // len(obj object) => int
-func builtinLen(args ...value.Object) (value.Object, error) {
+func builtinLen(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -241,7 +241,7 @@ func builtinLen(args ...value.Object) (value.Object, error) {
 }
 
 // range(start, stop[, step])
-func builtinRange(args ...value.Object) (value.Object, error) {
+func builtinRange(args ...core.Object) (core.Object, error) {
 	numArgs := len(args)
 	if numArgs < 2 || numArgs > 3 {
 		return nil, gse.ErrWrongNumArguments
@@ -305,7 +305,7 @@ func buildRange(start, stop, step int64) *value.Array {
 	return array
 }
 
-func builtinFormat(args ...value.Object) (value.Object, error) {
+func builtinFormat(args ...core.Object) (core.Object, error) {
 	numArgs := len(args)
 	if numArgs == 0 {
 		return nil, gse.ErrWrongNumArguments
@@ -329,14 +329,14 @@ func builtinFormat(args ...value.Object) (value.Object, error) {
 	return &value.String{Value: s}, nil
 }
 
-func builtinCopy(args ...value.Object) (value.Object, error) {
+func builtinCopy(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
 	return args[0].Copy(), nil
 }
 
-func builtinString(args ...value.Object) (value.Object, error) {
+func builtinString(args ...core.Object) (core.Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, gse.ErrWrongNumArguments
@@ -357,7 +357,7 @@ func builtinString(args ...value.Object) (value.Object, error) {
 	return value.UndefinedValue, nil
 }
 
-func builtinInt(args ...value.Object) (value.Object, error) {
+func builtinInt(args ...core.Object) (core.Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, gse.ErrWrongNumArguments
@@ -375,7 +375,7 @@ func builtinInt(args ...value.Object) (value.Object, error) {
 	return value.UndefinedValue, nil
 }
 
-func builtinFloat(args ...value.Object) (value.Object, error) {
+func builtinFloat(args ...core.Object) (core.Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, gse.ErrWrongNumArguments
@@ -393,7 +393,7 @@ func builtinFloat(args ...value.Object) (value.Object, error) {
 	return value.UndefinedValue, nil
 }
 
-func builtinBool(args ...value.Object) (value.Object, error) {
+func builtinBool(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -410,7 +410,7 @@ func builtinBool(args ...value.Object) (value.Object, error) {
 	return value.UndefinedValue, nil
 }
 
-func builtinChar(args ...value.Object) (value.Object, error) {
+func builtinChar(args ...core.Object) (core.Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, gse.ErrWrongNumArguments
@@ -428,7 +428,7 @@ func builtinChar(args ...value.Object) (value.Object, error) {
 	return value.UndefinedValue, nil
 }
 
-func builtinBytes(args ...value.Object) (value.Object, error) {
+func builtinBytes(args ...core.Object) (core.Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, gse.ErrWrongNumArguments
@@ -454,7 +454,7 @@ func builtinBytes(args ...value.Object) (value.Object, error) {
 	return value.UndefinedValue, nil
 }
 
-func builtinTime(args ...value.Object) (value.Object, error) {
+func builtinTime(args ...core.Object) (core.Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, gse.ErrWrongNumArguments
@@ -473,7 +473,7 @@ func builtinTime(args ...value.Object) (value.Object, error) {
 }
 
 // append(arr, items...)
-func builtinAppend(args ...value.Object) (value.Object, error) {
+func builtinAppend(args ...core.Object) (core.Object, error) {
 	if len(args) < 2 {
 		return nil, gse.ErrWrongNumArguments
 	}
@@ -494,7 +494,7 @@ func builtinAppend(args ...value.Object) (value.Object, error) {
 // builtinDelete deletes Map keys
 // usage: delete(map, "key")
 // key must be a string
-func builtinDelete(args ...value.Object) (value.Object, error) {
+func builtinDelete(args ...core.Object) (core.Object, error) {
 	argsLen := len(args)
 	if argsLen != 2 {
 		return nil, gse.ErrWrongNumArguments
@@ -522,7 +522,7 @@ func builtinDelete(args ...value.Object) (value.Object, error) {
 // builtinSplice deletes and changes given Array, returns deleted items.
 // usage:
 // deleted_items := splice(array[,start[,delete_count[,item1[,item2[,...]]]])
-func builtinSplice(args ...value.Object) (value.Object, error) {
+func builtinSplice(args ...core.Object) (core.Object, error) {
 	argsLen := len(args)
 	if argsLen == 0 {
 		return nil, gse.ErrWrongNumArguments
@@ -575,12 +575,12 @@ func builtinSplice(args ...value.Object) (value.Object, error) {
 	}
 	// delete items
 	endIdx := startIdx + delCount
-	deleted := append([]value.Object{}, array.Value[startIdx:endIdx]...)
+	deleted := append([]core.Object{}, array.Value[startIdx:endIdx]...)
 
 	head := array.Value[:startIdx]
-	var items []value.Object
+	var items []core.Object
 	if argsLen > 3 {
-		items = make([]value.Object, 0, argsLen-3)
+		items = make([]core.Object, 0, argsLen-3)
 		for i := 3; i < argsLen; i++ {
 			items = append(items, args[i])
 		}

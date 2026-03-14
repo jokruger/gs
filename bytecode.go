@@ -6,6 +6,7 @@ import (
 	"io"
 	"reflect"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/value"
 )
@@ -14,7 +15,7 @@ import (
 type Bytecode struct {
 	FileSet      *parser.SourceFileSet
 	MainFunction *value.CompiledFunction
-	Constants    []value.Object
+	Constants    []core.Object
 }
 
 // Size of the bytecode in bytes
@@ -101,7 +102,7 @@ func (b *Bytecode) Decode(r io.Reader, modules *ModuleMap) error {
 // RemoveDuplicates finds and remove the duplicate values in Constants.
 // Note this function mutates Bytecode.
 func (b *Bytecode) RemoveDuplicates() {
-	var deduped []value.Object
+	var deduped []core.Object
 
 	indexMap := make(map[int]int) // mapping from old constant index to new index
 	fns := make(map[*value.CompiledFunction]int)
@@ -190,7 +191,7 @@ func (b *Bytecode) RemoveDuplicates() {
 	}
 }
 
-func fixDecodedObject(o value.Object, modules *ModuleMap) (value.Object, error) {
+func fixDecodedObject(o core.Object, modules *ModuleMap) (core.Object, error) {
 	switch o := o.(type) {
 	case *value.Bool:
 		if o.IsFalsy() {

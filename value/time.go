@@ -3,6 +3,7 @@ package value
 import (
 	"time"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
@@ -20,7 +21,7 @@ func (o *Time) String() string {
 	return o.Value.String()
 }
 
-func (o *Time) BinaryOp(op token.Token, rhs Object) (Object, error) {
+func (o *Time) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	switch rhs := rhs.(type) {
 	case *Int:
 		switch op {
@@ -64,7 +65,7 @@ func (o *Time) BinaryOp(op token.Token, rhs Object) (Object, error) {
 	return nil, gse.ErrInvalidOperator
 }
 
-func (o *Time) Copy() Object {
+func (o *Time) Copy() core.Object {
 	return &Time{Value: o.Value}
 }
 
@@ -72,7 +73,7 @@ func (o *Time) IsFalsy() bool {
 	return o.Value.IsZero()
 }
 
-func (o *Time) Equals(x Object) bool {
+func (o *Time) Equals(x core.Object) bool {
 	t, ok := x.(*Time)
 	if !ok {
 		return false

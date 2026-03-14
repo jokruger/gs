@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/tests/require"
@@ -550,14 +551,11 @@ func TestFuncAI64RI64(t *testing.T) {
 	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
-func funcCall(
-	fn value.CallableFunc,
-	args ...value.Object,
-) (value.Object, error) {
+func funcCall(fn core.CallableFunction, args ...core.Object) (core.Object, error) {
 	userFunc := &value.UserFunction{Value: fn}
 	return userFunc.Call(args...)
 }
 
-func array(elements ...value.Object) *value.Array {
+func array(elements ...core.Object) *value.Array {
 	return &value.Array{Value: elements}
 }

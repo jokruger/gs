@@ -1,5 +1,7 @@
 package value
 
+import "github.com/jokruger/gs/core"
+
 type Bool struct {
 	ObjectImpl
 	value bool
@@ -16,7 +18,7 @@ func (o *Bool) String() string {
 	return FalseString
 }
 
-func (o *Bool) Copy() Object {
+func (o *Bool) Copy() core.Object {
 	return o
 }
 
@@ -24,7 +26,7 @@ func (o *Bool) IsFalsy() bool {
 	return !o.value
 }
 
-func (o *Bool) Equals(x Object) bool {
+func (o *Bool) Equals(x core.Object) bool {
 	return o == x
 }
 

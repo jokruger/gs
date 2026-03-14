@@ -6,12 +6,13 @@ import (
 	"testing"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
 
 func Test_builtinDelete(t *testing.T) {
-	var builtinDelete func(args ...value.Object) (value.Object, error)
+	var builtinDelete func(args ...core.Object) (core.Object, error)
 	for _, f := range gs.GetAllBuiltinFunctions() {
 		if f.Name == "delete" {
 			builtinDelete = f.Value
@@ -22,17 +23,17 @@ func Test_builtinDelete(t *testing.T) {
 		t.Fatal("builtin delete not found")
 	}
 	type args struct {
-		args []value.Object
+		args []core.Object
 	}
 	tests := []struct {
 		name      string
 		args      args
-		want      value.Object
+		want      core.Object
 		wantErr   bool
 		wantedErr error
 		target    interface{}
 	}{
-		{name: "invalid-arg", args: args{[]value.Object{&value.String{},
+		{name: "invalid-arg", args: args{[]core.Object{&value.String{},
 			&value.String{}}}, wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -41,60 +42,60 @@ func Test_builtinDelete(t *testing.T) {
 		},
 		{name: "no-args",
 			wantErr: true, wantedErr: gse.ErrWrongNumArguments},
-		{name: "empty-args", args: args{[]value.Object{}}, wantErr: true,
+		{name: "empty-args", args: args{[]core.Object{}}, wantErr: true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
-		{name: "3-args", args: args{[]value.Object{
+		{name: "3-args", args: args{[]core.Object{
 			(*value.Map)(nil), (*value.String)(nil), (*value.String)(nil)}},
 			wantErr: true, wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "nil-map-empty-key",
-			args: args{[]value.Object{&value.Map{}, &value.String{}}},
+			args: args{[]core.Object{&value.Map{}, &value.String{}}},
 			want: value.UndefinedValue,
 		},
 		{name: "nil-map-nonstr-key",
-			args: args{[]value.Object{
+			args: args{[]core.Object{
 				&value.Map{}, &value.Int{}}}, wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "second", Expected: "string", Found: "int"},
 		},
 		{name: "nil-map-no-key",
-			args: args{[]value.Object{&value.Map{}}}, wantErr: true,
+			args: args{[]core.Object{&value.Map{}}}, wantErr: true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "map-missing-key",
 			args: args{
-				[]value.Object{
-					&value.Map{Value: map[string]value.Object{
+				[]core.Object{
+					&value.Map{Value: map[string]core.Object{
 						"key": &value.String{Value: "value"},
 					}},
 					&value.String{Value: "key1"}}},
 			want: value.UndefinedValue,
 			target: &value.Map{
-				Value: map[string]value.Object{
+				Value: map[string]core.Object{
 					"key": &value.String{
 						Value: "value"}}},
 		},
 		{name: "map-emptied",
 			args: args{
-				[]value.Object{
-					&value.Map{Value: map[string]value.Object{
+				[]core.Object{
+					&value.Map{Value: map[string]core.Object{
 						"key": &value.String{Value: "value"},
 					}},
 					&value.String{Value: "key"}}},
 			want:   value.UndefinedValue,
-			target: &value.Map{Value: map[string]value.Object{}},
+			target: &value.Map{Value: map[string]core.Object{}},
 		},
 		{name: "map-multi-keys",
 			args: args{
-				[]value.Object{
-					&value.Map{Value: map[string]value.Object{
+				[]core.Object{
+					&value.Map{Value: map[string]core.Object{
 						"key1": &value.String{Value: "value1"},
 						"key2": &value.Int{Value: 10},
 					}},
 					&value.String{Value: "key1"}}},
 			want: value.UndefinedValue,
-			target: &value.Map{Value: map[string]value.Object{
+			target: &value.Map{Value: map[string]core.Object{
 				"key2": &value.Int{Value: 10}}},
 		},
 	}
@@ -135,7 +136,7 @@ func Test_builtinDelete(t *testing.T) {
 }
 
 func Test_builtinSplice(t *testing.T) {
-	var builtinSplice func(args ...value.Object) (value.Object, error)
+	var builtinSplice func(args ...core.Object) (core.Object, error)
 	for _, f := range gs.GetAllBuiltinFunctions() {
 		if f.Name == "splice" {
 			builtinSplice = f.Value
@@ -147,32 +148,32 @@ func Test_builtinSplice(t *testing.T) {
 	}
 	tests := []struct {
 		name      string
-		args      []value.Object
-		deleted   value.Object
+		args      []core.Object
+		deleted   core.Object
 		Array     *value.Array
 		wantErr   bool
 		wantedErr error
 	}{
-		{name: "no args", args: []value.Object{}, wantErr: true,
+		{name: "no args", args: []core.Object{}, wantErr: true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
-		{name: "invalid args", args: []value.Object{&value.Map{}},
+		{name: "invalid args", args: []core.Object{&value.Map{}},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "first", Expected: "array", Found: "map"},
 		},
 		{name: "invalid args",
-			args:    []value.Object{&value.Array{}, &value.String{}},
+			args:    []core.Object{&value.Array{}, &value.String{}},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "second", Expected: "int", Found: "string"},
 		},
 		{name: "negative index",
-			args:      []value.Object{&value.Array{}, &value.Int{Value: -1}},
+			args:      []core.Object{&value.Array{}, &value.Int{Value: -1}},
 			wantErr:   true,
 			wantedErr: gse.ErrIndexOutOfBounds},
 		{name: "non int count",
-			args: []value.Object{
+			args: []core.Object{
 				&value.Array{}, &value.Int{Value: 0},
 				&value.String{Value: ""}},
 			wantErr: true,
@@ -180,8 +181,8 @@ func Test_builtinSplice(t *testing.T) {
 				Name: "third", Expected: "int", Found: "string"},
 		},
 		{name: "negative count",
-			args: []value.Object{
-				&value.Array{Value: []value.Object{
+			args: []core.Object{
+				&value.Array{Value: []core.Object{
 					&value.Int{Value: 0},
 					&value.Int{Value: 1},
 					&value.Int{Value: 2}}},
@@ -191,24 +192,24 @@ func Test_builtinSplice(t *testing.T) {
 			wantedErr: gse.ErrIndexOutOfBounds,
 		},
 		{name: "insert with zero count",
-			args: []value.Object{
-				&value.Array{Value: []value.Object{
+			args: []core.Object{
+				&value.Array{Value: []core.Object{
 					&value.Int{Value: 0},
 					&value.Int{Value: 1},
 					&value.Int{Value: 2}}},
 				&value.Int{Value: 0},
 				&value.Int{Value: 0},
 				&value.String{Value: "b"}},
-			deleted: &value.Array{Value: []value.Object{}},
-			Array: &value.Array{Value: []value.Object{
+			deleted: &value.Array{Value: []core.Object{}},
+			Array: &value.Array{Value: []core.Object{
 				&value.String{Value: "b"},
 				&value.Int{Value: 0},
 				&value.Int{Value: 1},
 				&value.Int{Value: 2}}},
 		},
 		{name: "insert",
-			args: []value.Object{
-				&value.Array{Value: []value.Object{
+			args: []core.Object{
+				&value.Array{Value: []core.Object{
 					&value.Int{Value: 0},
 					&value.Int{Value: 1},
 					&value.Int{Value: 2}}},
@@ -216,8 +217,8 @@ func Test_builtinSplice(t *testing.T) {
 				&value.Int{Value: 0},
 				&value.String{Value: "c"},
 				&value.String{Value: "d"}},
-			deleted: &value.Array{Value: []value.Object{}},
-			Array: &value.Array{Value: []value.Object{
+			deleted: &value.Array{Value: []core.Object{}},
+			Array: &value.Array{Value: []core.Object{
 				&value.Int{Value: 0},
 				&value.String{Value: "c"},
 				&value.String{Value: "d"},
@@ -225,8 +226,8 @@ func Test_builtinSplice(t *testing.T) {
 				&value.Int{Value: 2}}},
 		},
 		{name: "insert with zero count",
-			args: []value.Object{
-				&value.Array{Value: []value.Object{
+			args: []core.Object{
+				&value.Array{Value: []core.Object{
 					&value.Int{Value: 0},
 					&value.Int{Value: 1},
 					&value.Int{Value: 2}}},
@@ -234,8 +235,8 @@ func Test_builtinSplice(t *testing.T) {
 				&value.Int{Value: 0},
 				&value.String{Value: "c"},
 				&value.String{Value: "d"}},
-			deleted: &value.Array{Value: []value.Object{}},
-			Array: &value.Array{Value: []value.Object{
+			deleted: &value.Array{Value: []core.Object{}},
+			Array: &value.Array{Value: []core.Object{
 				&value.Int{Value: 0},
 				&value.String{Value: "c"},
 				&value.String{Value: "d"},
@@ -243,8 +244,8 @@ func Test_builtinSplice(t *testing.T) {
 				&value.Int{Value: 2}}},
 		},
 		{name: "insert with delete",
-			args: []value.Object{
-				&value.Array{Value: []value.Object{
+			args: []core.Object{
+				&value.Array{Value: []core.Object{
 					&value.Int{Value: 0},
 					&value.Int{Value: 1},
 					&value.Int{Value: 2}}},
@@ -253,16 +254,16 @@ func Test_builtinSplice(t *testing.T) {
 				&value.String{Value: "c"},
 				&value.String{Value: "d"}},
 			deleted: &value.Array{
-				Value: []value.Object{&value.Int{Value: 1}}},
-			Array: &value.Array{Value: []value.Object{
+				Value: []core.Object{&value.Int{Value: 1}}},
+			Array: &value.Array{Value: []core.Object{
 				&value.Int{Value: 0},
 				&value.String{Value: "c"},
 				&value.String{Value: "d"},
 				&value.Int{Value: 2}}},
 		},
 		{name: "insert with delete multi",
-			args: []value.Object{
-				&value.Array{Value: []value.Object{
+			args: []core.Object{
+				&value.Array{Value: []core.Object{
 					&value.Int{Value: 0},
 					&value.Int{Value: 1},
 					&value.Int{Value: 2}}},
@@ -270,64 +271,64 @@ func Test_builtinSplice(t *testing.T) {
 				&value.Int{Value: 2},
 				&value.String{Value: "c"},
 				&value.String{Value: "d"}},
-			deleted: &value.Array{Value: []value.Object{
+			deleted: &value.Array{Value: []core.Object{
 				&value.Int{Value: 1},
 				&value.Int{Value: 2}}},
 			Array: &value.Array{
-				Value: []value.Object{
+				Value: []core.Object{
 					&value.Int{Value: 0},
 					&value.String{Value: "c"},
 					&value.String{Value: "d"}}},
 		},
 		{name: "delete all with positive count",
-			args: []value.Object{
-				&value.Array{Value: []value.Object{
+			args: []core.Object{
+				&value.Array{Value: []core.Object{
 					&value.Int{Value: 0},
 					&value.Int{Value: 1},
 					&value.Int{Value: 2}}},
 				&value.Int{Value: 0},
 				&value.Int{Value: 3}},
-			deleted: &value.Array{Value: []value.Object{
+			deleted: &value.Array{Value: []core.Object{
 				&value.Int{Value: 0},
 				&value.Int{Value: 1},
 				&value.Int{Value: 2}}},
-			Array: &value.Array{Value: []value.Object{}},
+			Array: &value.Array{Value: []core.Object{}},
 		},
 		{name: "delete all with big count",
-			args: []value.Object{
-				&value.Array{Value: []value.Object{
+			args: []core.Object{
+				&value.Array{Value: []core.Object{
 					&value.Int{Value: 0},
 					&value.Int{Value: 1},
 					&value.Int{Value: 2}}},
 				&value.Int{Value: 0},
 				&value.Int{Value: 5}},
-			deleted: &value.Array{Value: []value.Object{
+			deleted: &value.Array{Value: []core.Object{
 				&value.Int{Value: 0},
 				&value.Int{Value: 1},
 				&value.Int{Value: 2}}},
-			Array: &value.Array{Value: []value.Object{}},
+			Array: &value.Array{Value: []core.Object{}},
 		},
 		{name: "nothing2",
-			args: []value.Object{
-				&value.Array{Value: []value.Object{
+			args: []core.Object{
+				&value.Array{Value: []core.Object{
 					&value.Int{Value: 0},
 					&value.Int{Value: 1},
 					&value.Int{Value: 2}}}},
-			Array: &value.Array{Value: []value.Object{}},
-			deleted: &value.Array{Value: []value.Object{
+			Array: &value.Array{Value: []core.Object{}},
+			deleted: &value.Array{Value: []core.Object{
 				&value.Int{Value: 0},
 				&value.Int{Value: 1},
 				&value.Int{Value: 2}}},
 		},
 		{name: "pop without count",
-			args: []value.Object{
-				&value.Array{Value: []value.Object{
+			args: []core.Object{
+				&value.Array{Value: []core.Object{
 					&value.Int{Value: 0},
 					&value.Int{Value: 1},
 					&value.Int{Value: 2}}},
 				&value.Int{Value: 2}},
-			deleted: &value.Array{Value: []value.Object{&value.Int{Value: 2}}},
-			Array: &value.Array{Value: []value.Object{
+			deleted: &value.Array{Value: []core.Object{&value.Int{Value: 2}}},
+			Array: &value.Array{Value: []core.Object{
 				&value.Int{Value: 0}, &value.Int{Value: 1}}},
 		},
 	}
@@ -355,7 +356,7 @@ func Test_builtinSplice(t *testing.T) {
 }
 
 func Test_builtinRange(t *testing.T) {
-	var builtinRange func(args ...value.Object) (value.Object, error)
+	var builtinRange func(args ...core.Object) (core.Object, error)
 	for _, f := range gs.GetAllBuiltinFunctions() {
 		if f.Name == "range" {
 			builtinRange = f.Value
@@ -367,62 +368,62 @@ func Test_builtinRange(t *testing.T) {
 	}
 	tests := []struct {
 		name      string
-		args      []value.Object
+		args      []core.Object
 		result    *value.Array
 		wantErr   bool
 		wantedErr error
 	}{
-		{name: "no args", args: []value.Object{}, wantErr: true,
+		{name: "no args", args: []core.Object{}, wantErr: true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
-		{name: "single args", args: []value.Object{&value.Map{}},
+		{name: "single args", args: []core.Object{&value.Map{}},
 			wantErr:   true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
-		{name: "4 args", args: []value.Object{&value.Map{}, &value.String{}, &value.String{}, &value.String{}},
+		{name: "4 args", args: []core.Object{&value.Map{}, &value.String{}, &value.String{}, &value.String{}},
 			wantErr:   true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "invalid start",
-			args:    []value.Object{&value.String{}, &value.String{}},
+			args:    []core.Object{&value.String{}, &value.String{}},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "start", Expected: "int", Found: "string"},
 		},
 		{name: "invalid stop",
-			args:    []value.Object{&value.Int{}, &value.String{}},
+			args:    []core.Object{&value.Int{}, &value.String{}},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "stop", Expected: "int", Found: "string"},
 		},
 		{name: "invalid step",
-			args:    []value.Object{&value.Int{}, &value.Int{}, &value.String{}},
+			args:    []core.Object{&value.Int{}, &value.Int{}, &value.String{}},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "step", Expected: "int", Found: "string"},
 		},
 		{name: "zero step",
-			args:      []value.Object{&value.Int{}, &value.Int{}, &value.Int{}}, //must greate than 0
+			args:      []core.Object{&value.Int{}, &value.Int{}, &value.Int{}}, //must greate than 0
 			wantErr:   true,
 			wantedErr: gse.ErrInvalidRangeStep,
 		},
 		{name: "negative step",
-			args:      []value.Object{&value.Int{}, &value.Int{}, intObject(-2)}, //must greate than 0
+			args:      []core.Object{&value.Int{}, &value.Int{}, intObject(-2)}, //must greate than 0
 			wantErr:   true,
 			wantedErr: gse.ErrInvalidRangeStep,
 		},
 		{name: "same bound",
-			args:    []value.Object{&value.Int{}, &value.Int{}},
+			args:    []core.Object{&value.Int{}, &value.Int{}},
 			wantErr: false,
 			result: &value.Array{
 				Value: nil,
 			},
 		},
 		{name: "positive range",
-			args:    []value.Object{&value.Int{}, &value.Int{Value: 5}},
+			args:    []core.Object{&value.Int{}, &value.Int{Value: 5}},
 			wantErr: false,
 			result: &value.Array{
-				Value: []value.Object{
+				Value: []core.Object{
 					intObject(0),
 					intObject(1),
 					intObject(2),
@@ -432,10 +433,10 @@ func Test_builtinRange(t *testing.T) {
 			},
 		},
 		{name: "negative range",
-			args:    []value.Object{&value.Int{}, &value.Int{Value: -5}},
+			args:    []core.Object{&value.Int{}, &value.Int{Value: -5}},
 			wantErr: false,
 			result: &value.Array{
-				Value: []value.Object{
+				Value: []core.Object{
 					intObject(0),
 					intObject(-1),
 					intObject(-2),
@@ -446,10 +447,10 @@ func Test_builtinRange(t *testing.T) {
 		},
 
 		{name: "positive with step",
-			args:    []value.Object{&value.Int{}, &value.Int{Value: 5}, &value.Int{Value: 2}},
+			args:    []core.Object{&value.Int{}, &value.Int{Value: 5}, &value.Int{Value: 2}},
 			wantErr: false,
 			result: &value.Array{
-				Value: []value.Object{
+				Value: []core.Object{
 					intObject(0),
 					intObject(2),
 					intObject(4),
@@ -458,10 +459,10 @@ func Test_builtinRange(t *testing.T) {
 		},
 
 		{name: "negative with step",
-			args:    []value.Object{&value.Int{}, &value.Int{Value: -10}, &value.Int{Value: 2}},
+			args:    []core.Object{&value.Int{}, &value.Int{Value: -10}, &value.Int{Value: 2}},
 			wantErr: false,
 			result: &value.Array{
-				Value: []value.Object{
+				Value: []core.Object{
 					intObject(0),
 					intObject(-2),
 					intObject(-4),
@@ -472,10 +473,10 @@ func Test_builtinRange(t *testing.T) {
 		},
 
 		{name: "large range",
-			args:    []value.Object{intObject(-10), intObject(10), &value.Int{Value: 3}},
+			args:    []core.Object{intObject(-10), intObject(10), &value.Int{Value: 3}},
 			wantErr: false,
 			result: &value.Array{
-				Value: []value.Object{
+				Value: []core.Object{
 					intObject(-10),
 					intObject(-7),
 					intObject(-4),

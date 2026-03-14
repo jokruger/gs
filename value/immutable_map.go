@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 )
 
 type ImmutableMap struct {
 	ObjectImpl
-	Value map[string]Object
+	Value map[string]core.Object
 }
 
 func (o *ImmutableMap) TypeName() string {
@@ -24,8 +25,8 @@ func (o *ImmutableMap) String() string {
 	return fmt.Sprintf("{%s}", strings.Join(pairs, ", "))
 }
 
-func (o *ImmutableMap) Copy() Object {
-	c := make(map[string]Object)
+func (o *ImmutableMap) Copy() core.Object {
+	c := make(map[string]core.Object)
 	for k, v := range o.Value {
 		c[k] = v.Copy()
 	}
@@ -36,7 +37,7 @@ func (o *ImmutableMap) IsFalsy() bool {
 	return len(o.Value) == 0
 }
 
-func (o *ImmutableMap) IndexGet(index Object) (res Object, err error) {
+func (o *ImmutableMap) IndexGet(index core.Object) (res core.Object, err error) {
 	strIdx, ok := index.ToString()
 	if !ok {
 		err = gse.ErrInvalidIndexType
@@ -49,8 +50,8 @@ func (o *ImmutableMap) IndexGet(index Object) (res Object, err error) {
 	return
 }
 
-func (o *ImmutableMap) Equals(x Object) bool {
-	var xVal map[string]Object
+func (o *ImmutableMap) Equals(x core.Object) bool {
+	var xVal map[string]core.Object
 	switch x := x.(type) {
 	case *Map:
 		xVal = x.Value
@@ -71,7 +72,7 @@ func (o *ImmutableMap) Equals(x Object) bool {
 	return true
 }
 
-func (o *ImmutableMap) Iterate() Iterator {
+func (o *ImmutableMap) Iterate() core.Iterator {
 	var keys []string
 	for k := range o.Value {
 		keys = append(keys, k)

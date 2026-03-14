@@ -3,13 +3,14 @@ package stdlib
 import (
 	"os"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
 
 func makeOSFile(file *os.File) *value.ImmutableMap {
 	return &value.ImmutableMap{
-		Value: map[string]value.Object{
+		Value: map[string]core.Object{
 			// chdir() => true/error
 			"chdir": &value.UserFunction{
 				Name:  "chdir",
@@ -58,7 +59,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 			// chmod(mode int) => error
 			"chmod": &value.UserFunction{
 				Name: "chmod",
-				Value: func(args ...value.Object) (value.Object, error) {
+				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
@@ -76,7 +77,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 			// seek(offset int, whence int) => int/error
 			"seek": &value.UserFunction{
 				Name: "seek",
-				Value: func(args ...value.Object) (value.Object, error) {
+				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 2 {
 						return nil, gse.ErrWrongNumArguments
 					}
@@ -106,7 +107,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 			// stat() => imap(fileinfo)/error
 			"stat": &value.UserFunction{
 				Name: "stat",
-				Value: func(args ...value.Object) (value.Object, error) {
+				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 0 {
 						return nil, gse.ErrWrongNumArguments
 					}

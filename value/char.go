@@ -1,6 +1,7 @@
 package value
 
 import (
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
@@ -18,7 +19,7 @@ func (o *Char) String() string {
 	return string(o.Value)
 }
 
-func (o *Char) BinaryOp(op token.Token, rhs Object) (Object, error) {
+func (o *Char) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	switch rhs := rhs.(type) {
 	case *Char:
 		switch op {
@@ -94,7 +95,7 @@ func (o *Char) BinaryOp(op token.Token, rhs Object) (Object, error) {
 	return nil, gse.ErrInvalidOperator
 }
 
-func (o *Char) Copy() Object {
+func (o *Char) Copy() core.Object {
 	return &Char{Value: o.Value}
 }
 
@@ -102,7 +103,7 @@ func (o *Char) IsFalsy() bool {
 	return o.Value == 0
 }
 
-func (o *Char) Equals(x Object) bool {
+func (o *Char) Equals(x core.Object) bool {
 	t, ok := x.(*Char)
 	if !ok {
 		return false

@@ -50,7 +50,7 @@ type Compiler struct {
 	modulePath      string
 	importDir       string
 	importFileExt   []string
-	constants       []value.Object
+	constants       []core.Object
 	symbolTable     *SymbolTable
 	scopes          []compilationScope
 	scopeIndex      int
@@ -67,7 +67,7 @@ type Compiler struct {
 func NewCompiler(
 	file *parser.SourceFile,
 	symbolTable *SymbolTable,
-	constants []value.Object,
+	constants []core.Object,
 	modules ModuleGetter,
 	trace io.Writer,
 ) *Compiler {
@@ -519,7 +519,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 				}
 				c.emit(node, parser.OpConstant, c.addConstant(compiled))
 				c.emit(node, parser.OpCall, 0, 0)
-			case value.Object: // builtin module
+			case core.Object: // builtin module
 				c.emit(node, parser.OpConstant, c.addConstant(v))
 			default:
 				panic(fmt.Errorf("invalid import value type: %T", v))
@@ -1142,7 +1142,7 @@ func (c *Compiler) errorf(
 	}
 }
 
-func (c *Compiler) addConstant(o value.Object) int {
+func (c *Compiler) addConstant(o core.Object) int {
 	if c.parent != nil {
 		// module compilers will use their parent's constants array
 		return c.parent.addConstant(o)

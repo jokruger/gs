@@ -4,13 +4,14 @@ import (
 	"os"
 	"syscall"
 
+	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
 
 func makeOSProcessState(state *os.ProcessState) *value.ImmutableMap {
 	return &value.ImmutableMap{
-		Value: map[string]value.Object{
+		Value: map[string]core.Object{
 			"exited": &value.UserFunction{
 				Name:  "exited",
 				Value: FuncARB(state.Exited),
@@ -33,7 +34,7 @@ func makeOSProcessState(state *os.ProcessState) *value.ImmutableMap {
 
 func makeOSProcess(proc *os.Process) *value.ImmutableMap {
 	return &value.ImmutableMap{
-		Value: map[string]value.Object{
+		Value: map[string]core.Object{
 			"kill": &value.UserFunction{
 				Name:  "kill",
 				Value: FuncARE(proc.Kill),
@@ -44,7 +45,7 @@ func makeOSProcess(proc *os.Process) *value.ImmutableMap {
 			},
 			"signal": &value.UserFunction{
 				Name: "signal",
-				Value: func(args ...value.Object) (value.Object, error) {
+				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
@@ -61,7 +62,7 @@ func makeOSProcess(proc *os.Process) *value.ImmutableMap {
 			},
 			"wait": &value.UserFunction{
 				Name: "wait",
-				Value: func(args ...value.Object) (value.Object, error) {
+				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 0 {
 						return nil, gse.ErrWrongNumArguments
 					}

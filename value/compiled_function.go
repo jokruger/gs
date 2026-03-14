@@ -26,7 +26,7 @@ func (o *CompiledFunction) Size() int64 {
 	return int64(len(o.Instructions) + len(o.SourceMap) + len(o.Free))
 }
 
-func (o *CompiledFunction) Copy() Object {
+func (o *CompiledFunction) Copy() core.Object {
 	return &CompiledFunction{
 		Instructions:  append([]byte{}, o.Instructions...),
 		NumLocals:     o.NumLocals,
@@ -36,7 +36,7 @@ func (o *CompiledFunction) Copy() Object {
 	}
 }
 
-func (o *CompiledFunction) Equals(_ Object) bool {
+func (o *CompiledFunction) Equals(core.Object) bool {
 	return false
 }
 

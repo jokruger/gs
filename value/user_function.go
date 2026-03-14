@@ -28,6 +28,6 @@ func (o *UserFunction) Call(args ...core.Object) (core.Object, error) {
 	return o.Value(args...)
 }
 
-func (o *UserFunction) CanCall() bool {
+func (o *UserFunction) IsCallable() bool {
 	return true
 }

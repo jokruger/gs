@@ -138,26 +138,22 @@ func (o *Float) Equals(x core.Object) bool {
 	return o.Value == t.Value
 }
 
-func (o *Float) ToString() (string, bool) {
+func (o *Float) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Float) ToInt() (int, bool) {
-	return int(o.Value), true
-}
-
-func (o *Float) ToInt64() (int64, bool) {
+func (o *Float) AsInt() (int64, bool) {
 	return int64(o.Value), true
 }
 
-func (o *Float) ToFloat64() (float64, bool) {
+func (o *Float) AsFloat() (float64, bool) {
 	return o.Value, true
 }
 
-func (o *Float) ToBool() (bool, bool) {
+func (o *Float) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Float) ToInterface() any {
+func (o *Float) Interface() any {
 	return o.Value
 }

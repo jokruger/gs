@@ -118,23 +118,15 @@ func (o *String) Iterate() core.Iterator {
 	}
 }
 
-func (o *String) CanIterate() bool {
+func (o *String) IsIterable() bool {
 	return true
 }
 
-func (o *String) ToString() (string, bool) {
+func (o *String) AsString() (string, bool) {
 	return o.Value, true
 }
 
-func (o *String) ToInt() (int, bool) {
-	i, err := strconv.ParseInt(o.Value, 10, 64)
-	if err == nil {
-		return int(i), true
-	}
-	return 0, false
-}
-
-func (o *String) ToInt64() (int64, bool) {
+func (o *String) AsInt() (int64, bool) {
 	i, err := strconv.ParseInt(o.Value, 10, 64)
 	if err == nil {
 		return i, true
@@ -142,7 +134,7 @@ func (o *String) ToInt64() (int64, bool) {
 	return 0, false
 }
 
-func (o *String) ToFloat64() (float64, bool) {
+func (o *String) AsFloat() (float64, bool) {
 	f, err := strconv.ParseFloat(o.Value, 64)
 	if err == nil {
 		return f, true
@@ -150,14 +142,14 @@ func (o *String) ToFloat64() (float64, bool) {
 	return 0, false
 }
 
-func (o *String) ToBool() (bool, bool) {
+func (o *String) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *String) ToByteSlice() ([]byte, bool) {
+func (o *String) AsByteSlice() ([]byte, bool) {
 	return []byte(o.Value), true
 }
 
-func (o *String) ToInterface() any {
+func (o *String) Interface() any {
 	return o.Value
 }

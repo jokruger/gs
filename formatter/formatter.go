@@ -976,7 +976,7 @@ func intFromArg(a []core.Object, argNum int) (num int, isInt bool, newArgNum int
 	newArgNum = argNum
 	if argNum < len(a) {
 		var num64 int64
-		num64, isInt = a[argNum].ToInt64()
+		num64, isInt = a[argNum].AsInt()
 		num = int(num64)
 		newArgNum = argNum + 1
 		if tooLarge(num) {

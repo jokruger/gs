@@ -60,7 +60,7 @@ func (o *Map) Equals(x core.Object) bool {
 }
 
 func (o *Map) IndexGet(index core.Object) (res core.Object, err error) {
-	strIdx, ok := index.ToString()
+	strIdx, ok := index.AsString()
 	if !ok {
 		err = gse.ErrInvalidIndexType
 		return
@@ -73,7 +73,7 @@ func (o *Map) IndexGet(index core.Object) (res core.Object, err error) {
 }
 
 func (o *Map) IndexSet(index, value core.Object) (err error) {
-	strIdx, ok := index.ToString()
+	strIdx, ok := index.AsString()
 	if !ok {
 		err = gse.ErrInvalidIndexType
 		return
@@ -94,22 +94,22 @@ func (o *Map) Iterate() core.Iterator {
 	}
 }
 
-func (o *Map) CanIterate() bool {
+func (o *Map) IsIterable() bool {
 	return true
 }
 
-func (o *Map) ToString() (string, bool) {
+func (o *Map) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Map) ToBool() (bool, bool) {
+func (o *Map) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Map) ToInterface() any {
+func (o *Map) Interface() any {
 	res := make(map[string]any)
 	for key, v := range o.Value {
-		res[key] = v.ToInterface()
+		res[key] = v.Interface()
 	}
 	return res
 }

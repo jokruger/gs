@@ -34,7 +34,7 @@ func (o *Undefined) Iterate() core.Iterator {
 	return o
 }
 
-func (o *Undefined) CanIterate() bool {
+func (o *Undefined) IsIterable() bool {
 	return true
 }
 
@@ -50,10 +50,10 @@ func (o *Undefined) Value() core.Object {
 	return o
 }
 
-func (o *Undefined) ToBool() (bool, bool) {
+func (o *Undefined) AsBool() (bool, bool) {
 	return false, true
 }
 
-func (o *Undefined) ToInterface() any {
+func (o *Undefined) Interface() any {
 	return nil
 }

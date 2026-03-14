@@ -88,12 +88,12 @@ func (o *Array) IndexGet(index core.Object) (res core.Object, err error) {
 }
 
 func (o *Array) IndexSet(index, value core.Object) (err error) {
-	intIdx, ok := index.ToInt()
+	intIdx, ok := index.AsInt()
 	if !ok {
 		err = gse.ErrInvalidIndexType
 		return
 	}
-	if intIdx < 0 || intIdx >= len(o.Value) {
+	if intIdx < 0 || intIdx >= int64(len(o.Value)) {
 		err = gse.ErrIndexOutOfBounds
 		return
 	}
@@ -108,22 +108,22 @@ func (o *Array) Iterate() core.Iterator {
 	}
 }
 
-func (o *Array) CanIterate() bool {
+func (o *Array) IsIterable() bool {
 	return true
 }
 
-func (o *Array) ToString() (string, bool) {
+func (o *Array) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Array) ToBool() (bool, bool) {
+func (o *Array) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Array) ToInterface() any {
+func (o *Array) Interface() any {
 	res := make([]any, len(o.Value))
 	for i, val := range o.Value {
-		res[i] = val.ToInterface()
+		res[i] = val.Interface()
 	}
 	return res
 }

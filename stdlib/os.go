@@ -208,7 +208,7 @@ func osReadFile(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	fname, ok := args[0].ToString()
+	fname, ok := args[0].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -230,7 +230,7 @@ func osStat(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	fname, ok := args[0].ToString()
+	fname, ok := args[0].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -262,7 +262,7 @@ func osCreate(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -281,7 +281,7 @@ func osOpen(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -300,7 +300,7 @@ func osOpenFile(args ...core.Object) (core.Object, error) {
 	if len(args) != 3 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -308,7 +308,7 @@ func osOpenFile(args ...core.Object) (core.Object, error) {
 			Found:    args[0].TypeName(),
 		}
 	}
-	i2, ok := args[1].ToInt()
+	i2, ok := args[1].AsInt()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -316,7 +316,7 @@ func osOpenFile(args ...core.Object) (core.Object, error) {
 			Found:    args[1].TypeName(),
 		}
 	}
-	i3, ok := args[2].ToInt()
+	i3, ok := args[2].AsInt()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "third",
@@ -324,7 +324,7 @@ func osOpenFile(args ...core.Object) (core.Object, error) {
 			Found:    args[2].TypeName(),
 		}
 	}
-	res, err := os.OpenFile(s1, i2, os.FileMode(i3))
+	res, err := os.OpenFile(s1, int(i2), os.FileMode(i3))
 	if err != nil {
 		return wrapError(err), nil
 	}
@@ -355,7 +355,7 @@ func osFuncASFmRE(
 			if len(args) != 2 {
 				return nil, gse.ErrWrongNumArguments
 			}
-			s1, ok := args[0].ToString()
+			s1, ok := args[0].AsString()
 			if !ok {
 				return nil, gse.ErrInvalidArgumentType{
 					Name:     "first",
@@ -363,7 +363,7 @@ func osFuncASFmRE(
 					Found:    args[0].TypeName(),
 				}
 			}
-			i2, ok := args[1].ToInt64()
+			i2, ok := args[1].AsInt()
 			if !ok {
 				return nil, gse.ErrInvalidArgumentType{
 					Name:     "second",
@@ -380,7 +380,7 @@ func osLookupEnv(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -402,7 +402,7 @@ func osExpandEnv(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -437,7 +437,7 @@ func osExec(args ...core.Object) (core.Object, error) {
 	if len(args) == 0 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	name, ok := args[0].ToString()
+	name, ok := args[0].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -447,7 +447,7 @@ func osExec(args ...core.Object) (core.Object, error) {
 	}
 	var execArgs []string
 	for idx, arg := range args[1:] {
-		execArg, ok := arg.ToString()
+		execArg, ok := arg.AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     fmt.Sprintf("args[%d]", idx),
@@ -464,7 +464,7 @@ func osFindProcess(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	i1, ok := args[0].ToInt()
+	i1, ok := args[0].AsInt()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -472,7 +472,7 @@ func osFindProcess(args ...core.Object) (core.Object, error) {
 			Found:    args[0].TypeName(),
 		}
 	}
-	proc, err := os.FindProcess(i1)
+	proc, err := os.FindProcess(int(i1))
 	if err != nil {
 		return wrapError(err), nil
 	}
@@ -483,7 +483,7 @@ func osStartProcess(args ...core.Object) (core.Object, error) {
 	if len(args) != 4 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	name, ok := args[0].ToString()
+	name, ok := args[0].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -512,7 +512,7 @@ func osStartProcess(args ...core.Object) (core.Object, error) {
 		}
 	}
 
-	dir, ok := args[2].ToString()
+	dir, ok := args[2].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "third",

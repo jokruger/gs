@@ -47,7 +47,7 @@ func (o *ObjectImpl) Iterate() core.Iterator {
 	return nil
 }
 
-func (o *ObjectImpl) CanIterate() bool {
+func (o *ObjectImpl) IsIterable() bool {
 	return false
 }
 
@@ -55,42 +55,38 @@ func (o *ObjectImpl) Call(...core.Object) (core.Object, error) {
 	return nil, nil
 }
 
-func (o *ObjectImpl) CanCall() bool {
+func (o *ObjectImpl) IsCallable() bool {
 	return false
 }
 
-func (o *ObjectImpl) ToString() (string, bool) {
+func (o *ObjectImpl) AsString() (string, bool) {
 	return "", false
 }
 
-func (o *ObjectImpl) ToInt() (int, bool) {
+func (o *ObjectImpl) AsInt() (int64, bool) {
 	return 0, false
 }
 
-func (o *ObjectImpl) ToInt64() (int64, bool) {
+func (o *ObjectImpl) AsFloat() (float64, bool) {
 	return 0, false
 }
 
-func (o *ObjectImpl) ToFloat64() (float64, bool) {
-	return 0, false
-}
-
-func (o *ObjectImpl) ToBool() (bool, bool) {
+func (o *ObjectImpl) AsBool() (bool, bool) {
 	return false, false
 }
 
-func (o *ObjectImpl) ToRune() (rune, bool) {
+func (o *ObjectImpl) AsRune() (rune, bool) {
 	return 0, false
 }
 
-func (o *ObjectImpl) ToByteSlice() ([]byte, bool) {
+func (o *ObjectImpl) AsByteSlice() ([]byte, bool) {
 	return nil, false
 }
 
-func (o *ObjectImpl) ToTime() (time.Time, bool) {
+func (o *ObjectImpl) AsTime() (time.Time, bool) {
 	return time.Time{}, false
 }
 
-func (o *ObjectImpl) ToInterface() any {
+func (o *ObjectImpl) Interface() any {
 	return o
 }

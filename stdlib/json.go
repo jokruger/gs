@@ -78,7 +78,7 @@ func jsonIndent(args ...core.Object) (ret core.Object, err error) {
 		return nil, gse.ErrWrongNumArguments
 	}
 
-	prefix, ok := args[1].ToString()
+	prefix, ok := args[1].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "prefix",
@@ -87,7 +87,7 @@ func jsonIndent(args ...core.Object) (ret core.Object, err error) {
 		}
 	}
 
-	indent, ok := args[2].ToString()
+	indent, ok := args[2].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "indent",

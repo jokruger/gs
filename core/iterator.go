@@ -4,12 +4,7 @@ package core
 type Iterator interface {
 	Object
 
-	// Next returns true if there are more elements to iterate.
-	Next() bool
-
-	// Key returns the key or index value of the current element.
-	Key() Object
-
-	// Value returns the value of the current element.
-	Value() Object
+	Next() bool    // returns true if there are more elements to iterate
+	Key() Object   // returns the key or index value of the current element
+	Value() Object // returns the value of the current element
 }

@@ -194,7 +194,7 @@ func timesSleep(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i1, ok := args[0].ToInt64()
+	i1, ok := args[0].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -219,7 +219,7 @@ func timesParseDuration(args ...core.Object) (
 		return
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -249,7 +249,7 @@ func timesSince(args ...core.Object) (
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -273,7 +273,7 @@ func timesUntil(args ...core.Object) (
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -297,7 +297,7 @@ func timesDurationHours(args ...core.Object) (
 		return
 	}
 
-	i1, ok := args[0].ToInt64()
+	i1, ok := args[0].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -321,7 +321,7 @@ func timesDurationMinutes(args ...core.Object) (
 		return
 	}
 
-	i1, ok := args[0].ToInt64()
+	i1, ok := args[0].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -345,7 +345,7 @@ func timesDurationNanoseconds(args ...core.Object) (
 		return
 	}
 
-	i1, ok := args[0].ToInt64()
+	i1, ok := args[0].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -369,7 +369,7 @@ func timesDurationSeconds(args ...core.Object) (
 		return
 	}
 
-	i1, ok := args[0].ToInt64()
+	i1, ok := args[0].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -393,7 +393,7 @@ func timesDurationString(args ...core.Object) (
 		return
 	}
 
-	i1, ok := args[0].ToInt64()
+	i1, ok := args[0].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -417,7 +417,7 @@ func timesMonthString(args ...core.Object) (
 		return
 	}
 
-	i1, ok := args[0].ToInt64()
+	i1, ok := args[0].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -441,7 +441,7 @@ func timesDate(args ...core.Object) (
 		return
 	}
 
-	i1, ok := args[0].ToInt()
+	i1, ok := args[0].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -450,7 +450,7 @@ func timesDate(args ...core.Object) (
 		}
 		return
 	}
-	i2, ok := args[1].ToInt()
+	i2, ok := args[1].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -459,7 +459,7 @@ func timesDate(args ...core.Object) (
 		}
 		return
 	}
-	i3, ok := args[2].ToInt()
+	i3, ok := args[2].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "third",
@@ -468,7 +468,7 @@ func timesDate(args ...core.Object) (
 		}
 		return
 	}
-	i4, ok := args[3].ToInt()
+	i4, ok := args[3].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "fourth",
@@ -477,7 +477,7 @@ func timesDate(args ...core.Object) (
 		}
 		return
 	}
-	i5, ok := args[4].ToInt()
+	i5, ok := args[4].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "fifth",
@@ -486,7 +486,7 @@ func timesDate(args ...core.Object) (
 		}
 		return
 	}
-	i6, ok := args[5].ToInt()
+	i6, ok := args[5].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "sixth",
@@ -495,7 +495,7 @@ func timesDate(args ...core.Object) (
 		}
 		return
 	}
-	i7, ok := args[6].ToInt()
+	i7, ok := args[6].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "seventh",
@@ -507,7 +507,7 @@ func timesDate(args ...core.Object) (
 
 	var loc *time.Location
 	if len(args) == 8 {
-		i8, ok := args[7].ToString()
+		i8, ok := args[7].AsString()
 		if !ok {
 			err = gse.ErrInvalidArgumentType{
 				Name:     "eighth",
@@ -526,8 +526,7 @@ func timesDate(args ...core.Object) (
 	}
 
 	ret = &value.Time{
-		Value: time.Date(i1,
-			time.Month(i2), i3, i4, i5, i6, i7, loc),
+		Value: time.Date(int(i1), time.Month(i2), int(i3), int(i4), int(i5), int(i6), int(i7), loc),
 	}
 
 	return
@@ -550,7 +549,7 @@ func timesParse(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -560,7 +559,7 @@ func timesParse(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s2, ok := args[1].ToString()
+	s2, ok := args[1].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -587,7 +586,7 @@ func timesUnix(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i1, ok := args[0].ToInt64()
+	i1, ok := args[0].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -597,7 +596,7 @@ func timesUnix(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i2, ok := args[1].ToInt64()
+	i2, ok := args[1].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -618,7 +617,7 @@ func timesAdd(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -628,7 +627,7 @@ func timesAdd(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i2, ok := args[1].ToInt64()
+	i2, ok := args[1].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -649,7 +648,7 @@ func timesSub(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -659,7 +658,7 @@ func timesSub(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t2, ok := args[1].ToTime()
+	t2, ok := args[1].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -680,7 +679,7 @@ func timesAddDate(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -690,7 +689,7 @@ func timesAddDate(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i2, ok := args[1].ToInt()
+	i2, ok := args[1].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -700,7 +699,7 @@ func timesAddDate(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i3, ok := args[2].ToInt()
+	i3, ok := args[2].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "third",
@@ -710,7 +709,7 @@ func timesAddDate(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i4, ok := args[3].ToInt()
+	i4, ok := args[3].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "fourth",
@@ -720,7 +719,7 @@ func timesAddDate(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	ret = &value.Time{Value: t1.AddDate(i2, i3, i4)}
+	ret = &value.Time{Value: t1.AddDate(int(i2), int(i3), int(i4))}
 
 	return
 }
@@ -731,7 +730,7 @@ func timesAfter(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -741,7 +740,7 @@ func timesAfter(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t2, ok := args[1].ToTime()
+	t2, ok := args[1].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -766,7 +765,7 @@ func timesBefore(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -776,7 +775,7 @@ func timesBefore(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t2, ok := args[1].ToTime()
+	t2, ok := args[1].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -801,7 +800,7 @@ func timesTimeYear(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -822,7 +821,7 @@ func timesTimeMonth(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -843,7 +842,7 @@ func timesTimeDay(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -864,7 +863,7 @@ func timesTimeWeekday(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -885,7 +884,7 @@ func timesTimeHour(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -906,7 +905,7 @@ func timesTimeMinute(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -927,7 +926,7 @@ func timesTimeSecond(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -951,7 +950,7 @@ func timesTimeNanosecond(args ...core.Object) (
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -972,7 +971,7 @@ func timesTimeUnix(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -996,7 +995,7 @@ func timesTimeUnixNano(args ...core.Object) (
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -1017,7 +1016,7 @@ func timesTimeFormat(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -1027,7 +1026,7 @@ func timesTimeFormat(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s2, ok := args[1].ToString()
+	s2, ok := args[1].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -1054,7 +1053,7 @@ func timesIsZero(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -1079,7 +1078,7 @@ func timesToLocal(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -1100,7 +1099,7 @@ func timesToUTC(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -1124,7 +1123,7 @@ func timesTimeLocation(args ...core.Object) (
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -1148,7 +1147,7 @@ func timesInLocation(args ...core.Object) (
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -1158,7 +1157,7 @@ func timesInLocation(args ...core.Object) (
 		return
 	}
 
-	s2, ok := args[1].ToString()
+	s2, ok := args[1].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -1185,7 +1184,7 @@ func timesTimeString(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	t1, ok := args[0].ToTime()
+	t1, ok := args[0].AsTime()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",

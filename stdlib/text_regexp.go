@@ -22,7 +22,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 						return
 					}
 
-					s1, ok := args[0].ToString()
+					s1, ok := args[0].AsString()
 					if !ok {
 						err = gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -55,7 +55,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 						return
 					}
 
-					s1, ok := args[0].ToString()
+					s1, ok := args[0].AsString()
 					if !ok {
 						err = gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -94,7 +94,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 						return
 					}
 
-					i2, ok := args[1].ToInt()
+					i2, ok := args[1].AsInt()
 					if !ok {
 						err = gse.ErrInvalidArgumentType{
 							Name:     "second",
@@ -103,7 +103,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 						}
 						return
 					}
-					m := re.FindAllStringSubmatchIndex(s1, i2)
+					m := re.FindAllStringSubmatchIndex(s1, int(i2))
 					if m == nil {
 						ret = value.UndefinedValue
 						return
@@ -148,7 +148,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 						return
 					}
 
-					s1, ok := args[0].ToString()
+					s1, ok := args[0].AsString()
 					if !ok {
 						err = gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -158,7 +158,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 						return
 					}
 
-					s2, ok := args[1].ToString()
+					s2, ok := args[1].AsString()
 					if !ok {
 						err = gse.ErrInvalidArgumentType{
 							Name:     "second",
@@ -192,7 +192,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 						return
 					}
 
-					s1, ok := args[0].ToString()
+					s1, ok := args[0].AsString()
 					if !ok {
 						err = gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -204,7 +204,9 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 
 					var i2 = -1
 					if numArgs > 1 {
-						i2, ok = args[1].ToInt()
+						var i2t int64
+						i2t, ok = args[1].AsInt()
+						i2 = int(i2t)
 						if !ok {
 							err = gse.ErrInvalidArgumentType{
 								Name:     "second",

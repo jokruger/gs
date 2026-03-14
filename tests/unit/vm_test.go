@@ -2101,7 +2101,7 @@ func (o *StringDict) IndexSet(i, v core.Object) error {
 		return gse.ErrInvalidIndexType
 	}
 
-	strVal, ok := v.ToString()
+	strVal, ok := v.AsString()
 	if !ok {
 		return gse.ErrInvalidIndexValueType
 	}
@@ -2149,7 +2149,7 @@ func (o *StringCircle) IndexSet(i, v core.Object) error {
 		r = len(o.Value) + r
 	}
 
-	strVal, ok := v.ToString()
+	strVal, ok := v.AsString()
 	if !ok {
 		return gse.ErrInvalidIndexValueType
 	}
@@ -2168,10 +2168,7 @@ func (o *StringArray) String() string {
 	return strings.Join(o.Value, ", ")
 }
 
-func (o *StringArray) BinaryOp(
-	op token.Token,
-	rhs core.Object,
-) (core.Object, error) {
+func (o *StringArray) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	if rhs, ok := rhs.(*StringArray); ok {
 		switch op {
 		case token.Add:
@@ -2242,7 +2239,7 @@ func (o *StringArray) IndexGet(index core.Object) (core.Object, error) {
 }
 
 func (o *StringArray) IndexSet(i, v core.Object) error {
-	strVal, ok := v.ToString()
+	strVal, ok := v.AsString()
 	if !ok {
 		return gse.ErrInvalidIndexValueType
 	}
@@ -2260,14 +2257,12 @@ func (o *StringArray) IndexSet(i, v core.Object) error {
 	return gse.ErrInvalidIndexType
 }
 
-func (o *StringArray) Call(
-	args ...core.Object,
-) (ret core.Object, err error) {
+func (o *StringArray) Call(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -2285,7 +2280,7 @@ func (o *StringArray) Call(
 	return value.UndefinedValue, nil
 }
 
-func (o *StringArray) CanCall() bool {
+func (o *StringArray) IsCallable() bool {
 	return true
 }
 
@@ -2431,7 +2426,7 @@ func (o *StringArray) Iterate() core.Iterator {
 	}
 }
 
-func (o *StringArray) CanIterate() bool {
+func (o *StringArray) IsIterable() bool {
 	return true
 }
 
@@ -2439,12 +2434,9 @@ func TestIterable(t *testing.T) {
 	strArr := func() *StringArray {
 		return &StringArray{Value: []string{"one", "two", "three"}}
 	}
-	expectRun(t, `for i, s in arr { out += i }`,
-		Opts().Symbol("arr", strArr()).Skip2ndPass(), 3)
-	expectRun(t, `for i, s in arr { out += s }`,
-		Opts().Symbol("arr", strArr()).Skip2ndPass(), "onetwothree")
-	expectRun(t, `for i, s in arr { out += s + i }`,
-		Opts().Symbol("arr", strArr()).Skip2ndPass(), "one0two1three2")
+	expectRun(t, `for i, s in arr { out += i }`, Opts().Symbol("arr", strArr()).Skip2ndPass(), 3)
+	expectRun(t, `for i, s in arr { out += s }`, Opts().Symbol("arr", strArr()).Skip2ndPass(), "onetwothree")
+	expectRun(t, `for i, s in arr { out += s + i }`, Opts().Symbol("arr", strArr()).Skip2ndPass(), "one0two1three2")
 }
 
 func TestLogical(t *testing.T) {
@@ -2548,7 +2540,7 @@ func TestBuiltin(t *testing.T) {
 				"abs": &value.UserFunction{
 					Name: "abs",
 					Value: func(a ...core.Object) (core.Object, error) {
-						v, _ := a[0].ToFloat64()
+						v, _ := a[0].AsFloat()
 						return &value.Float{Value: math.Abs(v)}, nil
 					},
 				},
@@ -2754,7 +2746,7 @@ func TestModuleBlockScopes(t *testing.T) {
 				"intn": &value.UserFunction{
 					Name: "abs",
 					Value: func(a ...core.Object) (core.Object, error) {
-						v, _ := a[0].ToInt64()
+						v, _ := a[0].AsInt()
 						return &value.Int{Value: rand.Int63n(v)}, nil
 					},
 				},

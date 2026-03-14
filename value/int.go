@@ -191,34 +191,30 @@ func (o *Int) Equals(x core.Object) bool {
 	return o.Value == t.Value
 }
 
-func (o *Int) ToString() (string, bool) {
+func (o *Int) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Int) ToInt() (int, bool) {
-	return int(o.Value), true
-}
-
-func (o *Int) ToInt64() (int64, bool) {
+func (o *Int) AsInt() (int64, bool) {
 	return o.Value, true
 }
 
-func (o *Int) ToFloat64() (float64, bool) {
+func (o *Int) AsFloat() (float64, bool) {
 	return float64(o.Value), true
 }
 
-func (o *Int) ToBool() (bool, bool) {
+func (o *Int) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Int) ToRune() (rune, bool) {
+func (o *Int) AsRune() (rune, bool) {
 	return rune(o.Value), true
 }
 
-func (o *Int) ToTime() (time.Time, bool) {
+func (o *Int) AsTime() (time.Time, bool) {
 	return time.Unix(o.Value, 0), true
 }
 
-func (o *Int) ToInterface() any {
+func (o *Int) Interface() any {
 	return o.Value
 }

@@ -92,7 +92,7 @@ func getPrintArgs(args ...core.Object) ([]any, error) {
 	l := 0
 	for _, arg := range args {
 		// TODO: shell we check if arg cannot be converted to string?
-		s, _ := arg.ToString()
+		s, _ := arg.AsString()
 		slen := len(s)
 		// make sure length does not exceed the limit
 		if l+slen > core.MaxStringLen {

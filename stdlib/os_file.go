@@ -63,7 +63,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
-					i1, ok := args[0].ToInt64()
+					i1, ok := args[0].AsInt()
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -81,7 +81,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 					if len(args) != 2 {
 						return nil, gse.ErrWrongNumArguments
 					}
-					i1, ok := args[0].ToInt64()
+					i1, ok := args[0].AsInt()
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -89,7 +89,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 							Found:    args[0].TypeName(),
 						}
 					}
-					i2, ok := args[1].ToInt()
+					i2, ok := args[1].AsInt()
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "second",
@@ -97,7 +97,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 							Found:    args[1].TypeName(),
 						}
 					}
-					res, err := file.Seek(i1, i2)
+					res, err := file.Seek(i1, int(i2))
 					if err != nil {
 						return wrapError(err), nil
 					}

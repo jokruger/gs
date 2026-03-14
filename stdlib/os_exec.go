@@ -43,7 +43,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
-					s1, ok := args[0].ToString()
+					s1, ok := args[0].AsString()
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",
@@ -62,7 +62,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
-					s1, ok := args[0].ToString()
+					s1, ok := args[0].AsString()
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",

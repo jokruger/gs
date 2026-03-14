@@ -56,10 +56,10 @@ func TestScript_Add(t *testing.T) {
 	c, err := s.Compile()
 	require.NoError(t, err)
 	require.NoError(t, c.Run())
-	require.Equal(t, "foo", c.Get("a").Value().ToInterface())
-	require.Equal(t, "foo", c.Get("b").Value().ToInterface())
-	require.Equal(t, int64(0), c.Get("c").Value().ToInterface())
-	require.Equal(t, int64(6), c.Get("d").Value().ToInterface())
+	require.Equal(t, "foo", c.Get("a").Value().Interface())
+	require.Equal(t, "foo", c.Get("b").Value().Interface())
+	require.Equal(t, int64(0), c.Get("c").Value().Interface())
+	require.Equal(t, int64(6), c.Get("d").Value().Interface())
 }
 
 func TestScript_Remove(t *testing.T) {
@@ -198,7 +198,7 @@ e := mod1.double(s)
 				ret core.Object,
 				err error,
 			) {
-				arg0, _ := args[0].ToInt64()
+				arg0, _ := args[0].AsInt()
 				ret = &value.Int{Value: arg0 * 2}
 				return
 			},
@@ -224,8 +224,8 @@ e := mod1.double(s)
 		_ = compiled.Set("c", cv)
 		err := compiled.Run()
 		require.NoError(t, err)
-		d = compiled.Get("d").Int()
-		e = compiled.Get("e").Int()
+		d = int(compiled.Get("d").Int())
+		e = int(compiled.Get("e").Int())
 		return
 	}
 
@@ -256,6 +256,10 @@ type Counter struct {
 	value int64
 }
 
+func (o *Counter) Interface() any {
+	return o.value
+}
+
 func (o *Counter) TypeName() string {
 	return "counter"
 }
@@ -264,7 +268,7 @@ func (o *Counter) String() string {
 	return fmt.Sprintf("Counter(%d)", o.value)
 }
 
-func (o *Counter) ToString() (string, bool) {
+func (o *Counter) AsString() (string, bool) {
 	return o.String(), true
 }
 
@@ -309,7 +313,7 @@ func (o *Counter) Call(_ ...core.Object) (core.Object, error) {
 	return &value.Int{Value: o.value}, nil
 }
 
-func (o *Counter) CanCall() bool {
+func (o *Counter) IsCallable() bool {
 	return true
 }
 
@@ -355,7 +359,7 @@ func TestScriptSourceModule(t *testing.T) {
 	scr.SetImports(mods)
 	c, err := scr.Run()
 	require.NoError(t, err)
-	require.Equal(t, int64(5), c.Get("out").Value().ToInterface())
+	require.Equal(t, int64(5), c.Get("out").Value().Interface())
 
 	// executing module function
 	scr = gs.NewScript([]byte(`fn := import("mod"); out := fn()`))
@@ -365,7 +369,7 @@ func TestScriptSourceModule(t *testing.T) {
 	scr.SetImports(mods)
 	c, err = scr.Run()
 	require.NoError(t, err)
-	require.Equal(t, int64(8), c.Get("out").Value().ToInterface())
+	require.Equal(t, int64(8), c.Get("out").Value().Interface())
 
 	scr = gs.NewScript([]byte(`out := import("mod")`))
 	mods = vm.NewModuleMap()
@@ -375,14 +379,14 @@ func TestScriptSourceModule(t *testing.T) {
 			"title": &value.UserFunction{
 				Name: "title",
 				Value: func(args ...core.Object) (core.Object, error) {
-					s, _ := args[0].ToString()
+					s, _ := args[0].AsString()
 					return &value.String{Value: strings.Title(s)}, nil
 				}},
 		})
 	scr.SetImports(mods)
 	c, err = scr.Run()
 	require.NoError(t, err)
-	require.Equal(t, "Foo", c.Get("out").Value().ToInterface())
+	require.Equal(t, "Foo", c.Get("out").Value().Interface())
 	scr.SetImports(nil)
 	_, err = scr.Run()
 	require.Error(t, err)
@@ -671,9 +675,9 @@ data["b"] = 2
 	err = clone.RunContext(context.Background())
 	require.NoError(t, err)
 
-	require.Equal(t, 1000, compiled.Get("count").Int())
+	require.Equal(t, int64(1000), compiled.Get("count").Int())
 	require.Equal(t, 1, len(compiled.Get("data").Map()))
 
-	require.Equal(t, 1001, clone.Get("count").Int())
+	require.Equal(t, int64(1001), clone.Get("count").Int())
 	require.Equal(t, 2, len(clone.Get("data").Map()))
 }

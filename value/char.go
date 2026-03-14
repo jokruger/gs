@@ -111,26 +111,22 @@ func (o *Char) Equals(x core.Object) bool {
 	return o.Value == t.Value
 }
 
-func (o *Char) ToString() (string, bool) {
+func (o *Char) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Char) ToInt() (int, bool) {
-	return int(o.Value), true
-}
-
-func (o *Char) ToInt64() (int64, bool) {
+func (o *Char) AsInt() (int64, bool) {
 	return int64(o.Value), true
 }
 
-func (o *Char) ToBool() (bool, bool) {
+func (o *Char) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Char) ToRune() (rune, bool) {
+func (o *Char) AsRune() (rune, bool) {
 	return o.Value, true
 }
 
-func (o *Char) ToInterface() any {
+func (o *Char) Interface() any {
 	return o.Value
 }

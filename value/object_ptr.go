@@ -27,10 +27,10 @@ func (o *ObjectPtr) Equals(x core.Object) bool {
 	return o == x
 }
 
-func (o *ObjectPtr) ToBool() (bool, bool) {
+func (o *ObjectPtr) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *ObjectPtr) ToInterface() any {
+func (o *ObjectPtr) Interface() any {
 	return o.Value
 }

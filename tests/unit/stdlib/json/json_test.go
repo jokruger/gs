@@ -103,7 +103,7 @@ func testJSONEncodeDecode(t *testing.T, v any) {
 	vj, err := gojson.Marshal(v)
 	require.NoError(t, err)
 
-	aj, err := gojson.Marshal(a.ToInterface())
+	aj, err := gojson.Marshal(a.Interface())
 	require.NoError(t, err)
 
 	require.Equal(t, vj, aj)

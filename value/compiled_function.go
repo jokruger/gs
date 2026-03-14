@@ -50,6 +50,6 @@ func (o *CompiledFunction) SourcePos(ip int) core.Pos {
 	return core.NoPos
 }
 
-func (o *CompiledFunction) CanCall() bool {
+func (o *CompiledFunction) IsCallable() bool {
 	return true
 }

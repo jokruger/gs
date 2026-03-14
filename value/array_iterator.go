@@ -42,6 +42,6 @@ func (i *ArrayIterator) Value() core.Object {
 	return i.v[i.i-1]
 }
 
-func (o *ArrayIterator) ToBool() (bool, bool) {
+func (o *ArrayIterator) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }

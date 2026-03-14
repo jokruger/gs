@@ -38,7 +38,7 @@ func (o *ImmutableMap) IsFalsy() bool {
 }
 
 func (o *ImmutableMap) IndexGet(index core.Object) (res core.Object, err error) {
-	strIdx, ok := index.ToString()
+	strIdx, ok := index.AsString()
 	if !ok {
 		err = gse.ErrInvalidIndexType
 		return
@@ -84,22 +84,22 @@ func (o *ImmutableMap) Iterate() core.Iterator {
 	}
 }
 
-func (o *ImmutableMap) CanIterate() bool {
+func (o *ImmutableMap) IsIterable() bool {
 	return true
 }
 
-func (o *ImmutableMap) ToString() (string, bool) {
+func (o *ImmutableMap) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *ImmutableMap) ToBool() (bool, bool) {
+func (o *ImmutableMap) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *ImmutableMap) ToInterface() any {
+func (o *ImmutableMap) Interface() any {
 	res := make(map[string]any)
 	for key, v := range o.Value {
-		res[key] = v.ToInterface()
+		res[key] = v.Interface()
 	}
 	return res
 }

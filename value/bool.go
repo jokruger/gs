@@ -44,28 +44,21 @@ func (o *Bool) GobEncode() (b []byte, err error) {
 	return
 }
 
-func (o *Bool) ToString() (string, bool) {
+func (o *Bool) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Bool) ToInt() (int, bool) {
+func (o *Bool) AsInt() (int64, bool) {
 	if o == TrueValue {
 		return 1, true
 	}
 	return 0, true
 }
 
-func (o *Bool) ToInt64() (int64, bool) {
-	if o == TrueValue {
-		return 1, true
-	}
-	return 0, true
-}
-
-func (o *Bool) ToBool() (bool, bool) {
+func (o *Bool) AsBool() (bool, bool) {
 	return o.value, true
 }
 
-func (o *Bool) ToInterface() any {
+func (o *Bool) Interface() any {
 	return o.value
 }

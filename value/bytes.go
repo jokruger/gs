@@ -73,22 +73,22 @@ func (o *Bytes) Iterate() core.Iterator {
 	}
 }
 
-func (o *Bytes) CanIterate() bool {
+func (o *Bytes) IsIterable() bool {
 	return true
 }
 
-func (o *Bytes) ToString() (string, bool) {
+func (o *Bytes) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Bytes) ToBool() (bool, bool) {
+func (o *Bytes) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Bytes) ToByteSlice() ([]byte, bool) {
+func (o *Bytes) AsByteSlice() ([]byte, bool) {
 	return o.Value, true
 }
 
-func (o *Bytes) ToInterface() any {
+func (o *Bytes) Interface() any {
 	return o.Value
 }

@@ -91,22 +91,22 @@ func (o *ImmutableArray) Iterate() core.Iterator {
 	}
 }
 
-func (o *ImmutableArray) CanIterate() bool {
+func (o *ImmutableArray) IsIterable() bool {
 	return true
 }
 
-func (o *ImmutableArray) ToString() (string, bool) {
+func (o *ImmutableArray) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *ImmutableArray) ToBool() (bool, bool) {
+func (o *ImmutableArray) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *ImmutableArray) ToInterface() any {
+func (o *ImmutableArray) Interface() any {
 	res := make([]any, len(o.Value))
 	for i, val := range o.Value {
-		res[i] = val.ToInterface()
+		res[i] = val.Interface()
 	}
 	return res
 }

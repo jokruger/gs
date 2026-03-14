@@ -13,8 +13,7 @@ type VariableTest struct {
 	Name        string
 	Value       any
 	ValueType   string
-	IntValue    int
-	Int64Value  int64
+	IntValue    int64
 	FloatValue  float64
 	CharValue   rune
 	BoolValue   bool
@@ -30,7 +29,6 @@ func TestVariable(t *testing.T) {
 			Value:       int64(1),
 			ValueType:   "int",
 			IntValue:    1,
-			Int64Value:  1,
 			FloatValue:  1.0,
 			CharValue:   rune(1),
 			BoolValue:   true,
@@ -51,7 +49,6 @@ func TestVariable(t *testing.T) {
 			Value:       true,
 			ValueType:   "bool",
 			IntValue:    1,
-			Int64Value:  1,
 			FloatValue:  0,
 			BoolValue:   true,
 			StringValue: "true",
@@ -71,10 +68,9 @@ func TestVariable(t *testing.T) {
 		require.NoError(t, err)
 
 		v := vm.NewVariable(tc.Name, o)
-		require.Equal(t, tc.Value, v.Value().ToInterface(), "Name: %s", tc.Name)
+		require.Equal(t, tc.Value, v.Value().Interface(), "Name: %s", tc.Name)
 		require.Equal(t, tc.ValueType, v.ValueType(), "Name: %s", tc.Name)
 		require.Equal(t, tc.IntValue, v.Int(), "Name: %s", tc.Name)
-		require.Equal(t, tc.Int64Value, v.Int64(), "Name: %s", tc.Name)
 		require.Equal(t, tc.FloatValue, v.Float(), "Name: %s", tc.Name)
 		require.Equal(t, tc.CharValue, v.Char(), "Name: %s", tc.Name)
 		require.Equal(t, tc.BoolValue, v.Bool(), "Name: %s", tc.Name)

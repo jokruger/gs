@@ -37,7 +37,7 @@ func (o *Error) Equals(x core.Object) bool {
 }
 
 func (o *Error) IndexGet(index core.Object) (res core.Object, err error) {
-	if strIdx, _ := index.ToString(); strIdx != "value" {
+	if strIdx, _ := index.AsString(); strIdx != "value" {
 		err = gse.ErrInvalidIndexOnError
 		return
 	}
@@ -45,14 +45,14 @@ func (o *Error) IndexGet(index core.Object) (res core.Object, err error) {
 	return
 }
 
-func (o *Error) ToString() (string, bool) {
+func (o *Error) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Error) ToBool() (bool, bool) {
+func (o *Error) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Error) ToInterface() any {
+func (o *Error) Interface() any {
 	return errors.New(o.String())
 }

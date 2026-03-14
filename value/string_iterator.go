@@ -42,6 +42,6 @@ func (i *StringIterator) Value() core.Object {
 	return &Char{Value: i.v[i.i-1]}
 }
 
-func (o *StringIterator) ToBool() (bool, bool) {
+func (o *StringIterator) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }

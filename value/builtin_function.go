@@ -28,6 +28,6 @@ func (o *BuiltinFunction) Call(args ...core.Object) (core.Object, error) {
 	return o.Value(args...)
 }
 
-func (o *BuiltinFunction) CanCall() bool {
+func (o *BuiltinFunction) IsCallable() bool {
 	return true
 }

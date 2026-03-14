@@ -49,7 +49,7 @@ func FuncAI64RI64(fn func(int64) int64) core.CallableFunction {
 			return nil, gse.ErrWrongNumArguments
 		}
 
-		i1, ok := args[0].ToInt64()
+		i1, ok := args[0].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -69,7 +69,7 @@ func FuncAI64R(fn func(int64)) core.CallableFunction {
 			return nil, gse.ErrWrongNumArguments
 		}
 
-		i1, ok := args[0].ToInt64()
+		i1, ok := args[0].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -213,7 +213,7 @@ func FuncAIRIs(fn func(int) []int) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		i1, ok := args[0].ToInt()
+		i1, ok := args[0].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -221,7 +221,7 @@ func FuncAIRIs(fn func(int) []int) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		res := fn(i1)
+		res := fn(int(i1))
 		arr := &value.Array{}
 		for _, v := range res {
 			arr.Value = append(arr.Value, &value.Int{Value: int64(v)})
@@ -237,7 +237,7 @@ func FuncAFRF(fn func(float64) float64) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		f1, ok := args[0].ToFloat64()
+		f1, ok := args[0].AsFloat()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -255,7 +255,7 @@ func FuncAIR(fn func(int)) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		i1, ok := args[0].ToInt()
+		i1, ok := args[0].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -263,7 +263,7 @@ func FuncAIR(fn func(int)) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		fn(i1)
+		fn(int(i1))
 		return value.UndefinedValue, nil
 	}
 }
@@ -275,7 +275,7 @@ func FuncAIRF(fn func(int) float64) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		i1, ok := args[0].ToInt()
+		i1, ok := args[0].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -283,7 +283,7 @@ func FuncAIRF(fn func(int) float64) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		return &value.Float{Value: fn(i1)}, nil
+		return &value.Float{Value: fn(int(i1))}, nil
 	}
 }
 
@@ -294,7 +294,7 @@ func FuncAFRI(fn func(float64) int) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		f1, ok := args[0].ToFloat64()
+		f1, ok := args[0].AsFloat()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -313,7 +313,7 @@ func FuncAFFRF(fn func(float64, float64) float64) core.CallableFunction {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		f1, ok := args[0].ToFloat64()
+		f1, ok := args[0].AsFloat()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -321,7 +321,7 @@ func FuncAFFRF(fn func(float64, float64) float64) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		f2, ok := args[1].ToFloat64()
+		f2, ok := args[1].AsFloat()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -340,7 +340,7 @@ func FuncAIFRF(fn func(int, float64) float64) core.CallableFunction {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		i1, ok := args[0].ToInt()
+		i1, ok := args[0].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -348,7 +348,7 @@ func FuncAIFRF(fn func(int, float64) float64) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		f2, ok := args[1].ToFloat64()
+		f2, ok := args[1].AsFloat()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -356,7 +356,7 @@ func FuncAIFRF(fn func(int, float64) float64) core.CallableFunction {
 				Found:    args[1].TypeName(),
 			}
 		}
-		return &value.Float{Value: fn(i1, f2)}, nil
+		return &value.Float{Value: fn(int(i1), f2)}, nil
 	}
 }
 
@@ -367,7 +367,7 @@ func FuncAFIRF(fn func(float64, int) float64) core.CallableFunction {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		f1, ok := args[0].ToFloat64()
+		f1, ok := args[0].AsFloat()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -375,7 +375,7 @@ func FuncAFIRF(fn func(float64, int) float64) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		i2, ok := args[1].ToInt()
+		i2, ok := args[1].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -383,7 +383,7 @@ func FuncAFIRF(fn func(float64, int) float64) core.CallableFunction {
 				Found:    args[1].TypeName(),
 			}
 		}
-		return &value.Float{Value: fn(f1, i2)}, nil
+		return &value.Float{Value: fn(f1, int(i2))}, nil
 	}
 }
 
@@ -394,7 +394,7 @@ func FuncAFIRB(fn func(float64, int) bool) core.CallableFunction {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		f1, ok := args[0].ToFloat64()
+		f1, ok := args[0].AsFloat()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -402,7 +402,7 @@ func FuncAFIRB(fn func(float64, int) bool) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		i2, ok := args[1].ToInt()
+		i2, ok := args[1].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -410,7 +410,7 @@ func FuncAFIRB(fn func(float64, int) bool) core.CallableFunction {
 				Found:    args[1].TypeName(),
 			}
 		}
-		if fn(f1, i2) {
+		if fn(f1, int(i2)) {
 			return value.TrueValue, nil
 		}
 		return value.FalseValue, nil
@@ -424,7 +424,7 @@ func FuncAFRB(fn func(float64) bool) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		f1, ok := args[0].ToFloat64()
+		f1, ok := args[0].AsFloat()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -447,7 +447,7 @@ func FuncASRS(fn func(string) string) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -470,7 +470,7 @@ func FuncASRSs(fn func(string) []string) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -498,7 +498,7 @@ func FuncASRSE(fn func(string) (string, error)) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -525,7 +525,7 @@ func FuncASRE(fn func(string) error) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -545,7 +545,7 @@ func FuncASSRE(fn func(string, string) error) core.CallableFunction {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -553,7 +553,7 @@ func FuncASSRE(fn func(string, string) error) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		s2, ok := args[1].ToString()
+		s2, ok := args[1].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -572,7 +572,7 @@ func FuncASSRSs(fn func(string, string) []string) core.CallableFunction {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -580,7 +580,7 @@ func FuncASSRSs(fn func(string, string) []string) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		s2, ok := args[1].ToString()
+		s2, ok := args[1].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -606,7 +606,7 @@ func FuncASSIRSs(fn func(string, string, int) []string) core.CallableFunction {
 		if len(args) != 3 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -614,7 +614,7 @@ func FuncASSIRSs(fn func(string, string, int) []string) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		s2, ok := args[1].ToString()
+		s2, ok := args[1].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -622,7 +622,7 @@ func FuncASSIRSs(fn func(string, string, int) []string) core.CallableFunction {
 				Found:    args[1].TypeName(),
 			}
 		}
-		i3, ok := args[2].ToInt()
+		i3, ok := args[2].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "third",
@@ -631,7 +631,7 @@ func FuncASSIRSs(fn func(string, string, int) []string) core.CallableFunction {
 			}
 		}
 		arr := &value.Array{}
-		for _, res := range fn(s1, s2, i3) {
+		for _, res := range fn(s1, s2, int(i3)) {
 			if len(res) > core.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
@@ -648,7 +648,7 @@ func FuncASSRI(fn func(string, string) int) core.CallableFunction {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -656,7 +656,7 @@ func FuncASSRI(fn func(string, string) int) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		s2, ok := args[1].ToString()
+		s2, ok := args[1].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -675,7 +675,7 @@ func FuncASSRS(fn func(string, string) string) core.CallableFunction {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -683,7 +683,7 @@ func FuncASSRS(fn func(string, string) string) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		s2, ok := args[1].ToString()
+		s2, ok := args[1].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -706,7 +706,7 @@ func FuncASSRB(fn func(string, string) bool) core.CallableFunction {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -714,7 +714,7 @@ func FuncASSRB(fn func(string, string) bool) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		s2, ok := args[1].ToString()
+		s2, ok := args[1].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -740,7 +740,7 @@ func FuncASsSRS(fn func([]string, string) string) core.CallableFunction {
 		switch arg0 := args[0].(type) {
 		case *value.Array:
 			for idx, a := range arg0.Value {
-				as, ok := a.ToString()
+				as, ok := a.AsString()
 				if !ok {
 					return nil, gse.ErrInvalidArgumentType{
 						Name:     fmt.Sprintf("first[%d]", idx),
@@ -752,7 +752,7 @@ func FuncASsSRS(fn func([]string, string) string) core.CallableFunction {
 			}
 		case *value.ImmutableArray:
 			for idx, a := range arg0.Value {
-				as, ok := a.ToString()
+				as, ok := a.AsString()
 				if !ok {
 					return nil, gse.ErrInvalidArgumentType{
 						Name:     fmt.Sprintf("first[%d]", idx),
@@ -769,7 +769,7 @@ func FuncASsSRS(fn func([]string, string) string) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		s2, ok := args[1].ToString()
+		s2, ok := args[1].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -792,7 +792,7 @@ func FuncASI64RE(fn func(string, int64) error) core.CallableFunction {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -800,7 +800,7 @@ func FuncASI64RE(fn func(string, int64) error) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		i2, ok := args[1].ToInt64()
+		i2, ok := args[1].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -819,7 +819,7 @@ func FuncAIIRE(fn func(int, int) error) core.CallableFunction {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		i1, ok := args[0].ToInt()
+		i1, ok := args[0].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -827,7 +827,7 @@ func FuncAIIRE(fn func(int, int) error) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		i2, ok := args[1].ToInt()
+		i2, ok := args[1].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -835,7 +835,7 @@ func FuncAIIRE(fn func(int, int) error) core.CallableFunction {
 				Found:    args[1].TypeName(),
 			}
 		}
-		return wrapError(fn(i1, i2)), nil
+		return wrapError(fn(int(i1), int(i2))), nil
 	}
 }
 
@@ -846,7 +846,7 @@ func FuncASIRS(fn func(string, int) string) core.CallableFunction {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -854,7 +854,7 @@ func FuncASIRS(fn func(string, int) string) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		i2, ok := args[1].ToInt()
+		i2, ok := args[1].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -862,7 +862,7 @@ func FuncASIRS(fn func(string, int) string) core.CallableFunction {
 				Found:    args[1].TypeName(),
 			}
 		}
-		s := fn(s1, i2)
+		s := fn(s1, int(i2))
 		if len(s) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
@@ -877,7 +877,7 @@ func FuncASIIRE(fn func(string, int, int) error) core.CallableFunction {
 		if len(args) != 3 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -885,7 +885,7 @@ func FuncASIIRE(fn func(string, int, int) error) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		i2, ok := args[1].ToInt()
+		i2, ok := args[1].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "second",
@@ -893,7 +893,7 @@ func FuncASIIRE(fn func(string, int, int) error) core.CallableFunction {
 				Found:    args[1].TypeName(),
 			}
 		}
-		i3, ok := args[2].ToInt()
+		i3, ok := args[2].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "third",
@@ -901,7 +901,7 @@ func FuncASIIRE(fn func(string, int, int) error) core.CallableFunction {
 				Found:    args[2].TypeName(),
 			}
 		}
-		return wrapError(fn(s1, i2, i3)), nil
+		return wrapError(fn(s1, int(i2), int(i3))), nil
 	}
 }
 
@@ -912,7 +912,7 @@ func FuncAYRIE(fn func([]byte) (int, error)) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		y1, ok := args[0].ToByteSlice()
+		y1, ok := args[0].AsByteSlice()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -935,7 +935,7 @@ func FuncAYRS(fn func([]byte) string) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		y1, ok := args[0].ToByteSlice()
+		y1, ok := args[0].AsByteSlice()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -955,7 +955,7 @@ func FuncASRIE(fn func(string) (int, error)) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -978,7 +978,7 @@ func FuncASRYE(fn func(string) ([]byte, error)) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		s1, ok := args[0].ToString()
+		s1, ok := args[0].AsString()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -1004,7 +1004,7 @@ func FuncAIRSsE(fn func(int) ([]string, error)) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		i1, ok := args[0].ToInt()
+		i1, ok := args[0].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -1012,7 +1012,7 @@ func FuncAIRSsE(fn func(int) ([]string, error)) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		res, err := fn(i1)
+		res, err := fn(int(i1))
 		if err != nil {
 			return wrapError(err), nil
 		}
@@ -1034,7 +1034,7 @@ func FuncAIRS(fn func(int) string) core.CallableFunction {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
 		}
-		i1, ok := args[0].ToInt()
+		i1, ok := args[0].AsInt()
 		if !ok {
 			return nil, gse.ErrInvalidArgumentType{
 				Name:     "first",
@@ -1042,7 +1042,7 @@ func FuncAIRS(fn func(int) string) core.CallableFunction {
 				Found:    args[0].TypeName(),
 			}
 		}
-		s := fn(i1)
+		s := fn(int(i1))
 		if len(s) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}

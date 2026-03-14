@@ -38,6 +38,6 @@ func (i *BytesIterator) Value() core.Object {
 	return &Int{Value: int64(i.v[i.i-1])}
 }
 
-func (o *BytesIterator) ToBool() (bool, bool) {
+func (o *BytesIterator) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }

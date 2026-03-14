@@ -209,7 +209,7 @@ func textREMatch(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -219,7 +219,7 @@ func textREMatch(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s2, ok := args[1].ToString()
+	s2, ok := args[1].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -251,7 +251,7 @@ func textREFind(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -267,7 +267,7 @@ func textREFind(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s2, ok := args[1].ToString()
+	s2, ok := args[1].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -301,7 +301,7 @@ func textREFind(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i3, ok := args[2].ToInt()
+	i3, ok := args[2].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "third",
@@ -310,7 +310,7 @@ func textREFind(args ...core.Object) (ret core.Object, err error) {
 		}
 		return
 	}
-	m := re.FindAllStringSubmatchIndex(s2, i3)
+	m := re.FindAllStringSubmatchIndex(s2, int(i3))
 	if m == nil {
 		ret = value.UndefinedValue
 		return
@@ -344,7 +344,7 @@ func textREReplace(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -354,7 +354,7 @@ func textREReplace(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s2, ok := args[1].ToString()
+	s2, ok := args[1].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -364,7 +364,7 @@ func textREReplace(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s3, ok := args[2].ToString()
+	s3, ok := args[2].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "third",
@@ -396,7 +396,7 @@ func textRESplit(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -406,7 +406,7 @@ func textRESplit(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s2, ok := args[1].ToString()
+	s2, ok := args[1].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -418,7 +418,9 @@ func textRESplit(args ...core.Object) (ret core.Object, err error) {
 
 	var i3 = -1
 	if numArgs > 2 {
-		i3, ok = args[2].ToInt()
+		var i3t int64
+		i3t, ok = args[2].AsInt()
+		i3 = int(i3t)
 		if !ok {
 			err = gse.ErrInvalidArgumentType{
 				Name:     "third",
@@ -451,7 +453,7 @@ func textRECompile(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -477,7 +479,7 @@ func textReplace(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -487,7 +489,7 @@ func textReplace(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s2, ok := args[1].ToString()
+	s2, ok := args[1].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -497,7 +499,7 @@ func textReplace(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s3, ok := args[2].ToString()
+	s3, ok := args[2].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "third",
@@ -507,7 +509,7 @@ func textReplace(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i4, ok := args[3].ToInt()
+	i4, ok := args[3].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "fourth",
@@ -517,7 +519,7 @@ func textReplace(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s, ok := doTextReplace(s1, s2, s3, i4)
+	s, ok := doTextReplace(s1, s2, s3, int(i4))
 	if !ok {
 		err = gse.ErrStringLimit
 		return
@@ -535,7 +537,7 @@ func textSubstring(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -545,7 +547,7 @@ func textSubstring(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i2, ok := args[1].ToInt()
+	i2, ok := args[1].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -558,7 +560,9 @@ func textSubstring(args ...core.Object) (ret core.Object, err error) {
 	strlen := len(s1)
 	i3 := strlen
 	if argslen == 3 {
-		i3, ok = args[2].ToInt()
+		var i3t int64
+		i3t, ok = args[2].AsInt()
+		i3 = int(i3t)
 		if !ok {
 			err = gse.ErrInvalidArgumentType{
 				Name:     "third",
@@ -569,15 +573,15 @@ func textSubstring(args ...core.Object) (ret core.Object, err error) {
 		}
 	}
 
-	if i2 > i3 {
+	if int(i2) > i3 {
 		err = gse.ErrInvalidIndexType
 		return
 	}
 
 	if i2 < 0 {
 		i2 = 0
-	} else if i2 > strlen {
-		i2 = strlen
+	} else if int(i2) > strlen {
+		i2 = int64(strlen)
 	}
 
 	if i3 < 0 {
@@ -598,7 +602,7 @@ func textPadLeft(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -608,7 +612,7 @@ func textPadLeft(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i2, ok := args[1].ToInt()
+	i2, ok := args[1].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -618,19 +622,19 @@ func textPadLeft(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	if i2 > core.MaxStringLen {
+	if int(i2) > core.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 
 	sLen := len(s1)
-	if sLen >= i2 {
+	if sLen >= int(i2) {
 		ret = &value.String{Value: s1}
 		return
 	}
 
 	s3 := " "
 	if argslen == 3 {
-		s3, ok = args[2].ToString()
+		s3, ok = args[2].AsString()
 		if !ok {
 			err = gse.ErrInvalidArgumentType{
 				Name:     "third",
@@ -647,9 +651,9 @@ func textPadLeft(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	padCount := ((i2 - padStrLen) / padStrLen) + 1
+	padCount := ((int(i2) - padStrLen) / padStrLen) + 1
 	retStr := strings.Repeat(s3, padCount) + s1
-	ret = &value.String{Value: retStr[len(retStr)-i2:]}
+	ret = &value.String{Value: retStr[len(retStr)-int(i2):]}
 
 	return
 }
@@ -661,7 +665,7 @@ func textPadRight(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -671,7 +675,7 @@ func textPadRight(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i2, ok := args[1].ToInt()
+	i2, ok := args[1].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -681,19 +685,19 @@ func textPadRight(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	if i2 > core.MaxStringLen {
+	if int(i2) > core.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 
 	sLen := len(s1)
-	if sLen >= i2 {
+	if sLen >= int(i2) {
 		ret = &value.String{Value: s1}
 		return
 	}
 
 	s3 := " "
 	if argslen == 3 {
-		s3, ok = args[2].ToString()
+		s3, ok = args[2].AsString()
 		if !ok {
 			err = gse.ErrInvalidArgumentType{
 				Name:     "third",
@@ -710,7 +714,7 @@ func textPadRight(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	padCount := ((i2 - padStrLen) / padStrLen) + 1
+	padCount := ((int(i2) - padStrLen) / padStrLen) + 1
 	retStr := s1 + strings.Repeat(s3, padCount)
 	ret = &value.String{Value: retStr[:i2]}
 
@@ -722,7 +726,7 @@ func textRepeat(args ...core.Object) (ret core.Object, err error) {
 		return nil, gse.ErrWrongNumArguments
 	}
 
-	s1, ok := args[0].ToString()
+	s1, ok := args[0].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -731,7 +735,7 @@ func textRepeat(args ...core.Object) (ret core.Object, err error) {
 		}
 	}
 
-	i2, ok := args[1].ToInt()
+	i2, ok := args[1].AsInt()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -740,11 +744,11 @@ func textRepeat(args ...core.Object) (ret core.Object, err error) {
 		}
 	}
 
-	if len(s1)*i2 > core.MaxStringLen {
+	if len(s1)*int(i2) > core.MaxStringLen {
 		return nil, gse.ErrStringLimit
 	}
 
-	return &value.String{Value: strings.Repeat(s1, i2)}, nil
+	return &value.String{Value: strings.Repeat(s1, int(i2))}, nil
 }
 
 func textJoin(args ...core.Object) (ret core.Object, err error) {
@@ -757,7 +761,7 @@ func textJoin(args ...core.Object) (ret core.Object, err error) {
 	switch arg0 := args[0].(type) {
 	case *value.Array:
 		for idx, a := range arg0.Value {
-			as, ok := a.ToString()
+			as, ok := a.AsString()
 			if !ok {
 				return nil, gse.ErrInvalidArgumentType{
 					Name:     fmt.Sprintf("first[%d]", idx),
@@ -770,7 +774,7 @@ func textJoin(args ...core.Object) (ret core.Object, err error) {
 		}
 	case *value.ImmutableArray:
 		for idx, a := range arg0.Value {
-			as, ok := a.ToString()
+			as, ok := a.AsString()
 			if !ok {
 				return nil, gse.ErrInvalidArgumentType{
 					Name:     fmt.Sprintf("first[%d]", idx),
@@ -789,7 +793,7 @@ func textJoin(args ...core.Object) (ret core.Object, err error) {
 		}
 	}
 
-	s2, ok := args[1].ToString()
+	s2, ok := args[1].AsString()
 	if !ok {
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -847,7 +851,7 @@ func textFormatFloat(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	s2, ok := args[1].ToString()
+	s2, ok := args[1].AsString()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -857,7 +861,7 @@ func textFormatFloat(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i3, ok := args[2].ToInt()
+	i3, ok := args[2].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "third",
@@ -867,7 +871,7 @@ func textFormatFloat(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i4, ok := args[3].ToInt()
+	i4, ok := args[3].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "fourth",
@@ -877,7 +881,7 @@ func textFormatFloat(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	ret = &value.String{Value: strconv.FormatFloat(f1.Value, s2[0], i3, i4)}
+	ret = &value.String{Value: strconv.FormatFloat(f1.Value, s2[0], int(i3), int(i4))}
 
 	return
 }
@@ -898,7 +902,7 @@ func textFormatInt(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i2, ok := args[1].ToInt()
+	i2, ok := args[1].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -908,7 +912,7 @@ func textFormatInt(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	ret = &value.String{Value: strconv.FormatInt(i1.Value, i2)}
+	ret = &value.String{Value: strconv.FormatInt(i1.Value, int(i2))}
 
 	return
 }
@@ -960,7 +964,7 @@ func textParseFloat(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i2, ok := args[1].ToInt()
+	i2, ok := args[1].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -970,7 +974,7 @@ func textParseFloat(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	parsed, err := strconv.ParseFloat(s1.Value, i2)
+	parsed, err := strconv.ParseFloat(s1.Value, int(i2))
 	if err != nil {
 		ret = wrapError(err)
 		return
@@ -997,7 +1001,7 @@ func textParseInt(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i2, ok := args[1].ToInt()
+	i2, ok := args[1].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "second",
@@ -1007,7 +1011,7 @@ func textParseInt(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	i3, ok := args[2].ToInt()
+	i3, ok := args[2].AsInt()
 	if !ok {
 		err = gse.ErrInvalidArgumentType{
 			Name:     "third",
@@ -1017,7 +1021,7 @@ func textParseInt(args ...core.Object) (ret core.Object, err error) {
 		return
 	}
 
-	parsed, err := strconv.ParseInt(s1.Value, i2, i3)
+	parsed, err := strconv.ParseInt(s1.Value, int(i2), int(i3))
 	if err != nil {
 		ret = wrapError(err)
 		return

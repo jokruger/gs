@@ -198,7 +198,7 @@ func builtinIsCallable(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if args[0].CanCall() {
+	if args[0].IsCallable() {
 		return value.TrueValue, nil
 	}
 	return value.FalseValue, nil
@@ -208,7 +208,7 @@ func builtinIsIterable(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if args[0].CanIterate() {
+	if args[0].IsIterable() {
 		return value.TrueValue, nil
 	}
 	return value.FalseValue, nil
@@ -345,7 +345,7 @@ func builtinString(args ...core.Object) (core.Object, error) {
 	if _, ok := args[0].(*value.String); ok {
 		return args[0], nil
 	}
-	v, ok := args[0].ToString()
+	v, ok := args[0].AsString()
 	if ok {
 		if len(v) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
@@ -366,7 +366,7 @@ func builtinInt(args ...core.Object) (core.Object, error) {
 	if _, ok := args[0].(*value.Int); ok {
 		return args[0], nil
 	}
-	v, ok := args[0].ToInt64()
+	v, ok := args[0].AsInt()
 	if ok {
 		return &value.Int{Value: v}, nil
 	}
@@ -384,7 +384,7 @@ func builtinFloat(args ...core.Object) (core.Object, error) {
 	if _, ok := args[0].(*value.Float); ok {
 		return args[0], nil
 	}
-	v, ok := args[0].ToFloat64()
+	v, ok := args[0].AsFloat()
 	if ok {
 		return &value.Float{Value: v}, nil
 	}
@@ -401,7 +401,7 @@ func builtinBool(args ...core.Object) (core.Object, error) {
 	if _, ok := args[0].(*value.Bool); ok {
 		return args[0], nil
 	}
-	v, ok := args[0].ToBool()
+	v, ok := args[0].AsBool()
 	if ok {
 		if v {
 			return value.TrueValue, nil
@@ -419,7 +419,7 @@ func builtinChar(args ...core.Object) (core.Object, error) {
 	if _, ok := args[0].(*value.Char); ok {
 		return args[0], nil
 	}
-	v, ok := args[0].ToRune()
+	v, ok := args[0].AsRune()
 	if ok {
 		return &value.Char{Value: v}, nil
 	}
@@ -442,7 +442,7 @@ func builtinBytes(args ...core.Object) (core.Object, error) {
 		}
 		return &value.Bytes{Value: make([]byte, int(n.Value))}, nil
 	}
-	v, ok := args[0].ToByteSlice()
+	v, ok := args[0].AsByteSlice()
 	if ok {
 		if len(v) > core.MaxBytesLen {
 			return nil, gse.ErrBytesLimit
@@ -463,7 +463,7 @@ func builtinTime(args ...core.Object) (core.Object, error) {
 	if _, ok := args[0].(*value.Time); ok {
 		return args[0], nil
 	}
-	v, ok := args[0].ToTime()
+	v, ok := args[0].AsTime()
 	if ok {
 		return &value.Time{Value: v}, nil
 	}

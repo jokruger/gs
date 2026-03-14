@@ -81,26 +81,22 @@ func (o *Time) Equals(x core.Object) bool {
 	return o.Value.Equal(t.Value)
 }
 
-func (o *Time) ToString() (string, bool) {
+func (o *Time) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Time) ToBool() (bool, bool) {
+func (o *Time) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Time) ToInt() (int, bool) {
-	return int(o.Value.Unix()), false
-}
-
-func (o *Time) ToInt64() (int64, bool) {
+func (o *Time) AsInt() (int64, bool) {
 	return o.Value.Unix(), false
 }
 
-func (o *Time) ToTime() (time.Time, bool) {
+func (o *Time) AsTime() (time.Time, bool) {
 	return o.Value, true
 }
 
-func (o *Time) ToInterface() any {
+func (o *Time) Interface() any {
 	return o.Value
 }

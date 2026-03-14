@@ -544,7 +544,7 @@ func (v *VM) run() {
 			v.ip += 2
 
 			val := v.stack[v.sp-1-numArgs]
-			if !val.CanCall() {
+			if !val.IsCallable() {
 				v.err = fmt.Errorf("not callable: %s", val.TypeName())
 				return
 			}
@@ -828,7 +828,7 @@ func (v *VM) run() {
 			var iterator core.Object
 			dst := v.stack[v.sp-1]
 			v.sp--
-			if !dst.CanIterate() {
+			if !dst.IsIterable() {
 				v.err = fmt.Errorf("not iterable: %s", dst.TypeName())
 				return
 			}

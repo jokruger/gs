@@ -49,7 +49,7 @@ func makeOSProcess(proc *os.Process) *value.ImmutableMap {
 					if len(args) != 1 {
 						return nil, gse.ErrWrongNumArguments
 					}
-					i1, ok := args[0].ToInt64()
+					i1, ok := args[0].AsInt()
 					if !ok {
 						return nil, gse.ErrInvalidArgumentType{
 							Name:     "first",

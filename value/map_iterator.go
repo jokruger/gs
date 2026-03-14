@@ -45,6 +45,6 @@ func (i *MapIterator) Value() core.Object {
 	return i.v[k]
 }
 
-func (o *MapIterator) ToBool() (bool, bool) {
+func (o *MapIterator) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }

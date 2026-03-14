@@ -169,7 +169,7 @@ func RunREPL(modules *vm.ModuleMap, in io.Reader, out io.Writer) {
 				if _, isUndefined := arg.(*value.Undefined); isUndefined {
 					printArgs = append(printArgs, "<undefined>")
 				} else {
-					s, _ := arg.ToString()
+					s, _ := arg.AsString()
 					printArgs = append(printArgs, s)
 				}
 			}

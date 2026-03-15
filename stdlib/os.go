@@ -58,7 +58,7 @@ var osModule = map[string]core.Object{
 	}, // chown(name string, uid int, gid int) => error
 	"clearenv": &value.BuiltinFunction{
 		Name:  "clearenv",
-		Value: FuncAR(os.Clearenv),
+		Value: osClearenv,
 	}, // clearenv()
 	"environ": &value.BuiltinFunction{
 		Name:  "environ",
@@ -202,6 +202,14 @@ var osModule = map[string]core.Object{
 		Name:  "read_file",
 		Value: osReadFile,
 	}, // readfile(name) => array(byte)/error
+}
+
+func osClearenv(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	os.Clearenv()
+	return value.UndefinedValue, nil
 }
 
 func osReadFile(args ...core.Object) (ret core.Object, err error) {

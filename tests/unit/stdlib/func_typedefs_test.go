@@ -22,15 +22,6 @@ func TestFuncAIR(t *testing.T) {
 	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
-func TestFuncAR(t *testing.T) {
-	uf := stdlib.FuncAR(func() {})
-	ret, err := funcCall(uf)
-	require.NoError(t, err)
-	require.Equal(t, value.UndefinedValue, ret)
-	_, err = funcCall(uf, value.TrueValue)
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
 func TestFuncARI(t *testing.T) {
 	uf := stdlib.FuncARI(func() int { return 10 })
 	ret, err := funcCall(uf)

@@ -8,17 +8,6 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-// FuncAR transform a function of 'func()' signature into CallableFunc type.
-func FuncAR(fn func()) core.NativeFunc {
-	return func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
-		}
-		fn()
-		return value.UndefinedValue, nil
-	}
-}
-
 // FuncARI transform a function of 'func() int' signature into CallableFunc
 // type.
 func FuncARI(fn func() int) core.NativeFunc {

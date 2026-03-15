@@ -502,15 +502,6 @@ func TestFuncAI64R(t *testing.T) {
 	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
-func TestFuncARI64(t *testing.T) {
-	uf := stdlib.FuncARI64(func() int64 { return 55 })
-	ret, err := funcCall(uf)
-	require.NoError(t, err)
-	require.Equal(t, &value.Int{Value: 55}, ret)
-	_, err = funcCall(uf, &value.Int{Value: 55})
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
 func TestFuncASsSRS(t *testing.T) {
 	uf := stdlib.FuncASsSRS(func(a []string, b string) string {
 		return strings.Join(a, b)

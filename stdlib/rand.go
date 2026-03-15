@@ -11,7 +11,7 @@ import (
 var randModule = map[string]core.Object{
 	"int": &value.BuiltinFunction{
 		Name:  "int",
-		Value: FuncARI64(rand.Int63),
+		Value: randInt63,
 	},
 	"float": &value.BuiltinFunction{
 		Name:  "float",
@@ -79,12 +79,26 @@ var randModule = map[string]core.Object{
 	},
 }
 
+func randInt63(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	return &value.Int{Value: rand.Int63()}, nil
+}
+
 func randRand(r *rand.Rand) *value.ImmutableMap {
+	rInt63 := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 0 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		return &value.Int{Value: r.Int63()}, nil
+	}
+
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
 			"int": &value.BuiltinFunction{
 				Name:  "int",
-				Value: FuncARI64(r.Int63),
+				Value: rInt63,
 			},
 			"float": &value.BuiltinFunction{
 				Name:  "float",

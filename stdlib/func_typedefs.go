@@ -8,17 +8,6 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-// FuncARI64 transform a function of 'func() int64' signature into CallableFunc
-// type.
-func FuncARI64(fn func() int64) core.NativeFunc {
-	return func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
-		}
-		return &value.Int{Value: fn()}, nil
-	}
-}
-
 // FuncAI64RI64 transform a function of 'func(int64) int64' signature into
 // CallableFunc type.
 func FuncAI64RI64(fn func(int64) int64) core.NativeFunc {

@@ -102,6 +102,51 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 		return &value.Int{Value: int64(res)}, nil
 	}
 
+	fileWriteString := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 1 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		s1, ok := args[0].AsString()
+		if !ok {
+			return nil, gse.ErrInvalidArgumentType{
+				Name:     "first",
+				Expected: "string(compatible)",
+				Found:    args[0].TypeName(),
+			}
+		}
+		res, err := file.WriteString(s1)
+		if err != nil {
+			return wrapError(err), nil
+		}
+		return &value.Int{Value: int64(res)}, nil
+	}
+
+	fileReaddirnames := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 1 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		i1, ok := args[0].AsInt()
+		if !ok {
+			return nil, gse.ErrInvalidArgumentType{
+				Name:     "first",
+				Expected: "int(compatible)",
+				Found:    args[0].TypeName(),
+			}
+		}
+		res, err := file.Readdirnames(int(i1))
+		if err != nil {
+			return wrapError(err), nil
+		}
+		arr := &value.Array{}
+		for _, r := range res {
+			if len(r) > core.MaxStringLen {
+				return nil, gse.ErrStringLimit
+			}
+			arr.Value = append(arr.Value, &value.String{Value: r})
+		}
+		return arr, nil
+	}
+
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
 			// chdir() => true/error
@@ -127,7 +172,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 			// readdirnames(n int) => array(string)/error
 			"readdirnames": &value.BuiltinFunction{
 				Name:  "readdirnames",
-				Value: FuncAIRSsE(file.Readdirnames),
+				Value: fileReaddirnames,
 			}, //
 			// sync() => error
 			"sync": &value.BuiltinFunction{
@@ -142,7 +187,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 			// write(string) => int/error
 			"write_string": &value.BuiltinFunction{
 				Name:  "write_string",
-				Value: FuncASRIE(file.WriteString),
+				Value: fileWriteString,
 			}, //
 			// read(bytes) => int/error
 			"read": &value.BuiltinFunction{

@@ -163,7 +163,7 @@ var textModule = map[string]core.Object{
 	}, // trim_suffix(s, suffix) => string
 	"atoi": &value.BuiltinFunction{
 		Name:  "atoi",
-		Value: FuncASRIE(strconv.Atoi),
+		Value: strconvAtoi,
 	}, // atoi(str) => int/error
 	"format_bool": &value.BuiltinFunction{
 		Name:  "format_bool",
@@ -179,7 +179,7 @@ var textModule = map[string]core.Object{
 	}, // format_int(i, base) => string
 	"itoa": &value.BuiltinFunction{
 		Name:  "itoa",
-		Value: FuncAIRS(strconv.Itoa),
+		Value: strconvItoa,
 	}, // itoa(i) => string
 	"parse_bool": &value.BuiltinFunction{
 		Name:  "parse_bool",
@@ -201,6 +201,44 @@ var textModule = map[string]core.Object{
 		Name:  "unquote",
 		Value: strconvUnquote,
 	}, // unquote(str) => string/error
+}
+
+func strconvItoa(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 1 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	i1, ok := args[0].AsInt()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "int(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s := strconv.Itoa(int(i1))
+	if len(s) > core.MaxStringLen {
+		return nil, gse.ErrStringLimit
+	}
+	return &value.String{Value: s}, nil
+}
+
+func strconvAtoi(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 1 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	res, err := strconv.Atoi(s1)
+	if err != nil {
+		return wrapError(err), nil
+	}
+	return &value.Int{Value: int64(res)}, nil
 }
 
 func stringsTrimSuffix(args ...core.Object) (core.Object, error) {

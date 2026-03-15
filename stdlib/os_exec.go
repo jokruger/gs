@@ -12,32 +12,32 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
 			// combined_output() => bytes/error
-			"combined_output": &value.UserFunction{
+			"combined_output": &value.BuiltinFunction{
 				Name:  "combined_output",
 				Value: FuncARYE(cmd.CombinedOutput),
 			},
 			// output() => bytes/error
-			"output": &value.UserFunction{
+			"output": &value.BuiltinFunction{
 				Name:  "output",
 				Value: FuncARYE(cmd.Output),
 			}, //
 			// run() => error
-			"run": &value.UserFunction{
+			"run": &value.BuiltinFunction{
 				Name:  "run",
 				Value: FuncARE(cmd.Run),
 			}, //
 			// start() => error
-			"start": &value.UserFunction{
+			"start": &value.BuiltinFunction{
 				Name:  "start",
 				Value: FuncARE(cmd.Start),
 			}, //
 			// wait() => error
-			"wait": &value.UserFunction{
+			"wait": &value.BuiltinFunction{
 				Name:  "wait",
 				Value: FuncARE(cmd.Wait),
 			}, //
 			// set_path(path string)
-			"set_path": &value.UserFunction{
+			"set_path": &value.BuiltinFunction{
 				Name: "set_path",
 				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 1 {
@@ -56,7 +56,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
 				},
 			},
 			// set_dir(dir string)
-			"set_dir": &value.UserFunction{
+			"set_dir": &value.BuiltinFunction{
 				Name: "set_dir",
 				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 1 {
@@ -75,7 +75,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
 				},
 			},
 			// set_env(env array(string))
-			"set_env": &value.UserFunction{
+			"set_env": &value.BuiltinFunction{
 				Name: "set_env",
 				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 1 {
@@ -107,7 +107,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
 				},
 			},
 			// process() => imap(process)
-			"process": &value.UserFunction{
+			"process": &value.BuiltinFunction{
 				Name: "process",
 				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 0 {

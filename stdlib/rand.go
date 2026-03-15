@@ -9,35 +9,35 @@ import (
 )
 
 var randModule = map[string]core.Object{
-	"int": &value.UserFunction{
+	"int": &value.BuiltinFunction{
 		Name:  "int",
 		Value: FuncARI64(rand.Int63),
 	},
-	"float": &value.UserFunction{
+	"float": &value.BuiltinFunction{
 		Name:  "float",
 		Value: FuncARF(rand.Float64),
 	},
-	"intn": &value.UserFunction{
+	"intn": &value.BuiltinFunction{
 		Name:  "intn",
 		Value: FuncAI64RI64(rand.Int63n),
 	},
-	"exp_float": &value.UserFunction{
+	"exp_float": &value.BuiltinFunction{
 		Name:  "exp_float",
 		Value: FuncARF(rand.ExpFloat64),
 	},
-	"norm_float": &value.UserFunction{
+	"norm_float": &value.BuiltinFunction{
 		Name:  "norm_float",
 		Value: FuncARF(rand.NormFloat64),
 	},
-	"perm": &value.UserFunction{
+	"perm": &value.BuiltinFunction{
 		Name:  "perm",
 		Value: FuncAIRIs(rand.Perm),
 	},
-	"seed": &value.UserFunction{
+	"seed": &value.BuiltinFunction{
 		Name:  "seed",
 		Value: FuncAI64R(rand.Seed),
 	},
-	"read": &value.UserFunction{
+	"read": &value.BuiltinFunction{
 		Name: "read",
 		Value: func(args ...core.Object) (ret core.Object, err error) {
 			if len(args) != 1 {
@@ -59,7 +59,7 @@ var randModule = map[string]core.Object{
 			return &value.Int{Value: int64(res)}, nil
 		},
 	},
-	"rand": &value.UserFunction{
+	"rand": &value.BuiltinFunction{
 		Name: "rand",
 		Value: func(args ...core.Object) (core.Object, error) {
 			if len(args) != 1 {
@@ -82,35 +82,35 @@ var randModule = map[string]core.Object{
 func randRand(r *rand.Rand) *value.ImmutableMap {
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
-			"int": &value.UserFunction{
+			"int": &value.BuiltinFunction{
 				Name:  "int",
 				Value: FuncARI64(r.Int63),
 			},
-			"float": &value.UserFunction{
+			"float": &value.BuiltinFunction{
 				Name:  "float",
 				Value: FuncARF(r.Float64),
 			},
-			"intn": &value.UserFunction{
+			"intn": &value.BuiltinFunction{
 				Name:  "intn",
 				Value: FuncAI64RI64(r.Int63n),
 			},
-			"exp_float": &value.UserFunction{
+			"exp_float": &value.BuiltinFunction{
 				Name:  "exp_float",
 				Value: FuncARF(r.ExpFloat64),
 			},
-			"norm_float": &value.UserFunction{
+			"norm_float": &value.BuiltinFunction{
 				Name:  "norm_float",
 				Value: FuncARF(r.NormFloat64),
 			},
-			"perm": &value.UserFunction{
+			"perm": &value.BuiltinFunction{
 				Name:  "perm",
 				Value: FuncAIRIs(r.Perm),
 			},
-			"seed": &value.UserFunction{
+			"seed": &value.BuiltinFunction{
 				Name:  "seed",
 				Value: FuncAI64R(r.Seed),
 			},
-			"read": &value.UserFunction{
+			"read": &value.BuiltinFunction{
 				Name: "read",
 				Value: func(args ...core.Object) (
 					ret core.Object,

@@ -121,7 +121,7 @@ func (c callres) call(funcName string, args ...any) callres {
 				"function not found: %s", funcName)}
 		}
 
-		f, ok := m.(*value.UserFunction)
+		f, ok := m.(*value.BuiltinFunction)
 		if !ok {
 			return callres{t: c.t, e: fmt.Errorf(
 				"non-callable: %s", funcName)}
@@ -129,7 +129,7 @@ func (c callres) call(funcName string, args ...any) callres {
 
 		res, err := f.Value(oargs...)
 		return callres{t: c.t, o: res, e: err}
-	case *value.UserFunction:
+	case *value.BuiltinFunction:
 		res, err := o.Value(oargs...)
 		return callres{t: c.t, o: res, e: err}
 	case *value.ImmutableMap:
@@ -138,7 +138,7 @@ func (c callres) call(funcName string, args ...any) callres {
 			return callres{t: c.t, e: fmt.Errorf("function not found: %s", funcName)}
 		}
 
-		f, ok := m.(*value.UserFunction)
+		f, ok := m.(*value.BuiltinFunction)
 		if !ok {
 			return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
 		}

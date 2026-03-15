@@ -43,162 +43,162 @@ var osModule = map[string]core.Object{
 	"seek_set":            &value.Int{Value: int64(io.SeekStart)},
 	"seek_cur":            &value.Int{Value: int64(io.SeekCurrent)},
 	"seek_end":            &value.Int{Value: int64(io.SeekEnd)},
-	"args": &value.UserFunction{
+	"args": &value.BuiltinFunction{
 		Name:  "args",
 		Value: osArgs,
 	}, // args() => array(string)
-	"chdir": &value.UserFunction{
+	"chdir": &value.BuiltinFunction{
 		Name:  "chdir",
 		Value: FuncASRE(os.Chdir),
 	}, // chdir(dir string) => error
 	"chmod": osFuncASFmRE("chmod", os.Chmod), // chmod(name string, mode int) => error
-	"chown": &value.UserFunction{
+	"chown": &value.BuiltinFunction{
 		Name:  "chown",
 		Value: FuncASIIRE(os.Chown),
 	}, // chown(name string, uid int, gid int) => error
-	"clearenv": &value.UserFunction{
+	"clearenv": &value.BuiltinFunction{
 		Name:  "clearenv",
 		Value: FuncAR(os.Clearenv),
 	}, // clearenv()
-	"environ": &value.UserFunction{
+	"environ": &value.BuiltinFunction{
 		Name:  "environ",
 		Value: FuncARSs(os.Environ),
 	}, // environ() => array(string)
-	"exit": &value.UserFunction{
+	"exit": &value.BuiltinFunction{
 		Name:  "exit",
 		Value: FuncAIR(os.Exit),
 	}, // exit(code int)
-	"expand_env": &value.UserFunction{
+	"expand_env": &value.BuiltinFunction{
 		Name:  "expand_env",
 		Value: osExpandEnv,
 	}, // expand_env(s string) => string
-	"getegid": &value.UserFunction{
+	"getegid": &value.BuiltinFunction{
 		Name:  "getegid",
 		Value: FuncARI(os.Getegid),
 	}, // getegid() => int
-	"getenv": &value.UserFunction{
+	"getenv": &value.BuiltinFunction{
 		Name:  "getenv",
 		Value: FuncASRS(os.Getenv),
 	}, // getenv(s string) => string
-	"geteuid": &value.UserFunction{
+	"geteuid": &value.BuiltinFunction{
 		Name:  "geteuid",
 		Value: FuncARI(os.Geteuid),
 	}, // geteuid() => int
-	"getgid": &value.UserFunction{
+	"getgid": &value.BuiltinFunction{
 		Name:  "getgid",
 		Value: FuncARI(os.Getgid),
 	}, // getgid() => int
-	"getgroups": &value.UserFunction{
+	"getgroups": &value.BuiltinFunction{
 		Name:  "getgroups",
 		Value: FuncARIsE(os.Getgroups),
 	}, // getgroups() => array(string)/error
-	"getpagesize": &value.UserFunction{
+	"getpagesize": &value.BuiltinFunction{
 		Name:  "getpagesize",
 		Value: FuncARI(os.Getpagesize),
 	}, // getpagesize() => int
-	"getpid": &value.UserFunction{
+	"getpid": &value.BuiltinFunction{
 		Name:  "getpid",
 		Value: FuncARI(os.Getpid),
 	}, // getpid() => int
-	"getppid": &value.UserFunction{
+	"getppid": &value.BuiltinFunction{
 		Name:  "getppid",
 		Value: FuncARI(os.Getppid),
 	}, // getppid() => int
-	"getuid": &value.UserFunction{
+	"getuid": &value.BuiltinFunction{
 		Name:  "getuid",
 		Value: FuncARI(os.Getuid),
 	}, // getuid() => int
-	"getwd": &value.UserFunction{
+	"getwd": &value.BuiltinFunction{
 		Name:  "getwd",
 		Value: FuncARSE(os.Getwd),
 	}, // getwd() => string/error
-	"hostname": &value.UserFunction{
+	"hostname": &value.BuiltinFunction{
 		Name:  "hostname",
 		Value: FuncARSE(os.Hostname),
 	}, // hostname() => string/error
-	"lchown": &value.UserFunction{
+	"lchown": &value.BuiltinFunction{
 		Name:  "lchown",
 		Value: FuncASIIRE(os.Lchown),
 	}, // lchown(name string, uid int, gid int) => error
-	"link": &value.UserFunction{
+	"link": &value.BuiltinFunction{
 		Name:  "link",
 		Value: FuncASSRE(os.Link),
 	}, // link(oldname string, newname string) => error
-	"lookup_env": &value.UserFunction{
+	"lookup_env": &value.BuiltinFunction{
 		Name:  "lookup_env",
 		Value: osLookupEnv,
 	}, // lookup_env(key string) => string/false
 	"mkdir":     osFuncASFmRE("mkdir", os.Mkdir),        // mkdir(name string, perm int) => error
 	"mkdir_all": osFuncASFmRE("mkdir_all", os.MkdirAll), // mkdir_all(name string, perm int) => error
-	"readlink": &value.UserFunction{
+	"readlink": &value.BuiltinFunction{
 		Name:  "readlink",
 		Value: FuncASRSE(os.Readlink),
 	}, // readlink(name string) => string/error
-	"remove": &value.UserFunction{
+	"remove": &value.BuiltinFunction{
 		Name:  "remove",
 		Value: FuncASRE(os.Remove),
 	}, // remove(name string) => error
-	"remove_all": &value.UserFunction{
+	"remove_all": &value.BuiltinFunction{
 		Name:  "remove_all",
 		Value: FuncASRE(os.RemoveAll),
 	}, // remove_all(name string) => error
-	"rename": &value.UserFunction{
+	"rename": &value.BuiltinFunction{
 		Name:  "rename",
 		Value: FuncASSRE(os.Rename),
 	}, // rename(oldpath string, newpath string) => error
-	"setenv": &value.UserFunction{
+	"setenv": &value.BuiltinFunction{
 		Name:  "setenv",
 		Value: FuncASSRE(os.Setenv),
 	}, // setenv(key string, value string) => error
-	"symlink": &value.UserFunction{
+	"symlink": &value.BuiltinFunction{
 		Name:  "symlink",
 		Value: FuncASSRE(os.Symlink),
 	}, // symlink(oldname string newname string) => error
-	"temp_dir": &value.UserFunction{
+	"temp_dir": &value.BuiltinFunction{
 		Name:  "temp_dir",
 		Value: FuncARS(os.TempDir),
 	}, // temp_dir() => string
-	"truncate": &value.UserFunction{
+	"truncate": &value.BuiltinFunction{
 		Name:  "truncate",
 		Value: FuncASI64RE(os.Truncate),
 	}, // truncate(name string, size int) => error
-	"unsetenv": &value.UserFunction{
+	"unsetenv": &value.BuiltinFunction{
 		Name:  "unsetenv",
 		Value: FuncASRE(os.Unsetenv),
 	}, // unsetenv(key string) => error
-	"create": &value.UserFunction{
+	"create": &value.BuiltinFunction{
 		Name:  "create",
 		Value: osCreate,
 	}, // create(name string) => imap(file)/error
-	"open": &value.UserFunction{
+	"open": &value.BuiltinFunction{
 		Name:  "open",
 		Value: osOpen,
 	}, // open(name string) => imap(file)/error
-	"open_file": &value.UserFunction{
+	"open_file": &value.BuiltinFunction{
 		Name:  "open_file",
 		Value: osOpenFile,
 	}, // open_file(name string, flag int, perm int) => imap(file)/error
-	"find_process": &value.UserFunction{
+	"find_process": &value.BuiltinFunction{
 		Name:  "find_process",
 		Value: osFindProcess,
 	}, // find_process(pid int) => imap(process)/error
-	"start_process": &value.UserFunction{
+	"start_process": &value.BuiltinFunction{
 		Name:  "start_process",
 		Value: osStartProcess,
 	}, // start_process(name string, argv array(string), dir string, env array(string)) => imap(process)/error
-	"exec_look_path": &value.UserFunction{
+	"exec_look_path": &value.BuiltinFunction{
 		Name:  "exec_look_path",
 		Value: FuncASRSE(exec.LookPath),
 	}, // exec_look_path(file) => string/error
-	"exec": &value.UserFunction{
+	"exec": &value.BuiltinFunction{
 		Name:  "exec",
 		Value: osExec,
 	}, // exec(name, args...) => command
-	"stat": &value.UserFunction{
+	"stat": &value.BuiltinFunction{
 		Name:  "stat",
 		Value: osStat,
 	}, // stat(name) => imap(fileinfo)/error
-	"read_file": &value.UserFunction{
+	"read_file": &value.BuiltinFunction{
 		Name:  "read_file",
 		Value: osReadFile,
 	}, // readfile(name) => array(byte)/error
@@ -348,8 +348,8 @@ func osArgs(args ...core.Object) (core.Object, error) {
 func osFuncASFmRE(
 	name string,
 	fn func(string, os.FileMode) error,
-) *value.UserFunction {
-	return &value.UserFunction{
+) *value.BuiltinFunction {
+	return &value.BuiltinFunction{
 		Name: name,
 		Value: func(args ...core.Object) (core.Object, error) {
 			if len(args) != 2 {

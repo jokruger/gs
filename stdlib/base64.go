@@ -8,28 +8,28 @@ import (
 )
 
 var base64Module = map[string]core.Object{
-	"encode": &value.UserFunction{
+	"encode": &value.BuiltinFunction{
 		Value: FuncAYRS(base64.StdEncoding.EncodeToString),
 	},
-	"decode": &value.UserFunction{
+	"decode": &value.BuiltinFunction{
 		Value: FuncASRYE(base64.StdEncoding.DecodeString),
 	},
-	"raw_encode": &value.UserFunction{
+	"raw_encode": &value.BuiltinFunction{
 		Value: FuncAYRS(base64.RawStdEncoding.EncodeToString),
 	},
-	"raw_decode": &value.UserFunction{
+	"raw_decode": &value.BuiltinFunction{
 		Value: FuncASRYE(base64.RawStdEncoding.DecodeString),
 	},
-	"url_encode": &value.UserFunction{
+	"url_encode": &value.BuiltinFunction{
 		Value: FuncAYRS(base64.URLEncoding.EncodeToString),
 	},
-	"url_decode": &value.UserFunction{
+	"url_decode": &value.BuiltinFunction{
 		Value: FuncASRYE(base64.URLEncoding.DecodeString),
 	},
-	"raw_url_encode": &value.UserFunction{
+	"raw_url_encode": &value.BuiltinFunction{
 		Value: FuncAYRS(base64.RawURLEncoding.EncodeToString),
 	},
-	"raw_url_decode": &value.UserFunction{
+	"raw_url_decode": &value.BuiltinFunction{
 		Value: FuncASRYE(base64.RawURLEncoding.DecodeString),
 	},
 }

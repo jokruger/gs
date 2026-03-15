@@ -1071,15 +1071,15 @@ export func() {
 
 func TestVMErrorUnwrap(t *testing.T) {
 	userErr := errors.New("user runtime error")
-	userFunc := func(err error) *value.UserFunction {
-		return &value.UserFunction{Name: "user_func", Value: func(args ...core.Object) (core.Object, error) {
+	userFunc := func(err error) *value.BuiltinFunction {
+		return &value.BuiltinFunction{Name: "user_func", Value: func(args ...core.Object) (core.Object, error) {
 			return nil, err
 		}}
 	}
 	userModule := func(err error) *vm.Module {
 		return &vm.Module{
 			Attrs: map[string]core.Object{
-				"afunction": &value.UserFunction{
+				"afunction": &value.BuiltinFunction{
 					Name: "afunction",
 					Value: func(a ...core.Object) (core.Object, error) {
 						return nil, err
@@ -2537,7 +2537,7 @@ func TestBuiltin(t *testing.T) {
 	m := Opts().Module("math",
 		&vm.Module{
 			Attrs: map[string]core.Object{
-				"abs": &value.UserFunction{
+				"abs": &value.BuiltinFunction{
 					Name: "abs",
 					Value: func(a ...core.Object) (core.Object, error) {
 						v, _ := a[0].AsFloat()
@@ -2743,7 +2743,7 @@ func TestModuleBlockScopes(t *testing.T) {
 	m := Opts().Module("rand",
 		&vm.Module{
 			Attrs: map[string]core.Object{
-				"intn": &value.UserFunction{
+				"intn": &value.BuiltinFunction{
 					Name: "abs",
 					Value: func(a ...core.Object) (core.Object, error) {
 						v, _ := a[0].AsInt()

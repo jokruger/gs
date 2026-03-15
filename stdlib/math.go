@@ -33,215 +33,215 @@ var mathModule = map[string]core.Object{
 	"minInt32":               &value.Int{Value: math.MinInt32},
 	"maxInt64":               &value.Int{Value: math.MaxInt64},
 	"minInt64":               &value.Int{Value: math.MinInt64},
-	"abs": &value.UserFunction{
+	"abs": &value.BuiltinFunction{
 		Name:  "abs",
 		Value: FuncAFRF(math.Abs),
 	},
-	"acos": &value.UserFunction{
+	"acos": &value.BuiltinFunction{
 		Name:  "acos",
 		Value: FuncAFRF(math.Acos),
 	},
-	"acosh": &value.UserFunction{
+	"acosh": &value.BuiltinFunction{
 		Name:  "acosh",
 		Value: FuncAFRF(math.Acosh),
 	},
-	"asin": &value.UserFunction{
+	"asin": &value.BuiltinFunction{
 		Name:  "asin",
 		Value: FuncAFRF(math.Asin),
 	},
-	"asinh": &value.UserFunction{
+	"asinh": &value.BuiltinFunction{
 		Name:  "asinh",
 		Value: FuncAFRF(math.Asinh),
 	},
-	"atan": &value.UserFunction{
+	"atan": &value.BuiltinFunction{
 		Name:  "atan",
 		Value: FuncAFRF(math.Atan),
 	},
-	"atan2": &value.UserFunction{
+	"atan2": &value.BuiltinFunction{
 		Name:  "atan2",
 		Value: FuncAFFRF(math.Atan2),
 	},
-	"atanh": &value.UserFunction{
+	"atanh": &value.BuiltinFunction{
 		Name:  "atanh",
 		Value: FuncAFRF(math.Atanh),
 	},
-	"cbrt": &value.UserFunction{
+	"cbrt": &value.BuiltinFunction{
 		Name:  "cbrt",
 		Value: FuncAFRF(math.Cbrt),
 	},
-	"ceil": &value.UserFunction{
+	"ceil": &value.BuiltinFunction{
 		Name:  "ceil",
 		Value: FuncAFRF(math.Ceil),
 	},
-	"copysign": &value.UserFunction{
+	"copysign": &value.BuiltinFunction{
 		Name:  "copysign",
 		Value: FuncAFFRF(math.Copysign),
 	},
-	"cos": &value.UserFunction{
+	"cos": &value.BuiltinFunction{
 		Name:  "cos",
 		Value: FuncAFRF(math.Cos),
 	},
-	"cosh": &value.UserFunction{
+	"cosh": &value.BuiltinFunction{
 		Name:  "cosh",
 		Value: FuncAFRF(math.Cosh),
 	},
-	"dim": &value.UserFunction{
+	"dim": &value.BuiltinFunction{
 		Name:  "dim",
 		Value: FuncAFFRF(math.Dim),
 	},
-	"erf": &value.UserFunction{
+	"erf": &value.BuiltinFunction{
 		Name:  "erf",
 		Value: FuncAFRF(math.Erf),
 	},
-	"erfc": &value.UserFunction{
+	"erfc": &value.BuiltinFunction{
 		Name:  "erfc",
 		Value: FuncAFRF(math.Erfc),
 	},
-	"exp": &value.UserFunction{
+	"exp": &value.BuiltinFunction{
 		Name:  "exp",
 		Value: FuncAFRF(math.Exp),
 	},
-	"exp2": &value.UserFunction{
+	"exp2": &value.BuiltinFunction{
 		Name:  "exp2",
 		Value: FuncAFRF(math.Exp2),
 	},
-	"expm1": &value.UserFunction{
+	"expm1": &value.BuiltinFunction{
 		Name:  "expm1",
 		Value: FuncAFRF(math.Expm1),
 	},
-	"floor": &value.UserFunction{
+	"floor": &value.BuiltinFunction{
 		Name:  "floor",
 		Value: FuncAFRF(math.Floor),
 	},
-	"gamma": &value.UserFunction{
+	"gamma": &value.BuiltinFunction{
 		Name:  "gamma",
 		Value: FuncAFRF(math.Gamma),
 	},
-	"hypot": &value.UserFunction{
+	"hypot": &value.BuiltinFunction{
 		Name:  "hypot",
 		Value: FuncAFFRF(math.Hypot),
 	},
-	"ilogb": &value.UserFunction{
+	"ilogb": &value.BuiltinFunction{
 		Name:  "ilogb",
 		Value: FuncAFRI(math.Ilogb),
 	},
-	"inf": &value.UserFunction{
+	"inf": &value.BuiltinFunction{
 		Name:  "inf",
 		Value: FuncAIRF(math.Inf),
 	},
-	"is_inf": &value.UserFunction{
+	"is_inf": &value.BuiltinFunction{
 		Name:  "is_inf",
 		Value: FuncAFIRB(math.IsInf),
 	},
-	"is_nan": &value.UserFunction{
+	"is_nan": &value.BuiltinFunction{
 		Name:  "is_nan",
 		Value: FuncAFRB(math.IsNaN),
 	},
-	"j0": &value.UserFunction{
+	"j0": &value.BuiltinFunction{
 		Name:  "j0",
 		Value: FuncAFRF(math.J0),
 	},
-	"j1": &value.UserFunction{
+	"j1": &value.BuiltinFunction{
 		Name:  "j1",
 		Value: FuncAFRF(math.J1),
 	},
-	"jn": &value.UserFunction{
+	"jn": &value.BuiltinFunction{
 		Name:  "jn",
 		Value: FuncAIFRF(math.Jn),
 	},
-	"ldexp": &value.UserFunction{
+	"ldexp": &value.BuiltinFunction{
 		Name:  "ldexp",
 		Value: FuncAFIRF(math.Ldexp),
 	},
-	"log": &value.UserFunction{
+	"log": &value.BuiltinFunction{
 		Name:  "log",
 		Value: FuncAFRF(math.Log),
 	},
-	"log10": &value.UserFunction{
+	"log10": &value.BuiltinFunction{
 		Name:  "log10",
 		Value: FuncAFRF(math.Log10),
 	},
-	"log1p": &value.UserFunction{
+	"log1p": &value.BuiltinFunction{
 		Name:  "log1p",
 		Value: FuncAFRF(math.Log1p),
 	},
-	"log2": &value.UserFunction{
+	"log2": &value.BuiltinFunction{
 		Name:  "log2",
 		Value: FuncAFRF(math.Log2),
 	},
-	"logb": &value.UserFunction{
+	"logb": &value.BuiltinFunction{
 		Name:  "logb",
 		Value: FuncAFRF(math.Logb),
 	},
-	"max": &value.UserFunction{
+	"max": &value.BuiltinFunction{
 		Name:  "max",
 		Value: FuncAFFRF(math.Max),
 	},
-	"min": &value.UserFunction{
+	"min": &value.BuiltinFunction{
 		Name:  "min",
 		Value: FuncAFFRF(math.Min),
 	},
-	"mod": &value.UserFunction{
+	"mod": &value.BuiltinFunction{
 		Name:  "mod",
 		Value: FuncAFFRF(math.Mod),
 	},
-	"nan": &value.UserFunction{
+	"nan": &value.BuiltinFunction{
 		Name:  "nan",
 		Value: FuncARF(math.NaN),
 	},
-	"nextafter": &value.UserFunction{
+	"nextafter": &value.BuiltinFunction{
 		Name:  "nextafter",
 		Value: FuncAFFRF(math.Nextafter),
 	},
-	"pow": &value.UserFunction{
+	"pow": &value.BuiltinFunction{
 		Name:  "pow",
 		Value: FuncAFFRF(math.Pow),
 	},
-	"pow10": &value.UserFunction{
+	"pow10": &value.BuiltinFunction{
 		Name:  "pow10",
 		Value: FuncAIRF(math.Pow10),
 	},
-	"remainder": &value.UserFunction{
+	"remainder": &value.BuiltinFunction{
 		Name:  "remainder",
 		Value: FuncAFFRF(math.Remainder),
 	},
-	"signbit": &value.UserFunction{
+	"signbit": &value.BuiltinFunction{
 		Name:  "signbit",
 		Value: FuncAFRB(math.Signbit),
 	},
-	"sin": &value.UserFunction{
+	"sin": &value.BuiltinFunction{
 		Name:  "sin",
 		Value: FuncAFRF(math.Sin),
 	},
-	"sinh": &value.UserFunction{
+	"sinh": &value.BuiltinFunction{
 		Name:  "sinh",
 		Value: FuncAFRF(math.Sinh),
 	},
-	"sqrt": &value.UserFunction{
+	"sqrt": &value.BuiltinFunction{
 		Name:  "sqrt",
 		Value: FuncAFRF(math.Sqrt),
 	},
-	"tan": &value.UserFunction{
+	"tan": &value.BuiltinFunction{
 		Name:  "tan",
 		Value: FuncAFRF(math.Tan),
 	},
-	"tanh": &value.UserFunction{
+	"tanh": &value.BuiltinFunction{
 		Name:  "tanh",
 		Value: FuncAFRF(math.Tanh),
 	},
-	"trunc": &value.UserFunction{
+	"trunc": &value.BuiltinFunction{
 		Name:  "trunc",
 		Value: FuncAFRF(math.Trunc),
 	},
-	"y0": &value.UserFunction{
+	"y0": &value.BuiltinFunction{
 		Name:  "y0",
 		Value: FuncAFRF(math.Y0),
 	},
-	"y1": &value.UserFunction{
+	"y1": &value.BuiltinFunction{
 		Name:  "y1",
 		Value: FuncAFRF(math.Y1),
 	},
-	"yn": &value.UserFunction{
+	"yn": &value.BuiltinFunction{
 		Name:  "yn",
 		Value: FuncAIFRF(math.Yn),
 	},

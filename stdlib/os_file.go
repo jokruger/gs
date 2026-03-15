@@ -12,52 +12,52 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
 			// chdir() => true/error
-			"chdir": &value.UserFunction{
+			"chdir": &value.BuiltinFunction{
 				Name:  "chdir",
 				Value: FuncARE(file.Chdir),
 			}, //
 			// chown(uid int, gid int) => true/error
-			"chown": &value.UserFunction{
+			"chown": &value.BuiltinFunction{
 				Name:  "chown",
 				Value: FuncAIIRE(file.Chown),
 			}, //
 			// close() => error
-			"close": &value.UserFunction{
+			"close": &value.BuiltinFunction{
 				Name:  "close",
 				Value: FuncARE(file.Close),
 			}, //
 			// name() => string
-			"name": &value.UserFunction{
+			"name": &value.BuiltinFunction{
 				Name:  "name",
 				Value: FuncARS(file.Name),
 			}, //
 			// readdirnames(n int) => array(string)/error
-			"readdirnames": &value.UserFunction{
+			"readdirnames": &value.BuiltinFunction{
 				Name:  "readdirnames",
 				Value: FuncAIRSsE(file.Readdirnames),
 			}, //
 			// sync() => error
-			"sync": &value.UserFunction{
+			"sync": &value.BuiltinFunction{
 				Name:  "sync",
 				Value: FuncARE(file.Sync),
 			}, //
 			// write(bytes) => int/error
-			"write": &value.UserFunction{
+			"write": &value.BuiltinFunction{
 				Name:  "write",
 				Value: FuncAYRIE(file.Write),
 			}, //
 			// write(string) => int/error
-			"write_string": &value.UserFunction{
+			"write_string": &value.BuiltinFunction{
 				Name:  "write_string",
 				Value: FuncASRIE(file.WriteString),
 			}, //
 			// read(bytes) => int/error
-			"read": &value.UserFunction{
+			"read": &value.BuiltinFunction{
 				Name:  "read",
 				Value: FuncAYRIE(file.Read),
 			}, //
 			// chmod(mode int) => error
-			"chmod": &value.UserFunction{
+			"chmod": &value.BuiltinFunction{
 				Name: "chmod",
 				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 1 {
@@ -75,7 +75,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 				},
 			},
 			// seek(offset int, whence int) => int/error
-			"seek": &value.UserFunction{
+			"seek": &value.BuiltinFunction{
 				Name: "seek",
 				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 2 {
@@ -105,7 +105,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 				},
 			},
 			// stat() => imap(fileinfo)/error
-			"stat": &value.UserFunction{
+			"stat": &value.BuiltinFunction{
 				Name: "stat",
 				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 0 {

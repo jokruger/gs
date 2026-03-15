@@ -13,191 +13,191 @@ import (
 )
 
 var textModule = map[string]core.Object{
-	"re_match": &value.UserFunction{
+	"re_match": &value.BuiltinFunction{
 		Name:  "re_match",
 		Value: textREMatch,
 	}, // re_match(pattern, text) => bool/error
-	"re_find": &value.UserFunction{
+	"re_find": &value.BuiltinFunction{
 		Name:  "re_find",
 		Value: textREFind,
 	}, // re_find(pattern, text, count) => [[{text:,begin:,end:}]]/undefined
-	"re_replace": &value.UserFunction{
+	"re_replace": &value.BuiltinFunction{
 		Name:  "re_replace",
 		Value: textREReplace,
 	}, // re_replace(pattern, text, repl) => string/error
-	"re_split": &value.UserFunction{
+	"re_split": &value.BuiltinFunction{
 		Name:  "re_split",
 		Value: textRESplit,
 	}, // re_split(pattern, text, count) => [string]/error
-	"re_compile": &value.UserFunction{
+	"re_compile": &value.BuiltinFunction{
 		Name:  "re_compile",
 		Value: textRECompile,
 	}, // re_compile(pattern) => Regexp/error
-	"compare": &value.UserFunction{
+	"compare": &value.BuiltinFunction{
 		Name:  "compare",
 		Value: FuncASSRI(strings.Compare),
 	}, // compare(a, b) => int
-	"contains": &value.UserFunction{
+	"contains": &value.BuiltinFunction{
 		Name:  "contains",
 		Value: FuncASSRB(strings.Contains),
 	}, // contains(s, substr) => bool
-	"contains_any": &value.UserFunction{
+	"contains_any": &value.BuiltinFunction{
 		Name:  "contains_any",
 		Value: FuncASSRB(strings.ContainsAny),
 	}, // contains_any(s, chars) => bool
-	"count": &value.UserFunction{
+	"count": &value.BuiltinFunction{
 		Name:  "count",
 		Value: FuncASSRI(strings.Count),
 	}, // count(s, substr) => int
-	"equal_fold": &value.UserFunction{
+	"equal_fold": &value.BuiltinFunction{
 		Name:  "equal_fold",
 		Value: FuncASSRB(strings.EqualFold),
 	}, // "equal_fold(s, t) => bool
-	"fields": &value.UserFunction{
+	"fields": &value.BuiltinFunction{
 		Name:  "fields",
 		Value: FuncASRSs(strings.Fields),
 	}, // fields(s) => [string]
-	"has_prefix": &value.UserFunction{
+	"has_prefix": &value.BuiltinFunction{
 		Name:  "has_prefix",
 		Value: FuncASSRB(strings.HasPrefix),
 	}, // has_prefix(s, prefix) => bool
-	"has_suffix": &value.UserFunction{
+	"has_suffix": &value.BuiltinFunction{
 		Name:  "has_suffix",
 		Value: FuncASSRB(strings.HasSuffix),
 	}, // has_suffix(s, suffix) => bool
-	"index": &value.UserFunction{
+	"index": &value.BuiltinFunction{
 		Name:  "index",
 		Value: FuncASSRI(strings.Index),
 	}, // index(s, substr) => int
-	"index_any": &value.UserFunction{
+	"index_any": &value.BuiltinFunction{
 		Name:  "index_any",
 		Value: FuncASSRI(strings.IndexAny),
 	}, // index_any(s, chars) => int
-	"join": &value.UserFunction{
+	"join": &value.BuiltinFunction{
 		Name:  "join",
 		Value: textJoin,
 	}, // join(arr, sep) => string
-	"last_index": &value.UserFunction{
+	"last_index": &value.BuiltinFunction{
 		Name:  "last_index",
 		Value: FuncASSRI(strings.LastIndex),
 	}, // last_index(s, substr) => int
-	"last_index_any": &value.UserFunction{
+	"last_index_any": &value.BuiltinFunction{
 		Name:  "last_index_any",
 		Value: FuncASSRI(strings.LastIndexAny),
 	}, // last_index_any(s, chars) => int
-	"repeat": &value.UserFunction{
+	"repeat": &value.BuiltinFunction{
 		Name:  "repeat",
 		Value: textRepeat,
 	}, // repeat(s, count) => string
-	"replace": &value.UserFunction{
+	"replace": &value.BuiltinFunction{
 		Name:  "replace",
 		Value: textReplace,
 	}, // replace(s, old, new, n) => string
-	"substr": &value.UserFunction{
+	"substr": &value.BuiltinFunction{
 		Name:  "substr",
 		Value: textSubstring,
 	}, // substr(s, lower, upper) => string
-	"split": &value.UserFunction{
+	"split": &value.BuiltinFunction{
 		Name:  "split",
 		Value: FuncASSRSs(strings.Split),
 	}, // split(s, sep) => [string]
-	"split_after": &value.UserFunction{
+	"split_after": &value.BuiltinFunction{
 		Name:  "split_after",
 		Value: FuncASSRSs(strings.SplitAfter),
 	}, // split_after(s, sep) => [string]
-	"split_after_n": &value.UserFunction{
+	"split_after_n": &value.BuiltinFunction{
 		Name:  "split_after_n",
 		Value: FuncASSIRSs(strings.SplitAfterN),
 	}, // split_after_n(s, sep, n) => [string]
-	"split_n": &value.UserFunction{
+	"split_n": &value.BuiltinFunction{
 		Name:  "split_n",
 		Value: FuncASSIRSs(strings.SplitN),
 	}, // split_n(s, sep, n) => [string]
-	"title": &value.UserFunction{
+	"title": &value.BuiltinFunction{
 		Name:  "title",
 		Value: FuncASRS(strings.Title),
 	}, // title(s) => string
-	"to_lower": &value.UserFunction{
+	"to_lower": &value.BuiltinFunction{
 		Name:  "to_lower",
 		Value: FuncASRS(strings.ToLower),
 	}, // to_lower(s) => string
-	"to_title": &value.UserFunction{
+	"to_title": &value.BuiltinFunction{
 		Name:  "to_title",
 		Value: FuncASRS(strings.ToTitle),
 	}, // to_title(s) => string
-	"to_upper": &value.UserFunction{
+	"to_upper": &value.BuiltinFunction{
 		Name:  "to_upper",
 		Value: FuncASRS(strings.ToUpper),
 	}, // to_upper(s) => string
-	"pad_left": &value.UserFunction{
+	"pad_left": &value.BuiltinFunction{
 		Name:  "pad_left",
 		Value: textPadLeft,
 	}, // pad_left(s, pad_len, pad_with) => string
-	"pad_right": &value.UserFunction{
+	"pad_right": &value.BuiltinFunction{
 		Name:  "pad_right",
 		Value: textPadRight,
 	}, // pad_right(s, pad_len, pad_with) => string
-	"trim": &value.UserFunction{
+	"trim": &value.BuiltinFunction{
 		Name:  "trim",
 		Value: FuncASSRS(strings.Trim),
 	}, // trim(s, cutset) => string
-	"trim_left": &value.UserFunction{
+	"trim_left": &value.BuiltinFunction{
 		Name:  "trim_left",
 		Value: FuncASSRS(strings.TrimLeft),
 	}, // trim_left(s, cutset) => string
-	"trim_prefix": &value.UserFunction{
+	"trim_prefix": &value.BuiltinFunction{
 		Name:  "trim_prefix",
 		Value: FuncASSRS(strings.TrimPrefix),
 	}, // trim_prefix(s, prefix) => string
-	"trim_right": &value.UserFunction{
+	"trim_right": &value.BuiltinFunction{
 		Name:  "trim_right",
 		Value: FuncASSRS(strings.TrimRight),
 	}, // trim_right(s, cutset) => string
-	"trim_space": &value.UserFunction{
+	"trim_space": &value.BuiltinFunction{
 		Name:  "trim_space",
 		Value: FuncASRS(strings.TrimSpace),
 	}, // trim_space(s) => string
-	"trim_suffix": &value.UserFunction{
+	"trim_suffix": &value.BuiltinFunction{
 		Name:  "trim_suffix",
 		Value: FuncASSRS(strings.TrimSuffix),
 	}, // trim_suffix(s, suffix) => string
-	"atoi": &value.UserFunction{
+	"atoi": &value.BuiltinFunction{
 		Name:  "atoi",
 		Value: FuncASRIE(strconv.Atoi),
 	}, // atoi(str) => int/error
-	"format_bool": &value.UserFunction{
+	"format_bool": &value.BuiltinFunction{
 		Name:  "format_bool",
 		Value: textFormatBool,
 	}, // format_bool(b) => string
-	"format_float": &value.UserFunction{
+	"format_float": &value.BuiltinFunction{
 		Name:  "format_float",
 		Value: textFormatFloat,
 	}, // format_float(f, fmt, prec, bits) => string
-	"format_int": &value.UserFunction{
+	"format_int": &value.BuiltinFunction{
 		Name:  "format_int",
 		Value: textFormatInt,
 	}, // format_int(i, base) => string
-	"itoa": &value.UserFunction{
+	"itoa": &value.BuiltinFunction{
 		Name:  "itoa",
 		Value: FuncAIRS(strconv.Itoa),
 	}, // itoa(i) => string
-	"parse_bool": &value.UserFunction{
+	"parse_bool": &value.BuiltinFunction{
 		Name:  "parse_bool",
 		Value: textParseBool,
 	}, // parse_bool(str) => bool/error
-	"parse_float": &value.UserFunction{
+	"parse_float": &value.BuiltinFunction{
 		Name:  "parse_float",
 		Value: textParseFloat,
 	}, // parse_float(str, bits) => float/error
-	"parse_int": &value.UserFunction{
+	"parse_int": &value.BuiltinFunction{
 		Name:  "parse_int",
 		Value: textParseInt,
 	}, // parse_int(str, base, bits) => int/error
-	"quote": &value.UserFunction{
+	"quote": &value.BuiltinFunction{
 		Name:  "quote",
 		Value: FuncASRS(strconv.Quote),
 	}, // quote(str) => string
-	"unquote": &value.UserFunction{
+	"unquote": &value.BuiltinFunction{
 		Name:  "unquote",
 		Value: FuncASRSE(strconv.Unquote),
 	}, // unquote(str) => string/error

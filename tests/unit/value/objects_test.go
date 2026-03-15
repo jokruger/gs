@@ -32,8 +32,6 @@ func TestObject_TypeName(t *testing.T) {
 	require.Equal(t, "map-iterator", o.TypeName())
 	o = &value.BuiltinFunction{Name: "fn"}
 	require.Equal(t, "builtin-function:fn", o.TypeName())
-	o = &value.UserFunction{Name: "fn"}
-	require.Equal(t, "user-function:fn", o.TypeName())
 	o = &value.CompiledFunction{}
 	require.Equal(t, "compiled-function", o.TypeName())
 	o = &value.Undefined{}

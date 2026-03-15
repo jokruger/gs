@@ -12,7 +12,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
 			// match(text) => bool
-			"match": &value.UserFunction{
+			"match": &value.BuiltinFunction{
 				Value: func(args ...core.Object) (
 					ret core.Object,
 					err error,
@@ -44,7 +44,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 
 			// find(text) 			=> array(array({text:,begin:,end:}))/undefined
 			// find(text, maxCount) => array(array({text:,begin:,end:}))/undefined
-			"find": &value.UserFunction{
+			"find": &value.BuiltinFunction{
 				Value: func(args ...core.Object) (
 					ret core.Object,
 					err error,
@@ -138,7 +138,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 			},
 
 			// replace(src, repl) => string
-			"replace": &value.UserFunction{
+			"replace": &value.BuiltinFunction{
 				Value: func(args ...core.Object) (
 					ret core.Object,
 					err error,
@@ -181,7 +181,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 
 			// split(text) 			 => array(string)
 			// split(text, maxCount) => array(string)
-			"split": &value.UserFunction{
+			"split": &value.BuiltinFunction{
 				Value: func(args ...core.Object) (
 					ret core.Object,
 					err error,

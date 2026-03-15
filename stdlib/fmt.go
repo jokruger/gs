@@ -10,10 +10,10 @@ import (
 )
 
 var fmtModule = map[string]core.Object{
-	"print":   &value.UserFunction{Name: "print", Value: fmtPrint},
-	"printf":  &value.UserFunction{Name: "printf", Value: fmtPrintf},
-	"println": &value.UserFunction{Name: "println", Value: fmtPrintln},
-	"sprintf": &value.UserFunction{Name: "sprintf", Value: fmtSprintf},
+	"print":   &value.BuiltinFunction{Name: "print", Value: fmtPrint},
+	"printf":  &value.BuiltinFunction{Name: "printf", Value: fmtPrintf},
+	"println": &value.BuiltinFunction{Name: "println", Value: fmtPrintln},
+	"sprintf": &value.BuiltinFunction{Name: "sprintf", Value: fmtSprintf},
 }
 
 func fmtPrint(args ...core.Object) (ret core.Object, err error) {

@@ -12,19 +12,19 @@ import (
 func makeOSProcessState(state *os.ProcessState) *value.ImmutableMap {
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
-			"exited": &value.UserFunction{
+			"exited": &value.BuiltinFunction{
 				Name:  "exited",
 				Value: FuncARB(state.Exited),
 			},
-			"pid": &value.UserFunction{
+			"pid": &value.BuiltinFunction{
 				Name:  "pid",
 				Value: FuncARI(state.Pid),
 			},
-			"string": &value.UserFunction{
+			"string": &value.BuiltinFunction{
 				Name:  "string",
 				Value: FuncARS(state.String),
 			},
-			"success": &value.UserFunction{
+			"success": &value.BuiltinFunction{
 				Name:  "success",
 				Value: FuncARB(state.Success),
 			},
@@ -35,15 +35,15 @@ func makeOSProcessState(state *os.ProcessState) *value.ImmutableMap {
 func makeOSProcess(proc *os.Process) *value.ImmutableMap {
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
-			"kill": &value.UserFunction{
+			"kill": &value.BuiltinFunction{
 				Name:  "kill",
 				Value: FuncARE(proc.Kill),
 			},
-			"release": &value.UserFunction{
+			"release": &value.BuiltinFunction{
 				Name:  "release",
 				Value: FuncARE(proc.Release),
 			},
-			"signal": &value.UserFunction{
+			"signal": &value.BuiltinFunction{
 				Name: "signal",
 				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 1 {
@@ -60,7 +60,7 @@ func makeOSProcess(proc *os.Process) *value.ImmutableMap {
 					return wrapError(proc.Signal(syscall.Signal(i1))), nil
 				},
 			},
-			"wait": &value.UserFunction{
+			"wait": &value.BuiltinFunction{
 				Name: "wait",
 				Value: func(args ...core.Object) (core.Object, error) {
 					if len(args) != 0 {

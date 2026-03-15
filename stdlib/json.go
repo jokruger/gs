@@ -11,19 +11,19 @@ import (
 )
 
 var jsonModule = map[string]core.Object{
-	"decode": &value.UserFunction{
+	"decode": &value.BuiltinFunction{
 		Name:  "decode",
 		Value: jsonDecode,
 	},
-	"encode": &value.UserFunction{
+	"encode": &value.BuiltinFunction{
 		Name:  "encode",
 		Value: jsonEncode,
 	},
-	"indent": &value.UserFunction{
+	"indent": &value.BuiltinFunction{
 		Name:  "encode",
 		Value: jsonIndent,
 	},
-	"html_escape": &value.UserFunction{
+	"html_escape": &value.BuiltinFunction{
 		Name:  "html_escape",
 		Value: jsonHTMLEscape,
 	},

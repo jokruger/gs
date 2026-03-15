@@ -42,147 +42,147 @@ var timesModule = map[string]core.Object{
 	"october":             &value.Int{Value: int64(time.October)},
 	"november":            &value.Int{Value: int64(time.November)},
 	"december":            &value.Int{Value: int64(time.December)},
-	"sleep": &value.UserFunction{
+	"sleep": &value.BuiltinFunction{
 		Name:  "sleep",
 		Value: timesSleep,
 	}, // sleep(int)
-	"parse_duration": &value.UserFunction{
+	"parse_duration": &value.BuiltinFunction{
 		Name:  "parse_duration",
 		Value: timesParseDuration,
 	}, // parse_duration(str) => int
-	"since": &value.UserFunction{
+	"since": &value.BuiltinFunction{
 		Name:  "since",
 		Value: timesSince,
 	}, // since(time) => int
-	"until": &value.UserFunction{
+	"until": &value.BuiltinFunction{
 		Name:  "until",
 		Value: timesUntil,
 	}, // until(time) => int
-	"duration_hours": &value.UserFunction{
+	"duration_hours": &value.BuiltinFunction{
 		Name:  "duration_hours",
 		Value: timesDurationHours,
 	}, // duration_hours(int) => float
-	"duration_minutes": &value.UserFunction{
+	"duration_minutes": &value.BuiltinFunction{
 		Name:  "duration_minutes",
 		Value: timesDurationMinutes,
 	}, // duration_minutes(int) => float
-	"duration_nanoseconds": &value.UserFunction{
+	"duration_nanoseconds": &value.BuiltinFunction{
 		Name:  "duration_nanoseconds",
 		Value: timesDurationNanoseconds,
 	}, // duration_nanoseconds(int) => int
-	"duration_seconds": &value.UserFunction{
+	"duration_seconds": &value.BuiltinFunction{
 		Name:  "duration_seconds",
 		Value: timesDurationSeconds,
 	}, // duration_seconds(int) => float
-	"duration_string": &value.UserFunction{
+	"duration_string": &value.BuiltinFunction{
 		Name:  "duration_string",
 		Value: timesDurationString,
 	}, // duration_string(int) => string
-	"month_string": &value.UserFunction{
+	"month_string": &value.BuiltinFunction{
 		Name:  "month_string",
 		Value: timesMonthString,
 	}, // month_string(int) => string
-	"date": &value.UserFunction{
+	"date": &value.BuiltinFunction{
 		Name:  "date",
 		Value: timesDate,
 	}, // date(year, month, day, hour, min, sec, nsec) => time
-	"now": &value.UserFunction{
+	"now": &value.BuiltinFunction{
 		Name:  "now",
 		Value: timesNow,
 	}, // now() => time
-	"parse": &value.UserFunction{
+	"parse": &value.BuiltinFunction{
 		Name:  "parse",
 		Value: timesParse,
 	}, // parse(format, str) => time
-	"unix": &value.UserFunction{
+	"unix": &value.BuiltinFunction{
 		Name:  "unix",
 		Value: timesUnix,
 	}, // unix(sec, nsec) => time
-	"add": &value.UserFunction{
+	"add": &value.BuiltinFunction{
 		Name:  "add",
 		Value: timesAdd,
 	}, // add(time, int) => time
-	"add_date": &value.UserFunction{
+	"add_date": &value.BuiltinFunction{
 		Name:  "add_date",
 		Value: timesAddDate,
 	}, // add_date(time, years, months, days) => time
-	"sub": &value.UserFunction{
+	"sub": &value.BuiltinFunction{
 		Name:  "sub",
 		Value: timesSub,
 	}, // sub(t time, u time) => int
-	"after": &value.UserFunction{
+	"after": &value.BuiltinFunction{
 		Name:  "after",
 		Value: timesAfter,
 	}, // after(t time, u time) => bool
-	"before": &value.UserFunction{
+	"before": &value.BuiltinFunction{
 		Name:  "before",
 		Value: timesBefore,
 	}, // before(t time, u time) => bool
-	"time_year": &value.UserFunction{
+	"time_year": &value.BuiltinFunction{
 		Name:  "time_year",
 		Value: timesTimeYear,
 	}, // time_year(time) => int
-	"time_month": &value.UserFunction{
+	"time_month": &value.BuiltinFunction{
 		Name:  "time_month",
 		Value: timesTimeMonth,
 	}, // time_month(time) => int
-	"time_day": &value.UserFunction{
+	"time_day": &value.BuiltinFunction{
 		Name:  "time_day",
 		Value: timesTimeDay,
 	}, // time_day(time) => int
-	"time_weekday": &value.UserFunction{
+	"time_weekday": &value.BuiltinFunction{
 		Name:  "time_weekday",
 		Value: timesTimeWeekday,
 	}, // time_weekday(time) => int
-	"time_hour": &value.UserFunction{
+	"time_hour": &value.BuiltinFunction{
 		Name:  "time_hour",
 		Value: timesTimeHour,
 	}, // time_hour(time) => int
-	"time_minute": &value.UserFunction{
+	"time_minute": &value.BuiltinFunction{
 		Name:  "time_minute",
 		Value: timesTimeMinute,
 	}, // time_minute(time) => int
-	"time_second": &value.UserFunction{
+	"time_second": &value.BuiltinFunction{
 		Name:  "time_second",
 		Value: timesTimeSecond,
 	}, // time_second(time) => int
-	"time_nanosecond": &value.UserFunction{
+	"time_nanosecond": &value.BuiltinFunction{
 		Name:  "time_nanosecond",
 		Value: timesTimeNanosecond,
 	}, // time_nanosecond(time) => int
-	"time_unix": &value.UserFunction{
+	"time_unix": &value.BuiltinFunction{
 		Name:  "time_unix",
 		Value: timesTimeUnix,
 	}, // time_unix(time) => int
-	"time_unix_nano": &value.UserFunction{
+	"time_unix_nano": &value.BuiltinFunction{
 		Name:  "time_unix_nano",
 		Value: timesTimeUnixNano,
 	}, // time_unix_nano(time) => int
-	"time_format": &value.UserFunction{
+	"time_format": &value.BuiltinFunction{
 		Name:  "time_format",
 		Value: timesTimeFormat,
 	}, // time_format(time, format) => string
-	"time_location": &value.UserFunction{
+	"time_location": &value.BuiltinFunction{
 		Name:  "time_location",
 		Value: timesTimeLocation,
 	}, // time_location(time) => string
-	"time_string": &value.UserFunction{
+	"time_string": &value.BuiltinFunction{
 		Name:  "time_string",
 		Value: timesTimeString,
 	}, // time_string(time) => string
-	"is_zero": &value.UserFunction{
+	"is_zero": &value.BuiltinFunction{
 		Name:  "is_zero",
 		Value: timesIsZero,
 	}, // is_zero(time) => bool
-	"to_local": &value.UserFunction{
+	"to_local": &value.BuiltinFunction{
 		Name:  "to_local",
 		Value: timesToLocal,
 	}, // to_local(time) => time
-	"to_utc": &value.UserFunction{
+	"to_utc": &value.BuiltinFunction{
 		Name:  "to_utc",
 		Value: timesToUTC,
 	}, // to_utc(time) => time
-	"in_location": &value.UserFunction{
+	"in_location": &value.BuiltinFunction{
 		Name:  "in_location",
 		Value: timesInLocation,
 	}, // in_location(time, location) => time

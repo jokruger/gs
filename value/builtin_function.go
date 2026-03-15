@@ -17,7 +17,7 @@ func (o *BuiltinFunction) String() string {
 }
 
 func (o *BuiltinFunction) Copy() core.Object {
-	return &BuiltinFunction{Value: o.Value}
+	return &BuiltinFunction{Name: o.Name, Value: o.Value}
 }
 
 func (o *BuiltinFunction) Equals(core.Object) bool {

@@ -193,7 +193,7 @@ for i:=1; i<=d; i++ {
 e := mod1.double(s)
 `)
 	mod1 := map[string]core.Object{
-		"double": &value.UserFunction{
+		"double": &value.BuiltinFunction{
 			Value: func(args ...core.Object) (
 				ret core.Object,
 				err error,
@@ -376,7 +376,7 @@ func TestScriptSourceModule(t *testing.T) {
 	mods.AddSourceModule("mod", []byte(`text := import("text"); export text.title("foo")`))
 	mods.AddBuiltinModule("text",
 		map[string]core.Object{
-			"title": &value.UserFunction{
+			"title": &value.BuiltinFunction{
 				Name: "title",
 				Value: func(args ...core.Object) (core.Object, error) {
 					s, _ := args[0].AsString()

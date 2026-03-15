@@ -8,6 +8,6 @@ import (
 )
 
 var hexModule = map[string]core.Object{
-	"encode": &value.UserFunction{Value: FuncAYRS(hex.EncodeToString)},
-	"decode": &value.UserFunction{Value: FuncASRYE(hex.DecodeString)},
+	"encode": &value.BuiltinFunction{Value: FuncAYRS(hex.EncodeToString)},
+	"decode": &value.BuiltinFunction{Value: FuncASRYE(hex.DecodeString)},
 }

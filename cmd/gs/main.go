@@ -161,7 +161,7 @@ func RunREPL(modules *vm.ModuleMap, in io.Reader, out io.Writer) {
 
 	// embed println function
 	symbol := symbolTable.Define("__repl_println__")
-	globals[symbol.Index] = &value.UserFunction{
+	globals[symbol.Index] = &value.BuiltinFunction{
 		Name: "println",
 		Value: func(args ...core.Object) (ret core.Object, err error) {
 			var printArgs []any

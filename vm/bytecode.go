@@ -232,7 +232,7 @@ func fixDecodedObject(o core.Object, modules *ModuleMap) (core.Object, error) {
 
 		for k, v := range o.Value {
 			// encoding of user function not supported
-			if _, isUserFunction := v.(*value.UserFunction); isUserFunction {
+			if _, isBuiltinFunction := v.(*value.BuiltinFunction); isBuiltinFunction {
 				return nil, fmt.Errorf("user function not decodable")
 			}
 
@@ -299,5 +299,5 @@ func init() {
 	gob.Register(&value.String{})
 	gob.Register(&value.Time{})
 	gob.Register(&value.Undefined{})
-	gob.Register(&value.UserFunction{})
+	gob.Register(&value.BuiltinFunction{})
 }

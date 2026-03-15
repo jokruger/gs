@@ -38,11 +38,7 @@ type VM struct {
 }
 
 // NewVM creates a VM.
-func NewVM(
-	bytecode *Bytecode,
-	globals []core.Object,
-	maxAllocs int64,
-) *VM {
+func NewVM(bytecode *Bytecode, globals []core.Object, maxAllocs int64) *VM {
 	if globals == nil {
 		globals = make([]core.Object, GlobalsSize)
 	}
@@ -65,6 +61,17 @@ func NewVM(
 // Abort aborts the execution.
 func (v *VM) Abort() {
 	atomic.StoreInt64(&v.aborting, 1)
+}
+
+// IsStackEmpty tests if the stack is empty or not.
+func (v *VM) IsStackEmpty() bool {
+	return v.sp == 0
+}
+
+// Call calls a compiled function with the given arguments and returns the result.
+func (v *VM) Call(core.CompiledFunction, ...core.Object) (core.Object, error) {
+	// TODO: implement this method (to be used with callbacks from Go)
+	return nil, gse.ErrNotImplemented
 }
 
 // Run starts the execution.
@@ -869,11 +876,6 @@ func (v *VM) run() {
 			return
 		}
 	}
-}
-
-// IsStackEmpty tests if the stack is empty or not.
-func (v *VM) IsStackEmpty() bool {
-	return v.sp == 0
 }
 
 func indexAssign(dst, src core.Object, selectors []core.Object) error {

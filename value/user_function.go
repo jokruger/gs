@@ -5,7 +5,7 @@ import "github.com/jokruger/gs/core"
 type UserFunction struct {
 	Object
 	Name  string
-	Value core.CallableFunction
+	Value core.NativeFunc
 }
 
 func (o *UserFunction) TypeName() string {

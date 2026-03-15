@@ -68,7 +68,7 @@ func FromInterface(v any) (core.Object, error) {
 		return &value.Time{Value: v}, nil
 	case core.Object:
 		return v, nil
-	case core.CallableFunction:
+	case core.NativeFunc:
 		return &value.UserFunction{Value: v}, nil
 	}
 	return nil, fmt.Errorf("cannot convert to object: %T", v)

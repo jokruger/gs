@@ -5,7 +5,7 @@ import "github.com/jokruger/gs/core"
 type BuiltinFunction struct {
 	Object
 	Name  string
-	Value core.CallableFunction
+	Value core.NativeFunc
 }
 
 func (o *BuiltinFunction) TypeName() string {

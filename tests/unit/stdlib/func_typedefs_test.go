@@ -551,7 +551,7 @@ func TestFuncAI64RI64(t *testing.T) {
 	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
-func funcCall(fn core.CallableFunction, args ...core.Object) (core.Object, error) {
+func funcCall(fn core.NativeFunc, args ...core.Object) (core.Object, error) {
 	userFunc := &value.UserFunction{Value: fn}
 	return userFunc.Call(args...)
 }

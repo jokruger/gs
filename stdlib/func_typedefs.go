@@ -9,7 +9,7 @@ import (
 )
 
 // FuncAR transform a function of 'func()' signature into CallableFunc type.
-func FuncAR(fn func()) core.CallableFunction {
+func FuncAR(fn func()) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
@@ -21,7 +21,7 @@ func FuncAR(fn func()) core.CallableFunction {
 
 // FuncARI transform a function of 'func() int' signature into CallableFunc
 // type.
-func FuncARI(fn func() int) core.CallableFunction {
+func FuncARI(fn func() int) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
@@ -32,7 +32,7 @@ func FuncARI(fn func() int) core.CallableFunction {
 
 // FuncARI64 transform a function of 'func() int64' signature into CallableFunc
 // type.
-func FuncARI64(fn func() int64) core.CallableFunction {
+func FuncARI64(fn func() int64) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
@@ -43,7 +43,7 @@ func FuncARI64(fn func() int64) core.CallableFunction {
 
 // FuncAI64RI64 transform a function of 'func(int64) int64' signature into
 // CallableFunc type.
-func FuncAI64RI64(fn func(int64) int64) core.CallableFunction {
+func FuncAI64RI64(fn func(int64) int64) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -63,7 +63,7 @@ func FuncAI64RI64(fn func(int64) int64) core.CallableFunction {
 
 // FuncAI64R transform a function of 'func(int64)' signature into CallableFunc
 // type.
-func FuncAI64R(fn func(int64)) core.CallableFunction {
+func FuncAI64R(fn func(int64)) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -84,7 +84,7 @@ func FuncAI64R(fn func(int64)) core.CallableFunction {
 
 // FuncARB transform a function of 'func() bool' signature into CallableFunc
 // type.
-func FuncARB(fn func() bool) core.CallableFunction {
+func FuncARB(fn func() bool) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
@@ -98,7 +98,7 @@ func FuncARB(fn func() bool) core.CallableFunction {
 
 // FuncARE transform a function of 'func() error' signature into CallableFunc
 // type.
-func FuncARE(fn func() error) core.CallableFunction {
+func FuncARE(fn func() error) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
@@ -109,7 +109,7 @@ func FuncARE(fn func() error) core.CallableFunction {
 
 // FuncARS transform a function of 'func() string' signature into CallableFunc
 // type.
-func FuncARS(fn func() string) core.CallableFunction {
+func FuncARS(fn func() string) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
@@ -124,7 +124,7 @@ func FuncARS(fn func() string) core.CallableFunction {
 
 // FuncARSE transform a function of 'func() (string, error)' signature into
 // CallableFunc type.
-func FuncARSE(fn func() (string, error)) core.CallableFunction {
+func FuncARSE(fn func() (string, error)) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
@@ -142,7 +142,7 @@ func FuncARSE(fn func() (string, error)) core.CallableFunction {
 
 // FuncARYE transform a function of 'func() ([]byte, error)' signature into
 // CallableFunc type.
-func FuncARYE(fn func() ([]byte, error)) core.CallableFunction {
+func FuncARYE(fn func() ([]byte, error)) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
@@ -160,7 +160,7 @@ func FuncARYE(fn func() ([]byte, error)) core.CallableFunction {
 
 // FuncARF transform a function of 'func() float64' signature into CallableFunc
 // type.
-func FuncARF(fn func() float64) core.CallableFunction {
+func FuncARF(fn func() float64) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
@@ -171,7 +171,7 @@ func FuncARF(fn func() float64) core.CallableFunction {
 
 // FuncARSs transform a function of 'func() []string' signature into
 // CallableFunc type.
-func FuncARSs(fn func() []string) core.CallableFunction {
+func FuncARSs(fn func() []string) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
@@ -189,7 +189,7 @@ func FuncARSs(fn func() []string) core.CallableFunction {
 
 // FuncARIsE transform a function of 'func() ([]int, error)' signature into
 // CallableFunc type.
-func FuncARIsE(fn func() ([]int, error)) core.CallableFunction {
+func FuncARIsE(fn func() ([]int, error)) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, gse.ErrWrongNumArguments
@@ -208,7 +208,7 @@ func FuncARIsE(fn func() ([]int, error)) core.CallableFunction {
 
 // FuncAIRIs transform a function of 'func(int) []int' signature into
 // CallableFunc type.
-func FuncAIRIs(fn func(int) []int) core.CallableFunction {
+func FuncAIRIs(fn func(int) []int) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -232,7 +232,7 @@ func FuncAIRIs(fn func(int) []int) core.CallableFunction {
 
 // FuncAFRF transform a function of 'func(float64) float64' signature into
 // CallableFunc type.
-func FuncAFRF(fn func(float64) float64) core.CallableFunction {
+func FuncAFRF(fn func(float64) float64) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -250,7 +250,7 @@ func FuncAFRF(fn func(float64) float64) core.CallableFunction {
 }
 
 // FuncAIR transform a function of 'func(int)' signature into CallableFunc type.
-func FuncAIR(fn func(int)) core.CallableFunction {
+func FuncAIR(fn func(int)) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -270,7 +270,7 @@ func FuncAIR(fn func(int)) core.CallableFunction {
 
 // FuncAIRF transform a function of 'func(int) float64' signature into
 // CallableFunc type.
-func FuncAIRF(fn func(int) float64) core.CallableFunction {
+func FuncAIRF(fn func(int) float64) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -289,7 +289,7 @@ func FuncAIRF(fn func(int) float64) core.CallableFunction {
 
 // FuncAFRI transform a function of 'func(float64) int' signature into
 // CallableFunc type.
-func FuncAFRI(fn func(float64) int) core.CallableFunction {
+func FuncAFRI(fn func(float64) int) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -308,7 +308,7 @@ func FuncAFRI(fn func(float64) int) core.CallableFunction {
 
 // FuncAFFRF transform a function of 'func(float64, float64) float64' signature
 // into CallableFunc type.
-func FuncAFFRF(fn func(float64, float64) float64) core.CallableFunction {
+func FuncAFFRF(fn func(float64, float64) float64) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -335,7 +335,7 @@ func FuncAFFRF(fn func(float64, float64) float64) core.CallableFunction {
 
 // FuncAIFRF transform a function of 'func(int, float64) float64' signature
 // into CallableFunc type.
-func FuncAIFRF(fn func(int, float64) float64) core.CallableFunction {
+func FuncAIFRF(fn func(int, float64) float64) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -362,7 +362,7 @@ func FuncAIFRF(fn func(int, float64) float64) core.CallableFunction {
 
 // FuncAFIRF transform a function of 'func(float64, int) float64' signature
 // into CallableFunc type.
-func FuncAFIRF(fn func(float64, int) float64) core.CallableFunction {
+func FuncAFIRF(fn func(float64, int) float64) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -389,7 +389,7 @@ func FuncAFIRF(fn func(float64, int) float64) core.CallableFunction {
 
 // FuncAFIRB transform a function of 'func(float64, int) bool' signature
 // into CallableFunc type.
-func FuncAFIRB(fn func(float64, int) bool) core.CallableFunction {
+func FuncAFIRB(fn func(float64, int) bool) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -419,7 +419,7 @@ func FuncAFIRB(fn func(float64, int) bool) core.CallableFunction {
 
 // FuncAFRB transform a function of 'func(float64) bool' signature
 // into CallableFunc type.
-func FuncAFRB(fn func(float64) bool) core.CallableFunction {
+func FuncAFRB(fn func(float64) bool) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -442,7 +442,7 @@ func FuncAFRB(fn func(float64) bool) core.CallableFunction {
 // FuncASRS transform a function of 'func(string) string' signature into
 // CallableFunc type. User function will return 'true' if underlying native
 // function returns nil.
-func FuncASRS(fn func(string) string) core.CallableFunction {
+func FuncASRS(fn func(string) string) core.NativeFunc {
 	return func(args ...core.Object) (core.Object, error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -465,7 +465,7 @@ func FuncASRS(fn func(string) string) core.CallableFunction {
 
 // FuncASRSs transform a function of 'func(string) []string' signature into
 // CallableFunc type.
-func FuncASRSs(fn func(string) []string) core.CallableFunction {
+func FuncASRSs(fn func(string) []string) core.NativeFunc {
 	return func(args ...core.Object) (core.Object, error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -493,7 +493,7 @@ func FuncASRSs(fn func(string) []string) core.CallableFunction {
 // FuncASRSE transform a function of 'func(string) (string, error)' signature
 // into CallableFunc type. User function will return 'true' if underlying
 // native function returns nil.
-func FuncASRSE(fn func(string) (string, error)) core.CallableFunction {
+func FuncASRSE(fn func(string) (string, error)) core.NativeFunc {
 	return func(args ...core.Object) (core.Object, error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -520,7 +520,7 @@ func FuncASRSE(fn func(string) (string, error)) core.CallableFunction {
 // FuncASRE transform a function of 'func(string) error' signature into
 // CallableFunc type. User function will return 'true' if underlying native
 // function returns nil.
-func FuncASRE(fn func(string) error) core.CallableFunction {
+func FuncASRE(fn func(string) error) core.NativeFunc {
 	return func(args ...core.Object) (core.Object, error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -540,7 +540,7 @@ func FuncASRE(fn func(string) error) core.CallableFunction {
 // FuncASSRE transform a function of 'func(string, string) error' signature
 // into CallableFunc type. User function will return 'true' if underlying
 // native function returns nil.
-func FuncASSRE(fn func(string, string) error) core.CallableFunction {
+func FuncASSRE(fn func(string, string) error) core.NativeFunc {
 	return func(args ...core.Object) (core.Object, error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -567,7 +567,7 @@ func FuncASSRE(fn func(string, string) error) core.CallableFunction {
 
 // FuncASSRSs transform a function of 'func(string, string) []string'
 // signature into CallableFunc type.
-func FuncASSRSs(fn func(string, string) []string) core.CallableFunction {
+func FuncASSRSs(fn func(string, string) []string) core.NativeFunc {
 	return func(args ...core.Object) (core.Object, error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -601,7 +601,7 @@ func FuncASSRSs(fn func(string, string) []string) core.CallableFunction {
 
 // FuncASSIRSs transform a function of 'func(string, string, int) []string'
 // signature into CallableFunc type.
-func FuncASSIRSs(fn func(string, string, int) []string) core.CallableFunction {
+func FuncASSIRSs(fn func(string, string, int) []string) core.NativeFunc {
 	return func(args ...core.Object) (core.Object, error) {
 		if len(args) != 3 {
 			return nil, gse.ErrWrongNumArguments
@@ -643,7 +643,7 @@ func FuncASSIRSs(fn func(string, string, int) []string) core.CallableFunction {
 
 // FuncASSRI transform a function of 'func(string, string) int' signature into
 // CallableFunc type.
-func FuncASSRI(fn func(string, string) int) core.CallableFunction {
+func FuncASSRI(fn func(string, string) int) core.NativeFunc {
 	return func(args ...core.Object) (core.Object, error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -670,7 +670,7 @@ func FuncASSRI(fn func(string, string) int) core.CallableFunction {
 
 // FuncASSRS transform a function of 'func(string, string) string' signature
 // into CallableFunc type.
-func FuncASSRS(fn func(string, string) string) core.CallableFunction {
+func FuncASSRS(fn func(string, string) string) core.NativeFunc {
 	return func(args ...core.Object) (core.Object, error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -701,7 +701,7 @@ func FuncASSRS(fn func(string, string) string) core.CallableFunction {
 
 // FuncASSRB transform a function of 'func(string, string) bool' signature
 // into CallableFunc type.
-func FuncASSRB(fn func(string, string) bool) core.CallableFunction {
+func FuncASSRB(fn func(string, string) bool) core.NativeFunc {
 	return func(args ...core.Object) (core.Object, error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -731,7 +731,7 @@ func FuncASSRB(fn func(string, string) bool) core.CallableFunction {
 
 // FuncASsSRS transform a function of 'func([]string, string) string' signature
 // into CallableFunc type.
-func FuncASsSRS(fn func([]string, string) string) core.CallableFunction {
+func FuncASsSRS(fn func([]string, string) string) core.NativeFunc {
 	return func(args ...core.Object) (core.Object, error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -787,7 +787,7 @@ func FuncASsSRS(fn func([]string, string) string) core.CallableFunction {
 
 // FuncASI64RE transform a function of 'func(string, int64) error' signature
 // into CallableFunc type.
-func FuncASI64RE(fn func(string, int64) error) core.CallableFunction {
+func FuncASI64RE(fn func(string, int64) error) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -814,7 +814,7 @@ func FuncASI64RE(fn func(string, int64) error) core.CallableFunction {
 
 // FuncAIIRE transform a function of 'func(int, int) error' signature
 // into CallableFunc type.
-func FuncAIIRE(fn func(int, int) error) core.CallableFunction {
+func FuncAIIRE(fn func(int, int) error) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -841,7 +841,7 @@ func FuncAIIRE(fn func(int, int) error) core.CallableFunction {
 
 // FuncASIRS transform a function of 'func(string, int) string' signature
 // into CallableFunc type.
-func FuncASIRS(fn func(string, int) string) core.CallableFunction {
+func FuncASIRS(fn func(string, int) string) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 2 {
 			return nil, gse.ErrWrongNumArguments
@@ -872,7 +872,7 @@ func FuncASIRS(fn func(string, int) string) core.CallableFunction {
 
 // FuncASIIRE transform a function of 'func(string, int, int) error' signature
 // into CallableFunc type.
-func FuncASIIRE(fn func(string, int, int) error) core.CallableFunction {
+func FuncASIIRE(fn func(string, int, int) error) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 3 {
 			return nil, gse.ErrWrongNumArguments
@@ -907,7 +907,7 @@ func FuncASIIRE(fn func(string, int, int) error) core.CallableFunction {
 
 // FuncAYRIE transform a function of 'func([]byte) (int, error)' signature
 // into CallableFunc type.
-func FuncAYRIE(fn func([]byte) (int, error)) core.CallableFunction {
+func FuncAYRIE(fn func([]byte) (int, error)) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -930,7 +930,7 @@ func FuncAYRIE(fn func([]byte) (int, error)) core.CallableFunction {
 
 // FuncAYRS transform a function of 'func([]byte) string' signature into
 // CallableFunc type.
-func FuncAYRS(fn func([]byte) string) core.CallableFunction {
+func FuncAYRS(fn func([]byte) string) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -950,7 +950,7 @@ func FuncAYRS(fn func([]byte) string) core.CallableFunction {
 
 // FuncASRIE transform a function of 'func(string) (int, error)' signature
 // into CallableFunc type.
-func FuncASRIE(fn func(string) (int, error)) core.CallableFunction {
+func FuncASRIE(fn func(string) (int, error)) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -973,7 +973,7 @@ func FuncASRIE(fn func(string) (int, error)) core.CallableFunction {
 
 // FuncASRYE transform a function of 'func(string) ([]byte, error)' signature
 // into CallableFunc type.
-func FuncASRYE(fn func(string) ([]byte, error)) core.CallableFunction {
+func FuncASRYE(fn func(string) ([]byte, error)) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -999,7 +999,7 @@ func FuncASRYE(fn func(string) ([]byte, error)) core.CallableFunction {
 
 // FuncAIRSsE transform a function of 'func(int) ([]string, error)' signature
 // into CallableFunc type.
-func FuncAIRSsE(fn func(int) ([]string, error)) core.CallableFunction {
+func FuncAIRSsE(fn func(int) ([]string, error)) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments
@@ -1029,7 +1029,7 @@ func FuncAIRSsE(fn func(int) ([]string, error)) core.CallableFunction {
 
 // FuncAIRS transform a function of 'func(int) string' signature into
 // CallableFunc type.
-func FuncAIRS(fn func(int) string) core.CallableFunction {
+func FuncAIRS(fn func(int) string) core.NativeFunc {
 	return func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, gse.ErrWrongNumArguments

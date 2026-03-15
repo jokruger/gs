@@ -37,6 +37,17 @@ func makeOSProcessState(state *os.ProcessState) *value.ImmutableMap {
 		return value.FalseValue, nil
 	}
 
+	stateString := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 0 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		s := state.String()
+		if len(s) > core.MaxStringLen {
+			return nil, gse.ErrStringLimit
+		}
+		return &value.String{Value: s}, nil
+	}
+
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
 			"exited": &value.BuiltinFunction{
@@ -49,7 +60,7 @@ func makeOSProcessState(state *os.ProcessState) *value.ImmutableMap {
 			},
 			"string": &value.BuiltinFunction{
 				Name:  "string",
-				Value: FuncARS(state.String),
+				Value: stateString,
 			},
 			"success": &value.BuiltinFunction{
 				Name:  "success",

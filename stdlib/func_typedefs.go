@@ -8,57 +8,6 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-// FuncARS transform a function of 'func() string' signature into CallableFunc
-// type.
-func FuncARS(fn func() string) core.NativeFunc {
-	return func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
-		}
-		s := fn()
-		if len(s) > core.MaxStringLen {
-			return nil, gse.ErrStringLimit
-		}
-		return &value.String{Value: s}, nil
-	}
-}
-
-// FuncARSE transform a function of 'func() (string, error)' signature into
-// CallableFunc type.
-func FuncARSE(fn func() (string, error)) core.NativeFunc {
-	return func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
-		}
-		res, err := fn()
-		if err != nil {
-			return wrapError(err), nil
-		}
-		if len(res) > core.MaxStringLen {
-			return nil, gse.ErrStringLimit
-		}
-		return &value.String{Value: res}, nil
-	}
-}
-
-// FuncARYE transform a function of 'func() ([]byte, error)' signature into
-// CallableFunc type.
-func FuncARYE(fn func() ([]byte, error)) core.NativeFunc {
-	return func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
-		}
-		res, err := fn()
-		if err != nil {
-			return wrapError(err), nil
-		}
-		if len(res) > core.MaxBytesLen {
-			return nil, gse.ErrBytesLimit
-		}
-		return &value.Bytes{Value: res}, nil
-	}
-}
-
 // FuncARF transform a function of 'func() float64' signature into CallableFunc
 // type.
 func FuncARF(fn func() float64) core.NativeFunc {

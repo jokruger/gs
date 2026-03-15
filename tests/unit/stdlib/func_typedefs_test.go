@@ -40,30 +40,6 @@ func TestFuncARIsE(t *testing.T) {
 	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
-func TestFuncARS(t *testing.T) {
-	uf := stdlib.FuncARS(func() string { return "foo" })
-	ret, err := funcCall(uf)
-	require.NoError(t, err)
-	require.Equal(t, &value.String{Value: "foo"}, ret)
-	_, err = funcCall(uf, value.TrueValue)
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
-func TestFuncARSE(t *testing.T) {
-	uf := stdlib.FuncARSE(func() (string, error) { return "foo", nil })
-	ret, err := funcCall(uf)
-	require.NoError(t, err)
-	require.Equal(t, &value.String{Value: "foo"}, ret)
-	uf = stdlib.FuncARSE(func() (string, error) {
-		return "", errors.New("some error")
-	})
-	ret, err = funcCall(uf)
-	require.NoError(t, err)
-	require.Equal(t, &value.Error{Value: &value.String{Value: "some error"}}, ret)
-	_, err = funcCall(uf, value.TrueValue)
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
 func TestFuncARSs(t *testing.T) {
 	uf := stdlib.FuncARSs(func() []string { return []string{"foo", "bar"} })
 	ret, err := funcCall(uf)
@@ -370,24 +346,6 @@ func TestFuncASSIRSs(t *testing.T) {
 	require.Equal(t, array(&value.String{Value: "foo"},
 		&value.String{Value: "bar"}, &value.String{Value: "5"}), ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
-func TestFuncARYE(t *testing.T) {
-	uf := stdlib.FuncARYE(func() ([]byte, error) {
-		return []byte("foo bar"), nil
-	})
-	ret, err := funcCall(uf)
-	require.NoError(t, err)
-	require.Equal(t, &value.Bytes{Value: []byte("foo bar")}, ret)
-	uf = stdlib.FuncARYE(func() ([]byte, error) {
-		return nil, errors.New("some error")
-	})
-	ret, err = funcCall(uf)
-	require.NoError(t, err)
-	require.Equal(t,
-		&value.Error{Value: &value.String{Value: "some error"}}, ret)
-	_, err = funcCall(uf, value.TrueValue)
 	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 

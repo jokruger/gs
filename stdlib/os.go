@@ -110,11 +110,11 @@ var osModule = map[string]core.Object{
 	}, // getuid() => int
 	"getwd": &value.BuiltinFunction{
 		Name:  "getwd",
-		Value: FuncARSE(os.Getwd),
+		Value: osGetwd,
 	}, // getwd() => string/error
 	"hostname": &value.BuiltinFunction{
 		Name:  "hostname",
-		Value: FuncARSE(os.Hostname),
+		Value: osHostname,
 	}, // hostname() => string/error
 	"lchown": &value.BuiltinFunction{
 		Name:  "lchown",
@@ -156,7 +156,7 @@ var osModule = map[string]core.Object{
 	}, // symlink(oldname string newname string) => error
 	"temp_dir": &value.BuiltinFunction{
 		Name:  "temp_dir",
-		Value: FuncARS(os.TempDir),
+		Value: osTempDir,
 	}, // temp_dir() => string
 	"truncate": &value.BuiltinFunction{
 		Name:  "truncate",
@@ -202,6 +202,45 @@ var osModule = map[string]core.Object{
 		Name:  "read_file",
 		Value: osReadFile,
 	}, // readfile(name) => array(byte)/error
+}
+
+func osHostname(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	res, err := os.Hostname()
+	if err != nil {
+		return wrapError(err), nil
+	}
+	if len(res) > core.MaxStringLen {
+		return nil, gse.ErrStringLimit
+	}
+	return &value.String{Value: res}, nil
+}
+
+func osGetwd(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	res, err := os.Getwd()
+	if err != nil {
+		return wrapError(err), nil
+	}
+	if len(res) > core.MaxStringLen {
+		return nil, gse.ErrStringLimit
+	}
+	return &value.String{Value: res}, nil
+}
+
+func osTempDir(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s := os.TempDir()
+	if len(s) > core.MaxStringLen {
+		return nil, gse.ErrStringLimit
+	}
+	return &value.String{Value: s}, nil
 }
 
 func osGetuid(args ...core.Object) (ret core.Object, err error) {

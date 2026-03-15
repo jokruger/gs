@@ -30,6 +30,17 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 		return wrapError(file.Sync()), nil
 	}
 
+	fileName := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 0 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		s := file.Name()
+		if len(s) > core.MaxStringLen {
+			return nil, gse.ErrStringLimit
+		}
+		return &value.String{Value: s}, nil
+	}
+
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
 			// chdir() => true/error
@@ -50,7 +61,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 			// name() => string
 			"name": &value.BuiltinFunction{
 				Name:  "name",
-				Value: FuncARS(file.Name),
+				Value: fileName,
 			}, //
 			// readdirnames(n int) => array(string)/error
 			"readdirnames": &value.BuiltinFunction{

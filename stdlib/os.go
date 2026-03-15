@@ -54,7 +54,7 @@ var osModule = map[string]core.Object{
 	"chmod": osFuncASFmRE("chmod", os.Chmod), // chmod(name string, mode int) => error
 	"chown": &value.BuiltinFunction{
 		Name:  "chown",
-		Value: FuncASIIRE(os.Chown),
+		Value: osChown,
 	}, // chown(name string, uid int, gid int) => error
 	"clearenv": &value.BuiltinFunction{
 		Name:  "clearenv",
@@ -118,7 +118,7 @@ var osModule = map[string]core.Object{
 	}, // hostname() => string/error
 	"lchown": &value.BuiltinFunction{
 		Name:  "lchown",
-		Value: FuncASIIRE(os.Lchown),
+		Value: osLchown,
 	}, // lchown(name string, uid int, gid int) => error
 	"link": &value.BuiltinFunction{
 		Name:  "link",
@@ -160,7 +160,7 @@ var osModule = map[string]core.Object{
 	}, // temp_dir() => string
 	"truncate": &value.BuiltinFunction{
 		Name:  "truncate",
-		Value: FuncASI64RE(os.Truncate),
+		Value: osTruncate,
 	}, // truncate(name string, size int) => error
 	"unsetenv": &value.BuiltinFunction{
 		Name:  "unsetenv",
@@ -202,6 +202,91 @@ var osModule = map[string]core.Object{
 		Name:  "read_file",
 		Value: osReadFile,
 	}, // readfile(name) => array(byte)/error
+}
+
+func osLchown(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 3 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	i2, ok := args[1].AsInt()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "int(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	i3, ok := args[2].AsInt()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "third",
+			Expected: "int(compatible)",
+			Found:    args[2].TypeName(),
+		}
+	}
+	return wrapError(os.Lchown(s1, int(i2), int(i3))), nil
+}
+
+func osChown(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 3 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	i2, ok := args[1].AsInt()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "int(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	i3, ok := args[2].AsInt()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "third",
+			Expected: "int(compatible)",
+			Found:    args[2].TypeName(),
+		}
+	}
+	return wrapError(os.Chown(s1, int(i2), int(i3))), nil
+}
+
+func osTruncate(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	i2, ok := args[1].AsInt()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "int(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	return wrapError(os.Truncate(s1, i2)), nil
 }
 
 func osSymlink(args ...core.Object) (core.Object, error) {

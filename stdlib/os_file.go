@@ -41,6 +41,67 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 		return &value.String{Value: s}, nil
 	}
 
+	fileChown := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 2 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		i1, ok := args[0].AsInt()
+		if !ok {
+			return nil, gse.ErrInvalidArgumentType{
+				Name:     "first",
+				Expected: "int(compatible)",
+				Found:    args[0].TypeName(),
+			}
+		}
+		i2, ok := args[1].AsInt()
+		if !ok {
+			return nil, gse.ErrInvalidArgumentType{
+				Name:     "second",
+				Expected: "int(compatible)",
+				Found:    args[1].TypeName(),
+			}
+		}
+		return wrapError(file.Chown(int(i1), int(i2))), nil
+	}
+
+	fileWrite := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 1 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		y1, ok := args[0].AsByteSlice()
+		if !ok {
+			return nil, gse.ErrInvalidArgumentType{
+				Name:     "first",
+				Expected: "bytes(compatible)",
+				Found:    args[0].TypeName(),
+			}
+		}
+		res, err := file.Write(y1)
+		if err != nil {
+			return wrapError(err), nil
+		}
+		return &value.Int{Value: int64(res)}, nil
+	}
+
+	fileRead := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 1 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		y1, ok := args[0].AsByteSlice()
+		if !ok {
+			return nil, gse.ErrInvalidArgumentType{
+				Name:     "first",
+				Expected: "bytes(compatible)",
+				Found:    args[0].TypeName(),
+			}
+		}
+		res, err := file.Read(y1)
+		if err != nil {
+			return wrapError(err), nil
+		}
+		return &value.Int{Value: int64(res)}, nil
+	}
+
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
 			// chdir() => true/error
@@ -51,7 +112,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 			// chown(uid int, gid int) => true/error
 			"chown": &value.BuiltinFunction{
 				Name:  "chown",
-				Value: FuncAIIRE(file.Chown),
+				Value: fileChown,
 			}, //
 			// close() => error
 			"close": &value.BuiltinFunction{
@@ -76,7 +137,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 			// write(bytes) => int/error
 			"write": &value.BuiltinFunction{
 				Name:  "write",
-				Value: FuncAYRIE(file.Write),
+				Value: fileWrite,
 			}, //
 			// write(string) => int/error
 			"write_string": &value.BuiltinFunction{
@@ -86,7 +147,7 @@ func makeOSFile(file *os.File) *value.ImmutableMap {
 			// read(bytes) => int/error
 			"read": &value.BuiltinFunction{
 				Name:  "read",
-				Value: FuncAYRIE(file.Read),
+				Value: fileRead,
 			}, //
 			// chmod(mode int) => error
 			"chmod": &value.BuiltinFunction{

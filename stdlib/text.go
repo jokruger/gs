@@ -35,23 +35,23 @@ var textModule = map[string]core.Object{
 	}, // re_compile(pattern) => Regexp/error
 	"compare": &value.BuiltinFunction{
 		Name:  "compare",
-		Value: FuncASSRI(strings.Compare),
+		Value: stringsCompare,
 	}, // compare(a, b) => int
 	"contains": &value.BuiltinFunction{
 		Name:  "contains",
-		Value: FuncASSRB(strings.Contains),
+		Value: textContains,
 	}, // contains(s, substr) => bool
 	"contains_any": &value.BuiltinFunction{
 		Name:  "contains_any",
-		Value: FuncASSRB(strings.ContainsAny),
+		Value: textContainsAny,
 	}, // contains_any(s, chars) => bool
 	"count": &value.BuiltinFunction{
 		Name:  "count",
-		Value: FuncASSRI(strings.Count),
+		Value: stringsCount,
 	}, // count(s, substr) => int
 	"equal_fold": &value.BuiltinFunction{
 		Name:  "equal_fold",
-		Value: FuncASSRB(strings.EqualFold),
+		Value: textEqualFold,
 	}, // "equal_fold(s, t) => bool
 	"fields": &value.BuiltinFunction{
 		Name:  "fields",
@@ -59,19 +59,19 @@ var textModule = map[string]core.Object{
 	}, // fields(s) => [string]
 	"has_prefix": &value.BuiltinFunction{
 		Name:  "has_prefix",
-		Value: FuncASSRB(strings.HasPrefix),
+		Value: textHasPrefix,
 	}, // has_prefix(s, prefix) => bool
 	"has_suffix": &value.BuiltinFunction{
 		Name:  "has_suffix",
-		Value: FuncASSRB(strings.HasSuffix),
+		Value: textHasSuffix,
 	}, // has_suffix(s, suffix) => bool
 	"index": &value.BuiltinFunction{
 		Name:  "index",
-		Value: FuncASSRI(strings.Index),
+		Value: stringsIndex,
 	}, // index(s, substr) => int
 	"index_any": &value.BuiltinFunction{
 		Name:  "index_any",
-		Value: FuncASSRI(strings.IndexAny),
+		Value: stringsIndexAny,
 	}, // index_any(s, chars) => int
 	"join": &value.BuiltinFunction{
 		Name:  "join",
@@ -79,11 +79,11 @@ var textModule = map[string]core.Object{
 	}, // join(arr, sep) => string
 	"last_index": &value.BuiltinFunction{
 		Name:  "last_index",
-		Value: FuncASSRI(strings.LastIndex),
+		Value: stringsLastIndex,
 	}, // last_index(s, substr) => int
 	"last_index_any": &value.BuiltinFunction{
 		Name:  "last_index_any",
-		Value: FuncASSRI(strings.LastIndexAny),
+		Value: stringsLastIndexAny,
 	}, // last_index_any(s, chars) => int
 	"repeat": &value.BuiltinFunction{
 		Name:  "repeat",
@@ -107,11 +107,11 @@ var textModule = map[string]core.Object{
 	}, // split_after(s, sep) => [string]
 	"split_after_n": &value.BuiltinFunction{
 		Name:  "split_after_n",
-		Value: FuncASSIRSs(strings.SplitAfterN),
+		Value: stringsSplitAfterN,
 	}, // split_after_n(s, sep, n) => [string]
 	"split_n": &value.BuiltinFunction{
 		Name:  "split_n",
-		Value: FuncASSIRSs(strings.SplitN),
+		Value: stringsSplitN,
 	}, // split_n(s, sep, n) => [string]
 	"title": &value.BuiltinFunction{
 		Name:  "title",
@@ -139,19 +139,19 @@ var textModule = map[string]core.Object{
 	}, // pad_right(s, pad_len, pad_with) => string
 	"trim": &value.BuiltinFunction{
 		Name:  "trim",
-		Value: FuncASSRS(strings.Trim),
+		Value: stringsTrim,
 	}, // trim(s, cutset) => string
 	"trim_left": &value.BuiltinFunction{
 		Name:  "trim_left",
-		Value: FuncASSRS(strings.TrimLeft),
+		Value: stringsTrimLeft,
 	}, // trim_left(s, cutset) => string
 	"trim_prefix": &value.BuiltinFunction{
 		Name:  "trim_prefix",
-		Value: FuncASSRS(strings.TrimPrefix),
+		Value: stringsTrimPrefix,
 	}, // trim_prefix(s, prefix) => string
 	"trim_right": &value.BuiltinFunction{
 		Name:  "trim_right",
-		Value: FuncASSRS(strings.TrimRight),
+		Value: stringsTrimRight,
 	}, // trim_right(s, cutset) => string
 	"trim_space": &value.BuiltinFunction{
 		Name:  "trim_space",
@@ -159,7 +159,7 @@ var textModule = map[string]core.Object{
 	}, // trim_space(s) => string
 	"trim_suffix": &value.BuiltinFunction{
 		Name:  "trim_suffix",
-		Value: FuncASSRS(strings.TrimSuffix),
+		Value: stringsTrimSuffix,
 	}, // trim_suffix(s, suffix) => string
 	"atoi": &value.BuiltinFunction{
 		Name:  "atoi",
@@ -201,6 +201,355 @@ var textModule = map[string]core.Object{
 		Name:  "unquote",
 		Value: strconvUnquote,
 	}, // unquote(str) => string/error
+}
+
+func stringsTrimSuffix(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	s := strings.TrimSuffix(s1, s2)
+	if len(s) > core.MaxStringLen {
+		return nil, gse.ErrStringLimit
+	}
+	return &value.String{Value: s}, nil
+}
+
+func stringsTrimRight(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	s := strings.TrimRight(s1, s2)
+	if len(s) > core.MaxStringLen {
+		return nil, gse.ErrStringLimit
+	}
+	return &value.String{Value: s}, nil
+}
+
+func stringsTrimPrefix(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	s := strings.TrimPrefix(s1, s2)
+	if len(s) > core.MaxStringLen {
+		return nil, gse.ErrStringLimit
+	}
+	return &value.String{Value: s}, nil
+}
+
+func stringsTrimLeft(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	s := strings.TrimLeft(s1, s2)
+	if len(s) > core.MaxStringLen {
+		return nil, gse.ErrStringLimit
+	}
+	return &value.String{Value: s}, nil
+}
+
+func stringsTrim(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	s := strings.Trim(s1, s2)
+	if len(s) > core.MaxStringLen {
+		return nil, gse.ErrStringLimit
+	}
+	return &value.String{Value: s}, nil
+}
+
+func stringsLastIndexAny(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	return &value.Int{Value: int64(strings.LastIndexAny(s1, s2))}, nil
+}
+
+func stringsLastIndex(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	return &value.Int{Value: int64(strings.LastIndex(s1, s2))}, nil
+}
+
+func stringsIndexAny(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	return &value.Int{Value: int64(strings.IndexAny(s1, s2))}, nil
+}
+
+func stringsIndex(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	return &value.Int{Value: int64(strings.Index(s1, s2))}, nil
+}
+
+func stringsCount(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	return &value.Int{Value: int64(strings.Count(s1, s2))}, nil
+}
+
+func stringsCompare(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	return &value.Int{Value: int64(strings.Compare(s1, s2))}, nil
+}
+
+func stringsSplitN(args ...core.Object) (core.Object, error) {
+	if len(args) != 3 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	i3, ok := args[2].AsInt()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "third",
+			Expected: "int(compatible)",
+			Found:    args[2].TypeName(),
+		}
+	}
+	arr := &value.Array{}
+	for _, res := range strings.SplitN(s1, s2, int(i3)) {
+		if len(res) > core.MaxStringLen {
+			return nil, gse.ErrStringLimit
+		}
+		arr.Value = append(arr.Value, &value.String{Value: res})
+	}
+	return arr, nil
+}
+
+func stringsSplitAfterN(args ...core.Object) (core.Object, error) {
+	if len(args) != 3 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	i3, ok := args[2].AsInt()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "third",
+			Expected: "int(compatible)",
+			Found:    args[2].TypeName(),
+		}
+	}
+	arr := &value.Array{}
+	for _, res := range strings.SplitAfterN(s1, s2, int(i3)) {
+		if len(res) > core.MaxStringLen {
+			return nil, gse.ErrStringLimit
+		}
+		arr.Value = append(arr.Value, &value.String{Value: res})
+	}
+	return arr, nil
 }
 
 func stringsSplitAfter(args ...core.Object) (core.Object, error) {
@@ -1298,4 +1647,134 @@ func doTextReplace(s, old, new string, n int) (string, bool) {
 	w += copy(t[w:], ss)
 
 	return string(t[0:w]), true
+}
+
+func textContains(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	if strings.Contains(s1, s2) {
+		return value.TrueValue, nil
+	}
+	return value.FalseValue, nil
+}
+
+func textContainsAny(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	if strings.ContainsAny(s1, s2) {
+		return value.TrueValue, nil
+	}
+	return value.FalseValue, nil
+}
+
+func textEqualFold(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	if strings.EqualFold(s1, s2) {
+		return value.TrueValue, nil
+	}
+	return value.FalseValue, nil
+}
+
+func textHasPrefix(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	if strings.HasPrefix(s1, s2) {
+		return value.TrueValue, nil
+	}
+	return value.FalseValue, nil
+}
+
+func textHasSuffix(args ...core.Object) (core.Object, error) {
+	if len(args) != 2 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	s2, ok := args[1].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "second",
+			Expected: "string(compatible)",
+			Found:    args[1].TypeName(),
+		}
+	}
+	if strings.HasSuffix(s1, s2) {
+		return value.TrueValue, nil
+	}
+	return value.FalseValue, nil
 }

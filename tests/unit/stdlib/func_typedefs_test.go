@@ -107,19 +107,6 @@ func TestFuncAIRSsE(t *testing.T) {
 	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
-func TestFuncASSIRSs(t *testing.T) {
-	uf := stdlib.FuncASSIRSs(func(a, b string, c int) []string {
-		return []string{a, b, strconv.Itoa(c)}
-	})
-	ret, err := funcCall(uf, &value.String{Value: "foo"},
-		&value.String{Value: "bar"}, &value.Int{Value: 5})
-	require.NoError(t, err)
-	require.Equal(t, array(&value.String{Value: "foo"},
-		&value.String{Value: "bar"}, &value.String{Value: "5"}), ret)
-	_, err = funcCall(uf)
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
 func TestFuncASRIE(t *testing.T) {
 	uf := stdlib.FuncASRIE(func(a string) (int, error) { return 5, nil })
 	ret, err := funcCall(uf, &value.String{Value: "foo"})
@@ -149,36 +136,6 @@ func TestFuncAYRIE(t *testing.T) {
 	require.Equal(t,
 		&value.Error{Value: &value.String{Value: "some error"}}, ret)
 	_, err = funcCall(uf)
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
-func TestFuncASSRI(t *testing.T) {
-	uf := stdlib.FuncASSRI(func(a, b string) int { return len(a) + len(b) })
-	ret, err := funcCall(uf,
-		&value.String{Value: "foo"}, &value.String{Value: "bar"})
-	require.NoError(t, err)
-	require.Equal(t, &value.Int{Value: 6}, ret)
-	_, err = funcCall(uf, &value.String{Value: "foo"})
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
-func TestFuncASSRS(t *testing.T) {
-	uf := stdlib.FuncASSRS(func(a, b string) string { return a + b })
-	ret, err := funcCall(uf,
-		&value.String{Value: "foo"}, &value.String{Value: "bar"})
-	require.NoError(t, err)
-	require.Equal(t, &value.String{Value: "foobar"}, ret)
-	_, err = funcCall(uf, &value.String{Value: "foo"})
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
-func TestFuncASSRB(t *testing.T) {
-	uf := stdlib.FuncASSRB(func(a, b string) bool { return len(a) > len(b) })
-	ret, err := funcCall(uf,
-		&value.String{Value: "123"}, &value.String{Value: "12"})
-	require.NoError(t, err)
-	require.Equal(t, value.TrueValue, ret)
-	_, err = funcCall(uf, &value.String{Value: "foo"})
 	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 

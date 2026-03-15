@@ -13,30 +13,6 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-func TestFuncASRE(t *testing.T) {
-	uf := stdlib.FuncASRE(func(a string) error { return nil })
-	ret, err := funcCall(uf, &value.String{Value: "foo"})
-	require.NoError(t, err)
-	require.Equal(t, value.TrueValue, ret)
-	uf = stdlib.FuncASRE(func(a string) error {
-		return errors.New("some error")
-	})
-	ret, err = funcCall(uf, &value.String{Value: "foo"})
-	require.NoError(t, err)
-	require.Equal(t, &value.Error{Value: &value.String{Value: "some error"}}, ret)
-	_, err = funcCall(uf)
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
-func TestFuncASRSs(t *testing.T) {
-	uf := stdlib.FuncASRSs(func(a string) []string { return []string{a} })
-	ret, err := funcCall(uf, &value.String{Value: "foo"})
-	require.NoError(t, err)
-	require.Equal(t, array(&value.String{Value: "foo"}), ret)
-	_, err = funcCall(uf)
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
 func TestFuncASI64RE(t *testing.T) {
 	uf := stdlib.FuncASI64RE(func(a string, b int64) error { return nil })
 	ret, err := funcCall(uf, &value.String{Value: "foo"}, &value.Int{Value: 5})
@@ -80,22 +56,6 @@ func TestFuncASIIRE(t *testing.T) {
 	})
 	ret, err = funcCall(uf, &value.String{Value: "foo"}, &value.Int{Value: 5},
 		&value.Int{Value: 7})
-	require.NoError(t, err)
-	require.Equal(t,
-		&value.Error{Value: &value.String{Value: "some error"}}, ret)
-	_, err = funcCall(uf)
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
-func TestFuncASRSE(t *testing.T) {
-	uf := stdlib.FuncASRSE(func(a string) (string, error) { return a, nil })
-	ret, err := funcCall(uf, &value.String{Value: "foo"})
-	require.NoError(t, err)
-	require.Equal(t, &value.String{Value: "foo"}, ret)
-	uf = stdlib.FuncASRSE(func(a string) (string, error) {
-		return a, errors.New("some error")
-	})
-	ret, err = funcCall(uf, &value.String{Value: "foo"})
 	require.NoError(t, err)
 	require.Equal(t,
 		&value.Error{Value: &value.String{Value: "some error"}}, ret)

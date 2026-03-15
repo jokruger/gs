@@ -55,7 +55,7 @@ var textModule = map[string]core.Object{
 	}, // "equal_fold(s, t) => bool
 	"fields": &value.BuiltinFunction{
 		Name:  "fields",
-		Value: FuncASRSs(strings.Fields),
+		Value: stringsFields,
 	}, // fields(s) => [string]
 	"has_prefix": &value.BuiltinFunction{
 		Name:  "has_prefix",
@@ -199,8 +199,53 @@ var textModule = map[string]core.Object{
 	}, // quote(str) => string
 	"unquote": &value.BuiltinFunction{
 		Name:  "unquote",
-		Value: FuncASRSE(strconv.Unquote),
+		Value: strconvUnquote,
 	}, // unquote(str) => string/error
+}
+
+func strconvUnquote(args ...core.Object) (core.Object, error) {
+	if len(args) != 1 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	res, err := strconv.Unquote(s1)
+	if err != nil {
+		return wrapError(err), nil
+	}
+	if len(res) > core.MaxStringLen {
+		return nil, gse.ErrStringLimit
+	}
+	return &value.String{Value: res}, nil
+}
+
+func stringsFields(args ...core.Object) (core.Object, error) {
+	if len(args) != 1 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	res := strings.Fields(s1)
+	arr := &value.Array{}
+	for _, elem := range res {
+		if len(elem) > core.MaxStringLen {
+			return nil, gse.ErrStringLimit
+		}
+		arr.Value = append(arr.Value, &value.String{Value: elem})
+	}
+	return arr, nil
 }
 
 func strconvQuote(args ...core.Object) (core.Object, error) {

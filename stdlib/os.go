@@ -49,7 +49,7 @@ var osModule = map[string]core.Object{
 	}, // args() => array(string)
 	"chdir": &value.BuiltinFunction{
 		Name:  "chdir",
-		Value: FuncASRE(os.Chdir),
+		Value: osChdir,
 	}, // chdir(dir string) => error
 	"chmod": osFuncASFmRE("chmod", os.Chmod), // chmod(name string, mode int) => error
 	"chown": &value.BuiltinFunction{
@@ -132,15 +132,15 @@ var osModule = map[string]core.Object{
 	"mkdir_all": osFuncASFmRE("mkdir_all", os.MkdirAll), // mkdir_all(name string, perm int) => error
 	"readlink": &value.BuiltinFunction{
 		Name:  "readlink",
-		Value: FuncASRSE(os.Readlink),
+		Value: osReadlink,
 	}, // readlink(name string) => string/error
 	"remove": &value.BuiltinFunction{
 		Name:  "remove",
-		Value: FuncASRE(os.Remove),
+		Value: osRemove,
 	}, // remove(name string) => error
 	"remove_all": &value.BuiltinFunction{
 		Name:  "remove_all",
-		Value: FuncASRE(os.RemoveAll),
+		Value: osRemoveAll,
 	}, // remove_all(name string) => error
 	"rename": &value.BuiltinFunction{
 		Name:  "rename",
@@ -164,7 +164,7 @@ var osModule = map[string]core.Object{
 	}, // truncate(name string, size int) => error
 	"unsetenv": &value.BuiltinFunction{
 		Name:  "unsetenv",
-		Value: FuncASRE(os.Unsetenv),
+		Value: osUnsetenv,
 	}, // unsetenv(key string) => error
 	"create": &value.BuiltinFunction{
 		Name:  "create",
@@ -188,7 +188,7 @@ var osModule = map[string]core.Object{
 	}, // start_process(name string, argv array(string), dir string, env array(string)) => imap(process)/error
 	"exec_look_path": &value.BuiltinFunction{
 		Name:  "exec_look_path",
-		Value: FuncASRSE(exec.LookPath),
+		Value: execLookPath,
 	}, // exec_look_path(file) => string/error
 	"exec": &value.BuiltinFunction{
 		Name:  "exec",
@@ -202,6 +202,110 @@ var osModule = map[string]core.Object{
 		Name:  "read_file",
 		Value: osReadFile,
 	}, // readfile(name) => array(byte)/error
+}
+
+func osUnsetenv(args ...core.Object) (core.Object, error) {
+	if len(args) != 1 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	return wrapError(os.Unsetenv(s1)), nil
+}
+
+func osRemoveAll(args ...core.Object) (core.Object, error) {
+	if len(args) != 1 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	return wrapError(os.RemoveAll(s1)), nil
+}
+
+func osRemove(args ...core.Object) (core.Object, error) {
+	if len(args) != 1 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	return wrapError(os.Remove(s1)), nil
+}
+
+func osChdir(args ...core.Object) (core.Object, error) {
+	if len(args) != 1 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	return wrapError(os.Chdir(s1)), nil
+}
+
+func execLookPath(args ...core.Object) (core.Object, error) {
+	if len(args) != 1 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	res, err := exec.LookPath(s1)
+	if err != nil {
+		return wrapError(err), nil
+	}
+	if len(res) > core.MaxStringLen {
+		return nil, gse.ErrStringLimit
+	}
+	return &value.String{Value: res}, nil
+}
+
+func osReadlink(args ...core.Object) (core.Object, error) {
+	if len(args) != 1 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	s1, ok := args[0].AsString()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "string(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	res, err := os.Readlink(s1)
+	if err != nil {
+		return wrapError(err), nil
+	}
+	if len(res) > core.MaxStringLen {
+		return nil, gse.ErrStringLimit
+	}
+	return &value.String{Value: res}, nil
 }
 
 func osGetenv(args ...core.Object) (core.Object, error) {

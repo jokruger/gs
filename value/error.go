@@ -9,7 +9,7 @@ import (
 )
 
 type Error struct {
-	ObjectImpl
+	Object
 	Value core.Object
 }
 

@@ -3,7 +3,7 @@ package value
 import "github.com/jokruger/gs/core"
 
 type UserFunction struct {
-	ObjectImpl
+	Object
 	Name  string
 	Value core.CallableFunction
 }

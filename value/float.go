@@ -10,7 +10,7 @@ import (
 )
 
 type Float struct {
-	ObjectImpl
+	Object
 	Value float64
 }
 

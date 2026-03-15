@@ -3,7 +3,7 @@ package value
 import "github.com/jokruger/gs/core"
 
 type MapIterator struct {
-	ObjectImpl
+	Object
 	v map[string]core.Object
 	k []string
 	i int

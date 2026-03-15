@@ -10,7 +10,7 @@ import (
 )
 
 type Array struct {
-	ObjectImpl
+	Object
 	Value []core.Object
 }
 

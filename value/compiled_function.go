@@ -5,7 +5,7 @@ import (
 )
 
 type CompiledFunction struct {
-	ObjectImpl
+	Object
 	Instructions  []byte
 	NumLocals     int // number of local variables (including function parameters)
 	NumParameters int

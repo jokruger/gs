@@ -2070,7 +2070,7 @@ func TestIncDec(t *testing.T) {
 }
 
 type StringDict struct {
-	value.ObjectImpl
+	value.Object
 	Value map[string]string
 }
 
@@ -2112,7 +2112,7 @@ func (o *StringDict) IndexSet(i, v core.Object) error {
 }
 
 type StringCircle struct {
-	value.ObjectImpl
+	value.Object
 	Value []string
 }
 
@@ -2160,7 +2160,7 @@ func (o *StringCircle) IndexSet(i, v core.Object) error {
 }
 
 type StringArray struct {
-	value.ObjectImpl
+	value.Object
 	Value []string
 }
 
@@ -2394,7 +2394,7 @@ func TestInteger(t *testing.T) {
 }
 
 type StringArrayIterator struct {
-	value.ObjectImpl
+	value.Object
 	strArr *StringArray
 	idx    int
 }

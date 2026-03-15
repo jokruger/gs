@@ -3,7 +3,7 @@ package value
 import "github.com/jokruger/gs/core"
 
 type StringIterator struct {
-	ObjectImpl
+	Object
 	v []rune
 	i int
 	l int

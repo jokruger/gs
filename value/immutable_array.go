@@ -10,7 +10,7 @@ import (
 )
 
 type ImmutableArray struct {
-	ObjectImpl
+	Object
 	Value []core.Object
 }
 

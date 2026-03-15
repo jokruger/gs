@@ -9,7 +9,7 @@ import (
 )
 
 type String struct {
-	ObjectImpl
+	Object
 	Value   string
 	runeStr []rune
 }

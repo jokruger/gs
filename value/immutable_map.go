@@ -9,7 +9,7 @@ import (
 )
 
 type ImmutableMap struct {
-	ObjectImpl
+	Object
 	Value map[string]core.Object
 }
 

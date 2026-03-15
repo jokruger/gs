@@ -9,7 +9,7 @@ import (
 )
 
 type Map struct {
-	ObjectImpl
+	Object
 	Value map[string]core.Object
 }
 

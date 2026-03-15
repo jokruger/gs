@@ -3,7 +3,7 @@ package value
 import "github.com/jokruger/gs/core"
 
 type Bool struct {
-	ObjectImpl
+	Object
 	value bool
 }
 

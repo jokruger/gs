@@ -10,7 +10,7 @@ import (
 )
 
 type Int struct {
-	ObjectImpl
+	Object
 	Value int64
 }
 

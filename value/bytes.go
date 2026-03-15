@@ -9,7 +9,7 @@ import (
 )
 
 type Bytes struct {
-	ObjectImpl
+	Object
 	Value []byte
 }
 

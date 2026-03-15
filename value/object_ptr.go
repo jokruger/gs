@@ -3,7 +3,7 @@ package value
 import "github.com/jokruger/gs/core"
 
 type ObjectPtr struct {
-	ObjectImpl
+	Object
 	Value *core.Object
 }
 

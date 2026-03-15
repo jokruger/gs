@@ -9,7 +9,7 @@ import (
 )
 
 type Time struct {
-	ObjectImpl
+	Object
 	Value time.Time
 }
 

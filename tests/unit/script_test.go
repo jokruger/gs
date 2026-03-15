@@ -252,7 +252,7 @@ e := mod1.double(s)
 }
 
 type Counter struct {
-	value.ObjectImpl
+	value.Object
 	value int64
 }
 
@@ -519,7 +519,7 @@ func TestCompiled_CustomObject(t *testing.T) {
 // customNumber is a user defined object that can compare to value.Int
 // very shitty implementation, just to test that token.Less and token.Greater in BinaryOp works
 type customNumber struct {
-	value.ObjectImpl
+	value.Object
 	value int64
 }
 

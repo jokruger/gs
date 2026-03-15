@@ -3,7 +3,7 @@ package value
 import "github.com/jokruger/gs/core"
 
 type BytesIterator struct {
-	ObjectImpl
+	Object
 	v []byte
 	i int
 	l int

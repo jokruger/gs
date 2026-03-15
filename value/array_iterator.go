@@ -3,7 +3,7 @@ package value
 import "github.com/jokruger/gs/core"
 
 type ArrayIterator struct {
-	ObjectImpl
+	Object
 	v []core.Object
 	i int
 	l int

@@ -7,7 +7,7 @@ import (
 )
 
 type Char struct {
-	ObjectImpl
+	Object
 	Value rune
 }
 

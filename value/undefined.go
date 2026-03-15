@@ -3,7 +3,7 @@ package value
 import "github.com/jokruger/gs/core"
 
 type Undefined struct {
-	ObjectImpl
+	Object
 }
 
 func (o *Undefined) TypeName() string {

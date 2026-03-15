@@ -62,7 +62,7 @@ var osModule = map[string]core.Object{
 	}, // clearenv()
 	"environ": &value.BuiltinFunction{
 		Name:  "environ",
-		Value: FuncARSs(os.Environ),
+		Value: osEnviron,
 	}, // environ() => array(string)
 	"exit": &value.BuiltinFunction{
 		Name:  "exit",
@@ -90,7 +90,7 @@ var osModule = map[string]core.Object{
 	}, // getgid() => int
 	"getgroups": &value.BuiltinFunction{
 		Name:  "getgroups",
-		Value: FuncARIsE(os.Getgroups),
+		Value: osGetgroups,
 	}, // getgroups() => array(string)/error
 	"getpagesize": &value.BuiltinFunction{
 		Name:  "getpagesize",
@@ -202,6 +202,35 @@ var osModule = map[string]core.Object{
 		Name:  "read_file",
 		Value: osReadFile,
 	}, // readfile(name) => array(byte)/error
+}
+
+func osGetgroups(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	res, err := os.Getgroups()
+	if err != nil {
+		return wrapError(err), nil
+	}
+	arr := &value.Array{}
+	for _, v := range res {
+		arr.Value = append(arr.Value, &value.Int{Value: int64(v)})
+	}
+	return arr, nil
+}
+
+func osEnviron(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	arr := &value.Array{}
+	for _, elem := range os.Environ() {
+		if len(elem) > core.MaxStringLen {
+			return nil, gse.ErrStringLimit
+		}
+		arr.Value = append(arr.Value, &value.String{Value: elem})
+	}
+	return arr, nil
 }
 
 func osHostname(args ...core.Object) (ret core.Object, err error) {

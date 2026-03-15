@@ -15,7 +15,7 @@ var randModule = map[string]core.Object{
 	},
 	"float": &value.BuiltinFunction{
 		Name:  "float",
-		Value: FuncARF(rand.Float64),
+		Value: randFloat64,
 	},
 	"intn": &value.BuiltinFunction{
 		Name:  "intn",
@@ -23,15 +23,15 @@ var randModule = map[string]core.Object{
 	},
 	"exp_float": &value.BuiltinFunction{
 		Name:  "exp_float",
-		Value: FuncARF(rand.ExpFloat64),
+		Value: randExpFloat64,
 	},
 	"norm_float": &value.BuiltinFunction{
 		Name:  "norm_float",
-		Value: FuncARF(rand.NormFloat64),
+		Value: randNormFloat64,
 	},
 	"perm": &value.BuiltinFunction{
 		Name:  "perm",
-		Value: FuncAIRIs(rand.Perm),
+		Value: randPerm,
 	},
 	"seed": &value.BuiltinFunction{
 		Name:  "seed",
@@ -45,6 +45,47 @@ var randModule = map[string]core.Object{
 		Name:  "rand",
 		Value: randFunc,
 	},
+}
+
+func randPerm(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 1 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	i1, ok := args[0].AsInt()
+	if !ok {
+		return nil, gse.ErrInvalidArgumentType{
+			Name:     "first",
+			Expected: "int(compatible)",
+			Found:    args[0].TypeName(),
+		}
+	}
+	res := rand.Perm(int(i1))
+	arr := &value.Array{}
+	for _, v := range res {
+		arr.Value = append(arr.Value, &value.Int{Value: int64(v)})
+	}
+	return arr, nil
+}
+
+func randNormFloat64(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	return &value.Float{Value: rand.NormFloat64()}, nil
+}
+
+func randExpFloat64(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	return &value.Float{Value: rand.ExpFloat64()}, nil
+}
+
+func randFloat64(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	return &value.Float{Value: rand.Float64()}, nil
 }
 
 func randSeed(args ...core.Object) (ret core.Object, err error) {
@@ -184,6 +225,47 @@ func randRand(r *rand.Rand) *value.ImmutableMap {
 		return value.UndefinedValue, nil
 	}
 
+	rFloat64 := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 0 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		return &value.Float{Value: r.Float64()}, nil
+	}
+
+	rExpFloat64 := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 0 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		return &value.Float{Value: r.ExpFloat64()}, nil
+	}
+
+	rNormFloat64 := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 0 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		return &value.Float{Value: r.NormFloat64()}, nil
+	}
+
+	rPerm := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 1 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		i1, ok := args[0].AsInt()
+		if !ok {
+			return nil, gse.ErrInvalidArgumentType{
+				Name:     "first",
+				Expected: "int(compatible)",
+				Found:    args[0].TypeName(),
+			}
+		}
+		res := r.Perm(int(i1))
+		arr := &value.Array{}
+		for _, v := range res {
+			arr.Value = append(arr.Value, &value.Int{Value: int64(v)})
+		}
+		return arr, nil
+	}
+
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
 			"int": &value.BuiltinFunction{
@@ -192,7 +274,7 @@ func randRand(r *rand.Rand) *value.ImmutableMap {
 			},
 			"float": &value.BuiltinFunction{
 				Name:  "float",
-				Value: FuncARF(r.Float64),
+				Value: rFloat64,
 			},
 			"intn": &value.BuiltinFunction{
 				Name:  "intn",
@@ -200,15 +282,15 @@ func randRand(r *rand.Rand) *value.ImmutableMap {
 			},
 			"exp_float": &value.BuiltinFunction{
 				Name:  "exp_float",
-				Value: FuncARF(r.ExpFloat64),
+				Value: rExpFloat64,
 			},
 			"norm_float": &value.BuiltinFunction{
 				Name:  "norm_float",
-				Value: FuncARF(r.NormFloat64),
+				Value: rNormFloat64,
 			},
 			"perm": &value.BuiltinFunction{
 				Name:  "perm",
-				Value: FuncAIRIs(r.Perm),
+				Value: rPerm,
 			},
 			"seed": &value.BuiltinFunction{
 				Name:  "seed",

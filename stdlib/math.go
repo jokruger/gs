@@ -4,6 +4,7 @@ import (
 	"math"
 
 	"github.com/jokruger/gs/core"
+	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
 
@@ -187,7 +188,7 @@ var mathModule = map[string]core.Object{
 	},
 	"nan": &value.BuiltinFunction{
 		Name:  "nan",
-		Value: FuncARF(math.NaN),
+		Value: mathNaN,
 	},
 	"nextafter": &value.BuiltinFunction{
 		Name:  "nextafter",
@@ -245,4 +246,11 @@ var mathModule = map[string]core.Object{
 		Name:  "yn",
 		Value: FuncAIFRF(math.Yn),
 	},
+}
+
+func mathNaN(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	return &value.Float{Value: math.NaN()}, nil
 }

@@ -22,34 +22,6 @@ func TestFuncAIR(t *testing.T) {
 	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
-func TestFuncARIsE(t *testing.T) {
-	uf := stdlib.FuncARIsE(func() ([]int, error) {
-		return []int{1, 2, 3}, nil
-	})
-	ret, err := funcCall(uf)
-	require.NoError(t, err)
-	require.Equal(t, array(&value.Int{Value: 1},
-		&value.Int{Value: 2}, &value.Int{Value: 3}), ret)
-	uf = stdlib.FuncARIsE(func() ([]int, error) {
-		return nil, errors.New("some error")
-	})
-	ret, err = funcCall(uf)
-	require.NoError(t, err)
-	require.Equal(t, &value.Error{Value: &value.String{Value: "some error"}}, ret)
-	_, err = funcCall(uf, value.TrueValue)
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
-func TestFuncARSs(t *testing.T) {
-	uf := stdlib.FuncARSs(func() []string { return []string{"foo", "bar"} })
-	ret, err := funcCall(uf)
-	require.NoError(t, err)
-	require.Equal(t, array(&value.String{Value: "foo"},
-		&value.String{Value: "bar"}), ret)
-	_, err = funcCall(uf, value.TrueValue)
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
 func TestFuncASRE(t *testing.T) {
 	uf := stdlib.FuncASRE(func(a string) error { return nil })
 	ret, err := funcCall(uf, &value.String{Value: "foo"})
@@ -176,15 +148,6 @@ func TestFuncASsRS(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, &value.String{Value: "foo bar"}, ret)
 	_, err = funcCall(uf, &value.String{Value: "foo"})
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
-func TestFuncARF(t *testing.T) {
-	uf := stdlib.FuncARF(func() float64 { return 10.0 })
-	ret, err := funcCall(uf)
-	require.NoError(t, err)
-	require.Equal(t, &value.Float{Value: 10.0}, ret)
-	_, err = funcCall(uf, value.TrueValue)
 	require.Equal(t, gse.ErrWrongNumArguments, err)
 }
 
@@ -416,15 +379,6 @@ func TestFuncAIRS(t *testing.T) {
 	ret, err := funcCall(uf, &value.Int{Value: 55})
 	require.NoError(t, err)
 	require.Equal(t, &value.String{Value: "55"}, ret)
-	_, err = funcCall(uf)
-	require.Equal(t, gse.ErrWrongNumArguments, err)
-}
-
-func TestFuncAIRIs(t *testing.T) {
-	uf := stdlib.FuncAIRIs(func(a int) []int { return []int{a, a} })
-	ret, err := funcCall(uf, &value.Int{Value: 55})
-	require.NoError(t, err)
-	require.Equal(t, array(&value.Int{Value: 55}, &value.Int{Value: 55}), ret)
 	_, err = funcCall(uf)
 	require.Equal(t, gse.ErrWrongNumArguments, err)
 }

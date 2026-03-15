@@ -24,11 +24,11 @@ func (o *Object) BinaryOp(token.Token, core.Object) (core.Object, error) {
 }
 
 func (o *Object) Copy() core.Object {
-	return nil
+	return o
 }
 
 func (o *Object) IsFalsy() bool {
-	return false
+	return o == nil
 }
 
 func (o *Object) Equals(x core.Object) bool {

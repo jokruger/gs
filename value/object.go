@@ -51,7 +51,7 @@ func (o *Object) IsIterable() bool {
 	return false
 }
 
-func (o *Object) Call(...core.Object) (core.Object, error) {
+func (o *Object) Call(core.VM, ...core.Object) (core.Object, error) {
 	return nil, nil
 }
 

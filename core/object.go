@@ -15,9 +15,9 @@ type Object interface {
 	Equals(Object) bool                           // return whether the value of the type is equal to the value of another object
 	Copy() Object                                 // return a copy of the type (and its value)
 	IndexGet(Object) (Object, error)              // return the result of indexing the object with the given index
-	IndexSet(index, value Object) error           // return the result of setting the value of the object at the given index
+	IndexSet(idx, val Object) error               // return the result of setting the value of the object at the given index
 	Iterate() Iterator                            // return an Iterator for the type
-	Call(...Object) (Object, error)               // return the result of calling the object with the given arguments
+	Call(VM, ...Object) (Object, error)           // return the result of calling the object with the given arguments
 
 	IsFalsy() bool    // return whether the value of the type is equivalent to false in a boolean context
 	IsIterable() bool // return whether the type is iterable (i.e. can be used in a for loop)

@@ -553,7 +553,7 @@ func TestFuncAI64RI64(t *testing.T) {
 
 func funcCall(fn core.NativeFunc, args ...core.Object) (core.Object, error) {
 	userFunc := &value.BuiltinFunction{Value: fn}
-	return userFunc.Call(args...)
+	return userFunc.Call(nil, args...)
 }
 
 func array(elements ...core.Object) *value.Array {

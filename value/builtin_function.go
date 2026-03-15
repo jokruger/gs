@@ -24,7 +24,7 @@ func (o *BuiltinFunction) Equals(core.Object) bool {
 	return false
 }
 
-func (o *BuiltinFunction) Call(args ...core.Object) (core.Object, error) {
+func (o *BuiltinFunction) Call(vm core.VM, args ...core.Object) (core.Object, error) {
 	return o.Value(args...)
 }
 

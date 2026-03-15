@@ -2257,7 +2257,7 @@ func (o *StringArray) IndexSet(i, v core.Object) error {
 	return gse.ErrInvalidIndexType
 }
 
-func (o *StringArray) Call(args ...core.Object) (ret core.Object, err error) {
+func (o *StringArray) Call(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}

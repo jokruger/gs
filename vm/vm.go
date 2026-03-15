@@ -640,7 +640,7 @@ func (v *VM) run() {
 			} else {
 				var args []core.Object
 				args = append(args, v.stack[v.sp-numArgs:v.sp]...)
-				ret, e := val.Call(args...)
+				ret, e := val.Call(v, args...)
 				v.sp -= numArgs + 1
 
 				// runtime error

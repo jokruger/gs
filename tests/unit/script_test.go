@@ -309,7 +309,7 @@ func (o *Counter) Copy() core.Object {
 	return &Counter{value: o.value}
 }
 
-func (o *Counter) Call(_ ...core.Object) (core.Object, error) {
+func (o *Counter) Call(core.VM, ...core.Object) (core.Object, error) {
 	return &value.Int{Value: o.value}, nil
 }
 

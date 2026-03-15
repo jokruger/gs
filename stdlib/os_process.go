@@ -10,6 +10,13 @@ import (
 )
 
 func makeOSProcessState(state *os.ProcessState) *value.ImmutableMap {
+	statePid := func(args ...core.Object) (ret core.Object, err error) {
+		if len(args) != 0 {
+			return nil, gse.ErrWrongNumArguments
+		}
+		return &value.Int{Value: int64(state.Pid())}, nil
+	}
+
 	return &value.ImmutableMap{
 		Value: map[string]core.Object{
 			"exited": &value.BuiltinFunction{
@@ -18,7 +25,7 @@ func makeOSProcessState(state *os.ProcessState) *value.ImmutableMap {
 			},
 			"pid": &value.BuiltinFunction{
 				Name:  "pid",
-				Value: FuncARI(state.Pid),
+				Value: statePid,
 			},
 			"string": &value.BuiltinFunction{
 				Name:  "string",

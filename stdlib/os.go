@@ -74,7 +74,7 @@ var osModule = map[string]core.Object{
 	}, // expand_env(s string) => string
 	"getegid": &value.BuiltinFunction{
 		Name:  "getegid",
-		Value: FuncARI(os.Getegid),
+		Value: osGetegid,
 	}, // getegid() => int
 	"getenv": &value.BuiltinFunction{
 		Name:  "getenv",
@@ -82,11 +82,11 @@ var osModule = map[string]core.Object{
 	}, // getenv(s string) => string
 	"geteuid": &value.BuiltinFunction{
 		Name:  "geteuid",
-		Value: FuncARI(os.Geteuid),
+		Value: osGeteuid,
 	}, // geteuid() => int
 	"getgid": &value.BuiltinFunction{
 		Name:  "getgid",
-		Value: FuncARI(os.Getgid),
+		Value: osGetgid,
 	}, // getgid() => int
 	"getgroups": &value.BuiltinFunction{
 		Name:  "getgroups",
@@ -94,19 +94,19 @@ var osModule = map[string]core.Object{
 	}, // getgroups() => array(string)/error
 	"getpagesize": &value.BuiltinFunction{
 		Name:  "getpagesize",
-		Value: FuncARI(os.Getpagesize),
+		Value: osGetpagesize,
 	}, // getpagesize() => int
 	"getpid": &value.BuiltinFunction{
 		Name:  "getpid",
-		Value: FuncARI(os.Getpid),
+		Value: osGetpid,
 	}, // getpid() => int
 	"getppid": &value.BuiltinFunction{
 		Name:  "getppid",
-		Value: FuncARI(os.Getppid),
+		Value: osGetppid,
 	}, // getppid() => int
 	"getuid": &value.BuiltinFunction{
 		Name:  "getuid",
-		Value: FuncARI(os.Getuid),
+		Value: osGetuid,
 	}, // getuid() => int
 	"getwd": &value.BuiltinFunction{
 		Name:  "getwd",
@@ -202,6 +202,55 @@ var osModule = map[string]core.Object{
 		Name:  "read_file",
 		Value: osReadFile,
 	}, // readfile(name) => array(byte)/error
+}
+
+func osGetuid(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	return &value.Int{Value: int64(os.Getuid())}, nil
+}
+
+func osGetppid(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	return &value.Int{Value: int64(os.Getppid())}, nil
+}
+
+func osGetpid(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	return &value.Int{Value: int64(os.Getpid())}, nil
+}
+
+func osGetpagesize(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	return &value.Int{Value: int64(os.Getpagesize())}, nil
+}
+
+func osGetgid(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	return &value.Int{Value: int64(os.Getgid())}, nil
+}
+
+func osGeteuid(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	return &value.Int{Value: int64(os.Geteuid())}, nil
+}
+
+func osGetegid(args ...core.Object) (ret core.Object, err error) {
+	if len(args) != 0 {
+		return nil, gse.ErrWrongNumArguments
+	}
+	return &value.Int{Value: int64(os.Getegid())}, nil
 }
 
 func osClearenv(args ...core.Object) (ret core.Object, err error) {

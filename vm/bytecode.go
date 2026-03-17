@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"time"
 
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
@@ -284,17 +285,18 @@ func inferModuleName(mod *value.Map) string {
 func init() {
 	gob.Register(&parser.SourceFileSet{})
 	gob.Register(&parser.SourceFile{})
-	gob.Register(value.NewArray(nil, false))
-	gob.Register(&value.Bool{})
-	gob.Register(&value.Bytes{})
-	gob.Register(&value.Char{})
 	gob.Register(&CompiledFunction{})
-	gob.Register(&value.Error{})
-	gob.Register(&value.Float{})
-	gob.Register(&value.Int{})
-	gob.Register(&value.Map{})
-	gob.Register(&value.String{})
-	gob.Register(&value.Time{})
-	gob.Register(&value.Undefined{})
-	gob.Register(&value.BuiltinFunction{})
+
+	gob.Register(value.NewArray(nil, false))
+	gob.Register(value.NewBool(false))
+	gob.Register(value.NewBytes(nil))
+	gob.Register(value.NewChar(0))
+	gob.Register(value.NewError(nil))
+	gob.Register(value.NewFloat(0))
+	gob.Register(value.NewInt(0))
+	gob.Register(value.NewMap(nil, false))
+	gob.Register(value.NewString(""))
+	gob.Register(value.NewTime(time.Time{}))
+	gob.Register(value.NewUndefined())
+	gob.Register(value.NewBuiltinFunction("fn", nil, 0, false))
 }

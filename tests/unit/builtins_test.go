@@ -33,8 +33,8 @@ func Test_builtinDelete(t *testing.T) {
 		wantedErr error
 		target    any
 	}{
-		{name: "invalid-arg", args: args{[]core.Object{&value.String{},
-			&value.String{}}}, wantErr: true,
+		{name: "invalid-arg", args: args{[]core.Object{value.NewString(""),
+			value.NewString("")}}, wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{Name: "first", Expected: "map", Found: "string"},
 		},
 		{name: "no-args",
@@ -47,17 +47,17 @@ func Test_builtinDelete(t *testing.T) {
 			wantErr: true, wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "nil-map-empty-key",
-			args: args{[]core.Object{&value.Map{}, &value.String{}}},
+			args: args{[]core.Object{value.NewMap(nil, false), value.NewString("")}},
 			want: value.UndefinedValue,
 		},
 		//{name: "nil-map-nonstr-key",
 		//	args: args{[]core.Object{
-		//		&value.Map{}, &value.Int{}}}, wantErr: true,
+		//		value.NewMap(nil, false), value.NewInt(0)}}, wantErr: true,
 		//	wantedErr: gse.ErrInvalidArgumentType{
 		//		Name: "second", Expected: "string", Found: "int"},
 		//},
 		{name: "nil-map-no-key",
-			args: args{[]core.Object{&value.Map{}}}, wantErr: true,
+			args: args{[]core.Object{value.NewMap(nil, false)}}, wantErr: true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "map-missing-key",
@@ -151,13 +151,13 @@ func Test_builtinSplice(t *testing.T) {
 		{name: "no args", args: []core.Object{}, wantErr: true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
-		{name: "invalid args", args: []core.Object{&value.Map{}},
+		{name: "invalid args", args: []core.Object{value.NewMap(nil, false)},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "first", Expected: "array", Found: "map"},
 		},
 		{name: "invalid args",
-			args:    []core.Object{value.NewArray(nil, false), &value.String{}},
+			args:    []core.Object{value.NewArray(nil, false), value.NewString("")},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "second", Expected: "int", Found: "string"},
@@ -315,49 +315,49 @@ func Test_builtinRange(t *testing.T) {
 		{name: "no args", args: []core.Object{}, wantErr: true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
-		{name: "single args", args: []core.Object{&value.Map{}},
+		{name: "single args", args: []core.Object{value.NewMap(nil, false)},
 			wantErr:   true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
-		{name: "4 args", args: []core.Object{&value.Map{}, &value.String{}, &value.String{}, &value.String{}},
+		{name: "4 args", args: []core.Object{value.NewMap(nil, false), value.NewString(""), value.NewString(""), value.NewString("")},
 			wantErr:   true,
 			wantedErr: gse.ErrWrongNumArguments,
 		},
 		{name: "invalid start",
-			args:    []core.Object{&value.String{}, &value.String{}},
+			args:    []core.Object{value.NewString(""), value.NewString("")},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "start", Expected: "int", Found: "string"},
 		},
 		{name: "invalid stop",
-			args:    []core.Object{&value.Int{}, &value.String{}},
+			args:    []core.Object{value.NewInt(0), value.NewString("")},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "stop", Expected: "int", Found: "string"},
 		},
 		{name: "invalid step",
-			args:    []core.Object{&value.Int{}, &value.Int{}, &value.String{}},
+			args:    []core.Object{value.NewInt(0), value.NewInt(0), value.NewString("")},
 			wantErr: true,
 			wantedErr: gse.ErrInvalidArgumentType{
 				Name: "step", Expected: "int", Found: "string"},
 		},
 		{name: "zero step",
-			args:      []core.Object{&value.Int{}, &value.Int{}, &value.Int{}}, //must greate than 0
+			args:      []core.Object{value.NewInt(0), value.NewInt(0), value.NewInt(0)}, //must greate than 0
 			wantErr:   true,
 			wantedErr: gse.ErrInvalidRangeStep,
 		},
 		{name: "negative step",
-			args:      []core.Object{&value.Int{}, &value.Int{}, intObject(-2)}, //must greate than 0
+			args:      []core.Object{value.NewInt(0), value.NewInt(0), intObject(-2)}, //must greate than 0
 			wantErr:   true,
 			wantedErr: gse.ErrInvalidRangeStep,
 		},
 		{name: "same bound",
-			args:    []core.Object{&value.Int{}, &value.Int{}},
+			args:    []core.Object{value.NewInt(0), value.NewInt(0)},
 			wantErr: false,
 			result:  value.NewArray(nil, false),
 		},
 		{name: "positive range",
-			args:    []core.Object{&value.Int{}, value.NewInt(5)},
+			args:    []core.Object{value.NewInt(0), value.NewInt(5)},
 			wantErr: false,
 			result: value.NewArray([]core.Object{
 				intObject(0),
@@ -368,7 +368,7 @@ func Test_builtinRange(t *testing.T) {
 			}, false),
 		},
 		{name: "negative range",
-			args:    []core.Object{&value.Int{}, value.NewInt(-5)},
+			args:    []core.Object{value.NewInt(0), value.NewInt(-5)},
 			wantErr: false,
 			result: value.NewArray([]core.Object{
 				intObject(0),
@@ -380,7 +380,7 @@ func Test_builtinRange(t *testing.T) {
 		},
 
 		{name: "positive with step",
-			args:    []core.Object{&value.Int{}, value.NewInt(5), value.NewInt(2)},
+			args:    []core.Object{value.NewInt(0), value.NewInt(5), value.NewInt(2)},
 			wantErr: false,
 			result: value.NewArray([]core.Object{
 				intObject(0),
@@ -390,7 +390,7 @@ func Test_builtinRange(t *testing.T) {
 		},
 
 		{name: "negative with step",
-			args:    []core.Object{&value.Int{}, value.NewInt(-10), value.NewInt(2)},
+			args:    []core.Object{value.NewInt(0), value.NewInt(-10), value.NewInt(2)},
 			wantErr: false,
 			result: value.NewArray([]core.Object{
 				intObject(0),

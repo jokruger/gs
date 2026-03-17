@@ -2,35 +2,35 @@ package value_test
 
 /*
 func TestObject_TypeName(t *testing.T) {
-	var o core.Object = &value.Int{}
+	var o core.Object = value.NewInt(0)
 	require.Equal(t, "int", o.TypeName())
-	o = &value.Float{}
+	o = value.NewFloat(0)
 	require.Equal(t, "float", o.TypeName())
-	o = &value.Char{}
+	o = value.NewChar(0)
 	require.Equal(t, "char", o.TypeName())
-	o = &value.String{}
+	o = value.NewString("")
 	require.Equal(t, "string", o.TypeName())
-	o = &value.Bool{}
+	o = value.NewBool(false)
 	require.Equal(t, "bool", o.TypeName())
 	o = value.NewArray(nil, false)
 	require.Equal(t, "array", o.TypeName())
-	o = &value.Map{}
+	o = value.NewMap(nil, false)
 	require.Equal(t, "map", o.TypeName())
-	o = &value.ArrayIterator{}
+	o = value.NewArrayIterator(nil)
 	require.Equal(t, "array-iterator", o.TypeName())
-	o = &value.StringIterator{}
+	o = value.NewStringIterator(nil)
 	require.Equal(t, "string-iterator", o.TypeName())
-	o = &value.MapIterator{}
+	o = value.NewMapIterator(nil)
 	require.Equal(t, "map-iterator", o.TypeName())
-	o = &value.BuiltinFunction{Name: "fn"}
+	o = value.NewBuiltinFunction("fn", nil, 0, false)
 	require.Equal(t, "builtin-function:fn", o.TypeName())
 	o = &value.CompiledFunction{}
 	require.Equal(t, "compiled-function", o.TypeName())
-	o = &value.Undefined{}
+	o = value.UndefinedValue
 	require.Equal(t, "undefined", o.TypeName())
-	o = &value.Error{}
+	o = value.NewError(nil)
 	require.Equal(t, "error", o.TypeName())
-	o = &value.Bytes{}
+	o = value.NewBytes(nil)
 	require.Equal(t, "bytes", o.TypeName())
 }
 
@@ -59,21 +59,21 @@ func TestObject_IsFalsy(t *testing.T) {
 	require.True(t, o.IsFalsy())
 	o = &value.Map{Value: map[string]core.Object{"a": nil}} // nil is not valid but still count as 1 element
 	require.False(t, o.IsFalsy())
-	o = &value.StringIterator{}
+	o = value.NewStringIterator(nil)
 	require.True(t, o.IsFalsy())
-	o = &value.ArrayIterator{}
+	o = value.NewArrayIterator(nil)
 	require.True(t, o.IsFalsy())
-	o = &value.MapIterator{}
+	o = value.NewMapIterator(nil)
 	require.True(t, o.IsFalsy())
-	o = &value.BuiltinFunction{}
+	o = value.NewBuiltinFunction("fn", nil, 0, false)
 	require.False(t, o.IsFalsy())
 	o = &value.CompiledFunction{}
 	require.False(t, o.IsFalsy())
-	o = &value.Undefined{}
+	o = value.UndefinedValue
 	require.True(t, o.IsFalsy())
-	o = &value.Error{}
+	o = value.NewError(nil)
 	require.True(t, o.IsFalsy())
-	o = &value.Bytes{}
+	o = value.NewBytes(nil)
 	require.True(t, o.IsFalsy())
 	o = &value.Bytes{Value: []byte{1, 2}}
 	require.False(t, o.IsFalsy())
@@ -104,49 +104,49 @@ func TestObject_String(t *testing.T) {
 	require.Equal(t, "error", o.String())
 	o = &value.Error{Value: &value.String{Value: "error 1"}}
 	require.Equal(t, `error: "error 1"`, o.String())
-	o = &value.StringIterator{}
+	o = value.NewStringIterator(nil)
 	require.Equal(t, "<string-iterator>", o.String())
-	o = &value.ArrayIterator{}
+	o = value.NewArrayIterator(nil)
 	require.Equal(t, "<array-iterator>", o.String())
-	o = &value.MapIterator{}
+	o = value.NewMapIterator(nil)
 	require.Equal(t, "<map-iterator>", o.String())
-	o = &value.Undefined{}
+	o = value.UndefinedValue
 	require.Equal(t, "<undefined>", o.String())
-	o = &value.Bytes{}
+	o = value.NewBytes(nil)
 	require.Equal(t, "", o.String())
 	o = &value.Bytes{Value: []byte("foo")}
 	require.Equal(t, "foo", o.String())
 }
 
 func TestObject_BinaryOp(t *testing.T) {
-	var o core.Object = &value.Char{}
+	var o core.Object = value.NewChar(0)
 	_, err := o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
-	o = &value.Bool{}
+	o = value.NewBool(false)
 	_, err = o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
-	o = &value.Map{}
+	o = value.NewMap(nil, false)
 	_, err = o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
-	o = &value.ArrayIterator{}
+	o = value.NewArrayIterator(nil)
 	_, err = o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
-	o = &value.StringIterator{}
+	o = value.NewStringIterator(nil)
 	_, err = o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
-	o = &value.MapIterator{}
+	o = value.NewMapIterator(nil)
 	_, err = o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
-	o = &value.BuiltinFunction{}
+	o = value.NewBuiltinFunction("fn", nil, 0, false)
 	_, err = o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
 	o = &value.CompiledFunction{}
 	_, err = o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
-	o = &value.Undefined{}
+	o = value.UndefinedValue
 	_, err = o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
-	o = &value.Error{}
+	o = value.NewError(nil)
 	_, err = o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
 }

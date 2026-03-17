@@ -27,33 +27,7 @@
 
 uncomment:
     objects_test.go
-
     bytecode_test.go - gob serialization for private fields!
-
-replace with constructors:
-    &X{}
-    X{}
-    new(X)
-
-    for:
-        ArrayIterator
-        BytesIterator
-        MapIterator
-        StringIterator
-        String
-        Bytes
-        Char
-        Int
-        Float
-        Bool
-        Time
-        Map, ImmutableMap => Map
-        Array, ImmutableArray => Array
-        Undefined
-        ObjectPtr
-        Error
-        BuiltinFunction
-        CompiledFunction
 
 replace:
     .Native() => .Value()

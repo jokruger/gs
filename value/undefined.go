@@ -11,6 +11,10 @@ import (
 type Undefined struct {
 }
 
+func NewUndefined() *Undefined {
+	return &Undefined{}
+}
+
 func (o *Undefined) Next() bool {
 	return false
 }

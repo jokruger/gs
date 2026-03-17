@@ -1341,7 +1341,7 @@ func concatInsts(instructions ...[]byte) []byte {
 func bytecode(instructions []byte, constants []core.Object) *vm.Bytecode {
 	return &vm.Bytecode{
 		FileSet:      parser.NewFileSet(),
-		MainFunction: &value.CompiledFunction{Instructions: instructions},
+		MainFunction: &vm.CompiledFunction{Instructions: instructions},
 		Constants:    constants,
 	}
 }
@@ -1413,7 +1413,7 @@ func traceCompile(input string, symbols map[string]core.Object) (res *vm.Bytecod
 		symTable.Define(name)
 	}
 	for idx, fn := range vm.GetAllBuiltinFunctions() {
-		symTable.DefineBuiltin(idx, fn.Name)
+		symTable.DefineBuiltin(idx, fn.Name())
 	}
 
 	tr := &compileTracer{}
@@ -1445,15 +1445,15 @@ func objectsArray(o ...core.Object) []core.Object {
 }
 
 func intObject(v int64) *value.Int {
-	return &value.Int{Value: v}
+	return value.NewInt(v)
 }
 
 func stringObject(v string) *value.String {
-	return &value.String{Value: v}
+	return value.NewString(v)
 }
 
-func compiledFunction(numLocals, numParams int, insts ...[]byte) *value.CompiledFunction {
-	return &value.CompiledFunction{
+func compiledFunction(numLocals, numParams int, insts ...[]byte) *vm.CompiledFunction {
+	return &vm.CompiledFunction{
 		Instructions:  concatInsts(insts...),
 		NumLocals:     numLocals,
 		NumParameters: numParams,

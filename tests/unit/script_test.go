@@ -47,11 +47,10 @@ func TestScript_Add(t *testing.T) {
 			if len(args) > 0 {
 				switch arg := args[0].(type) {
 				case *value.Int:
-					return &value.Int{Value: arg.Value + 1}, nil
+					return value.NewInt(arg.Native() + 1), nil
 				}
 			}
-
-			return &value.Int{Value: 0}, nil
+			return value.NewInt(0), nil
 		}))
 	c, err := s.Compile()
 	require.NoError(t, err)
@@ -193,16 +192,16 @@ for i:=1; i<=d; i++ {
 e := mod1.double(s)
 `)
 	mod1 := map[string]core.Object{
-		"double": &value.BuiltinFunction{
-			Value: func(args ...core.Object) (
-				ret core.Object,
-				err error,
-			) {
+		"double": value.NewBuiltinFunction(
+			"unknown",
+			func(args ...core.Object) (ret core.Object, err error) {
 				arg0, _ := args[0].AsInt()
-				ret = &value.Int{Value: arg0 * 2}
+				ret = value.NewInt(arg0 * 2)
 				return
 			},
-		},
+			1,
+			false,
+		),
 	}
 
 	scr := gs.NewScript(code)
@@ -284,9 +283,9 @@ func (o *Counter) BinaryOp(op token.Token, rhs core.Object) (core.Object, error)
 	case *value.Int:
 		switch op {
 		case token.Add:
-			return &Counter{value: o.value + rhs.Value}, nil
+			return &Counter{value: o.value + rhs.Native()}, nil
 		case token.Sub:
-			return &Counter{value: o.value - rhs.Value}, nil
+			return &Counter{value: o.value - rhs.Native()}, nil
 		}
 	}
 
@@ -310,7 +309,7 @@ func (o *Counter) Copy() core.Object {
 }
 
 func (o *Counter) Call(core.VM, ...core.Object) (core.Object, error) {
-	return &value.Int{Value: o.value}, nil
+	return value.NewInt(o.value), nil
 }
 
 func (o *Counter) IsCallable() bool {
@@ -374,15 +373,17 @@ func TestScriptSourceModule(t *testing.T) {
 	scr = gs.NewScript([]byte(`out := import("mod")`))
 	mods = vm.NewModuleMap()
 	mods.AddSourceModule("mod", []byte(`text := import("text"); export text.title("foo")`))
-	mods.AddBuiltinModule("text",
-		map[string]core.Object{
-			"title": &value.BuiltinFunction{
-				Name: "title",
-				Value: func(args ...core.Object) (core.Object, error) {
-					s, _ := args[0].AsString()
-					return &value.String{Value: strings.Title(s)}, nil
-				}},
-		})
+	mods.AddBuiltinModule("text", map[string]core.Object{
+		"title": value.NewBuiltinFunction(
+			"title",
+			func(args ...core.Object) (core.Object, error) {
+				s, _ := args[0].AsString()
+				return value.NewString(strings.Title(s)), nil
+			},
+			1,
+			false,
+		),
+	})
 	scr.SetImports(mods)
 	c, err = scr.Run()
 	require.NoError(t, err)
@@ -544,22 +545,22 @@ func (n *customNumber) binaryOpInt(op token.Token, rhs *value.Int) (core.Object,
 
 	switch op {
 	case token.Less:
-		if i < rhs.Value {
+		if i < rhs.Native() {
 			return value.TrueValue, nil
 		}
 		return value.FalseValue, nil
 	case token.Greater:
-		if i > rhs.Value {
+		if i > rhs.Native() {
 			return value.TrueValue, nil
 		}
 		return value.FalseValue, nil
 	case token.LessEq:
-		if i <= rhs.Value {
+		if i <= rhs.Native() {
 			return value.TrueValue, nil
 		}
 		return value.FalseValue, nil
 	case token.GreaterEq:
-		if i >= rhs.Value {
+		if i >= rhs.Native() {
 			return value.TrueValue, nil
 		}
 		return value.FalseValue, nil

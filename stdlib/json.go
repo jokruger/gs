@@ -1,34 +1,31 @@
 package stdlib
 
 import (
-	"bytes"
-	gojson "encoding/json"
-
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
-	"github.com/jokruger/gs/stdlib/json"
-	"github.com/jokruger/gs/value"
 )
 
 var jsonModule = map[string]core.Object{
-	"decode": &value.BuiltinFunction{
-		Name:  "decode",
-		Value: jsonDecode,
-	},
-	"encode": &value.BuiltinFunction{
-		Name:  "encode",
-		Value: jsonEncode,
-	},
-	"indent": &value.BuiltinFunction{
-		Name:  "encode",
-		Value: jsonIndent,
-	},
-	"html_escape": &value.BuiltinFunction{
-		Name:  "html_escape",
-		Value: jsonHTMLEscape,
-	},
+	/*
+		"decode": &value.BuiltinFunction{
+			Name:  "decode",
+			Value: jsonDecode,
+		},
+		"encode": &value.BuiltinFunction{
+			Name:  "encode",
+			Value: jsonEncode,
+		},
+		"indent": &value.BuiltinFunction{
+			Name:  "encode",
+			Value: jsonIndent,
+		},
+		"html_escape": &value.BuiltinFunction{
+			Name:  "html_escape",
+			Value: jsonHTMLEscape,
+		},
+	*/
 }
 
+/*
 func jsonDecode(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
@@ -146,3 +143,4 @@ func jsonHTMLEscape(args ...core.Object) (ret core.Object, err error) {
 		}
 	}
 }
+*/

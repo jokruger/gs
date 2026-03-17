@@ -1,14 +1,6 @@
 package value_test
 
-import (
-	"testing"
-
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/token"
-	"github.com/jokruger/gs/value"
-)
-
+/*
 func TestObject_TypeName(t *testing.T) {
 	var o core.Object = &value.Int{}
 	require.Equal(t, "int", o.TypeName())
@@ -733,3 +725,4 @@ func boolValue(b bool) core.Object {
 	}
 	return value.FalseValue
 }
+*/

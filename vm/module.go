@@ -15,11 +15,11 @@ func (m *Module) Import(moduleName string) (any, error) {
 }
 
 // AsImmutableMap converts builtin module into an immutable map.
-func (m *Module) AsImmutableMap(moduleName string) *value.ImmutableMap {
+func (m *Module) AsImmutableMap(moduleName string) *value.Map {
 	attrs := make(map[string]core.Object, len(m.Attrs))
 	for k, v := range m.Attrs {
 		attrs[k] = v.Copy()
 	}
-	attrs["__module_name__"] = &value.String{Value: moduleName}
-	return &value.ImmutableMap{Value: attrs}
+	attrs["__module_name__"] = value.NewString(moduleName)
+	return value.NewMap(attrs, true)
 }

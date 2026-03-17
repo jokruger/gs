@@ -1,40 +1,39 @@
 package stdlib
 
 import (
-	"encoding/base64"
-
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
-	"github.com/jokruger/gs/value"
 )
 
 var base64Module = map[string]core.Object{
-	"encode": &value.BuiltinFunction{
-		Value: b64EncodeToString,
-	},
-	"decode": &value.BuiltinFunction{
-		Value: b64DecodeString,
-	},
-	"raw_encode": &value.BuiltinFunction{
-		Value: b64RawEncodeToString,
-	},
-	"raw_decode": &value.BuiltinFunction{
-		Value: b64RawDecodeString,
-	},
-	"url_encode": &value.BuiltinFunction{
-		Value: b64URLEncodeToString,
-	},
-	"url_decode": &value.BuiltinFunction{
-		Value: b64URLDecodeString,
-	},
-	"raw_url_encode": &value.BuiltinFunction{
-		Value: b64RawURLEncodeToString,
-	},
-	"raw_url_decode": &value.BuiltinFunction{
-		Value: b64RawURLDecodeString,
-	},
+	/*
+		"encode": &value.BuiltinFunction{
+			Value: b64EncodeToString,
+		},
+		"decode": &value.BuiltinFunction{
+			Value: b64DecodeString,
+		},
+		"raw_encode": &value.BuiltinFunction{
+			Value: b64RawEncodeToString,
+		},
+		"raw_decode": &value.BuiltinFunction{
+			Value: b64RawDecodeString,
+		},
+		"url_encode": &value.BuiltinFunction{
+			Value: b64URLEncodeToString,
+		},
+		"url_decode": &value.BuiltinFunction{
+			Value: b64URLDecodeString,
+		},
+		"raw_url_encode": &value.BuiltinFunction{
+			Value: b64RawURLEncodeToString,
+		},
+		"raw_url_decode": &value.BuiltinFunction{
+			Value: b64RawURLDecodeString,
+		},
+	*/
 }
 
+/*
 func b64RawURLDecodeString(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
@@ -186,3 +185,4 @@ func b64EncodeToString(args ...core.Object) (ret core.Object, err error) {
 	res := base64.StdEncoding.EncodeToString(y1)
 	return &value.String{Value: res}, nil
 }
+*/

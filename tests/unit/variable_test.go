@@ -33,7 +33,7 @@ func TestVariable(t *testing.T) {
 			CharValue:   rune(1),
 			BoolValue:   true,
 			StringValue: "1",
-			Object:      &value.Int{Value: 1},
+			Object:      value.NewInt(1),
 		},
 		{
 			Name:        "b",
@@ -42,7 +42,7 @@ func TestVariable(t *testing.T) {
 			FloatValue:  52.11,
 			StringValue: "52.11",
 			BoolValue:   true,
-			Object:      &value.String{Value: "52.11"},
+			Object:      value.NewString("52.11"),
 		},
 		{
 			Name:        "c",

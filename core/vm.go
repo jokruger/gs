@@ -3,6 +3,6 @@ package core
 type VM interface {
 	Abort()
 	IsStackEmpty() bool
-	Call(CompiledFunction, ...Object) (Object, error)
+	Call(Object, ...Object) (Object, error)
 	Run() error
 }

@@ -156,14 +156,14 @@ func RunREPL(modules *vm.ModuleMap, in io.Reader, out io.Writer) {
 	globals := make([]core.Object, vm.GlobalsSize)
 	symbolTable := vm.NewSymbolTable()
 	for idx, fn := range vm.GetAllBuiltinFunctions() {
-		symbolTable.DefineBuiltin(idx, fn.Name)
+		symbolTable.DefineBuiltin(idx, fn.Name())
 	}
 
 	// embed println function
 	symbol := symbolTable.Define("__repl_println__")
-	globals[symbol.Index] = &value.BuiltinFunction{
-		Name: "println",
-		Value: func(args ...core.Object) (ret core.Object, err error) {
+	globals[symbol.Index] = value.NewBuiltinFunction(
+		"println",
+		func(args ...core.Object) (ret core.Object, err error) {
 			var printArgs []any
 			for _, arg := range args {
 				if _, isUndefined := arg.(*value.Undefined); isUndefined {
@@ -177,7 +177,9 @@ func RunREPL(modules *vm.ModuleMap, in io.Reader, out io.Writer) {
 			_, _ = fmt.Print(printArgs...)
 			return
 		},
-	}
+		1,
+		true,
+	)
 
 	var constants []core.Object
 	for {

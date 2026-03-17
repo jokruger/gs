@@ -8,37 +8,37 @@ import (
 )
 
 var BuiltinFuncs = []*value.BuiltinFunction{
-	{Name: "len", Value: builtinLen},
-	{Name: "copy", Value: builtinCopy},
-	{Name: "append", Value: builtinAppend},
-	{Name: "delete", Value: builtinDelete},
-	{Name: "splice", Value: builtinSplice},
-	{Name: "string", Value: builtinString},
-	{Name: "int", Value: builtinInt},
-	{Name: "bool", Value: builtinBool},
-	{Name: "float", Value: builtinFloat},
-	{Name: "char", Value: builtinChar},
-	{Name: "bytes", Value: builtinBytes},
-	{Name: "time", Value: builtinTime},
-	{Name: "is_int", Value: builtinIsInt},
-	{Name: "is_float", Value: builtinIsFloat},
-	{Name: "is_string", Value: builtinIsString},
-	{Name: "is_bool", Value: builtinIsBool},
-	{Name: "is_char", Value: builtinIsChar},
-	{Name: "is_bytes", Value: builtinIsBytes},
-	{Name: "is_array", Value: builtinIsArray},
-	{Name: "is_immutable_array", Value: builtinIsImmutableArray},
-	{Name: "is_map", Value: builtinIsMap},
-	{Name: "is_immutable_map", Value: builtinIsImmutableMap},
-	{Name: "is_iterable", Value: builtinIsIterable},
-	{Name: "is_time", Value: builtinIsTime},
-	{Name: "is_error", Value: builtinIsError},
-	{Name: "is_undefined", Value: builtinIsUndefined},
-	{Name: "is_function", Value: builtinIsFunction},
-	{Name: "is_callable", Value: builtinIsCallable},
-	{Name: "type_name", Value: builtinTypeName},
-	{Name: "format", Value: builtinFormat},
-	{Name: "range", Value: builtinRange},
+	value.NewBuiltinFunction("len", builtinLen, 1, false),
+	value.NewBuiltinFunction("copy", builtinCopy, 1, false),
+	value.NewBuiltinFunction("append", builtinAppend, 2, true),
+	value.NewBuiltinFunction("delete", builtinDelete, 2, false),
+	value.NewBuiltinFunction("splice", builtinSplice, 1, true),
+	value.NewBuiltinFunction("string", builtinString, 1, true),
+	value.NewBuiltinFunction("int", builtinInt, 1, true),
+	value.NewBuiltinFunction("bool", builtinBool, 1, true),
+	value.NewBuiltinFunction("float", builtinFloat, 1, true),
+	value.NewBuiltinFunction("char", builtinChar, 1, true),
+	value.NewBuiltinFunction("bytes", builtinBytes, 1, true),
+	value.NewBuiltinFunction("time", builtinTime, 1, true),
+	value.NewBuiltinFunction("is_int", builtinIsInt, 1, false),
+	value.NewBuiltinFunction("is_float", builtinIsFloat, 1, false),
+	value.NewBuiltinFunction("is_string", builtinIsString, 1, false),
+	value.NewBuiltinFunction("is_bool", builtinIsBool, 1, false),
+	value.NewBuiltinFunction("is_char", builtinIsChar, 1, false),
+	value.NewBuiltinFunction("is_bytes", builtinIsBytes, 1, false),
+	value.NewBuiltinFunction("is_array", builtinIsArray, 1, false),
+	value.NewBuiltinFunction("is_immutable_array", builtinIsImmutableArray, 1, false),
+	value.NewBuiltinFunction("is_map", builtinIsMap, 1, false),
+	value.NewBuiltinFunction("is_immutable_map", builtinIsImmutableMap, 1, false),
+	value.NewBuiltinFunction("is_iterable", builtinIsIterable, 1, false),
+	value.NewBuiltinFunction("is_time", builtinIsTime, 1, false),
+	value.NewBuiltinFunction("is_error", builtinIsError, 1, false),
+	value.NewBuiltinFunction("is_undefined", builtinIsUndefined, 1, false),
+	value.NewBuiltinFunction("is_function", builtinIsFunction, 1, false),
+	value.NewBuiltinFunction("is_callable", builtinIsCallable, 1, false),
+	value.NewBuiltinFunction("type_name", builtinTypeName, 1, false),
+	value.NewBuiltinFunction("format", builtinFormat, 1, true),
+	value.NewBuiltinFunction("range", builtinRange, 2, true),
 }
 
 // GetAllBuiltinFunctions returns all builtin function objects.
@@ -50,7 +50,7 @@ func builtinTypeName(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	return &value.String{Value: args[0].TypeName()}, nil
+	return value.NewString(args[0].TypeName()), nil
 }
 
 func builtinIsString(args ...core.Object) (core.Object, error) {
@@ -127,7 +127,10 @@ func builtinIsImmutableArray(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*value.ImmutableArray); ok {
+	if !args[0].IsImmutable() {
+		return value.FalseValue, nil
+	}
+	if _, ok := args[0].(*value.Array); ok {
 		return value.TrueValue, nil
 	}
 	return value.FalseValue, nil
@@ -147,7 +150,10 @@ func builtinIsImmutableMap(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	if _, ok := args[0].(*value.ImmutableMap); ok {
+	if !args[0].IsImmutable() {
+		return value.FalseValue, nil
+	}
+	if _, ok := args[0].(*value.Map); ok {
 		return value.TrueValue, nil
 	}
 	return value.FalseValue, nil
@@ -188,7 +194,7 @@ func builtinIsFunction(args ...core.Object) (core.Object, error) {
 		return nil, gse.ErrWrongNumArguments
 	}
 	switch args[0].(type) {
-	case *value.CompiledFunction:
+	case *CompiledFunction:
 		return value.TrueValue, nil
 	}
 	return value.FalseValue, nil
@@ -221,17 +227,13 @@ func builtinLen(args ...core.Object) (core.Object, error) {
 	}
 	switch arg := args[0].(type) {
 	case *value.Array:
-		return &value.Int{Value: int64(len(arg.Value))}, nil
-	case *value.ImmutableArray:
-		return &value.Int{Value: int64(len(arg.Value))}, nil
+		return value.NewInt(int64(arg.Len())), nil
 	case *value.String:
-		return &value.Int{Value: int64(len(arg.Value))}, nil
+		return value.NewInt(int64(arg.Len())), nil
 	case *value.Bytes:
-		return &value.Int{Value: int64(len(arg.Value))}, nil
+		return value.NewInt(int64(arg.Len())), nil
 	case *value.Map:
-		return &value.Int{Value: int64(len(arg.Value))}, nil
-	case *value.ImmutableMap:
-		return &value.Int{Value: int64(len(arg.Value))}, nil
+		return value.NewInt(int64(arg.Len())), nil
 	default:
 		return nil, gse.ErrInvalidArgumentType{
 			Name:     "first",
@@ -247,10 +249,10 @@ func builtinRange(args ...core.Object) (core.Object, error) {
 	if numArgs < 2 || numArgs > 3 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	var start, stop, step *value.Int
 
+	var start, stop, step int64
 	for i, arg := range args {
-		v, ok := args[i].(*value.Int)
+		v, ok := args[i].AsInt()
 		if !ok {
 			var name string
 			switch i {
@@ -261,16 +263,13 @@ func builtinRange(args ...core.Object) (core.Object, error) {
 			case 2:
 				name = "step"
 			}
-
-			return nil, gse.ErrInvalidArgumentType{
-				Name:     name,
-				Expected: "int",
-				Found:    arg.TypeName(),
-			}
+			return nil, gse.ErrInvalidArgumentType{Name: name, Expected: "int", Found: arg.TypeName()}
 		}
-		if i == 2 && v.Value <= 0 {
+
+		if i == 2 && v <= 0 {
 			return nil, gse.ErrInvalidRangeStep
 		}
+
 		switch i {
 		case 0:
 			start = v
@@ -281,29 +280,25 @@ func builtinRange(args ...core.Object) (core.Object, error) {
 		}
 	}
 
-	if step == nil {
-		step = &value.Int{Value: int64(1)}
+	if step == 0 {
+		step = 1
 	}
 
-	return buildRange(start.Value, stop.Value, step.Value), nil
+	return buildRange(start, stop, step), nil
 }
 
 func buildRange(start, stop, step int64) *value.Array {
-	array := &value.Array{}
+	array := make([]core.Object, 0)
 	if start <= stop {
 		for i := start; i < stop; i += step {
-			array.Value = append(array.Value, &value.Int{
-				Value: i,
-			})
+			array = append(array, value.NewInt(i))
 		}
 	} else {
 		for i := start; i > stop; i -= step {
-			array.Value = append(array.Value, &value.Int{
-				Value: i,
-			})
+			array = append(array, value.NewInt(i))
 		}
 	}
-	return array
+	return value.NewArray(array, false)
 }
 
 func builtinFormat(args ...core.Object) (core.Object, error) {
@@ -311,23 +306,19 @@ func builtinFormat(args ...core.Object) (core.Object, error) {
 	if numArgs == 0 {
 		return nil, gse.ErrWrongNumArguments
 	}
-	format, ok := args[0].(*value.String)
+	format, ok := args[0].AsString()
 	if !ok {
-		return nil, gse.ErrInvalidArgumentType{
-			Name:     "format",
-			Expected: "string",
-			Found:    args[0].TypeName(),
-		}
+		return nil, gse.ErrInvalidArgumentType{Name: "format", Expected: "string", Found: args[0].TypeName()}
 	}
 	if numArgs == 1 {
 		// okay to return 'format' directly as String is immutable
-		return format, nil
+		return value.NewString(format), nil
 	}
-	s, err := formatter.Format(format.Value, args[1:]...)
+	s, err := formatter.Format(format, args[1:]...)
 	if err != nil {
 		return nil, err
 	}
-	return &value.String{Value: s}, nil
+	return value.NewString(s), nil
 }
 
 func builtinCopy(args ...core.Object) (core.Object, error) {
@@ -350,7 +341,7 @@ func builtinString(args ...core.Object) (core.Object, error) {
 		if len(v) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
-		return &value.String{Value: v}, nil
+		return value.NewString(v), nil
 	}
 	if argsLen == 2 {
 		return args[1], nil
@@ -368,7 +359,7 @@ func builtinInt(args ...core.Object) (core.Object, error) {
 	}
 	v, ok := args[0].AsInt()
 	if ok {
-		return &value.Int{Value: v}, nil
+		return value.NewInt(v), nil
 	}
 	if argsLen == 2 {
 		return args[1], nil
@@ -386,7 +377,7 @@ func builtinFloat(args ...core.Object) (core.Object, error) {
 	}
 	v, ok := args[0].AsFloat()
 	if ok {
-		return &value.Float{Value: v}, nil
+		return value.NewFloat(v), nil
 	}
 	if argsLen == 2 {
 		return args[1], nil
@@ -421,7 +412,7 @@ func builtinChar(args ...core.Object) (core.Object, error) {
 	}
 	v, ok := args[0].AsRune()
 	if ok {
-		return &value.Char{Value: v}, nil
+		return value.NewChar(v), nil
 	}
 	if argsLen == 2 {
 		return args[1], nil
@@ -437,17 +428,17 @@ func builtinBytes(args ...core.Object) (core.Object, error) {
 
 	// bytes(N) => create a new bytes with given size N
 	if n, ok := args[0].(*value.Int); ok {
-		if n.Value > int64(core.MaxBytesLen) {
+		if n.Native() > int64(core.MaxBytesLen) {
 			return nil, gse.ErrBytesLimit
 		}
-		return &value.Bytes{Value: make([]byte, int(n.Value))}, nil
+		return value.NewBytes(make([]byte, int(n.Native()))), nil
 	}
 	v, ok := args[0].AsByteSlice()
 	if ok {
 		if len(v) > core.MaxBytesLen {
 			return nil, gse.ErrBytesLimit
 		}
-		return &value.Bytes{Value: v}, nil
+		return value.NewBytes(v), nil
 	}
 	if argsLen == 2 {
 		return args[1], nil
@@ -465,7 +456,7 @@ func builtinTime(args ...core.Object) (core.Object, error) {
 	}
 	v, ok := args[0].AsTime()
 	if ok {
-		return &value.Time{Value: v}, nil
+		return value.NewTime(v), nil
 	}
 	if argsLen == 2 {
 		return args[1], nil
@@ -480,15 +471,9 @@ func builtinAppend(args ...core.Object) (core.Object, error) {
 	}
 	switch arg := args[0].(type) {
 	case *value.Array:
-		return &value.Array{Value: append(arg.Value, args[1:]...)}, nil
-	case *value.ImmutableArray:
-		return &value.Array{Value: append(arg.Value, args[1:]...)}, nil
+		return value.NewArray(append(arg.Native(), args[1:]...), false), nil
 	default:
-		return nil, gse.ErrInvalidArgumentType{
-			Name:     "first",
-			Expected: "array",
-			Found:    arg.TypeName(),
-		}
+		return nil, gse.ErrInvalidArgumentType{Name: "first", Expected: "array", Found: arg.TypeName()}
 	}
 }
 
@@ -502,21 +487,16 @@ func builtinDelete(args ...core.Object) (core.Object, error) {
 	}
 	switch arg := args[0].(type) {
 	case *value.Map:
-		if key, ok := args[1].(*value.String); ok {
-			delete(arg.Value, key.Value)
+		if arg.IsImmutable() {
+			return nil, gse.ErrInvalidArgumentType{Name: "first", Expected: "map", Found: arg.TypeName()}
+		}
+		if key, ok := args[1].AsString(); ok {
+			arg.Delete(key)
 			return value.UndefinedValue, nil
 		}
-		return nil, gse.ErrInvalidArgumentType{
-			Name:     "second",
-			Expected: "string",
-			Found:    args[1].TypeName(),
-		}
+		return nil, gse.ErrInvalidArgumentType{Name: "second", Expected: "string", Found: args[1].TypeName()}
 	default:
-		return nil, gse.ErrInvalidArgumentType{
-			Name:     "first",
-			Expected: "map",
-			Found:    arg.TypeName(),
-		}
+		return nil, gse.ErrInvalidArgumentType{Name: "first", Expected: "map", Found: arg.TypeName()}
 	}
 }
 
@@ -530,42 +510,31 @@ func builtinSplice(args ...core.Object) (core.Object, error) {
 	}
 
 	array, ok := args[0].(*value.Array)
-	if !ok {
-		return nil, gse.ErrInvalidArgumentType{
-			Name:     "first",
-			Expected: "array",
-			Found:    args[0].TypeName(),
-		}
+	if !ok || array.IsImmutable() {
+		return nil, gse.ErrInvalidArgumentType{Name: "first", Expected: "array", Found: args[0].TypeName()}
 	}
-	arrayLen := len(array.Value)
+
+	arrayLen := int(array.Len())
 
 	var startIdx int
 	if argsLen > 1 {
-		arg1, ok := args[1].(*value.Int)
+		arg1, ok := args[1].AsInt()
 		if !ok {
-			return nil, gse.ErrInvalidArgumentType{
-				Name:     "second",
-				Expected: "int",
-				Found:    args[1].TypeName(),
-			}
+			return nil, gse.ErrInvalidArgumentType{Name: "second", Expected: "int", Found: args[1].TypeName()}
 		}
-		startIdx = int(arg1.Value)
+		startIdx = int(arg1)
 		if startIdx < 0 || startIdx > arrayLen {
 			return nil, gse.ErrIndexOutOfBounds
 		}
 	}
 
-	delCount := len(array.Value)
+	delCount := arrayLen
 	if argsLen > 2 {
-		arg2, ok := args[2].(*value.Int)
+		arg2, ok := args[2].AsInt()
 		if !ok {
-			return nil, gse.ErrInvalidArgumentType{
-				Name:     "third",
-				Expected: "int",
-				Found:    args[2].TypeName(),
-			}
+			return nil, gse.ErrInvalidArgumentType{Name: "third", Expected: "int", Found: args[2].TypeName()}
 		}
-		delCount = int(arg2.Value)
+		delCount = int(arg2)
 		if delCount < 0 {
 			return nil, gse.ErrIndexOutOfBounds
 		}
@@ -576,9 +545,9 @@ func builtinSplice(args ...core.Object) (core.Object, error) {
 	}
 	// delete items
 	endIdx := startIdx + delCount
-	deleted := append([]core.Object{}, array.Value[startIdx:endIdx]...)
+	deleted := append([]core.Object{}, array.Slice(startIdx, endIdx)...)
 
-	head := array.Value[:startIdx]
+	head := array.Slice(0, startIdx)
 	var items []core.Object
 	if argsLen > 3 {
 		items = make([]core.Object, 0, argsLen-3)
@@ -586,9 +555,9 @@ func builtinSplice(args ...core.Object) (core.Object, error) {
 			items = append(items, args[i])
 		}
 	}
-	items = append(items, array.Value[endIdx:]...)
-	array.Value = append(head, items...)
+	items = append(items, array.Slice(endIdx, array.Len())...)
+	array.Set(append(head, items...), false)
 
 	// return deleted items
-	return &value.Array{Value: deleted}, nil
+	return value.NewArray(deleted, false), nil
 }

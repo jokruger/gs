@@ -2,6 +2,7 @@ package value
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
@@ -9,9 +10,59 @@ import (
 )
 
 type String struct {
-	Object
-	Value   string
-	runeStr []rune
+	value string
+	runes []rune
+}
+
+func NewString(s string) *String {
+	o := &String{}
+	o.Set(s)
+	return o
+}
+
+func (o *String) Set(s string) {
+	o.value = s
+	o.runes = []rune(o.value)
+}
+
+func (o *String) Native() string {
+	return o.value
+}
+
+func (o *String) Runes() []rune {
+	return o.runes
+}
+
+func (o *String) IsEmpty() bool {
+	return len(o.value) == 0
+}
+
+func (o *String) Len() int {
+	return len(o.runes)
+}
+
+func (o *String) At(i int) rune {
+	return o.runes[i]
+}
+
+func (o *String) Get(i int) (rune, bool) {
+	if i < 0 || i >= len(o.runes) {
+		return 0, false
+	}
+	return o.runes[i], true
+}
+
+func (o *String) Slice(start, end int) string {
+	return o.value[start:end]
+}
+
+func (o *String) Substring(start, end int) string {
+	return string(o.runes[start:end])
+}
+
+func (o *String) Append(s string) {
+	o.value += s
+	o.runes = []rune(o.value)
 }
 
 func (o *String) TypeName() string {
@@ -19,7 +70,15 @@ func (o *String) TypeName() string {
 }
 
 func (o *String) String() string {
-	return strconv.Quote(o.Value)
+	return strconv.Quote(o.value)
+}
+
+func (o *String) Interface() any {
+	return o.value
+}
+
+func (o *String) Arity() int {
+	return 0
 }
 
 func (o *String) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
@@ -27,21 +86,21 @@ func (o *String) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) 
 	case token.Add:
 		switch rhs := rhs.(type) {
 		case *String:
-			if len(o.Value)+len(rhs.Value) > core.MaxStringLen {
+			if len(o.value)+len(rhs.value) > core.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
-			return &String{Value: o.Value + rhs.Value}, nil
+			return NewString(o.value + rhs.value), nil
 		default:
-			rhsStr := rhs.String()
-			if len(o.Value)+len(rhsStr) > core.MaxStringLen {
+			s := rhs.String()
+			if len(o.value)+len(s) > core.MaxStringLen {
 				return nil, gse.ErrStringLimit
 			}
-			return &String{Value: o.Value + rhsStr}, nil
+			return NewString(o.value + s), nil
 		}
 	case token.Less:
 		switch rhs := rhs.(type) {
 		case *String:
-			if o.Value < rhs.Value {
+			if o.value < rhs.value {
 				return TrueValue, nil
 			}
 			return FalseValue, nil
@@ -49,7 +108,7 @@ func (o *String) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) 
 	case token.LessEq:
 		switch rhs := rhs.(type) {
 		case *String:
-			if o.Value <= rhs.Value {
+			if o.value <= rhs.value {
 				return TrueValue, nil
 			}
 			return FalseValue, nil
@@ -57,7 +116,7 @@ func (o *String) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) 
 	case token.Greater:
 		switch rhs := rhs.(type) {
 		case *String:
-			if o.Value > rhs.Value {
+			if o.value > rhs.value {
 				return TrueValue, nil
 			}
 			return FalseValue, nil
@@ -65,7 +124,7 @@ func (o *String) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) 
 	case token.GreaterEq:
 		switch rhs := rhs.(type) {
 		case *String:
-			if o.Value >= rhs.Value {
+			if o.value >= rhs.value {
 				return TrueValue, nil
 			}
 			return FalseValue, nil
@@ -74,60 +133,70 @@ func (o *String) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) 
 	return nil, gse.ErrInvalidOperator
 }
 
-func (o *String) IsFalsy() bool {
-	return len(o.Value) == 0
-}
-
-func (o *String) Copy() core.Object {
-	return &String{Value: o.Value}
-}
-
 func (o *String) Equals(x core.Object) bool {
 	t, ok := x.(*String)
 	if !ok {
 		return false
 	}
-	return o.Value == t.Value
+	return o.value == t.value
+}
+
+func (o *String) Copy() core.Object {
+	return NewString(o.value)
 }
 
 func (o *String) IndexGet(index core.Object) (res core.Object, err error) {
-	intIdx, ok := index.(*Int)
+	i, ok := index.AsInt()
 	if !ok {
 		err = gse.ErrInvalidIndexType
 		return
 	}
-	idxVal := int(intIdx.Value)
-	if o.runeStr == nil {
-		o.runeStr = []rune(o.Value)
-	}
-	if idxVal < 0 || idxVal >= len(o.runeStr) {
+	if i < 0 || i >= int64(len(o.runes)) {
 		res = UndefinedValue
 		return
 	}
-	res = &Char{Value: o.runeStr[idxVal]}
+	res = NewChar(o.runes[i])
 	return
 }
 
+func (o *String) IndexSet(core.Object, core.Object) error {
+	return gse.ErrNotIndexAssignable
+}
+
 func (o *String) Iterate() core.Iterator {
-	if o.runeStr == nil {
-		o.runeStr = []rune(o.Value)
-	}
-	return &StringIterator{
-		v: o.runeStr,
-		l: len(o.runeStr),
-	}
+	return NewStringIterator(o.runes)
+}
+
+func (o *String) Call(core.VM, ...core.Object) (core.Object, error) {
+	return nil, nil
+}
+
+func (o *String) IsFalsy() bool {
+	return len(o.value) == 0
 }
 
 func (o *String) IsIterable() bool {
 	return true
 }
 
+func (o *String) IsCallable() bool {
+	return false
+}
+
+func (o *String) IsImmutable() bool {
+	return false
+}
+
+func (o *String) IsVariadic() bool {
+	return false
+}
+
 func (o *String) AsString() (string, bool) {
-	return o.Value, true
+	return o.value, true
 }
 
 func (o *String) AsInt() (int64, bool) {
-	i, err := strconv.ParseInt(o.Value, 10, 64)
+	i, err := strconv.ParseInt(o.value, 10, 64)
 	if err == nil {
 		return i, true
 	}
@@ -135,7 +204,7 @@ func (o *String) AsInt() (int64, bool) {
 }
 
 func (o *String) AsFloat() (float64, bool) {
-	f, err := strconv.ParseFloat(o.Value, 64)
+	f, err := strconv.ParseFloat(o.value, 64)
 	if err == nil {
 		return f, true
 	}
@@ -146,10 +215,14 @@ func (o *String) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *String) AsByteSlice() ([]byte, bool) {
-	return []byte(o.Value), true
+func (o *String) AsRune() (rune, bool) {
+	return 0, false
 }
 
-func (o *String) Interface() any {
-	return o.Value
+func (o *String) AsByteSlice() ([]byte, bool) {
+	return []byte(o.value), true
+}
+
+func (o *String) AsTime() (time.Time, bool) {
+	return time.Time{}, false
 }

@@ -1,17 +1,18 @@
-package value
+package vm
 
 import (
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/value"
 )
 
 type CompiledFunction struct {
-	Object
+	value.Object
 	Instructions  []byte
 	NumLocals     int // number of local variables (including function parameters)
 	NumParameters int
 	VarArgs       bool
 	SourceMap     map[int]core.Pos
-	Free          []*ObjectPtr
+	Free          []*value.ObjectPtr
 }
 
 func (o *CompiledFunction) TypeName() string {
@@ -20,6 +21,14 @@ func (o *CompiledFunction) TypeName() string {
 
 func (o *CompiledFunction) String() string {
 	return "<compiled-function>"
+}
+
+func (o *CompiledFunction) Arity() int {
+	return o.NumParameters
+}
+
+func (o *CompiledFunction) IsVariadic() bool {
+	return o.VarArgs
 }
 
 func (o *CompiledFunction) Size() int64 {
@@ -32,7 +41,7 @@ func (o *CompiledFunction) Copy() core.Object {
 		NumLocals:     o.NumLocals,
 		NumParameters: o.NumParameters,
 		VarArgs:       o.VarArgs,
-		Free:          append([]*ObjectPtr{}, o.Free...), // DO NOT Copy() of elements; these are variable pointers
+		Free:          append([]*value.ObjectPtr{}, o.Free...), // DO NOT Copy() of elements; these are variable pointers
 	}
 }
 

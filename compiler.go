@@ -56,7 +56,7 @@ type Compiler struct {
 	scopes          []compilationScope
 	scopeIndex      int
 	modules         vm.ModuleGetter
-	compiledModules map[string]*value.CompiledFunction
+	compiledModules map[string]*vm.CompiledFunction
 	allowFileImport bool
 	loops           []*loop
 	loopIndex       int
@@ -84,7 +84,7 @@ func NewCompiler(
 
 	// add builtin functions to the symbol table
 	for idx, fn := range vm.BuiltinFuncs {
-		symbolTable.DefineBuiltin(idx, fn.Name)
+		symbolTable.DefineBuiltin(idx, fn.Name())
 	}
 
 	// builtin modules
@@ -101,7 +101,7 @@ func NewCompiler(
 		loopIndex:       -1,
 		trace:           trace,
 		modules:         modules,
-		compiledModules: make(map[string]*value.CompiledFunction),
+		compiledModules: make(map[string]*vm.CompiledFunction),
 		importFileExt:   []string{SourceFileExtDefault},
 	}
 }
@@ -192,9 +192,9 @@ func (c *Compiler) Compile(node parser.Node) error {
 				node.Token.String())
 		}
 	case *parser.IntLit:
-		c.emit(node, parser.OpConstant, c.addConstant(&value.Int{Value: node.Value}))
+		c.emit(node, parser.OpConstant, c.addConstant(value.NewInt(node.Value)))
 	case *parser.FloatLit:
-		c.emit(node, parser.OpConstant, c.addConstant(&value.Float{Value: node.Value}))
+		c.emit(node, parser.OpConstant, c.addConstant(value.NewFloat(node.Value)))
 	case *parser.BoolLit:
 		if node.Value {
 			c.emit(node, parser.OpTrue)
@@ -205,9 +205,9 @@ func (c *Compiler) Compile(node parser.Node) error {
 		if len(node.Value) > core.MaxStringLen {
 			return c.error(node, gse.ErrStringLimit)
 		}
-		c.emit(node, parser.OpConstant, c.addConstant(&value.String{Value: node.Value}))
+		c.emit(node, parser.OpConstant, c.addConstant(value.NewString(node.Value)))
 	case *parser.CharLit:
-		c.emit(node, parser.OpConstant, c.addConstant(&value.Char{Value: node.Value}))
+		c.emit(node, parser.OpConstant, c.addConstant(value.NewChar(node.Value)))
 	case *parser.UndefinedLit:
 		c.emit(node, parser.OpNull)
 	case *parser.UnaryExpr:
@@ -341,7 +341,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 				return c.error(node, gse.ErrStringLimit)
 			}
 			c.emit(node, parser.OpConstant,
-				c.addConstant(&value.String{Value: elt.Key}))
+				c.addConstant(value.NewString(elt.Key)))
 
 			// value
 			if err := c.Compile(elt.Value); err != nil {
@@ -459,7 +459,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			}
 		}
 
-		compiledFunction := &value.CompiledFunction{
+		compiledFunction := &vm.CompiledFunction{
 			Instructions:  instructions,
 			NumLocals:     numLocals,
 			NumParameters: len(node.Type.Params.List),
@@ -606,7 +606,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 func (c *Compiler) Bytecode() *vm.Bytecode {
 	return &vm.Bytecode{
 		FileSet: c.file.Set(),
-		MainFunction: &value.CompiledFunction{
+		MainFunction: &vm.CompiledFunction{
 			Instructions: append(c.currentInstructions(), parser.OpSuspend),
 			SourceMap:    c.currentSourceMap(),
 		},
@@ -979,12 +979,7 @@ func (c *Compiler) checkCyclicImports(
 	return nil
 }
 
-func (c *Compiler) compileModule(
-	node parser.Node,
-	modulePath string,
-	src []byte,
-	isFile bool,
-) (*value.CompiledFunction, error) {
+func (c *Compiler) compileModule(node parser.Node, modulePath string, src []byte, isFile bool) (*vm.CompiledFunction, error) {
 	if err := c.checkCyclicImports(node, modulePath); err != nil {
 		return nil, err
 	}
@@ -1024,9 +1019,7 @@ func (c *Compiler) compileModule(
 	return compiledFunc, nil
 }
 
-func (c *Compiler) loadCompiledModule(
-	modulePath string,
-) (mod *value.CompiledFunction, ok bool) {
+func (c *Compiler) loadCompiledModule(modulePath string) (mod *vm.CompiledFunction, ok bool) {
 	if c.parent != nil {
 		return c.parent.loadCompiledModule(modulePath)
 	}
@@ -1034,10 +1027,7 @@ func (c *Compiler) loadCompiledModule(
 	return
 }
 
-func (c *Compiler) storeCompiledModule(
-	modulePath string,
-	module *value.CompiledFunction,
-) {
+func (c *Compiler) storeCompiledModule(modulePath string, module *vm.CompiledFunction) {
 	if c.parent != nil {
 		c.parent.storeCompiledModule(modulePath, module)
 	}

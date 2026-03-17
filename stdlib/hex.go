@@ -1,18 +1,17 @@
 package stdlib
 
 import (
-	"encoding/hex"
-
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
-	"github.com/jokruger/gs/value"
 )
 
 var hexModule = map[string]core.Object{
-	"encode": &value.BuiltinFunction{Value: hexEncodeToString},
-	"decode": &value.BuiltinFunction{Value: hexDecodeString},
+	/*
+		"encode": &value.BuiltinFunction{Value: hexEncodeToString},
+		"decode": &value.BuiltinFunction{Value: hexDecodeString},
+	*/
 }
 
+/*
 func hexDecodeString(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
@@ -50,3 +49,4 @@ func hexEncodeToString(args ...core.Object) (ret core.Object, err error) {
 	res := hex.EncodeToString(y1)
 	return &value.String{Value: res}, nil
 }
+*/

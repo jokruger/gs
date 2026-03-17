@@ -59,55 +59,38 @@ func TestMakeInstruction(t *testing.T) {
 }
 
 func TestNumObjects(t *testing.T) {
-	testCountObjects(t, &value.Array{}, 1)
-	testCountObjects(t, &value.Array{Value: []core.Object{
-		&value.Int{Value: 1},
-		&value.Int{Value: 2},
-		&value.Array{Value: []core.Object{
-			&value.Int{Value: 3},
-			&value.Int{Value: 4},
-			&value.Int{Value: 5},
-		}},
-	}}, 7)
+	testCountObjects(t, value.NewArray(nil, false), 1)
+	testCountObjects(t, value.NewArray([]core.Object{
+		value.NewInt(1),
+		value.NewInt(2),
+		value.NewArray([]core.Object{value.NewInt(3), value.NewInt(4), value.NewInt(5)}, false),
+	}, false), 7)
 	testCountObjects(t, value.TrueValue, 1)
 	testCountObjects(t, value.FalseValue, 1)
-	testCountObjects(t, &value.BuiltinFunction{}, 1)
-	testCountObjects(t, &value.Bytes{Value: []byte("foobar")}, 1)
-	testCountObjects(t, &value.Char{Value: '가'}, 1)
-	testCountObjects(t, &value.CompiledFunction{}, 1)
-	testCountObjects(t, &value.Error{Value: &value.Int{Value: 5}}, 2)
-	testCountObjects(t, &value.Float{Value: 19.84}, 1)
-	testCountObjects(t, &value.ImmutableArray{Value: []core.Object{
-		&value.Int{Value: 1},
-		&value.Int{Value: 2},
-		&value.ImmutableArray{Value: []core.Object{
-			&value.Int{Value: 3},
-			&value.Int{Value: 4},
-			&value.Int{Value: 5},
-		}},
-	}}, 7)
-	testCountObjects(t, &value.ImmutableMap{
-		Value: map[string]core.Object{
-			"k1": &value.Int{Value: 1},
-			"k2": &value.Int{Value: 2},
-			"k3": &value.Array{Value: []core.Object{
-				&value.Int{Value: 3},
-				&value.Int{Value: 4},
-				&value.Int{Value: 5},
-			}},
-		}}, 7)
-	testCountObjects(t, &value.Int{Value: 1984}, 1)
-	testCountObjects(t, &value.Map{Value: map[string]core.Object{
-		"k1": &value.Int{Value: 1},
-		"k2": &value.Int{Value: 2},
-		"k3": &value.Array{Value: []core.Object{
-			&value.Int{Value: 3},
-			&value.Int{Value: 4},
-			&value.Int{Value: 5},
-		}},
-	}}, 7)
-	testCountObjects(t, &value.String{Value: "foo bar"}, 1)
-	testCountObjects(t, &value.Time{Value: time.Now()}, 1)
+	testCountObjects(t, value.NewBuiltinFunction("", nil, 0, false), 1)
+	testCountObjects(t, value.NewBytes([]byte("foobar")), 1)
+	testCountObjects(t, value.NewChar('가'), 1)
+	testCountObjects(t, &vm.CompiledFunction{}, 1)
+	testCountObjects(t, value.NewError(value.NewInt(5)), 2)
+	testCountObjects(t, value.NewFloat(19.84), 1)
+	testCountObjects(t, value.NewArray([]core.Object{
+		value.NewInt(1),
+		value.NewInt(2),
+		value.NewArray([]core.Object{value.NewInt(3), value.NewInt(4), value.NewInt(5)}, true),
+	}, true), 7)
+	testCountObjects(t, value.NewMap(map[string]core.Object{
+		"k1": value.NewInt(1),
+		"k2": value.NewInt(2),
+		"k3": value.NewArray([]core.Object{value.NewInt(3), value.NewInt(4), value.NewInt(5)}, false),
+	}, true), 7)
+	testCountObjects(t, value.NewInt(1984), 1)
+	testCountObjects(t, value.NewMap(map[string]core.Object{
+		"k1": value.NewInt(1),
+		"k2": value.NewInt(2),
+		"k3": value.NewArray([]core.Object{value.NewInt(3), value.NewInt(4), value.NewInt(5)}, false),
+	}, false), 7)
+	testCountObjects(t, value.NewString("foo bar"), 1)
+	testCountObjects(t, value.NewTime(time.Now()), 1)
 	testCountObjects(t, value.UndefinedValue, 1)
 }
 

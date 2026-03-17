@@ -3,113 +3,210 @@ package value
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
+	"github.com/jokruger/gs/token"
 )
 
 type Map struct {
-	Object
-	Value map[string]core.Object
+	value     map[string]core.Object
+	immutable bool
+}
+
+func NewMap(val map[string]core.Object, immutable bool) *Map {
+	o := &Map{}
+	o.Set(val, immutable)
+	return o
+}
+
+func (o *Map) Set(val map[string]core.Object, immutable bool) {
+	o.value = val
+	if o.value == nil {
+		o.value = make(map[string]core.Object)
+	}
+
+	o.immutable = immutable
+}
+
+func (o *Map) Native() map[string]core.Object {
+	return o.value
+}
+
+func (o *Map) IsEmpty() bool {
+	return len(o.value) == 0
+}
+
+func (o *Map) Len() int {
+	return len(o.value)
+}
+
+func (o *Map) Delete(key string) {
+	delete(o.value, key)
+}
+
+func (o *Map) Has(key string) bool {
+	_, ok := o.value[key]
+	return ok
+}
+
+func (o *Map) Get(key string) (core.Object, bool) {
+	v, ok := o.value[key]
+	return v, ok
+}
+
+func (o *Map) Keys() []string {
+	keys := make([]string, 0, len(o.value))
+	for k := range o.value {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+func (o *Map) SetKey(key string, value core.Object) {
+	o.value[key] = value
 }
 
 func (o *Map) TypeName() string {
+	if o.immutable {
+		return "immutable-map"
+	}
 	return "map"
 }
 
 func (o *Map) String() string {
 	var pairs []string
-	for k, v := range o.Value {
+	for k, v := range o.value {
 		pairs = append(pairs, fmt.Sprintf("%s: %s", k, v.String()))
 	}
 	return fmt.Sprintf("{%s}", strings.Join(pairs, ", "))
 }
 
-func (o *Map) Copy() core.Object {
-	c := make(map[string]core.Object)
-	for k, v := range o.Value {
-		c[k] = v.Copy()
+func (o *Map) Interface() any {
+	res := make(map[string]any)
+	for key, v := range o.value {
+		res[key] = v.Interface()
 	}
-	return &Map{Value: c}
+	return res
 }
 
-func (o *Map) IsFalsy() bool {
-	return len(o.Value) == 0
+func (o *Map) Arity() int {
+	return 0
+}
+
+func (o *Map) BinaryOp(token.Token, core.Object) (core.Object, error) {
+	return nil, gse.ErrInvalidOperator
 }
 
 func (o *Map) Equals(x core.Object) bool {
-	var xVal map[string]core.Object
+	if o == x {
+		return true
+	}
+
 	switch x := x.(type) {
 	case *Map:
-		xVal = x.Value
-	case *ImmutableMap:
-		xVal = x.Value
+		if len(o.value) != len(x.value) {
+			return false
+		}
+		for k, v := range o.value {
+			if !v.Equals(x.value[k]) {
+				return false
+			}
+		}
+		return true
 	default:
 		return false
 	}
-	if len(o.Value) != len(xVal) {
-		return false
-	}
-	for k, v := range o.Value {
-		tv := xVal[k]
-		if !v.Equals(tv) {
-			return false
-		}
-	}
-	return true
 }
 
-func (o *Map) IndexGet(index core.Object) (res core.Object, err error) {
-	strIdx, ok := index.AsString()
-	if !ok {
-		err = gse.ErrInvalidIndexType
-		return
+func (o *Map) Copy() core.Object {
+	// perform a deep copy of the map even if it is immutable (since the values may be mutable)
+	c := make(map[string]core.Object, len(o.value))
+	for k, v := range o.value {
+		c[k] = v.Copy()
 	}
-	res, ok = o.Value[strIdx]
-	if !ok {
-		res = UndefinedValue
-	}
-	return
+	return NewMap(c, false) // copy always returns a mutable map
 }
 
-func (o *Map) IndexSet(index, value core.Object) (err error) {
-	strIdx, ok := index.AsString()
+func (o *Map) IndexGet(index core.Object) (core.Object, error) {
+	k, ok := index.AsString()
 	if !ok {
-		err = gse.ErrInvalidIndexType
-		return
+		return nil, gse.ErrInvalidIndexType
 	}
-	o.Value[strIdx] = value
+	r, ok := o.value[k]
+	if !ok {
+		return UndefinedValue, nil
+	}
+	return r, nil
+}
+
+func (o *Map) IndexSet(index, value core.Object) error {
+	if o.immutable {
+		return gse.ErrNotIndexAssignable
+	}
+
+	k, ok := index.AsString()
+	if !ok {
+		return gse.ErrInvalidIndexType
+	}
+	o.value[k] = value
+
 	return nil
 }
 
 func (o *Map) Iterate() core.Iterator {
-	var keys []string
-	for k := range o.Value {
-		keys = append(keys, k)
-	}
-	return &MapIterator{
-		v: o.Value,
-		k: keys,
-		l: len(keys),
-	}
+	return NewMapIterator(o.value)
+}
+
+func (o *Map) Call(core.VM, ...core.Object) (core.Object, error) {
+	return nil, nil
+}
+
+func (o *Map) IsFalsy() bool {
+	return len(o.value) == 0
 }
 
 func (o *Map) IsIterable() bool {
 	return true
 }
 
+func (o *Map) IsCallable() bool {
+	return false
+}
+
+func (o *Map) IsImmutable() bool {
+	return o.immutable
+}
+
+func (o *Map) IsVariadic() bool {
+	return false
+}
+
 func (o *Map) AsString() (string, bool) {
 	return o.String(), true
+}
+
+func (o *Map) AsInt() (int64, bool) {
+	return 0, false
+}
+
+func (o *Map) AsFloat() (float64, bool) {
+	return 0, false
 }
 
 func (o *Map) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Map) Interface() any {
-	res := make(map[string]any)
-	for key, v := range o.Value {
-		res[key] = v.Interface()
-	}
-	return res
+func (o *Map) AsRune() (rune, bool) {
+	return 0, false
+}
+
+func (o *Map) AsByteSlice() ([]byte, bool) {
+	return nil, false
+}
+
+func (o *Map) AsTime() (time.Time, bool) {
+	return time.Time{}, false
 }

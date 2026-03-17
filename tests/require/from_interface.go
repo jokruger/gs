@@ -17,31 +17,31 @@ func FromInterface(v any) (core.Object, error) {
 		if len(v) > core.MaxStringLen {
 			return nil, gse.ErrStringLimit
 		}
-		return &value.String{Value: v}, nil
+		return value.NewString(v), nil
 	case int64:
-		return &value.Int{Value: v}, nil
+		return value.NewInt(v), nil
 	case int:
-		return &value.Int{Value: int64(v)}, nil
+		return value.NewInt(int64(v)), nil
 	case bool:
 		if v {
 			return value.TrueValue, nil
 		}
 		return value.FalseValue, nil
 	case rune:
-		return &value.Char{Value: v}, nil
+		return value.NewChar(v), nil
 	case byte:
-		return &value.Char{Value: rune(v)}, nil
+		return value.NewChar(rune(v)), nil
 	case float64:
-		return &value.Float{Value: v}, nil
+		return value.NewFloat(v), nil
 	case []byte:
 		if len(v) > core.MaxBytesLen {
 			return nil, gse.ErrBytesLimit
 		}
-		return &value.Bytes{Value: v}, nil
+		return value.NewBytes(v), nil
 	case error:
-		return &value.Error{Value: &value.String{Value: v.Error()}}, nil
+		return value.NewError(value.NewString(v.Error())), nil
 	case map[string]core.Object:
-		return &value.Map{Value: v}, nil
+		return value.NewMap(v, false), nil
 	case map[string]any:
 		kv := make(map[string]core.Object)
 		for vk, vv := range v {
@@ -51,9 +51,9 @@ func FromInterface(v any) (core.Object, error) {
 			}
 			kv[vk] = vo
 		}
-		return &value.Map{Value: kv}, nil
+		return value.NewMap(kv, false), nil
 	case []core.Object:
-		return &value.Array{Value: v}, nil
+		return value.NewArray(v, false), nil
 	case []any:
 		arr := make([]core.Object, len(v))
 		for i, e := range v {
@@ -63,13 +63,13 @@ func FromInterface(v any) (core.Object, error) {
 			}
 			arr[i] = vo
 		}
-		return &value.Array{Value: arr}, nil
+		return value.NewArray(arr, false), nil
 	case time.Time:
-		return &value.Time{Value: v}, nil
+		return value.NewTime(v), nil
 	case core.Object:
 		return v, nil
 	case core.NativeFunc:
-		return &value.BuiltinFunction{Value: v}, nil
+		return value.NewBuiltinFunction("anonymous", v, 0, true), nil
 	}
 	return nil, fmt.Errorf("cannot convert to object: %T", v)
 }

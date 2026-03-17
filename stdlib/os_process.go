@@ -2,54 +2,54 @@ package stdlib
 
 import (
 	"os"
-	"syscall"
 
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
 
-func makeOSProcessState(state *os.ProcessState) *value.ImmutableMap {
-	statePid := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
+func makeOSProcessState(state *os.ProcessState) *value.Map {
+	/*
+		statePid := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			return &value.Int{Value: int64(state.Pid())}, nil
 		}
-		return &value.Int{Value: int64(state.Pid())}, nil
-	}
 
-	stateExited := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
+		stateExited := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			if state.Exited() {
+				return value.TrueValue, nil
+			}
+			return value.FalseValue, nil
 		}
-		if state.Exited() {
-			return value.TrueValue, nil
-		}
-		return value.FalseValue, nil
-	}
 
-	stateSuccess := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
+		stateSuccess := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			if state.Success() {
+				return value.TrueValue, nil
+			}
+			return value.FalseValue, nil
 		}
-		if state.Success() {
-			return value.TrueValue, nil
-		}
-		return value.FalseValue, nil
-	}
 
-	stateString := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
+		stateString := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			s := state.String()
+			if len(s) > core.MaxStringLen {
+				return nil, gse.ErrStringLimit
+			}
+			return &value.String{Value: s}, nil
 		}
-		s := state.String()
-		if len(s) > core.MaxStringLen {
-			return nil, gse.ErrStringLimit
-		}
-		return &value.String{Value: s}, nil
-	}
+	*/
 
-	return &value.ImmutableMap{
-		Value: map[string]core.Object{
+	return value.NewMap(map[string]core.Object{
+		/*
 			"exited": &value.BuiltinFunction{
 				Name:  "exited",
 				Value: stateExited,
@@ -66,27 +66,29 @@ func makeOSProcessState(state *os.ProcessState) *value.ImmutableMap {
 				Name:  "success",
 				Value: stateSuccess,
 			},
-		},
-	}
+		*/
+	}, true)
 }
 
-func makeOSProcess(proc *os.Process) *value.ImmutableMap {
-	procKill := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
+func makeOSProcess(proc *os.Process) *value.Map {
+	/*
+		procKill := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			return wrapError(proc.Kill()), nil
 		}
-		return wrapError(proc.Kill()), nil
-	}
 
-	procRelease := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
+		procRelease := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			return wrapError(proc.Release()), nil
 		}
-		return wrapError(proc.Release()), nil
-	}
+	*/
 
-	return &value.ImmutableMap{
-		Value: map[string]core.Object{
+	return value.NewMap(map[string]core.Object{
+		/*
 			"kill": &value.BuiltinFunction{
 				Name:  "kill",
 				Value: procKill,
@@ -125,6 +127,6 @@ func makeOSProcess(proc *os.Process) *value.ImmutableMap {
 					return makeOSProcessState(state), nil
 				},
 			},
-		},
-	}
+		*/
+	}, true)
 }

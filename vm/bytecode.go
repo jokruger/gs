@@ -14,7 +14,7 @@ import (
 // Bytecode is a compiled instructions and constants.
 type Bytecode struct {
 	FileSet      *parser.SourceFileSet
-	MainFunction *value.CompiledFunction
+	MainFunction *CompiledFunction
 	Constants    []core.Object
 }
 
@@ -56,9 +56,8 @@ func (b *Bytecode) FormatInstructions() []string {
 func (b *Bytecode) FormatConstants() (output []string) {
 	for cidx, cn := range b.Constants {
 		switch cn := cn.(type) {
-		case *value.CompiledFunction:
-			output = append(output, fmt.Sprintf(
-				"[% 3d] (Compiled Function|%p)", cidx, &cn))
+		case *CompiledFunction:
+			output = append(output, fmt.Sprintf("[% 3d] (Compiled Function|%p)", cidx, &cn))
 			for _, l := range FormatInstructions(cn.Instructions, 0) {
 				output = append(output, fmt.Sprintf("     %s", l))
 			}
@@ -105,7 +104,7 @@ func (b *Bytecode) RemoveDuplicates() {
 	var deduped []core.Object
 
 	indexMap := make(map[int]int) // mapping from old constant index to new index
-	fns := make(map[*value.CompiledFunction]int)
+	fns := make(map[*CompiledFunction]int)
 	ints := make(map[int64]int)
 	strings := make(map[string]int)
 	floats := make(map[float64]int)
@@ -114,7 +113,7 @@ func (b *Bytecode) RemoveDuplicates() {
 
 	for curIdx, c := range b.Constants {
 		switch c := c.(type) {
-		case *value.CompiledFunction:
+		case *CompiledFunction:
 			if newIdx, ok := fns[c]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
@@ -123,7 +122,10 @@ func (b *Bytecode) RemoveDuplicates() {
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
-		case *value.ImmutableMap:
+		case *value.Map:
+			if !c.IsImmutable() {
+				panic(fmt.Errorf("unsupported top-level constant type: %s", c.TypeName()))
+			}
 			modName := inferModuleName(c)
 			newIdx, ok := immutableMaps[modName]
 			if modName != "" && ok {
@@ -135,44 +137,43 @@ func (b *Bytecode) RemoveDuplicates() {
 				deduped = append(deduped, c)
 			}
 		case *value.Int:
-			if newIdx, ok := ints[c.Value]; ok {
+			if newIdx, ok := ints[c.Native()]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
 				newIdx = len(deduped)
-				ints[c.Value] = newIdx
+				ints[c.Native()] = newIdx
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
 		case *value.String:
-			if newIdx, ok := strings[c.Value]; ok {
+			if newIdx, ok := strings[c.Native()]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
 				newIdx = len(deduped)
-				strings[c.Value] = newIdx
+				strings[c.Native()] = newIdx
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
 		case *value.Float:
-			if newIdx, ok := floats[c.Value]; ok {
+			if newIdx, ok := floats[c.Native()]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
 				newIdx = len(deduped)
-				floats[c.Value] = newIdx
+				floats[c.Native()] = newIdx
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
 		case *value.Char:
-			if newIdx, ok := chars[c.Value]; ok {
+			if newIdx, ok := chars[c.Native()]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
 				newIdx = len(deduped)
-				chars[c.Value] = newIdx
+				chars[c.Native()] = newIdx
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
 		default:
-			panic(fmt.Errorf("unsupported top-level constant type: %s",
-				c.TypeName()))
+			panic(fmt.Errorf("unsupported top-level constant type: %s", c.TypeName()))
 		}
 	}
 
@@ -185,7 +186,7 @@ func (b *Bytecode) RemoveDuplicates() {
 	// other compiled functions in constants
 	for _, c := range b.Constants {
 		switch c := c.(type) {
-		case *value.CompiledFunction:
+		case *CompiledFunction:
 			updateConstIndexes(c.Instructions, indexMap)
 		}
 	}
@@ -201,46 +202,40 @@ func fixDecodedObject(o core.Object, modules *ModuleMap) (core.Object, error) {
 	case *value.Undefined:
 		return value.UndefinedValue, nil
 	case *value.Array:
-		for i, v := range o.Value {
+		for i, v := range o.Native() {
 			fv, err := fixDecodedObject(v, modules)
 			if err != nil {
 				return nil, err
 			}
-			o.Value[i] = fv
-		}
-	case *value.ImmutableArray:
-		for i, v := range o.Value {
-			fv, err := fixDecodedObject(v, modules)
-			if err != nil {
-				return nil, err
-			}
-			o.Value[i] = fv
+			o.SetAt(i, fv)
 		}
 	case *value.Map:
-		for k, v := range o.Value {
-			fv, err := fixDecodedObject(v, modules)
-			if err != nil {
-				return nil, err
-			}
-			o.Value[k] = fv
-		}
-	case *value.ImmutableMap:
-		modName := inferModuleName(o)
-		if mod := modules.GetBuiltinModule(modName); mod != nil {
-			return mod.AsImmutableMap(modName), nil
-		}
-
-		for k, v := range o.Value {
-			// encoding of user function not supported
-			if _, isBuiltinFunction := v.(*value.BuiltinFunction); isBuiltinFunction {
-				return nil, fmt.Errorf("user function not decodable")
+		if o.IsImmutable() {
+			modName := inferModuleName(o)
+			if mod := modules.GetBuiltinModule(modName); mod != nil {
+				return mod.AsImmutableMap(modName), nil
 			}
 
-			fv, err := fixDecodedObject(v, modules)
-			if err != nil {
-				return nil, err
+			for k, v := range o.Native() {
+				// encoding of user function not supported
+				if _, isBuiltinFunction := v.(*value.BuiltinFunction); isBuiltinFunction {
+					return nil, fmt.Errorf("user function not decodable")
+				}
+
+				fv, err := fixDecodedObject(v, modules)
+				if err != nil {
+					return nil, err
+				}
+				o.SetKey(k, fv)
 			}
-			o.Value[k] = fv
+		} else {
+			for k, v := range o.Native() {
+				fv, err := fixDecodedObject(v, modules)
+				if err != nil {
+					return nil, err
+				}
+				o.SetKey(k, fv)
+			}
 		}
 	}
 	return o, nil
@@ -275,9 +270,13 @@ func updateConstIndexes(insts []byte, indexMap map[int]int) {
 	}
 }
 
-func inferModuleName(mod *value.ImmutableMap) string {
-	if modName, ok := mod.Value["__module_name__"].(*value.String); ok {
-		return modName.Value
+func inferModuleName(mod *value.Map) string {
+	mn, ok := mod.Get("__module_name__")
+	if !ok {
+		return ""
+	}
+	if s, ok := mn.AsString(); ok {
+		return s
 	}
 	return ""
 }
@@ -289,11 +288,9 @@ func init() {
 	gob.Register(&value.Bool{})
 	gob.Register(&value.Bytes{})
 	gob.Register(&value.Char{})
-	gob.Register(&value.CompiledFunction{})
+	gob.Register(&CompiledFunction{})
 	gob.Register(&value.Error{})
 	gob.Register(&value.Float{})
-	gob.Register(&value.ImmutableArray{})
-	gob.Register(&value.ImmutableMap{})
 	gob.Register(&value.Int{})
 	gob.Register(&value.Map{})
 	gob.Register(&value.String{})

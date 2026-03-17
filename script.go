@@ -171,7 +171,7 @@ func (s *Script) prepCompile() (
 
 	symbolTable = vm.NewSymbolTable()
 	for idx, fn := range vm.BuiltinFuncs {
-		symbolTable.DefineBuiltin(idx, fn.Name)
+		symbolTable.DefineBuiltin(idx, fn.Name())
 	}
 
 	globals = make([]core.Object, vm.GlobalsSize)
@@ -291,13 +291,16 @@ func (c *Compiled) Get(name string) *vm.Variable {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	v := value.UndefinedValue
+	var v core.Object
+
+	v = value.UndefinedValue
 	if idx, ok := c.globalIndexes[name]; ok {
 		v = c.globals[idx]
 		if v == nil {
 			v = value.UndefinedValue
 		}
 	}
+
 	return vm.NewVariable(name, v)
 }
 

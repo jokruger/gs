@@ -131,7 +131,7 @@ func (d *decodeState) array() (core.Object, error) {
 			panic(phasePanicMsg)
 		}
 	}
-	return &value.Array{Value: arr}, nil
+	return value.NewArray(arr, false), nil
 }
 
 func (d *decodeState) object() (core.Object, error) {
@@ -184,7 +184,7 @@ func (d *decodeState) object() (core.Object, error) {
 			panic(phasePanicMsg)
 		}
 	}
-	return &value.Map{Value: m}, nil
+	return value.NewMap(m, false), nil
 }
 
 func (d *decodeState) literal() (core.Object, error) {
@@ -209,7 +209,7 @@ func (d *decodeState) literal() (core.Object, error) {
 		if !ok {
 			panic(phasePanicMsg)
 		}
-		return &value.String{Value: s}, nil
+		return value.NewString(s), nil
 
 	default: // number
 		if c != '-' && (c < '0' || c > '9') {
@@ -217,10 +217,10 @@ func (d *decodeState) literal() (core.Object, error) {
 		}
 		if isFloat {
 			n, _ := strconv.ParseFloat(string(item), 10)
-			return &value.Float{Value: n}, nil
+			return value.NewFloat(n), nil
 		}
 		n, _ := strconv.ParseInt(string(item), 10, 64)
-		return &value.Int{Value: n}, nil
+		return value.NewInt(n), nil
 	}
 }
 

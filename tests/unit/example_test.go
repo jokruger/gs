@@ -25,10 +25,10 @@ each([a, b, c, d], func(x) {
 	script := gs.NewScript([]byte(src))
 
 	// set values
-	script.Add("a", &value.Int{Value: 1})
-	script.Add("b", &value.Int{Value: 9})
-	script.Add("c", &value.Int{Value: 8})
-	script.Add("d", &value.Int{Value: 4})
+	script.Add("a", value.NewInt(1))
+	script.Add("b", value.NewInt(9))
+	script.Add("c", value.NewInt(8))
+	script.Add("d", value.NewInt(4))
 
 	// run the script
 	compiled, err := script.RunContext(context.Background())

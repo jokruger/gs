@@ -958,13 +958,13 @@ func (p *pp) printArg(arg core.Object, verb rune) {
 	case *value.Bool:
 		p.fmtBool(!f.IsFalsy(), verb)
 	case *value.Float:
-		p.fmtFloat(f.Value, 64, verb)
+		p.fmtFloat(f.Native(), 64, verb)
 	case *value.Int:
-		p.fmtInteger(uint64(f.Value), signed, verb)
+		p.fmtInteger(uint64(f.Native()), signed, verb)
 	case *value.String:
-		p.fmtString(f.Value, verb)
+		p.fmtString(f.Native(), verb)
 	case *value.Bytes:
-		p.fmtBytes(f.Value, verb, "[]byte")
+		p.fmtBytes(f.Native(), verb, "[]byte")
 	default:
 		p.fmtString(f.String(), verb)
 	}

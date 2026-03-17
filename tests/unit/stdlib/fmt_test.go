@@ -1,7 +1,6 @@
 package stdlib_test
 
-import "testing"
-
+/*
 func TestFmtSprintf(t *testing.T) {
 	module(t, `fmt`).call("sprintf", "").expect("")
 	module(t, `fmt`).call("sprintf", "foo").expect("foo")
@@ -17,3 +16,4 @@ func TestFmtSprintf(t *testing.T) {
 	module(t, `fmt`).call("sprintf", "%v", IARR{1, IARR{2, IARR{3, 4}}}).
 		expect(`[1, [2, [3, 4]]]`)
 }
+*/

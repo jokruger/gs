@@ -9,246 +9,247 @@ import (
 )
 
 var mathModule = map[string]core.Object{
-	"e":                      &value.Float{Value: math.E},
-	"pi":                     &value.Float{Value: math.Pi},
-	"phi":                    &value.Float{Value: math.Phi},
-	"sqrt2":                  &value.Float{Value: math.Sqrt2},
-	"sqrtE":                  &value.Float{Value: math.SqrtE},
-	"sqrtPi":                 &value.Float{Value: math.SqrtPi},
-	"sqrtPhi":                &value.Float{Value: math.SqrtPhi},
-	"ln2":                    &value.Float{Value: math.Ln2},
-	"log2E":                  &value.Float{Value: math.Log2E},
-	"ln10":                   &value.Float{Value: math.Ln10},
-	"log10E":                 &value.Float{Value: math.Log10E},
-	"maxFloat32":             &value.Float{Value: math.MaxFloat32},
-	"smallestNonzeroFloat32": &value.Float{Value: math.SmallestNonzeroFloat32},
-	"maxFloat64":             &value.Float{Value: math.MaxFloat64},
-	"smallestNonzeroFloat64": &value.Float{Value: math.SmallestNonzeroFloat64},
-	"maxInt":                 &value.Int{Value: math.MaxInt},
-	"minInt":                 &value.Int{Value: math.MinInt},
-	"maxInt8":                &value.Int{Value: math.MaxInt8},
-	"minInt8":                &value.Int{Value: math.MinInt8},
-	"maxInt16":               &value.Int{Value: math.MaxInt16},
-	"minInt16":               &value.Int{Value: math.MinInt16},
-	"maxInt32":               &value.Int{Value: math.MaxInt32},
-	"minInt32":               &value.Int{Value: math.MinInt32},
-	"maxInt64":               &value.Int{Value: math.MaxInt64},
-	"minInt64":               &value.Int{Value: math.MinInt64},
-
-	"abs": &value.BuiltinFunction{
-		Name:  "abs",
-		Value: mathAbs,
-	},
-	"acos": &value.BuiltinFunction{
-		Name:  "acos",
-		Value: mathAcos,
-	},
-	"acosh": &value.BuiltinFunction{
-		Name:  "acosh",
-		Value: mathAcosh,
-	},
-	"asin": &value.BuiltinFunction{
-		Name:  "asin",
-		Value: mathAsin,
-	},
-	"asinh": &value.BuiltinFunction{
-		Name:  "asinh",
-		Value: mathAsinh,
-	},
-	"atan": &value.BuiltinFunction{
-		Name:  "atan",
-		Value: mathAtan,
-	},
-	"atan2": &value.BuiltinFunction{
-		Name:  "atan2",
-		Value: mathAtan2,
-	},
-	"atanh": &value.BuiltinFunction{
-		Name:  "atanh",
-		Value: mathAtanh,
-	},
-	"cbrt": &value.BuiltinFunction{
-		Name:  "cbrt",
-		Value: mathCbrt,
-	},
-	"ceil": &value.BuiltinFunction{
-		Name:  "ceil",
-		Value: mathCeil,
-	},
-	"copysign": &value.BuiltinFunction{
-		Name:  "copysign",
-		Value: mathCopysign,
-	},
-	"cos": &value.BuiltinFunction{
-		Name:  "cos",
-		Value: mathCos,
-	},
-	"cosh": &value.BuiltinFunction{
-		Name:  "cosh",
-		Value: mathCosh,
-	},
-	"dim": &value.BuiltinFunction{
-		Name:  "dim",
-		Value: mathDim,
-	},
-	"erf": &value.BuiltinFunction{
-		Name:  "erf",
-		Value: mathErf,
-	},
-	"erfc": &value.BuiltinFunction{
-		Name:  "erfc",
-		Value: mathErfc,
-	},
-	"exp": &value.BuiltinFunction{
-		Name:  "exp",
-		Value: mathExp,
-	},
-	"exp2": &value.BuiltinFunction{
-		Name:  "exp2",
-		Value: mathExp2,
-	},
-	"expm1": &value.BuiltinFunction{
-		Name:  "expm1",
-		Value: mathExpm1,
-	},
-	"floor": &value.BuiltinFunction{
-		Name:  "floor",
-		Value: mathFloor,
-	},
-	"gamma": &value.BuiltinFunction{
-		Name:  "gamma",
-		Value: mathGamma,
-	},
-	"hypot": &value.BuiltinFunction{
-		Name:  "hypot",
-		Value: mathHypot,
-	},
-	"ilogb": &value.BuiltinFunction{
-		Name:  "ilogb",
-		Value: mathIlogb,
-	},
-	"inf": &value.BuiltinFunction{
-		Name:  "inf",
-		Value: mathInf,
-	},
-	"is_inf": &value.BuiltinFunction{
-		Name:  "is_inf",
-		Value: mathIsInf,
-	},
-	"is_nan": &value.BuiltinFunction{
-		Name:  "is_nan",
-		Value: mathIsNaN,
-	},
-	"j0": &value.BuiltinFunction{
-		Name:  "j0",
-		Value: mathJ0,
-	},
-	"j1": &value.BuiltinFunction{
-		Name:  "j1",
-		Value: mathJ1,
-	},
-	"jn": &value.BuiltinFunction{
-		Name:  "jn",
-		Value: mathJn,
-	},
-	"ldexp": &value.BuiltinFunction{
-		Name:  "ldexp",
-		Value: mathLdexp,
-	},
-	"log": &value.BuiltinFunction{
-		Name:  "log",
-		Value: mathLog,
-	},
-	"log10": &value.BuiltinFunction{
-		Name:  "log10",
-		Value: mathLog10,
-	},
-	"log1p": &value.BuiltinFunction{
-		Name:  "log1p",
-		Value: mathLog1p,
-	},
-	"log2": &value.BuiltinFunction{
-		Name:  "log2",
-		Value: mathLog2,
-	},
-	"logb": &value.BuiltinFunction{
-		Name:  "logb",
-		Value: mathLogb,
-	},
-	"max": &value.BuiltinFunction{
-		Name:  "max",
-		Value: mathMax,
-	},
-	"min": &value.BuiltinFunction{
-		Name:  "min",
-		Value: mathMin,
-	},
-	"mod": &value.BuiltinFunction{
-		Name:  "mod",
-		Value: mathMod,
-	},
-	"nan": &value.BuiltinFunction{
-		Name:  "nan",
-		Value: mathNaN,
-	},
-	"nextafter": &value.BuiltinFunction{
-		Name:  "nextafter",
-		Value: mathNextafter,
-	},
-	"pow": &value.BuiltinFunction{
-		Name:  "pow",
-		Value: mathPow,
-	},
-	"pow10": &value.BuiltinFunction{
-		Name:  "pow10",
-		Value: mathPow10,
-	},
-	"remainder": &value.BuiltinFunction{
-		Name:  "remainder",
-		Value: mathRemainder,
-	},
-	"signbit": &value.BuiltinFunction{
-		Name:  "signbit",
-		Value: mathSignbit,
-	},
-	"sin": &value.BuiltinFunction{
-		Name:  "sin",
-		Value: mathSin,
-	},
-	"sinh": &value.BuiltinFunction{
-		Name:  "sinh",
-		Value: mathSinh,
-	},
-	"sqrt": &value.BuiltinFunction{
-		Name:  "sqrt",
-		Value: mathSqrt,
-	},
-	"tan": &value.BuiltinFunction{
-		Name:  "tan",
-		Value: mathTan,
-	},
-	"tanh": &value.BuiltinFunction{
-		Name:  "tanh",
-		Value: mathTanh,
-	},
-	"trunc": &value.BuiltinFunction{
-		Name:  "trunc",
-		Value: mathTrunc,
-	},
-	"y0": &value.BuiltinFunction{
-		Name:  "y0",
-		Value: mathY0,
-	},
-	"y1": &value.BuiltinFunction{
-		Name:  "y1",
-		Value: mathY1,
-	},
-	"yn": &value.BuiltinFunction{
-		Name:  "yn",
-		Value: mathYn,
-	},
+	/*
+		"e":                      &value.Float{Value: math.E},
+		"pi":                     &value.Float{Value: math.Pi},
+		"phi":                    &value.Float{Value: math.Phi},
+		"sqrt2":                  &value.Float{Value: math.Sqrt2},
+		"sqrtE":                  &value.Float{Value: math.SqrtE},
+		"sqrtPi":                 &value.Float{Value: math.SqrtPi},
+		"sqrtPhi":                &value.Float{Value: math.SqrtPhi},
+		"ln2":                    &value.Float{Value: math.Ln2},
+		"log2E":                  &value.Float{Value: math.Log2E},
+		"ln10":                   &value.Float{Value: math.Ln10},
+		"log10E":                 &value.Float{Value: math.Log10E},
+		"maxFloat32":             &value.Float{Value: math.MaxFloat32},
+		"smallestNonzeroFloat32": &value.Float{Value: math.SmallestNonzeroFloat32},
+		"maxFloat64":             &value.Float{Value: math.MaxFloat64},
+		"smallestNonzeroFloat64": &value.Float{Value: math.SmallestNonzeroFloat64},
+		"maxInt":                 &value.Int{Value: math.MaxInt},
+		"minInt":                 &value.Int{Value: math.MinInt},
+		"maxInt8":                &value.Int{Value: math.MaxInt8},
+		"minInt8":                &value.Int{Value: math.MinInt8},
+		"maxInt16":               &value.Int{Value: math.MaxInt16},
+		"minInt16":               &value.Int{Value: math.MinInt16},
+		"maxInt32":               &value.Int{Value: math.MaxInt32},
+		"minInt32":               &value.Int{Value: math.MinInt32},
+		"maxInt64":               &value.Int{Value: math.MaxInt64},
+		"minInt64":               &value.Int{Value: math.MinInt64},
+	*/
+	"abs": value.NewBuiltinFunction("abs", mathAbs, 1, false),
+	/*
+		"acos": &value.BuiltinFunction{
+			Name:  "acos",
+			Value: mathAcos,
+		},
+		"acosh": &value.BuiltinFunction{
+			Name:  "acosh",
+			Value: mathAcosh,
+		},
+		"asin": &value.BuiltinFunction{
+			Name:  "asin",
+			Value: mathAsin,
+		},
+		"asinh": &value.BuiltinFunction{
+			Name:  "asinh",
+			Value: mathAsinh,
+		},
+		"atan": &value.BuiltinFunction{
+			Name:  "atan",
+			Value: mathAtan,
+		},
+		"atan2": &value.BuiltinFunction{
+			Name:  "atan2",
+			Value: mathAtan2,
+		},
+		"atanh": &value.BuiltinFunction{
+			Name:  "atanh",
+			Value: mathAtanh,
+		},
+		"cbrt": &value.BuiltinFunction{
+			Name:  "cbrt",
+			Value: mathCbrt,
+		},
+		"ceil": &value.BuiltinFunction{
+			Name:  "ceil",
+			Value: mathCeil,
+		},
+		"copysign": &value.BuiltinFunction{
+			Name:  "copysign",
+			Value: mathCopysign,
+		},
+		"cos": &value.BuiltinFunction{
+			Name:  "cos",
+			Value: mathCos,
+		},
+		"cosh": &value.BuiltinFunction{
+			Name:  "cosh",
+			Value: mathCosh,
+		},
+		"dim": &value.BuiltinFunction{
+			Name:  "dim",
+			Value: mathDim,
+		},
+		"erf": &value.BuiltinFunction{
+			Name:  "erf",
+			Value: mathErf,
+		},
+		"erfc": &value.BuiltinFunction{
+			Name:  "erfc",
+			Value: mathErfc,
+		},
+		"exp": &value.BuiltinFunction{
+			Name:  "exp",
+			Value: mathExp,
+		},
+		"exp2": &value.BuiltinFunction{
+			Name:  "exp2",
+			Value: mathExp2,
+		},
+		"expm1": &value.BuiltinFunction{
+			Name:  "expm1",
+			Value: mathExpm1,
+		},
+		"floor": &value.BuiltinFunction{
+			Name:  "floor",
+			Value: mathFloor,
+		},
+		"gamma": &value.BuiltinFunction{
+			Name:  "gamma",
+			Value: mathGamma,
+		},
+		"hypot": &value.BuiltinFunction{
+			Name:  "hypot",
+			Value: mathHypot,
+		},
+		"ilogb": &value.BuiltinFunction{
+			Name:  "ilogb",
+			Value: mathIlogb,
+		},
+		"inf": &value.BuiltinFunction{
+			Name:  "inf",
+			Value: mathInf,
+		},
+		"is_inf": &value.BuiltinFunction{
+			Name:  "is_inf",
+			Value: mathIsInf,
+		},
+		"is_nan": &value.BuiltinFunction{
+			Name:  "is_nan",
+			Value: mathIsNaN,
+		},
+		"j0": &value.BuiltinFunction{
+			Name:  "j0",
+			Value: mathJ0,
+		},
+		"j1": &value.BuiltinFunction{
+			Name:  "j1",
+			Value: mathJ1,
+		},
+		"jn": &value.BuiltinFunction{
+			Name:  "jn",
+			Value: mathJn,
+		},
+		"ldexp": &value.BuiltinFunction{
+			Name:  "ldexp",
+			Value: mathLdexp,
+		},
+		"log": &value.BuiltinFunction{
+			Name:  "log",
+			Value: mathLog,
+		},
+		"log10": &value.BuiltinFunction{
+			Name:  "log10",
+			Value: mathLog10,
+		},
+		"log1p": &value.BuiltinFunction{
+			Name:  "log1p",
+			Value: mathLog1p,
+		},
+		"log2": &value.BuiltinFunction{
+			Name:  "log2",
+			Value: mathLog2,
+		},
+		"logb": &value.BuiltinFunction{
+			Name:  "logb",
+			Value: mathLogb,
+		},
+		"max": &value.BuiltinFunction{
+			Name:  "max",
+			Value: mathMax,
+		},
+		"min": &value.BuiltinFunction{
+			Name:  "min",
+			Value: mathMin,
+		},
+		"mod": &value.BuiltinFunction{
+			Name:  "mod",
+			Value: mathMod,
+		},
+		"nan": &value.BuiltinFunction{
+			Name:  "nan",
+			Value: mathNaN,
+		},
+		"nextafter": &value.BuiltinFunction{
+			Name:  "nextafter",
+			Value: mathNextafter,
+		},
+		"pow": &value.BuiltinFunction{
+			Name:  "pow",
+			Value: mathPow,
+		},
+		"pow10": &value.BuiltinFunction{
+			Name:  "pow10",
+			Value: mathPow10,
+		},
+		"remainder": &value.BuiltinFunction{
+			Name:  "remainder",
+			Value: mathRemainder,
+		},
+		"signbit": &value.BuiltinFunction{
+			Name:  "signbit",
+			Value: mathSignbit,
+		},
+		"sin": &value.BuiltinFunction{
+			Name:  "sin",
+			Value: mathSin,
+		},
+		"sinh": &value.BuiltinFunction{
+			Name:  "sinh",
+			Value: mathSinh,
+		},
+		"sqrt": &value.BuiltinFunction{
+			Name:  "sqrt",
+			Value: mathSqrt,
+		},
+		"tan": &value.BuiltinFunction{
+			Name:  "tan",
+			Value: mathTan,
+		},
+		"tanh": &value.BuiltinFunction{
+			Name:  "tanh",
+			Value: mathTanh,
+		},
+		"trunc": &value.BuiltinFunction{
+			Name:  "trunc",
+			Value: mathTrunc,
+		},
+		"y0": &value.BuiltinFunction{
+			Name:  "y0",
+			Value: mathY0,
+		},
+		"y1": &value.BuiltinFunction{
+			Name:  "y1",
+			Value: mathY1,
+		},
+		"yn": &value.BuiltinFunction{
+			Name:  "yn",
+			Value: mathYn,
+		},
+	*/
 }
 
+/*
 func mathSignbit(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
@@ -424,6 +425,7 @@ func mathInf(args ...core.Object) (ret core.Object, err error) {
 	}
 	return &value.Float{Value: math.Inf(int(i1))}, nil
 }
+*/
 
 func mathAbs(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
@@ -437,9 +439,10 @@ func mathAbs(args ...core.Object) (ret core.Object, err error) {
 			Found:    args[0].TypeName(),
 		}
 	}
-	return &value.Float{Value: math.Abs(f1)}, nil
+	return value.NewFloat(math.Abs(f1)), nil
 }
 
+/*
 func mathAcos(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
@@ -1156,3 +1159,4 @@ func mathNaN(args ...core.Object) (ret core.Object, err error) {
 	}
 	return &value.Float{Value: math.NaN()}, nil
 }
+*/

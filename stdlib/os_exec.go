@@ -4,62 +4,63 @@ import (
 	"os/exec"
 
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
 
-func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
-	cmdRun := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
+func makeOSExecCommand(cmd *exec.Cmd) *value.Map {
+	/*
+		cmdRun := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			return wrapError(cmd.Run()), nil
 		}
-		return wrapError(cmd.Run()), nil
-	}
 
-	cmdStart := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
+		cmdStart := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			return wrapError(cmd.Start()), nil
 		}
-		return wrapError(cmd.Start()), nil
-	}
 
-	cmdWait := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
+		cmdWait := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			return wrapError(cmd.Wait()), nil
 		}
-		return wrapError(cmd.Wait()), nil
-	}
 
-	cmdCombinedOutput := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
+		cmdCombinedOutput := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			res, err := cmd.CombinedOutput()
+			if err != nil {
+				return wrapError(err), nil
+			}
+			if len(res) > core.MaxBytesLen {
+				return nil, gse.ErrBytesLimit
+			}
+			return &value.Bytes{Value: res}, nil
 		}
-		res, err := cmd.CombinedOutput()
-		if err != nil {
-			return wrapError(err), nil
-		}
-		if len(res) > core.MaxBytesLen {
-			return nil, gse.ErrBytesLimit
-		}
-		return &value.Bytes{Value: res}, nil
-	}
 
-	cmdOutput := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
+		cmdOutput := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			res, err := cmd.Output()
+			if err != nil {
+				return wrapError(err), nil
+			}
+			if len(res) > core.MaxBytesLen {
+				return nil, gse.ErrBytesLimit
+			}
+			return &value.Bytes{Value: res}, nil
 		}
-		res, err := cmd.Output()
-		if err != nil {
-			return wrapError(err), nil
-		}
-		if len(res) > core.MaxBytesLen {
-			return nil, gse.ErrBytesLimit
-		}
-		return &value.Bytes{Value: res}, nil
-	}
+	*/
 
-	return &value.ImmutableMap{
-		Value: map[string]core.Object{
+	return value.NewMap(map[string]core.Object{
+		/*
 			// combined_output() => bytes/error
 			"combined_output": &value.BuiltinFunction{
 				Name:  "combined_output",
@@ -165,6 +166,6 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.ImmutableMap {
 					return makeOSProcess(cmd.Process), nil
 				},
 			},
-		},
-	}
+		*/
+	}, true)
 }

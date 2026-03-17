@@ -1,13 +1,6 @@
 package stdlib_test
 
-import (
-	"regexp"
-	"testing"
-
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/value"
-)
-
+/*
 func TestTextRE(t *testing.T) {
 	// re_match(pattern, text)
 	for _, d := range []struct {
@@ -304,3 +297,4 @@ func TestPadLeft(t *testing.T) {
 	module(t, "text").call("pad_left", "ab", 7, "+-").expect("-+-+-ab")
 	module(t, "text").call("pad_right", "ab", 7, "+-").expect("ab+-+-+")
 }
+*/

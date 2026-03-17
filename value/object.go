@@ -19,20 +19,24 @@ func (o *Object) String() string {
 	panic(gse.ErrNotImplemented)
 }
 
+func (o *Object) Interface() any {
+	return o
+}
+
+func (o *Object) Arity() int {
+	return 0
+}
+
 func (o *Object) BinaryOp(token.Token, core.Object) (core.Object, error) {
 	return nil, gse.ErrInvalidOperator
 }
 
-func (o *Object) Copy() core.Object {
-	return o
-}
-
-func (o *Object) IsFalsy() bool {
-	return o == nil
-}
-
 func (o *Object) Equals(x core.Object) bool {
 	return o == x
+}
+
+func (o *Object) Copy() core.Object {
+	return o
 }
 
 func (o *Object) IndexGet(core.Object) (core.Object, error) {
@@ -47,15 +51,27 @@ func (o *Object) Iterate() core.Iterator {
 	return nil
 }
 
-func (o *Object) IsIterable() bool {
-	return false
-}
-
 func (o *Object) Call(core.VM, ...core.Object) (core.Object, error) {
 	return nil, nil
 }
 
+func (o *Object) IsFalsy() bool {
+	return o == nil
+}
+
+func (o *Object) IsIterable() bool {
+	return false
+}
+
 func (o *Object) IsCallable() bool {
+	return false
+}
+
+func (o *Object) IsImmutable() bool {
+	return false
+}
+
+func (o *Object) IsVariadic() bool {
 	return false
 }
 
@@ -85,8 +101,4 @@ func (o *Object) AsByteSlice() ([]byte, bool) {
 
 func (o *Object) AsTime() (time.Time, bool) {
 	return time.Time{}, false
-}
-
-func (o *Object) Interface() any {
-	return o
 }

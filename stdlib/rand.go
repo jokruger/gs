@@ -4,49 +4,51 @@ import (
 	"math/rand"
 
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
 
 var randModule = map[string]core.Object{
-	"int": &value.BuiltinFunction{
-		Name:  "int",
-		Value: randInt63,
-	},
-	"float": &value.BuiltinFunction{
-		Name:  "float",
-		Value: randFloat64,
-	},
-	"intn": &value.BuiltinFunction{
-		Name:  "intn",
-		Value: randInt63n,
-	},
-	"exp_float": &value.BuiltinFunction{
-		Name:  "exp_float",
-		Value: randExpFloat64,
-	},
-	"norm_float": &value.BuiltinFunction{
-		Name:  "norm_float",
-		Value: randNormFloat64,
-	},
-	"perm": &value.BuiltinFunction{
-		Name:  "perm",
-		Value: randPerm,
-	},
-	"seed": &value.BuiltinFunction{
-		Name:  "seed",
-		Value: randSeed,
-	},
-	"read": &value.BuiltinFunction{
-		Name:  "read",
-		Value: randRead,
-	},
-	"rand": &value.BuiltinFunction{
-		Name:  "rand",
-		Value: randFunc,
-	},
+	/*
+		"int": &value.BuiltinFunction{
+			Name:  "int",
+			Value: randInt63,
+		},
+		"float": &value.BuiltinFunction{
+			Name:  "float",
+			Value: randFloat64,
+		},
+		"intn": &value.BuiltinFunction{
+			Name:  "intn",
+			Value: randInt63n,
+		},
+		"exp_float": &value.BuiltinFunction{
+			Name:  "exp_float",
+			Value: randExpFloat64,
+		},
+		"norm_float": &value.BuiltinFunction{
+			Name:  "norm_float",
+			Value: randNormFloat64,
+		},
+		"perm": &value.BuiltinFunction{
+			Name:  "perm",
+			Value: randPerm,
+		},
+		"seed": &value.BuiltinFunction{
+			Name:  "seed",
+			Value: randSeed,
+		},
+		"read": &value.BuiltinFunction{
+			Name:  "read",
+			Value: randRead,
+		},
+		"rand": &value.BuiltinFunction{
+			Name:  "rand",
+			Value: randFunc,
+		},
+	*/
 }
 
+/*
 func randPerm(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, gse.ErrWrongNumArguments
@@ -163,111 +165,114 @@ func randInt63(args ...core.Object) (ret core.Object, err error) {
 	}
 	return &value.Int{Value: rand.Int63()}, nil
 }
+*/
 
-func randRand(r *rand.Rand) *value.ImmutableMap {
-	rInt63 := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
-		}
-		return &value.Int{Value: r.Int63()}, nil
-	}
-
-	rRead := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 1 {
-			return nil, gse.ErrWrongNumArguments
-		}
-		y1, ok := args[0].(*value.Bytes)
-		if !ok {
-			return nil, gse.ErrInvalidArgumentType{
-				Name:     "first",
-				Expected: "bytes",
-				Found:    args[0].TypeName(),
+func randRand(r *rand.Rand) *value.Map {
+	/*
+		rInt63 := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
 			}
-		}
-		res, err := r.Read(y1.Value)
-		if err != nil {
-			ret = wrapError(err)
-			return
-		}
-		return &value.Int{Value: int64(res)}, nil
-	}
-
-	rInt63n := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 1 {
-			return nil, gse.ErrWrongNumArguments
+			return &value.Int{Value: r.Int63()}, nil
 		}
 
-		i1, ok := args[0].AsInt()
-		if !ok {
-			return nil, gse.ErrInvalidArgumentType{
-				Name:     "first",
-				Expected: "int(compatible)",
-				Found:    args[0].TypeName(),
+		rRead := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 1 {
+				return nil, gse.ErrWrongNumArguments
 			}
-		}
-		return &value.Int{Value: r.Int63n(i1)}, nil
-	}
-
-	rSeed := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 1 {
-			return nil, gse.ErrWrongNumArguments
-		}
-
-		i1, ok := args[0].AsInt()
-		if !ok {
-			return nil, gse.ErrInvalidArgumentType{
-				Name:     "first",
-				Expected: "int(compatible)",
-				Found:    args[0].TypeName(),
+			y1, ok := args[0].(*value.Bytes)
+			if !ok {
+				return nil, gse.ErrInvalidArgumentType{
+					Name:     "first",
+					Expected: "bytes",
+					Found:    args[0].TypeName(),
+				}
 			}
-		}
-		r.Seed(i1)
-		return value.UndefinedValue, nil
-	}
-
-	rFloat64 := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
-		}
-		return &value.Float{Value: r.Float64()}, nil
-	}
-
-	rExpFloat64 := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
-		}
-		return &value.Float{Value: r.ExpFloat64()}, nil
-	}
-
-	rNormFloat64 := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 0 {
-			return nil, gse.ErrWrongNumArguments
-		}
-		return &value.Float{Value: r.NormFloat64()}, nil
-	}
-
-	rPerm := func(args ...core.Object) (ret core.Object, err error) {
-		if len(args) != 1 {
-			return nil, gse.ErrWrongNumArguments
-		}
-		i1, ok := args[0].AsInt()
-		if !ok {
-			return nil, gse.ErrInvalidArgumentType{
-				Name:     "first",
-				Expected: "int(compatible)",
-				Found:    args[0].TypeName(),
+			res, err := r.Read(y1.Value)
+			if err != nil {
+				ret = wrapError(err)
+				return
 			}
+			return &value.Int{Value: int64(res)}, nil
 		}
-		res := r.Perm(int(i1))
-		arr := &value.Array{}
-		for _, v := range res {
-			arr.Value = append(arr.Value, &value.Int{Value: int64(v)})
-		}
-		return arr, nil
-	}
 
-	return &value.ImmutableMap{
-		Value: map[string]core.Object{
+		rInt63n := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 1 {
+				return nil, gse.ErrWrongNumArguments
+			}
+
+			i1, ok := args[0].AsInt()
+			if !ok {
+				return nil, gse.ErrInvalidArgumentType{
+					Name:     "first",
+					Expected: "int(compatible)",
+					Found:    args[0].TypeName(),
+				}
+			}
+			return &value.Int{Value: r.Int63n(i1)}, nil
+		}
+
+		rSeed := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 1 {
+				return nil, gse.ErrWrongNumArguments
+			}
+
+			i1, ok := args[0].AsInt()
+			if !ok {
+				return nil, gse.ErrInvalidArgumentType{
+					Name:     "first",
+					Expected: "int(compatible)",
+					Found:    args[0].TypeName(),
+				}
+			}
+			r.Seed(i1)
+			return value.UndefinedValue, nil
+		}
+
+		rFloat64 := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			return &value.Float{Value: r.Float64()}, nil
+		}
+
+		rExpFloat64 := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			return &value.Float{Value: r.ExpFloat64()}, nil
+		}
+
+		rNormFloat64 := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 0 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			return &value.Float{Value: r.NormFloat64()}, nil
+		}
+
+		rPerm := func(args ...core.Object) (ret core.Object, err error) {
+			if len(args) != 1 {
+				return nil, gse.ErrWrongNumArguments
+			}
+			i1, ok := args[0].AsInt()
+			if !ok {
+				return nil, gse.ErrInvalidArgumentType{
+					Name:     "first",
+					Expected: "int(compatible)",
+					Found:    args[0].TypeName(),
+				}
+			}
+			res := r.Perm(int(i1))
+			arr := &value.Array{}
+			for _, v := range res {
+				arr.Value = append(arr.Value, &value.Int{Value: int64(v)})
+			}
+			return arr, nil
+		}
+	*/
+
+	return value.NewMap(map[string]core.Object{
+		/*
 			"int": &value.BuiltinFunction{
 				Name:  "int",
 				Value: rInt63,
@@ -300,6 +305,6 @@ func randRand(r *rand.Rand) *value.ImmutableMap {
 				Name:  "read",
 				Value: rRead,
 			},
-		},
-	}
+		*/
+	}, true)
 }

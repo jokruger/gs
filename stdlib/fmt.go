@@ -5,17 +5,21 @@ import (
 
 	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
-	"github.com/jokruger/gs/formatter"
 	"github.com/jokruger/gs/value"
 )
 
 var fmtModule = map[string]core.Object{
-	"print":   &value.BuiltinFunction{Name: "print", Value: fmtPrint},
-	"printf":  &value.BuiltinFunction{Name: "printf", Value: fmtPrintf},
-	"println": &value.BuiltinFunction{Name: "println", Value: fmtPrintln},
-	"sprintf": &value.BuiltinFunction{Name: "sprintf", Value: fmtSprintf},
+	/*
+		"print":   &value.BuiltinFunction{Name: "print", Value: fmtPrint},
+		"printf":  &value.BuiltinFunction{Name: "printf", Value: fmtPrintf},
+	*/
+	"println": value.NewBuiltinFunction("println", fmtPrintln, 0, true),
+	/*
+		"sprintf": &value.BuiltinFunction{Name: "sprintf", Value: fmtSprintf},
+	*/
 }
 
+/*
 func fmtPrint(args ...core.Object) (ret core.Object, err error) {
 	printArgs, err := getPrintArgs(args...)
 	if err != nil {
@@ -51,6 +55,7 @@ func fmtPrintf(args ...core.Object) (ret core.Object, err error) {
 	fmt.Print(s)
 	return nil, nil
 }
+*/
 
 func fmtPrintln(args ...core.Object) (ret core.Object, err error) {
 	printArgs, err := getPrintArgs(args...)
@@ -62,6 +67,7 @@ func fmtPrintln(args ...core.Object) (ret core.Object, err error) {
 	return nil, nil
 }
 
+/*
 func fmtSprintf(args ...core.Object) (ret core.Object, err error) {
 	numArgs := len(args)
 	if numArgs == 0 {
@@ -86,6 +92,7 @@ func fmtSprintf(args ...core.Object) (ret core.Object, err error) {
 	}
 	return &value.String{Value: s}, nil
 }
+*/
 
 func getPrintArgs(args ...core.Object) ([]any, error) {
 	var printArgs []any

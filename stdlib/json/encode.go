@@ -132,22 +132,8 @@ func Encode(o core.Object) ([]byte, error) {
 	switch o := o.(type) {
 	case *value.Array:
 		b = append(b, '[')
-		len1 := len(o.Value) - 1
-		for idx, elem := range o.Value {
-			eb, err := Encode(elem)
-			if err != nil {
-				return nil, err
-			}
-			b = append(b, eb...)
-			if idx < len1 {
-				b = append(b, ',')
-			}
-		}
-		b = append(b, ']')
-	case *value.ImmutableArray:
-		b = append(b, '[')
-		len1 := len(o.Value) - 1
-		for idx, elem := range o.Value {
+		len1 := o.Len() - 1
+		for idx, elem := range o.Native() {
 			eb, err := Encode(elem)
 			if err != nil {
 				return nil, err
@@ -160,27 +146,9 @@ func Encode(o core.Object) ([]byte, error) {
 		b = append(b, ']')
 	case *value.Map:
 		b = append(b, '{')
-		len1 := len(o.Value) - 1
+		len1 := o.Len() - 1
 		idx := 0
-		for key, value := range o.Value {
-			b = encodeString(b, key)
-			b = append(b, ':')
-			eb, err := Encode(value)
-			if err != nil {
-				return nil, err
-			}
-			b = append(b, eb...)
-			if idx < len1 {
-				b = append(b, ',')
-			}
-			idx++
-		}
-		b = append(b, '}')
-	case *value.ImmutableMap:
-		b = append(b, '{')
-		len1 := len(o.Value) - 1
-		idx := 0
-		for key, value := range o.Value {
+		for key, value := range o.Native() {
 			b = encodeString(b, key)
 			b = append(b, ':')
 			eb, err := Encode(value)
@@ -202,17 +170,17 @@ func Encode(o core.Object) ([]byte, error) {
 		}
 	case *value.Bytes:
 		b = append(b, '"')
-		encodedLen := base64.StdEncoding.EncodedLen(len(o.Value))
+		encodedLen := base64.StdEncoding.EncodedLen(o.Len())
 		dst := make([]byte, encodedLen)
-		base64.StdEncoding.Encode(dst, o.Value)
+		base64.StdEncoding.Encode(dst, o.Native())
 		b = append(b, dst...)
 		b = append(b, '"')
 	case *value.Char:
-		b = strconv.AppendInt(b, int64(o.Value), 10)
+		b = strconv.AppendInt(b, int64(o.Native()), 10)
 	case *value.Float:
 		var y []byte
 
-		f := o.Value
+		f := o.Native()
 		if math.IsInf(f, 0) || math.IsNaN(f) {
 			return nil, errors.New("unsupported float value")
 		}
@@ -238,11 +206,11 @@ func Encode(o core.Object) ([]byte, error) {
 
 		b = append(b, y...)
 	case *value.Int:
-		b = strconv.AppendInt(b, o.Value, 10)
+		b = strconv.AppendInt(b, o.Native(), 10)
 	case *value.String:
-		b = encodeString(b, o.Value)
+		b = encodeString(b, o.Native())
 	case *value.Time:
-		y, err := o.Value.MarshalJSON()
+		y, err := o.Native().MarshalJSON()
 		if err != nil {
 			return nil, err
 		}

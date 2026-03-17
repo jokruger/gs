@@ -4,13 +4,12 @@ import (
 	"regexp"
 
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
 
-func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
-	return &value.ImmutableMap{
-		Value: map[string]core.Object{
+func makeTextRegexp(re *regexp.Regexp) *value.Map {
+	return value.NewMap(map[string]core.Object{
+		/*
 			// match(text) => bool
 			"match": &value.BuiltinFunction{
 				Value: func(args ...core.Object) (
@@ -228,8 +227,8 @@ func makeTextRegexp(re *regexp.Regexp) *value.ImmutableMap {
 					return
 				},
 			},
-		},
-	}
+		*/
+	}, true)
 }
 
 // Size-limit checking implementation of regexp.ReplaceAllString.

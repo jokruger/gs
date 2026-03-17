@@ -13,7 +13,7 @@ import (
 
 // frame represents a function call frame.
 type frame struct {
-	fn          *value.CompiledFunction
+	fn          *CompiledFunction
 	freeVars    []*value.ObjectPtr
 	ip          int
 	basePointer int
@@ -69,8 +69,14 @@ func (v *VM) IsStackEmpty() bool {
 }
 
 // Call calls a compiled function with the given arguments and returns the result.
-func (v *VM) Call(core.CompiledFunction, ...core.Object) (core.Object, error) {
+func (v *VM) Call(foo core.Object, args ...core.Object) (core.Object, error) {
 	// TODO: implement this method (to be used with callbacks from Go)
+
+	//f, ok := foo.(*CompiledFunction)
+	//if !ok {
+	//	...
+	//}
+
 	return nil, gse.ErrNotImplemented
 }
 
@@ -184,7 +190,7 @@ func (v *VM) run() {
 
 			switch x := operand.(type) {
 			case *value.Int:
-				var res core.Object = &value.Int{Value: ^x.Value}
+				var res core.Object = value.NewInt(^x.Native())
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = gse.ErrObjectAllocLimit
@@ -203,7 +209,7 @@ func (v *VM) run() {
 
 			switch x := operand.(type) {
 			case *value.Int:
-				var res core.Object = &value.Int{Value: -x.Value}
+				var res core.Object = value.NewInt(-x.Native())
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = gse.ErrObjectAllocLimit
@@ -212,7 +218,7 @@ func (v *VM) run() {
 				v.stack[v.sp] = res
 				v.sp++
 			case *value.Float:
-				var res core.Object = &value.Float{Value: -x.Value}
+				var res core.Object = value.NewFloat(-x.Native())
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = gse.ErrObjectAllocLimit
@@ -289,7 +295,7 @@ func (v *VM) run() {
 			}
 			v.sp -= numElements
 
-			var arr core.Object = &value.Array{Value: elements}
+			var arr core.Object = value.NewArray(elements, false)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = gse.ErrObjectAllocLimit
@@ -305,11 +311,11 @@ func (v *VM) run() {
 			for i := v.sp - numElements; i < v.sp; i += 2 {
 				key := v.stack[i]
 				val := v.stack[i+1]
-				kv[key.(*value.String).Value] = val
+				kv[key.(*value.String).Native()] = val
 			}
 			v.sp -= numElements
 
-			var m core.Object = &value.Map{Value: kv}
+			var m core.Object = value.NewMap(kv, false)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = gse.ErrObjectAllocLimit
@@ -319,9 +325,7 @@ func (v *VM) run() {
 			v.sp++
 		case parser.OpError:
 			val := v.stack[v.sp-1]
-			var e core.Object = &value.Error{
-				Value: val,
-			}
+			var e core.Object = value.NewError(val)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = gse.ErrObjectAllocLimit
@@ -332,9 +336,7 @@ func (v *VM) run() {
 			val := v.stack[v.sp-1]
 			switch val := val.(type) {
 			case *value.Array:
-				var immutableArray core.Object = &value.ImmutableArray{
-					Value: val.Value,
-				}
+				var immutableArray core.Object = value.NewArray(val.Native(), true)
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = gse.ErrObjectAllocLimit
@@ -342,9 +344,7 @@ func (v *VM) run() {
 				}
 				v.stack[v.sp-1] = immutableArray
 			case *value.Map:
-				var immutableMap core.Object = &value.ImmutableMap{
-					Value: val.Value,
-				}
+				var immutableMap core.Object = value.NewMap(val.Native(), true)
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = gse.ErrObjectAllocLimit
@@ -384,7 +384,7 @@ func (v *VM) run() {
 			var lowIdx int64
 			if low != value.UndefinedValue {
 				if lowInt, ok := low.(*value.Int); ok {
-					lowIdx = lowInt.Value
+					lowIdx = lowInt.Native()
 				} else {
 					v.err = fmt.Errorf("invalid slice index type: %s",
 						low.TypeName())
@@ -394,20 +394,18 @@ func (v *VM) run() {
 
 			switch left := left.(type) {
 			case *value.Array:
-				numElements := int64(len(left.Value))
+				numElements := int64(left.Len())
 				var highIdx int64
 				if high == value.UndefinedValue {
 					highIdx = numElements
 				} else if highInt, ok := high.(*value.Int); ok {
-					highIdx = highInt.Value
+					highIdx = highInt.Native()
 				} else {
-					v.err = fmt.Errorf("invalid slice index type: %s",
-						high.TypeName())
+					v.err = fmt.Errorf("invalid slice index type: %s", high.TypeName())
 					return
 				}
 				if lowIdx > highIdx {
-					v.err = fmt.Errorf("invalid slice index: %d > %d",
-						lowIdx, highIdx)
+					v.err = fmt.Errorf("invalid slice index: %d > %d", lowIdx, highIdx)
 					return
 				}
 				if lowIdx < 0 {
@@ -420,46 +418,7 @@ func (v *VM) run() {
 				} else if highIdx > numElements {
 					highIdx = numElements
 				}
-				var val core.Object = &value.Array{
-					Value: left.Value[lowIdx:highIdx],
-				}
-				v.allocs--
-				if v.allocs == 0 {
-					v.err = gse.ErrObjectAllocLimit
-					return
-				}
-				v.stack[v.sp] = val
-				v.sp++
-			case *value.ImmutableArray:
-				numElements := int64(len(left.Value))
-				var highIdx int64
-				if high == value.UndefinedValue {
-					highIdx = numElements
-				} else if highInt, ok := high.(*value.Int); ok {
-					highIdx = highInt.Value
-				} else {
-					v.err = fmt.Errorf("invalid slice index type: %s",
-						high.TypeName())
-					return
-				}
-				if lowIdx > highIdx {
-					v.err = fmt.Errorf("invalid slice index: %d > %d",
-						lowIdx, highIdx)
-					return
-				}
-				if lowIdx < 0 {
-					lowIdx = 0
-				} else if lowIdx > numElements {
-					lowIdx = numElements
-				}
-				if highIdx < 0 {
-					highIdx = 0
-				} else if highIdx > numElements {
-					highIdx = numElements
-				}
-				var val core.Object = &value.Array{
-					Value: left.Value[lowIdx:highIdx],
-				}
+				var val core.Object = value.NewArray(left.Slice(int(lowIdx), int(highIdx)), false)
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = gse.ErrObjectAllocLimit
@@ -468,20 +427,18 @@ func (v *VM) run() {
 				v.stack[v.sp] = val
 				v.sp++
 			case *value.String:
-				numElements := int64(len(left.Value))
+				numElements := int64(left.Len())
 				var highIdx int64
 				if high == value.UndefinedValue {
 					highIdx = numElements
 				} else if highInt, ok := high.(*value.Int); ok {
-					highIdx = highInt.Value
+					highIdx = highInt.Native()
 				} else {
-					v.err = fmt.Errorf("invalid slice index type: %s",
-						high.TypeName())
+					v.err = fmt.Errorf("invalid slice index type: %s", high.TypeName())
 					return
 				}
 				if lowIdx > highIdx {
-					v.err = fmt.Errorf("invalid slice index: %d > %d",
-						lowIdx, highIdx)
+					v.err = fmt.Errorf("invalid slice index: %d > %d", lowIdx, highIdx)
 					return
 				}
 				if lowIdx < 0 {
@@ -494,9 +451,7 @@ func (v *VM) run() {
 				} else if highIdx > numElements {
 					highIdx = numElements
 				}
-				var val core.Object = &value.String{
-					Value: left.Value[lowIdx:highIdx],
-				}
+				var val core.Object = value.NewString(left.Substring(int(lowIdx), int(highIdx)))
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = gse.ErrObjectAllocLimit
@@ -505,20 +460,18 @@ func (v *VM) run() {
 				v.stack[v.sp] = val
 				v.sp++
 			case *value.Bytes:
-				numElements := int64(len(left.Value))
+				numElements := int64(left.Len())
 				var highIdx int64
 				if high == value.UndefinedValue {
 					highIdx = numElements
 				} else if highInt, ok := high.(*value.Int); ok {
-					highIdx = highInt.Value
+					highIdx = highInt.Native()
 				} else {
-					v.err = fmt.Errorf("invalid slice index type: %s",
-						high.TypeName())
+					v.err = fmt.Errorf("invalid slice index type: %s", high.TypeName())
 					return
 				}
 				if lowIdx > highIdx {
-					v.err = fmt.Errorf("invalid slice index: %d > %d",
-						lowIdx, highIdx)
+					v.err = fmt.Errorf("invalid slice index: %d > %d", lowIdx, highIdx)
 					return
 				}
 				if lowIdx < 0 {
@@ -531,9 +484,7 @@ func (v *VM) run() {
 				} else if highIdx > numElements {
 					highIdx = numElements
 				}
-				var val core.Object = &value.Bytes{
-					Value: left.Value[lowIdx:highIdx],
-				}
+				var val core.Object = value.NewBytes(left.Slice(int(lowIdx), int(highIdx)))
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = gse.ErrObjectAllocLimit
@@ -560,27 +511,20 @@ func (v *VM) run() {
 				v.sp--
 				switch arr := v.stack[v.sp].(type) {
 				case *value.Array:
-					for _, item := range arr.Value {
+					for _, item := range arr.Native() {
 						v.stack[v.sp] = item
 						v.sp++
 					}
-					numArgs += len(arr.Value) - 1
-				case *value.ImmutableArray:
-					for _, item := range arr.Value {
-						v.stack[v.sp] = item
-						v.sp++
-					}
-					numArgs += len(arr.Value) - 1
+					numArgs += arr.Len() - 1
 				default:
 					v.err = fmt.Errorf("not an array: %s", arr.TypeName())
 					return
 				}
 			}
 
-			if callee, ok := val.(*value.CompiledFunction); ok {
+			if callee, ok := val.(*CompiledFunction); ok {
 				if callee.VarArgs {
-					// if the closure is variadic,
-					// roll up all variadic parameters into an array
+					// if the closure is variadic, roll up all variadic parameters into an array
 					realArgs := callee.NumParameters - 1
 					varArgs := numArgs - realArgs
 					if varArgs >= 0 {
@@ -590,19 +534,15 @@ func (v *VM) run() {
 						for i := spStart; i < v.sp; i++ {
 							args[i-spStart] = v.stack[i]
 						}
-						v.stack[spStart] = &value.Array{Value: args}
+						v.stack[spStart] = value.NewArray(args, false)
 						v.sp = spStart + 1
 					}
 				}
 				if numArgs != callee.NumParameters {
 					if callee.VarArgs {
-						v.err = fmt.Errorf(
-							"wrong number of arguments: want>=%d, got=%d",
-							callee.NumParameters-1, numArgs)
+						v.err = fmt.Errorf("wrong number of arguments: want>=%d, got=%d", callee.NumParameters-1, numArgs)
 					} else {
-						v.err = fmt.Errorf(
-							"wrong number of arguments: want=%d, got=%d",
-							callee.NumParameters, numArgs)
+						v.err = fmt.Errorf("wrong number of arguments: want=%d, got=%d", callee.NumParameters, numArgs)
 					}
 					return
 				}
@@ -702,13 +642,12 @@ func (v *VM) run() {
 			v.ip++
 			sp := v.curFrame.basePointer + localIndex
 
-			// update pointee of v.stack[sp] instead of replacing the pointer
-			// itself. this is needed because there can be free variables
-			// referencing the same local variables.
+			// update pointee of v.stack[sp] instead of replacing the pointer itself.
+			// this is needed because there can be free variables referencing the same local variables.
 			val := v.stack[v.sp-1]
 			v.sp--
 			if obj, ok := v.stack[sp].(*value.ObjectPtr); ok {
-				*obj.Value = val
+				*obj.Native() = val
 				val = obj
 			}
 			v.stack[sp] = val // also use a copy of popped value
@@ -726,7 +665,7 @@ func (v *VM) run() {
 			v.sp -= numSelectors + 1
 			dst := v.stack[v.curFrame.basePointer+localIndex]
 			if obj, ok := dst.(*value.ObjectPtr); ok {
-				dst = *obj.Value
+				dst = *obj.Native()
 			}
 			if e := indexAssign(dst, val, selectors); e != nil {
 				v.err = e
@@ -737,7 +676,7 @@ func (v *VM) run() {
 			localIndex := int(v.curInsts[v.ip])
 			val := v.stack[v.curFrame.basePointer+localIndex]
 			if obj, ok := val.(*value.ObjectPtr); ok {
-				val = *obj.Value
+				val = *obj.Native()
 			}
 			v.stack[v.sp] = val
 			v.sp++
@@ -750,7 +689,7 @@ func (v *VM) run() {
 			v.ip += 3
 			constIndex := int(v.curInsts[v.ip-1]) | int(v.curInsts[v.ip-2])<<8
 			numFree := int(v.curInsts[v.ip])
-			fn, ok := v.constants[constIndex].(*value.CompiledFunction)
+			fn, ok := v.constants[constIndex].(*CompiledFunction)
 			if !ok {
 				v.err = fmt.Errorf("not function: %s", fn.TypeName())
 				return
@@ -761,13 +700,11 @@ func (v *VM) run() {
 				case *value.ObjectPtr:
 					free[i] = freeVar
 				default:
-					free[i] = &value.ObjectPtr{
-						Value: &v.stack[v.sp-numFree+i],
-					}
+					free[i] = value.NewObjectPtr(&v.stack[v.sp-numFree+i])
 				}
 			}
 			v.sp -= numFree
-			cl := &value.CompiledFunction{
+			cl := &CompiledFunction{
 				Instructions:  fn.Instructions,
 				NumLocals:     fn.NumLocals,
 				NumParameters: fn.NumParameters,
@@ -791,13 +728,13 @@ func (v *VM) run() {
 		case parser.OpGetFree:
 			v.ip++
 			freeIndex := int(v.curInsts[v.ip])
-			val := *v.curFrame.freeVars[freeIndex].Value
+			val := *v.curFrame.freeVars[freeIndex].Native()
 			v.stack[v.sp] = val
 			v.sp++
 		case parser.OpSetFree:
 			v.ip++
 			freeIndex := int(v.curInsts[v.ip])
-			*v.curFrame.freeVars[freeIndex].Value = v.stack[v.sp-1]
+			*v.curFrame.freeVars[freeIndex].Native() = v.stack[v.sp-1]
 			v.sp--
 		case parser.OpGetLocalPtr:
 			v.ip++
@@ -808,7 +745,7 @@ func (v *VM) run() {
 			if obj, ok := val.(*value.ObjectPtr); ok {
 				freeVar = obj
 			} else {
-				freeVar = &value.ObjectPtr{Value: &val}
+				freeVar = value.NewObjectPtr(&val)
 				v.stack[sp] = freeVar
 			}
 			v.stack[v.sp] = freeVar
@@ -825,8 +762,7 @@ func (v *VM) run() {
 			}
 			val := v.stack[v.sp-numSelectors-1]
 			v.sp -= numSelectors + 1
-			e := indexAssign(*v.curFrame.freeVars[freeIndex].Value,
-				val, selectors)
+			e := indexAssign(*v.curFrame.freeVars[freeIndex].Native(), val, selectors)
 			if e != nil {
 				v.err = e
 				return

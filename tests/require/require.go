@@ -129,38 +129,33 @@ func Equal(t *testing.T, expected, actual any, msg ...any) {
 	case []core.Object:
 		equalObjectSlice(t, expected, actual.([]core.Object), msg...)
 	case *value.Int:
-		Equal(t, expected.Value, actual.(*value.Int).Value, msg...)
+		Equal(t, expected.Native(), actual.(*value.Int).Native(), msg...)
 	case *value.Float:
-		Equal(t, expected.Value, actual.(*value.Float).Value, msg...)
+		Equal(t, expected.Native(), actual.(*value.Float).Native(), msg...)
 	case *value.String:
-		Equal(t, expected.Value, actual.(*value.String).Value, msg...)
+		Equal(t, expected.Native(), actual.(*value.String).Native(), msg...)
 	case *value.Char:
-		Equal(t, expected.Value, actual.(*value.Char).Value, msg...)
+		Equal(t, expected.Native(), actual.(*value.Char).Native(), msg...)
 	case *value.Bool:
 		if expected != actual {
 			failExpectedActual(t, expected, actual, msg...)
 		}
 	case *value.Array:
-		equalObjectSlice(t, expected.Value,
-			actual.(*value.Array).Value, msg...)
-	case *value.ImmutableArray:
-		equalObjectSlice(t, expected.Value, actual.(*value.ImmutableArray).Value, msg...)
+		equalObjectSlice(t, expected.Native(), actual.(*value.Array).Native(), msg...)
 	case *value.Bytes:
-		if !bytes.Equal(expected.Value, actual.(*value.Bytes).Value) {
-			failExpectedActual(t, string(expected.Value), string(actual.(*value.Bytes).Value), msg...)
+		if !bytes.Equal(expected.Native(), actual.(*value.Bytes).Native()) {
+			failExpectedActual(t, string(expected.Native()), string(actual.(*value.Bytes).Native()), msg...)
 		}
 	case *value.Map:
-		equalObjectMap(t, expected.Value, actual.(*value.Map).Value, msg...)
-	case *value.ImmutableMap:
-		equalObjectMap(t, expected.Value, actual.(*value.ImmutableMap).Value, msg...)
-	case *value.CompiledFunction:
-		equalCompiledFunction(t, expected, actual.(*value.CompiledFunction), msg...)
+		equalObjectMap(t, expected.Native(), actual.(*value.Map).Native(), msg...)
+	case *vm.CompiledFunction:
+		equalCompiledFunction(t, expected, actual.(*vm.CompiledFunction), msg...)
 	case *value.Undefined:
 		if expected != actual {
 			failExpectedActual(t, expected, actual, msg...)
 		}
 	case *value.Error:
-		Equal(t, expected.Value, actual.(*value.Error).Value, msg...)
+		Equal(t, expected.Native(), actual.(*value.Error).Native(), msg...)
 	case core.Object:
 		if !expected.Equals(actual.(core.Object)) {
 			failExpectedActual(t, expected, actual, msg...)
@@ -264,8 +259,8 @@ func equalObjectMap(t *testing.T, expected, actual map[string]core.Object, msg .
 }
 
 func equalCompiledFunction(t *testing.T, expected, actual core.Object, msg ...any) {
-	expectedT := expected.(*value.CompiledFunction)
-	actualT := actual.(*value.CompiledFunction)
+	expectedT := expected.(*vm.CompiledFunction)
+	actualT := actual.(*vm.CompiledFunction)
 	Equal(t, vm.FormatInstructions(expectedT.Instructions, 0), vm.FormatInstructions(actualT.Instructions, 0), msg...)
 }
 

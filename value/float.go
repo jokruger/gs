@@ -3,6 +3,7 @@ package value
 import (
 	"math"
 	"strconv"
+	"time"
 
 	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
@@ -10,16 +11,37 @@ import (
 )
 
 type Float struct {
-	Object
-	Value float64
+	value float64
 }
 
-func (o *Float) String() string {
-	return strconv.FormatFloat(o.Value, 'f', -1, 64)
+func NewFloat(value float64) *Float {
+	o := &Float{}
+	o.Set(value)
+	return o
+}
+
+func (o *Float) Set(value float64) {
+	o.value = value
+}
+
+func (o *Float) Native() float64 {
+	return o.value
 }
 
 func (o *Float) TypeName() string {
 	return "float"
+}
+
+func (o *Float) String() string {
+	return strconv.FormatFloat(o.value, 'f', -1, 64)
+}
+
+func (o *Float) Interface() any {
+	return o.value
+}
+
+func (o *Float) Arity() int {
+	return 0
 }
 
 func (o *Float) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
@@ -27,46 +49,46 @@ func (o *Float) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	case *Float:
 		switch op {
 		case token.Add:
-			r := o.Value + rhs.Value
-			if r == o.Value {
+			r := o.value + rhs.value
+			if r == o.value {
 				return o, nil
 			}
-			return &Float{Value: r}, nil
+			return NewFloat(r), nil
 		case token.Sub:
-			r := o.Value - rhs.Value
-			if r == o.Value {
+			r := o.value - rhs.value
+			if r == o.value {
 				return o, nil
 			}
-			return &Float{Value: r}, nil
+			return NewFloat(r), nil
 		case token.Mul:
-			r := o.Value * rhs.Value
-			if r == o.Value {
+			r := o.value * rhs.value
+			if r == o.value {
 				return o, nil
 			}
-			return &Float{Value: r}, nil
+			return NewFloat(r), nil
 		case token.Quo:
-			r := o.Value / rhs.Value
-			if r == o.Value {
+			r := o.value / rhs.value
+			if r == o.value {
 				return o, nil
 			}
-			return &Float{Value: r}, nil
+			return NewFloat(r), nil
 		case token.Less:
-			if o.Value < rhs.Value {
+			if o.value < rhs.value {
 				return TrueValue, nil
 			}
 			return FalseValue, nil
 		case token.Greater:
-			if o.Value > rhs.Value {
+			if o.value > rhs.value {
 				return TrueValue, nil
 			}
 			return FalseValue, nil
 		case token.LessEq:
-			if o.Value <= rhs.Value {
+			if o.value <= rhs.value {
 				return TrueValue, nil
 			}
 			return FalseValue, nil
 		case token.GreaterEq:
-			if o.Value >= rhs.Value {
+			if o.value >= rhs.value {
 				return TrueValue, nil
 			}
 			return FalseValue, nil
@@ -74,46 +96,46 @@ func (o *Float) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	case *Int:
 		switch op {
 		case token.Add:
-			r := o.Value + float64(rhs.Value)
-			if r == o.Value {
+			r := o.value + float64(rhs.value)
+			if r == o.value {
 				return o, nil
 			}
-			return &Float{Value: r}, nil
+			return NewFloat(r), nil
 		case token.Sub:
-			r := o.Value - float64(rhs.Value)
-			if r == o.Value {
+			r := o.value - float64(rhs.value)
+			if r == o.value {
 				return o, nil
 			}
-			return &Float{Value: r}, nil
+			return NewFloat(r), nil
 		case token.Mul:
-			r := o.Value * float64(rhs.Value)
-			if r == o.Value {
+			r := o.value * float64(rhs.value)
+			if r == o.value {
 				return o, nil
 			}
-			return &Float{Value: r}, nil
+			return NewFloat(r), nil
 		case token.Quo:
-			r := o.Value / float64(rhs.Value)
-			if r == o.Value {
+			r := o.value / float64(rhs.value)
+			if r == o.value {
 				return o, nil
 			}
-			return &Float{Value: r}, nil
+			return NewFloat(r), nil
 		case token.Less:
-			if o.Value < float64(rhs.Value) {
+			if o.value < float64(rhs.value) {
 				return TrueValue, nil
 			}
 			return FalseValue, nil
 		case token.Greater:
-			if o.Value > float64(rhs.Value) {
+			if o.value > float64(rhs.value) {
 				return TrueValue, nil
 			}
 			return FalseValue, nil
 		case token.LessEq:
-			if o.Value <= float64(rhs.Value) {
+			if o.value <= float64(rhs.value) {
 				return TrueValue, nil
 			}
 			return FalseValue, nil
 		case token.GreaterEq:
-			if o.Value >= float64(rhs.Value) {
+			if o.value >= float64(rhs.value) {
 				return TrueValue, nil
 			}
 			return FalseValue, nil
@@ -122,20 +144,52 @@ func (o *Float) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	return nil, gse.ErrInvalidOperator
 }
 
-func (o *Float) Copy() core.Object {
-	return &Float{Value: o.Value}
-}
-
-func (o *Float) IsFalsy() bool {
-	return math.IsNaN(o.Value)
-}
-
 func (o *Float) Equals(x core.Object) bool {
-	t, ok := x.(*Float)
+	t, ok := x.AsFloat()
 	if !ok {
 		return false
 	}
-	return o.Value == t.Value
+	return o.value == t
+}
+
+func (o *Float) Copy() core.Object {
+	return NewFloat(o.value)
+}
+
+func (o *Float) IndexGet(core.Object) (core.Object, error) {
+	return nil, gse.ErrNotIndexable
+}
+
+func (o *Float) IndexSet(core.Object, core.Object) error {
+	return gse.ErrNotIndexAssignable
+}
+
+func (o *Float) Iterate() core.Iterator {
+	return nil
+}
+
+func (o *Float) Call(core.VM, ...core.Object) (core.Object, error) {
+	return nil, nil
+}
+
+func (o *Float) IsFalsy() bool {
+	return math.IsNaN(o.value)
+}
+
+func (o *Float) IsIterable() bool {
+	return false
+}
+
+func (o *Float) IsCallable() bool {
+	return false
+}
+
+func (o *Float) IsImmutable() bool {
+	return false
+}
+
+func (o *Float) IsVariadic() bool {
+	return false
 }
 
 func (o *Float) AsString() (string, bool) {
@@ -143,17 +197,25 @@ func (o *Float) AsString() (string, bool) {
 }
 
 func (o *Float) AsInt() (int64, bool) {
-	return int64(o.Value), true
+	return int64(o.value), true
 }
 
 func (o *Float) AsFloat() (float64, bool) {
-	return o.Value, true
+	return o.value, true
 }
 
 func (o *Float) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Float) Interface() any {
-	return o.Value
+func (o *Float) AsRune() (rune, bool) {
+	return 0, false
+}
+
+func (o *Float) AsByteSlice() ([]byte, bool) {
+	return nil, false
+}
+
+func (o *Float) AsTime() (time.Time, bool) {
+	return time.Time{}, false
 }

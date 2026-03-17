@@ -35,7 +35,6 @@ uncomment:
     json_test.go
     hex_test.go
     fmt_test.go
-    base64_test.go
 
     bytecode_test.go - gob serialization for private fields!
 

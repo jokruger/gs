@@ -26,7 +26,6 @@
 - Review all stdlibs, check names for consistent style (snake-case, etc)
 
 uncomment:
-    objects_test.go
     bytecode_test.go - gob serialization for private fields!
 
 replace:

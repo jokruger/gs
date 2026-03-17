@@ -1,6 +1,14 @@
 package stdlib_test
 
-/*
+import (
+	"os"
+	"testing"
+
+	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/tests/require"
+	"github.com/jokruger/gs/value"
+)
+
 func TestReadFile(t *testing.T) {
 	content := []byte("the quick brown fox jumps over the lazy dog")
 	tf, err := os.CreateTemp("", "test")
@@ -93,4 +101,3 @@ func TestOSExpandEnv(t *testing.T) {
 	_ = os.Setenv("GS", "123456")
 	module(t, "os").call("expand_env", "${GS} ${GS}").expectError()
 }
-*/

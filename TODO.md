@@ -23,6 +23,7 @@
 - Bool operators (logic and, or, not, etc)
 - Investigate how .Copy is used - can we get rid of it?
 - Bytes/String - IndexSet
+- Review all stdlibs, check names for consistent style (snake-case, etc)
 
 uncomment:
     stdlib,
@@ -31,8 +32,6 @@ uncomment:
     times_test.go
     text_test.go
     text_regexp_test.go
-    stdlib_test.go
-    os_test.go
     json_test.go
     hex_test.go
     fmt_test.go

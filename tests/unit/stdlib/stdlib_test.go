@@ -1,11 +1,23 @@
 package stdlib_test
 
+import (
+	"fmt"
+	"testing"
+	"time"
+
+	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/stdlib"
+	"github.com/jokruger/gs/tests/require"
+	"github.com/jokruger/gs/value"
+	"github.com/jokruger/gs/vm"
+)
+
 type ARR = []any
 type MAP = map[string]any
 type IARR []any
 type IMAP map[string]any
 
-/*
 func TestAllModuleNames(t *testing.T) {
 	names := stdlib.AllModuleNames()
 	require.Equal(t,
@@ -233,4 +245,3 @@ func expect(t *testing.T, input string, expected any) {
 	require.NotNil(t, v)
 	require.Equal(t, e, v.Value())
 }
-*/

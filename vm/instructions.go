@@ -3,11 +3,12 @@ package vm
 import (
 	"fmt"
 
+	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 )
 
 // MakeInstruction returns a bytecode for an opcode and the operands.
-func MakeInstruction(opcode parser.Opcode, operands ...int) []byte {
+func MakeInstruction(opcode core.Opcode, operands ...int) []byte {
 	numOperands := parser.OpcodeOperands[opcode]
 
 	totalLen := 1

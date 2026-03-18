@@ -223,11 +223,11 @@ func (o *Int) Copy() core.Object {
 	return NewInt(o.value)
 }
 
-func (o *Int) IndexGet(core.Object) (core.Object, error) {
+func (o *Int) Access(core.Object, core.Opcode) (core.Object, error) {
 	return nil, gse.ErrNotIndexable
 }
 
-func (o *Int) IndexSet(core.Object, core.Object) error {
+func (o *Int) Assign(core.Object, core.Object) error {
 	return gse.ErrNotIndexAssignable
 }
 

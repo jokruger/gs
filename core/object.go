@@ -16,8 +16,8 @@ type Object interface {
 	BinaryOp(token.Token, Object) (Object, error) // return the result of a binary operation with another object
 	Equals(Object) bool                           // return whether the value of the type is equal to the value of another object
 	Copy() Object                                 // return a copy of the type (and its value)
-	IndexGet(Object) (Object, error)              // return the result of indexing the object with the given index
-	IndexSet(idx, val Object) error               // return the result of setting the value of the object at the given index
+	Access(Object, Opcode) (Object, error)        // return the result of accessing the object at the given index with the given mode (index or selector)
+	Assign(idx, val Object) error                 // return the result of setting the value of the object at the given index
 	Iterate() Iterator                            // return an Iterator for the type
 	Call(VM, ...Object) (Object, error)           // return the result of calling the object with the given arguments
 

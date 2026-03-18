@@ -124,11 +124,13 @@ func (c *Compiler) Compile(node parser.Node) error {
 				return err
 			}
 		}
+
 	case *parser.ExprStmt:
 		if err := c.Compile(node.Expr); err != nil {
 			return err
 		}
 		c.emit(node, parser.OpPop)
+
 	case *parser.IncDecStmt:
 		op := token.AddAssign
 		if node.Token == token.Dec {
@@ -136,10 +138,12 @@ func (c *Compiler) Compile(node parser.Node) error {
 		}
 		return c.compileAssign(node, []parser.Expr{node.Expr},
 			[]parser.Expr{&parser.IntLit{Value: 1}}, op)
+
 	case *parser.ParenExpr:
 		if err := c.Compile(node.Expr); err != nil {
 			return err
 		}
+
 	case *parser.BinaryExpr:
 		if node.Token == token.LAnd || node.Token == token.LOr {
 			return c.compileLogical(node)
@@ -191,25 +195,32 @@ func (c *Compiler) Compile(node parser.Node) error {
 			return c.errorf(node, "invalid binary operator: %s",
 				node.Token.String())
 		}
+
 	case *parser.IntLit:
 		c.emit(node, parser.OpConstant, c.addConstant(value.NewInt(node.Value)))
+
 	case *parser.FloatLit:
 		c.emit(node, parser.OpConstant, c.addConstant(value.NewFloat(node.Value)))
+
 	case *parser.BoolLit:
 		if node.Value {
 			c.emit(node, parser.OpTrue)
 		} else {
 			c.emit(node, parser.OpFalse)
 		}
+
 	case *parser.StringLit:
 		if len(node.Value) > core.MaxStringLen {
 			return c.error(node, gse.ErrStringLimit)
 		}
 		c.emit(node, parser.OpConstant, c.addConstant(value.NewString(node.Value)))
+
 	case *parser.CharLit:
 		c.emit(node, parser.OpConstant, c.addConstant(value.NewChar(node.Value)))
+
 	case *parser.UndefinedLit:
 		c.emit(node, parser.OpNull)
+
 	case *parser.UnaryExpr:
 		if err := c.Compile(node.Expr); err != nil {
 			return err
@@ -228,6 +239,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			return c.errorf(node,
 				"invalid unary operator: %s", node.Token.String())
 		}
+
 	case *parser.IfStmt:
 		// open new symbol table for the statement
 		c.symbolTable = c.symbolTable.Fork(true)
@@ -268,10 +280,13 @@ func (c *Compiler) Compile(node parser.Node) error {
 			curPos := len(c.currentInstructions())
 			c.changeOperand(jumpPos1, curPos)
 		}
+
 	case *parser.ForStmt:
 		return c.compileForStmt(node)
+
 	case *parser.ForInStmt:
 		return c.compileForInStmt(node)
+
 	case *parser.BranchStmt:
 		if node.Token == token.Break {
 			curLoop := c.currentLoop()
@@ -291,6 +306,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			panic(fmt.Errorf("invalid branch statement: %s",
 				node.Token.String()))
 		}
+
 	case *parser.BlockStmt:
 		if len(node.Stmts) == 0 {
 			return nil
@@ -306,11 +322,13 @@ func (c *Compiler) Compile(node parser.Node) error {
 				return err
 			}
 		}
+
 	case *parser.AssignStmt:
 		err := c.compileAssign(node, node.LHS, node.RHS, node.Token)
 		if err != nil {
 			return err
 		}
+
 	case *parser.Ident:
 		symbol, _, ok := c.symbolTable.Resolve(node.Name, false)
 		if !ok {
@@ -327,6 +345,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		case vm.ScopeFree:
 			c.emit(node, parser.OpGetFree, symbol.Index)
 		}
+
 	case *parser.ArrayLit:
 		for _, elem := range node.Elements {
 			if err := c.Compile(elem); err != nil {
@@ -334,6 +353,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			}
 		}
 		c.emit(node, parser.OpArray, len(node.Elements))
+
 	case *parser.MapLit:
 		for _, elt := range node.Elements {
 			// key
@@ -357,7 +377,8 @@ func (c *Compiler) Compile(node parser.Node) error {
 		if err := c.Compile(node.Sel); err != nil {
 			return err
 		}
-		c.emit(node, parser.OpIndex)
+		c.emit(node, parser.OpSelect)
+
 	case *parser.IndexExpr:
 		if err := c.Compile(node.Expr); err != nil {
 			return err
@@ -366,6 +387,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			return err
 		}
 		c.emit(node, parser.OpIndex)
+
 	case *parser.SliceExpr:
 		if err := c.Compile(node.Expr); err != nil {
 			return err
@@ -385,6 +407,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			c.emit(node, parser.OpNull)
 		}
 		c.emit(node, parser.OpSliceIndex)
+
 	case *parser.FuncLit:
 		c.enterScope()
 
@@ -472,6 +495,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		} else {
 			c.emit(node, parser.OpConstant, c.addConstant(compiledFunction))
 		}
+
 	case *parser.ReturnStmt:
 		if c.symbolTable.Parent(true) == nil {
 			// outside the function
@@ -486,6 +510,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			}
 			c.emit(node, parser.OpReturn, 1)
 		}
+
 	case *parser.CallExpr:
 		if err := c.Compile(node.Func); err != nil {
 			return err
@@ -500,6 +525,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			ellipsis = 1
 		}
 		c.emit(node, parser.OpCall, len(node.Args), ellipsis)
+
 	case *parser.ImportExpr:
 		if node.ModuleName == "" {
 			return c.errorf(node, "empty module name")
@@ -549,6 +575,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		} else {
 			return c.errorf(node, "module '%s' not found", node.ModuleName)
 		}
+
 	case *parser.ExportStmt:
 		// export statement must be in top-level scope
 		if c.scopeIndex != 0 {
@@ -564,16 +591,19 @@ func (c *Compiler) Compile(node parser.Node) error {
 		}
 		c.emit(node, parser.OpImmutable)
 		c.emit(node, parser.OpReturn, 1)
+
 	case *parser.ErrorExpr:
 		if err := c.Compile(node.Expr); err != nil {
 			return err
 		}
 		c.emit(node, parser.OpError)
+
 	case *parser.ImmutableExpr:
 		if err := c.Compile(node.Expr); err != nil {
 			return err
 		}
 		c.emit(node, parser.OpImmutable)
+
 	case *parser.CondExpr:
 		if err := c.Compile(node.Cond); err != nil {
 			return err
@@ -599,6 +629,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		curPos = len(c.currentInstructions())
 		c.changeOperand(jumpPos2, curPos)
 	}
+
 	return nil
 }
 
@@ -651,11 +682,7 @@ func (c *Compiler) GetImportFileExt() []string {
 	return c.importFileExt
 }
 
-func (c *Compiler) compileAssign(
-	node parser.Node,
-	lhs, rhs []parser.Expr,
-	op token.Token,
-) error {
+func (c *Compiler) compileAssign(node parser.Node, lhs, rhs []parser.Expr, op token.Token) error {
 	numLHS, numRHS := len(lhs), len(rhs)
 	if numLHS > 1 || numRHS > 1 {
 		return c.errorf(node, "tuple assignment not allowed")
@@ -1172,7 +1199,7 @@ func (c *Compiler) optimizeFunc(node parser.Node) {
 	// pass 1. identify all jump destinations
 	dsts := make(map[int]bool)
 	iterateInstructions(c.scopes[c.scopeIndex].Instructions,
-		func(pos int, opcode parser.Opcode, operands []int) bool {
+		func(pos int, opcode core.Opcode, operands []int) bool {
 			switch opcode {
 			case parser.OpJump, parser.OpJumpFalsy,
 				parser.OpAndJump, parser.OpOrJump:
@@ -1187,7 +1214,7 @@ func (c *Compiler) optimizeFunc(node parser.Node) {
 	var dstIdx int
 	var deadCode bool
 	iterateInstructions(c.scopes[c.scopeIndex].Instructions,
-		func(pos int, opcode parser.Opcode, operands []int) bool {
+		func(pos int, opcode core.Opcode, operands []int) bool {
 			switch {
 			case dsts[pos]:
 				dstIdx++
@@ -1206,13 +1233,13 @@ func (c *Compiler) optimizeFunc(node parser.Node) {
 		})
 
 	// pass 3. update jump positions
-	var lastOp parser.Opcode
+	var lastOp core.Opcode
 	var appendReturn bool
 	endPos := len(c.scopes[c.scopeIndex].Instructions)
 	newEndPost := len(newInsts)
 
 	iterateInstructions(newInsts,
-		func(pos int, opcode parser.Opcode, operands []int) bool {
+		func(pos int, opcode core.Opcode, operands []int) bool {
 			switch opcode {
 			case parser.OpJump, parser.OpJumpFalsy, parser.OpAndJump,
 				parser.OpOrJump:
@@ -1252,7 +1279,7 @@ func (c *Compiler) optimizeFunc(node parser.Node) {
 	}
 }
 
-func (c *Compiler) emit(node parser.Node, opcode parser.Opcode, operands ...int) int {
+func (c *Compiler) emit(node parser.Node, opcode core.Opcode, operands ...int) int {
 	filePos := core.NoPos
 	if node != nil {
 		filePos = node.Pos()
@@ -1304,9 +1331,7 @@ func (c *Compiler) getPathModule(moduleName string) (pathFile string, err error)
 	return "", fmt.Errorf("module '%s' not found at: %s", moduleName, pathFile)
 }
 
-func resolveAssignLHS(
-	expr parser.Expr,
-) (name string, selectors []parser.Expr) {
+func resolveAssignLHS(expr parser.Expr) (name string, selectors []parser.Expr) {
 	switch term := expr.(type) {
 	case *parser.SelectorExpr:
 		name, selectors = resolveAssignLHS(term.Expr)
@@ -1321,10 +1346,7 @@ func resolveAssignLHS(
 	return
 }
 
-func iterateInstructions(
-	b []byte,
-	fn func(pos int, opcode parser.Opcode, operands []int) bool,
-) {
+func iterateInstructions(b []byte, fn func(pos int, opcode core.Opcode, operands []int) bool) {
 	for i := 0; i < len(b); i++ {
 		numOperands := parser.OpcodeOperands[b[i]]
 		operands, read := parser.ReadOperands(numOperands, b[i+1:])

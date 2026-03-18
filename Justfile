@@ -21,6 +21,9 @@ test: generate
     @go test -race ./tests/unit
     @go run ./cmd/gs -resolve ./tests/testdata/cli/test.gs
 
+benchmark: generate
+    @go run ./cmd/bench
+
 clean:
     rm -rf ./build
     rm -rf ./*.prof

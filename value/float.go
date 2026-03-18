@@ -171,11 +171,11 @@ func (o *Float) Copy() core.Object {
 	return NewFloat(o.value)
 }
 
-func (o *Float) IndexGet(core.Object) (core.Object, error) {
+func (o *Float) Access(core.Object, core.Opcode) (core.Object, error) {
 	return nil, gse.ErrNotIndexable
 }
 
-func (o *Float) IndexSet(core.Object, core.Object) error {
+func (o *Float) Assign(core.Object, core.Object) error {
 	return gse.ErrNotIndexAssignable
 }
 

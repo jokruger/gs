@@ -1,52 +1,52 @@
 package parser
 
-// Opcode represents a single byte operation code.
-type Opcode = byte
+import "github.com/jokruger/gs/core"
 
 // List of opcodes
 const (
-	OpConstant      Opcode = iota // Load constant
-	OpBComplement                 // bitwise complement
-	OpPop                         // Pop
-	OpTrue                        // Push true
-	OpFalse                       // Push false
-	OpEqual                       // Equal ==
-	OpNotEqual                    // Not equal !=
-	OpMinus                       // Minus -
-	OpLNot                        // Logical not !
-	OpJumpFalsy                   // Jump if falsy
-	OpAndJump                     // Logical AND jump
-	OpOrJump                      // Logical OR jump
-	OpJump                        // Jump
-	OpNull                        // Push null
-	OpArray                       // Array object
-	OpMap                         // Map object
-	OpError                       // Error object
-	OpImmutable                   // Immutable object
-	OpIndex                       // Index operation
-	OpSliceIndex                  // Slice operation
-	OpCall                        // Call function
-	OpReturn                      // Return
-	OpGetGlobal                   // Get global variable
-	OpSetGlobal                   // Set global variable
-	OpSetSelGlobal                // Set global variable using selectors
-	OpGetLocal                    // Get local variable
-	OpSetLocal                    // Set local variable
-	OpDefineLocal                 // Define local variable
-	OpSetSelLocal                 // Set local variable using selectors
-	OpGetFreePtr                  // Get free variable pointer object
-	OpGetFree                     // Get free variables
-	OpSetFree                     // Set free variables
-	OpGetLocalPtr                 // Get local variable as a pointer
-	OpSetSelFree                  // Set free variables using selectors
-	OpGetBuiltin                  // Get builtin function
-	OpClosure                     // Push closure
-	OpIteratorInit                // Iterator init
-	OpIteratorNext                // Iterator next
-	OpIteratorKey                 // Iterator key
-	OpIteratorValue               // Iterator value
-	OpBinaryOp                    // Binary operation
-	OpSuspend                     // Suspend VM
+	OpConstant      core.Opcode = iota // Load constant
+	OpBComplement                      // bitwise complement
+	OpPop                              // Pop
+	OpTrue                             // Push true
+	OpFalse                            // Push false
+	OpEqual                            // Equal ==
+	OpNotEqual                         // Not equal !=
+	OpMinus                            // Minus -
+	OpLNot                             // Logical not !
+	OpJumpFalsy                        // Jump if falsy
+	OpAndJump                          // Logical AND jump
+	OpOrJump                           // Logical OR jump
+	OpJump                             // Jump
+	OpNull                             // Push null
+	OpArray                            // Array object
+	OpMap                              // Map object
+	OpError                            // Error object
+	OpImmutable                        // Immutable object
+	OpIndex                            // Index operation
+	OpSliceIndex                       // Slice operation
+	OpCall                             // Call function
+	OpReturn                           // Return
+	OpGetGlobal                        // Get global variable
+	OpSetGlobal                        // Set global variable
+	OpSetSelGlobal                     // Set global variable using selectors
+	OpGetLocal                         // Get local variable
+	OpSetLocal                         // Set local variable
+	OpDefineLocal                      // Define local variable
+	OpSetSelLocal                      // Set local variable using selectors
+	OpGetFreePtr                       // Get free variable pointer object
+	OpGetFree                          // Get free variables
+	OpSetFree                          // Set free variables
+	OpGetLocalPtr                      // Get local variable as a pointer
+	OpSetSelFree                       // Set free variables using selectors
+	OpGetBuiltin                       // Get builtin function
+	OpClosure                          // Push closure
+	OpIteratorInit                     // Iterator init
+	OpIteratorNext                     // Iterator next
+	OpIteratorKey                      // Iterator key
+	OpIteratorValue                    // Iterator value
+	OpBinaryOp                         // Binary operation
+	OpSuspend                          // Suspend VM
+	OpSelect                           // Select operation
 )
 
 // OpcodeNames are string representation of opcodes.
@@ -93,6 +93,7 @@ var OpcodeNames = [...]string{
 	OpIteratorValue: "ITVAL",
 	OpBinaryOp:      "BINARYOP",
 	OpSuspend:       "SUSPEND",
+	OpSelect:        "SELECT",
 }
 
 // OpcodeOperands is the number of operands.
@@ -139,6 +140,7 @@ var OpcodeOperands = [...][]int{
 	OpIteratorValue: {},
 	OpBinaryOp:      {1},
 	OpSuspend:       {},
+	OpSelect:        {},
 }
 
 // ReadOperands reads operands from the bytecode.

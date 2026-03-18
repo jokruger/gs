@@ -6,6 +6,7 @@ import (
 
 	"github.com/jokruger/gs/core"
 	gse "github.com/jokruger/gs/error"
+	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
 )
 
@@ -124,18 +125,24 @@ func (o *Bytes) Copy() core.Object {
 	return NewBytes(t)
 }
 
-func (o *Bytes) IndexGet(index core.Object) (core.Object, error) {
+func (o *Bytes) Access(index core.Object, mode core.Opcode) (core.Object, error) {
+	if mode != parser.OpIndex {
+		return nil, gse.ErrInvalidAccessMode
+	}
+
 	i, ok := index.AsInt()
 	if !ok {
 		return nil, gse.ErrInvalidIndexType
 	}
+
 	if i < 0 || i >= int64(len(o.value)) {
 		return UndefinedValue, nil
 	}
+
 	return NewInt(int64(o.value[i])), nil
 }
 
-func (o *Bytes) IndexSet(core.Object, core.Object) error {
+func (o *Bytes) Assign(core.Object, core.Object) error {
 	return gse.ErrNotIndexAssignable
 }
 

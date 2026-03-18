@@ -70,11 +70,11 @@ func (o *Undefined) Copy() core.Object {
 	return o
 }
 
-func (o *Undefined) IndexGet(core.Object) (core.Object, error) {
+func (o *Undefined) Access(core.Object, core.Opcode) (core.Object, error) {
 	return UndefinedValue, nil
 }
 
-func (o *Undefined) IndexSet(core.Object, core.Object) error {
+func (o *Undefined) Assign(core.Object, core.Object) error {
 	return gse.ErrNotIndexAssignable
 }
 

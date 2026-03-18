@@ -66,11 +66,11 @@ func (o *Object) Copy() core.Object {
 	return o
 }
 
-func (o *Object) IndexGet(core.Object) (core.Object, error) {
+func (o *Object) Access(core.Object, core.Opcode) (core.Object, error) {
 	return nil, gse.ErrNotIndexable
 }
 
-func (o *Object) IndexSet(core.Object, core.Object) error {
+func (o *Object) Assign(core.Object, core.Object) error {
 	return gse.ErrNotIndexAssignable
 }
 

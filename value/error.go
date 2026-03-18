@@ -98,7 +98,7 @@ func (o *Error) Copy() core.Object {
 	return NewError(o.value.Copy())
 }
 
-func (o *Error) IndexGet(index core.Object) (core.Object, error) {
+func (o *Error) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 	k, ok := index.AsString()
 	if !ok {
 		return nil, gse.ErrInvalidIndexOnError
@@ -112,7 +112,7 @@ func (o *Error) IndexGet(index core.Object) (core.Object, error) {
 	}
 }
 
-func (o *Error) IndexSet(core.Object, core.Object) error {
+func (o *Error) Assign(core.Object, core.Object) error {
 	return gse.ErrNotIndexAssignable
 }
 

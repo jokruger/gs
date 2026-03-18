@@ -2055,7 +2055,7 @@ func (o *StringDict) TypeName() string {
 	return "string-dict"
 }
 
-func (o *StringDict) IndexGet(index core.Object) (core.Object, error) {
+func (o *StringDict) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 	strIdx, ok := index.(*value.String)
 	if !ok {
 		return nil, gse.ErrInvalidIndexType
@@ -2070,7 +2070,7 @@ func (o *StringDict) IndexGet(index core.Object) (core.Object, error) {
 	return value.UndefinedValue, nil
 }
 
-func (o *StringDict) IndexSet(i, v core.Object) error {
+func (o *StringDict) Assign(i, v core.Object) error {
 	strIdx, ok := i.(*value.String)
 	if !ok {
 		return gse.ErrInvalidIndexType
@@ -2078,7 +2078,7 @@ func (o *StringDict) IndexSet(i, v core.Object) error {
 
 	strVal, ok := v.AsString()
 	if !ok {
-		return gse.ErrInvalidIndexValueType
+		return gse.ErrInvalidIndexType
 	}
 
 	o.Value[strings.ToLower(strIdx.Value())] = strVal
@@ -2099,7 +2099,7 @@ func (o *StringCircle) String() string {
 	return ""
 }
 
-func (o *StringCircle) IndexGet(index core.Object) (core.Object, error) {
+func (o *StringCircle) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 	intIdx, ok := index.(*value.Int)
 	if !ok {
 		return nil, gse.ErrInvalidIndexType
@@ -2113,7 +2113,7 @@ func (o *StringCircle) IndexGet(index core.Object) (core.Object, error) {
 	return value.NewString(o.Value[r]), nil
 }
 
-func (o *StringCircle) IndexSet(i, v core.Object) error {
+func (o *StringCircle) Assign(i, v core.Object) error {
 	intIdx, ok := i.(*value.Int)
 	if !ok {
 		return gse.ErrInvalidIndexType
@@ -2126,7 +2126,7 @@ func (o *StringCircle) IndexSet(i, v core.Object) error {
 
 	strVal, ok := v.AsString()
 	if !ok {
-		return gse.ErrInvalidIndexValueType
+		return gse.ErrInvalidIndexType
 	}
 
 	o.Value[r] = strVal
@@ -2189,7 +2189,7 @@ func (o *StringArray) TypeName() string {
 	return "string-array"
 }
 
-func (o *StringArray) IndexGet(index core.Object) (core.Object, error) {
+func (o *StringArray) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 	intIdx, ok := index.(*value.Int)
 	if ok {
 		if intIdx.Value() >= 0 && intIdx.Value() < int64(len(o.Value)) {
@@ -2213,10 +2213,10 @@ func (o *StringArray) IndexGet(index core.Object) (core.Object, error) {
 	return nil, gse.ErrInvalidIndexType
 }
 
-func (o *StringArray) IndexSet(i, v core.Object) error {
+func (o *StringArray) Assign(i, v core.Object) error {
 	strVal, ok := v.AsString()
 	if !ok {
-		return gse.ErrInvalidIndexValueType
+		return gse.ErrInvalidIndexType
 	}
 
 	intIdx, ok := i.(*value.Int)
@@ -2309,38 +2309,26 @@ func TestIndexAssignable(t *testing.T) {
 	dict := func() *StringDict {
 		return &StringDict{Value: map[string]string{"a": "foo", "b": "bar"}}
 	}
-	expectRun(t, `dict["a"] = "1984"; out = dict["a"]`,
-		Opts().Symbol("dict", dict()).Skip2ndPass(), "1984")
-	expectRun(t, `dict["c"] = "1984"; out = dict["c"]`,
-		Opts().Symbol("dict", dict()).Skip2ndPass(), "1984")
-	expectRun(t, `dict["c"] = 1984; out = dict["C"]`,
-		Opts().Symbol("dict", dict()).Skip2ndPass(), "1984")
-	expectError(t, `dict[0] = "1984"`,
-		Opts().Symbol("dict", dict()).Skip2ndPass(), "invalid index type")
+	expectRun(t, `dict["a"] = "1984"; out = dict["a"]`, Opts().Symbol("dict", dict()).Skip2ndPass(), "1984")
+	expectRun(t, `dict["c"] = "1984"; out = dict["c"]`, Opts().Symbol("dict", dict()).Skip2ndPass(), "1984")
+	expectRun(t, `dict["c"] = 1984; out = dict["C"]`, Opts().Symbol("dict", dict()).Skip2ndPass(), "1984")
+	expectError(t, `dict[0] = "1984"`, Opts().Symbol("dict", dict()).Skip2ndPass(), "invalid index type: string")
 
 	strCir := func() *StringCircle {
 		return &StringCircle{Value: []string{"one", "two", "three"}}
 	}
-	expectRun(t, `cir[0] = "ONE"; out = cir[0]`,
-		Opts().Symbol("cir", strCir()).Skip2ndPass(), "ONE")
-	expectRun(t, `cir[1] = "TWO"; out = cir[1]`,
-		Opts().Symbol("cir", strCir()).Skip2ndPass(), "TWO")
-	expectRun(t, `cir[-1] = "THREE"; out = cir[2]`,
-		Opts().Symbol("cir", strCir()).Skip2ndPass(), "THREE")
-	expectRun(t, `cir[0] = "ONE"; out = cir[3]`,
-		Opts().Symbol("cir", strCir()).Skip2ndPass(), "ONE")
-	expectError(t, `cir["a"] = "ONE"`,
-		Opts().Symbol("cir", strCir()).Skip2ndPass(), "invalid index type")
+	expectRun(t, `cir[0] = "ONE"; out = cir[0]`, Opts().Symbol("cir", strCir()).Skip2ndPass(), "ONE")
+	expectRun(t, `cir[1] = "TWO"; out = cir[1]`, Opts().Symbol("cir", strCir()).Skip2ndPass(), "TWO")
+	expectRun(t, `cir[-1] = "THREE"; out = cir[2]`, Opts().Symbol("cir", strCir()).Skip2ndPass(), "THREE")
+	expectRun(t, `cir[0] = "ONE"; out = cir[3]`, Opts().Symbol("cir", strCir()).Skip2ndPass(), "ONE")
+	expectError(t, `cir["a"] = "ONE"`, Opts().Symbol("cir", strCir()).Skip2ndPass(), "invalid index type")
 
 	strArr := func() *StringArray {
 		return &StringArray{Value: []string{"one", "two", "three"}}
 	}
-	expectRun(t, `arr[0] = "ONE"; out = arr[0]`,
-		Opts().Symbol("arr", strArr()).Skip2ndPass(), "ONE")
-	expectRun(t, `arr[1] = "TWO"; out = arr[1]`,
-		Opts().Symbol("arr", strArr()).Skip2ndPass(), "TWO")
-	expectError(t, `arr["one"] = "ONE"`,
-		Opts().Symbol("arr", strArr()).Skip2ndPass(), "invalid index type")
+	expectRun(t, `arr[0] = "ONE"; out = arr[0]`, Opts().Symbol("arr", strArr()).Skip2ndPass(), "ONE")
+	expectRun(t, `arr[1] = "TWO"; out = arr[1]`, Opts().Symbol("arr", strArr()).Skip2ndPass(), "TWO")
+	expectError(t, `arr["one"] = "ONE"`, Opts().Symbol("arr", strArr()).Skip2ndPass(), "invalid index type")
 }
 
 func TestInteger(t *testing.T) {
@@ -3036,18 +3024,12 @@ func() {
 }()
 `, nil, 9)
 
-	expectError(t, `a := {b: {c: 1}}; a.d.c = 2`,
-		nil, "not index-assignable")
-	expectError(t, `a := [1, 2, 3]; a.b = 2`,
-		nil, "invalid index type")
-	expectError(t, `a := "foo"; a.b = 2`,
-		nil, "not index-assignable")
-	expectError(t, `func() { a := {b: {c: 1}}; a.d.c = 2 }()`,
-		nil, "not index-assignable")
-	expectError(t, `func() { a := [1, 2, 3]; a.b = 2 }()`,
-		nil, "invalid index type")
-	expectError(t, `func() { a := "foo"; a.b = 2 }()`,
-		nil, "not index-assignable")
+	expectError(t, `a := {b: {c: 1}}; a.d.c = 2`, nil, "not index-assignable")
+	expectError(t, `a := [1, 2, 3]; a.b = 2`, nil, "invalid index type: int")
+	expectError(t, `a := "foo"; a.b = 2`, nil, "not index-assignable")
+	expectError(t, `func() { a := {b: {c: 1}}; a.d.c = 2 }()`, nil, "not index-assignable")
+	expectError(t, `func() { a := [1, 2, 3]; a.b = 2 }()`, nil, "invalid index type")
+	expectError(t, `func() { a := "foo"; a.b = 2 }()`, nil, "not index-assignable")
 }
 
 func TestSourceModules(t *testing.T) {

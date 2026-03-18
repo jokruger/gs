@@ -115,11 +115,11 @@ func (o *Time) Copy() core.Object {
 	return NewTime(o.value)
 }
 
-func (o *Time) IndexGet(core.Object) (core.Object, error) {
+func (o *Time) Access(core.Object, core.Opcode) (core.Object, error) {
 	return nil, gse.ErrNotIndexable
 }
 
-func (o *Time) IndexSet(core.Object, core.Object) error {
+func (o *Time) Assign(core.Object, core.Object) error {
 	return gse.ErrNotIndexAssignable
 }
 

@@ -145,11 +145,11 @@ func (o *Char) Copy() core.Object {
 	return NewChar(o.value)
 }
 
-func (o *Char) IndexGet(core.Object) (core.Object, error) {
+func (o *Char) Access(core.Object, core.Opcode) (core.Object, error) {
 	return nil, gse.ErrNotIndexable
 }
 
-func (o *Char) IndexSet(core.Object, core.Object) error {
+func (o *Char) Assign(core.Object, core.Object) error {
 	return gse.ErrNotIndexAssignable
 }
 

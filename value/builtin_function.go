@@ -72,11 +72,11 @@ func (o *BuiltinFunction) Copy() core.Object {
 	return NewBuiltinFunction(o.name, o.value, o.arity, o.variadic)
 }
 
-func (o *BuiltinFunction) IndexGet(core.Object) (core.Object, error) {
+func (o *BuiltinFunction) Access(core.Object, core.Opcode) (core.Object, error) {
 	return nil, gse.ErrNotIndexable
 }
 
-func (o *BuiltinFunction) IndexSet(core.Object, core.Object) error {
+func (o *BuiltinFunction) Assign(core.Object, core.Object) error {
 	return gse.ErrNotIndexAssignable
 }
 

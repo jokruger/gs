@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/token"
 	"github.com/jokruger/gs/value"
@@ -687,11 +688,11 @@ func TestMap_Index(t *testing.T) {
 	m := value.NewMap(make(map[string]core.Object), false)
 	k := value.NewInt(1)
 	v := value.NewString("abcdef")
-	err := m.IndexSet(k, v)
+	err := m.Assign(k, v)
 
 	require.NoError(t, err)
 
-	res, err := m.IndexGet(k)
+	res, err := m.Access(k, parser.OpIndex)
 	require.NoError(t, err)
 	require.Equal(t, v, res)
 }

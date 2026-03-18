@@ -80,11 +80,11 @@ func (o *Bool) Copy() core.Object {
 	return NewBool(o.value)
 }
 
-func (o *Bool) IndexGet(core.Object) (core.Object, error) {
+func (o *Bool) Access(core.Object, core.Opcode) (core.Object, error) {
 	return nil, gse.ErrNotIndexable
 }
 
-func (o *Bool) IndexSet(core.Object, core.Object) error {
+func (o *Bool) Assign(core.Object, core.Object) error {
 	return gse.ErrNotIndexAssignable
 }
 

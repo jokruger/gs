@@ -113,7 +113,7 @@ func assertInstructionString(
 func makeInstruction(
 	t *testing.T,
 	expected []byte,
-	opcode parser.Opcode,
+	opcode core.Opcode,
 	operands ...int,
 ) {
 	inst := vm.MakeInstruction(opcode, operands...)

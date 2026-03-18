@@ -111,17 +111,20 @@ func (v *VM) Run() (err error) {
 func (v *VM) run() {
 	for atomic.LoadInt64(&v.aborting) == 0 {
 		v.ip++
+		code := v.curInsts[v.ip]
 
-		switch v.curInsts[v.ip] {
+		switch code {
 		case parser.OpConstant:
 			v.ip += 2
 			cidx := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
 
 			v.stack[v.sp] = v.constants[cidx]
 			v.sp++
+
 		case parser.OpNull:
 			v.stack[v.sp] = value.UndefinedValue
 			v.sp++
+
 		case parser.OpBinaryOp:
 			v.ip++
 			right := v.stack[v.sp-1]
@@ -147,6 +150,7 @@ func (v *VM) run() {
 
 			v.stack[v.sp-2] = res
 			v.sp--
+
 		case parser.OpEqual:
 			right := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
@@ -157,6 +161,7 @@ func (v *VM) run() {
 				v.stack[v.sp] = value.FalseValue
 			}
 			v.sp++
+
 		case parser.OpNotEqual:
 			right := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
@@ -167,14 +172,18 @@ func (v *VM) run() {
 				v.stack[v.sp] = value.TrueValue
 			}
 			v.sp++
+
 		case parser.OpPop:
 			v.sp--
+
 		case parser.OpTrue:
 			v.stack[v.sp] = value.TrueValue
 			v.sp++
+
 		case parser.OpFalse:
 			v.stack[v.sp] = value.FalseValue
 			v.sp++
+
 		case parser.OpLNot:
 			operand := v.stack[v.sp-1]
 			v.sp--
@@ -184,6 +193,7 @@ func (v *VM) run() {
 				v.stack[v.sp] = value.FalseValue
 			}
 			v.sp++
+
 		case parser.OpBComplement:
 			operand := v.stack[v.sp-1]
 			v.sp--
@@ -203,6 +213,7 @@ func (v *VM) run() {
 					operand.TypeName())
 				return
 			}
+
 		case parser.OpMinus:
 			operand := v.stack[v.sp-1]
 			v.sp--
@@ -231,6 +242,7 @@ func (v *VM) run() {
 					operand.TypeName())
 				return
 			}
+
 		case parser.OpJumpFalsy:
 			v.ip += 4
 			v.sp--
@@ -238,6 +250,7 @@ func (v *VM) run() {
 				pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
 				v.ip = pos - 1
 			}
+
 		case parser.OpAndJump:
 			v.ip += 4
 			if v.stack[v.sp-1].IsFalsy() {
@@ -246,6 +259,7 @@ func (v *VM) run() {
 			} else {
 				v.sp--
 			}
+
 		case parser.OpOrJump:
 			v.ip += 4
 			if v.stack[v.sp-1].IsFalsy() {
@@ -254,14 +268,17 @@ func (v *VM) run() {
 				pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
 				v.ip = pos - 1
 			}
+
 		case parser.OpJump:
 			pos := int(v.curInsts[v.ip+4]) | int(v.curInsts[v.ip+3])<<8 | int(v.curInsts[v.ip+2])<<16 | int(v.curInsts[v.ip+1])<<24
 			v.ip = pos - 1
+
 		case parser.OpSetGlobal:
 			v.ip += 2
 			v.sp--
 			globalIndex := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
 			v.globals[globalIndex] = v.stack[v.sp]
+
 		case parser.OpSetSelGlobal:
 			v.ip += 3
 			globalIndex := int(v.curInsts[v.ip-1]) | int(v.curInsts[v.ip-2])<<8
@@ -279,12 +296,14 @@ func (v *VM) run() {
 				v.err = e
 				return
 			}
+
 		case parser.OpGetGlobal:
 			v.ip += 2
 			globalIndex := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
 			val := v.globals[globalIndex]
 			v.stack[v.sp] = val
 			v.sp++
+
 		case parser.OpArray:
 			v.ip += 2
 			numElements := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
@@ -304,6 +323,7 @@ func (v *VM) run() {
 
 			v.stack[v.sp] = arr
 			v.sp++
+
 		case parser.OpMap:
 			v.ip += 2
 			numElements := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
@@ -323,6 +343,7 @@ func (v *VM) run() {
 			}
 			v.stack[v.sp] = m
 			v.sp++
+
 		case parser.OpError:
 			val := v.stack[v.sp-1]
 			var e core.Object = value.NewError(val)
@@ -332,6 +353,7 @@ func (v *VM) run() {
 				return
 			}
 			v.stack[v.sp-1] = e
+
 		case parser.OpImmutable:
 			val := v.stack[v.sp-1]
 			switch val := val.(type) {
@@ -352,12 +374,13 @@ func (v *VM) run() {
 				}
 				v.stack[v.sp-1] = immutableMap
 			}
-		case parser.OpIndex:
+
+		case parser.OpIndex, parser.OpSelect:
 			index := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
 			v.sp -= 2
 
-			val, err := left.IndexGet(index)
+			val, err := left.Access(index, code)
 			if err != nil {
 				if err == gse.ErrNotIndexable {
 					v.err = fmt.Errorf("not indexable: %s", index.TypeName())
@@ -375,6 +398,7 @@ func (v *VM) run() {
 			}
 			v.stack[v.sp] = val
 			v.sp++
+
 		case parser.OpSliceIndex:
 			high := v.stack[v.sp-1]
 			low := v.stack[v.sp-2]
@@ -496,6 +520,7 @@ func (v *VM) run() {
 				v.err = fmt.Errorf("not indexable: %s", left.TypeName())
 				return
 			}
+
 		case parser.OpCall:
 			numArgs := int(v.curInsts[v.ip+1])
 			spread := int(v.curInsts[v.ip+2])
@@ -609,6 +634,7 @@ func (v *VM) run() {
 				v.stack[v.sp] = ret
 				v.sp++
 			}
+
 		case parser.OpReturn:
 			v.ip++
 			var retVal core.Object
@@ -627,6 +653,7 @@ func (v *VM) run() {
 			// skip stack overflow check because (newSP) <= (oldSP)
 			v.stack[v.sp-1] = retVal
 			//v.sp++
+
 		case parser.OpDefineLocal:
 			v.ip++
 			localIndex := int(v.curInsts[v.ip])
@@ -637,6 +664,7 @@ func (v *VM) run() {
 			val := v.stack[v.sp-1]
 			v.sp--
 			v.stack[sp] = val
+
 		case parser.OpSetLocal:
 			localIndex := int(v.curInsts[v.ip+1])
 			v.ip++
@@ -651,6 +679,7 @@ func (v *VM) run() {
 				val = obj
 			}
 			v.stack[sp] = val // also use a copy of popped value
+
 		case parser.OpSetSelLocal:
 			localIndex := int(v.curInsts[v.ip+1])
 			numSelectors := int(v.curInsts[v.ip+2])
@@ -671,6 +700,7 @@ func (v *VM) run() {
 				v.err = e
 				return
 			}
+
 		case parser.OpGetLocal:
 			v.ip++
 			localIndex := int(v.curInsts[v.ip])
@@ -680,11 +710,13 @@ func (v *VM) run() {
 			}
 			v.stack[v.sp] = val
 			v.sp++
+
 		case parser.OpGetBuiltin:
 			v.ip++
 			builtinIndex := int(v.curInsts[v.ip])
 			v.stack[v.sp] = BuiltinFuncs[builtinIndex]
 			v.sp++
+
 		case parser.OpClosure:
 			v.ip += 3
 			constIndex := int(v.curInsts[v.ip-1]) | int(v.curInsts[v.ip-2])<<8
@@ -719,23 +751,27 @@ func (v *VM) run() {
 			}
 			v.stack[v.sp] = cl
 			v.sp++
+
 		case parser.OpGetFreePtr:
 			v.ip++
 			freeIndex := int(v.curInsts[v.ip])
 			val := v.curFrame.freeVars[freeIndex]
 			v.stack[v.sp] = val
 			v.sp++
+
 		case parser.OpGetFree:
 			v.ip++
 			freeIndex := int(v.curInsts[v.ip])
 			val := *v.curFrame.freeVars[freeIndex].Value
 			v.stack[v.sp] = val
 			v.sp++
+
 		case parser.OpSetFree:
 			v.ip++
 			freeIndex := int(v.curInsts[v.ip])
 			*v.curFrame.freeVars[freeIndex].Value = v.stack[v.sp-1]
 			v.sp--
+
 		case parser.OpGetLocalPtr:
 			v.ip++
 			localIndex := int(v.curInsts[v.ip])
@@ -750,6 +786,7 @@ func (v *VM) run() {
 			}
 			v.stack[v.sp] = freeVar
 			v.sp++
+
 		case parser.OpSetSelFree:
 			v.ip += 2
 			freeIndex := int(v.curInsts[v.ip-1])
@@ -767,6 +804,7 @@ func (v *VM) run() {
 				v.err = e
 				return
 			}
+
 		case parser.OpIteratorInit:
 			var iterator core.Object
 			dst := v.stack[v.sp-1]
@@ -783,6 +821,7 @@ func (v *VM) run() {
 			}
 			v.stack[v.sp] = iterator
 			v.sp++
+
 		case parser.OpIteratorNext:
 			iterator := v.stack[v.sp-1]
 			v.sp--
@@ -793,20 +832,24 @@ func (v *VM) run() {
 				v.stack[v.sp] = value.FalseValue
 			}
 			v.sp++
+
 		case parser.OpIteratorKey:
 			iterator := v.stack[v.sp-1]
 			v.sp--
 			val := iterator.(core.Iterator).Key()
 			v.stack[v.sp] = val
 			v.sp++
+
 		case parser.OpIteratorValue:
 			iterator := v.stack[v.sp-1]
 			v.sp--
 			val := iterator.(core.Iterator).Value()
 			v.stack[v.sp] = val
 			v.sp++
+
 		case parser.OpSuspend:
 			return
+
 		default:
 			v.err = fmt.Errorf("unknown opcode: %d", v.curInsts[v.ip])
 			return
@@ -817,7 +860,7 @@ func (v *VM) run() {
 func indexAssign(dst, src core.Object, selectors []core.Object) error {
 	numSel := len(selectors)
 	for sidx := numSel - 1; sidx > 0; sidx-- {
-		next, err := dst.IndexGet(selectors[sidx])
+		next, err := dst.Access(selectors[sidx], parser.OpIndex)
 		if err != nil {
 			if err == gse.ErrNotIndexable {
 				return fmt.Errorf("not indexable: %s", dst.TypeName())
@@ -831,12 +874,12 @@ func indexAssign(dst, src core.Object, selectors []core.Object) error {
 		dst = next
 	}
 
-	if err := dst.IndexSet(selectors[0], src); err != nil {
+	if err := dst.Assign(selectors[0], src); err != nil {
 		if err == gse.ErrNotIndexAssignable {
 			return fmt.Errorf("not index-assignable: %s", dst.TypeName())
 		}
-		if err == gse.ErrInvalidIndexValueType {
-			return fmt.Errorf("invaid index value type: %s", src.TypeName())
+		if err == gse.ErrInvalidIndexType {
+			return fmt.Errorf("invalid index type: %s", src.TypeName())
 		}
 		return err
 	}

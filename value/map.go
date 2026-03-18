@@ -165,7 +165,7 @@ func (o *Map) Copy() core.Object {
 	return NewMap(c, false) // copy always returns a mutable map
 }
 
-func (o *Map) IndexGet(index core.Object) (core.Object, error) {
+func (o *Map) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 	k, ok := index.AsString()
 	if !ok {
 		return nil, gse.ErrInvalidIndexType
@@ -177,7 +177,7 @@ func (o *Map) IndexGet(index core.Object) (core.Object, error) {
 	return r, nil
 }
 
-func (o *Map) IndexSet(index, value core.Object) error {
+func (o *Map) Assign(index, value core.Object) error {
 	if o.immutable {
 		return gse.ErrNotIndexAssignable
 	}

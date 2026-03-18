@@ -7,6 +7,7 @@ import (
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/tests/require"
+	"github.com/jokruger/gs/value"
 	"github.com/jokruger/gs/vm"
 )
 
@@ -17,6 +18,51 @@ type srcfile struct {
 
 func TestBytecodeEmpty(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray()))
+}
+
+func TestBytecodeConstUndefined(t *testing.T) {
+	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
+		value.UndefinedValue,
+	)))
+}
+
+func TestBytecodeConstBool(t *testing.T) {
+	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
+		value.TrueValue,
+		value.FalseValue,
+	)))
+}
+
+func TestBytecodeConstChar(t *testing.T) {
+	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
+		value.NewChar('a'),
+		value.NewChar('b'),
+		value.NewChar('c'),
+	)))
+}
+
+func TestBytecodeConstInt(t *testing.T) {
+	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
+		value.NewInt(1),
+		value.NewInt(2),
+		value.NewInt(3),
+		value.NewInt(1234567890),
+	)))
+}
+
+func TestBytecodeConstFloat(t *testing.T) {
+	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
+		value.NewFloat(0.123),
+		value.NewFloat(123456.789),
+	)))
+}
+
+func TestBytecodeConstString(t *testing.T) {
+	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
+		value.NewString(""),
+		value.NewString("foo"),
+		value.NewString("foo bar"),
+	)))
 }
 
 /*

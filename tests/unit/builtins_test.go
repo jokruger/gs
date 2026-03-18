@@ -141,7 +141,7 @@ func Test_builtinSplice(t *testing.T) {
 			wantedErr: "invalid argument type: splice argument 'second' expects type int, got string"},
 
 		{name: "negative index", args: []core.Object{value.NewArray(nil, false), value.NewInt(-1)},
-			wantedErr: "index out of bounds"},
+			wantedErr: "index out of bounds: splice (start index): index -1 out of range [0,0)"},
 
 		{name: "non int count",
 			args: []core.Object{
@@ -157,7 +157,7 @@ func Test_builtinSplice(t *testing.T) {
 				value.NewInt(0),
 				value.NewInt(-1),
 			},
-			wantedErr: "index out of bounds"},
+			wantedErr: "logic error: splice delete count must be non-negative"},
 
 		{name: "insert with zero count",
 			args: []core.Object{

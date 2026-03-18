@@ -780,7 +780,7 @@ func TestBuiltinFunction(t *testing.T) {
 	expectError(t, `splice([], 0, immutable([]))`, nil, `invalid argument type: splice argument 'third' expects type int, got immutable-array`)
 	expectError(t, `splice([], 0, immutable({}))`, nil, `invalid argument type: splice argument 'third' expects type int, got immutable-map`)
 	expectError(t, `splice([], 1)`, nil, "index out of bounds")
-	expectError(t, `splice([1, 2, 3], 0, -1)`, nil, "index out of bounds")
+	expectError(t, `splice([1, 2, 3], 0, -1)`, nil, "logic error: splice delete count must be non-negative")
 	expectError(t, `splice([1, 2, 3], 99, 0, "a", "b")`, nil, "index out of bounds")
 	expectRun(t, `out = []; splice(out)`, nil, ARR{})
 	expectRun(t, `out = ["a"]; splice(out, 1)`, nil, ARR{"a"})
@@ -2173,8 +2173,7 @@ func (o *StringArray) Access(index core.Object, mode core.Opcode) (core.Object, 
 		if intIdx.Value() >= 0 && intIdx.Value() < int64(len(o.Value)) {
 			return value.NewString(o.Value[intIdx.Value()]), nil
 		}
-
-		return nil, gse.ErrIndexOutOfBounds
+		return nil, core.IndexOutOfBounds("StringArray assignment", int(intIdx.Value()), len(o.Value))
 	}
 
 	strIdx, ok := index.(*value.String)
@@ -2203,8 +2202,7 @@ func (o *StringArray) Assign(i, v core.Object) error {
 			o.Value[intIdx.Value()] = strVal
 			return nil
 		}
-
-		return gse.ErrIndexOutOfBounds
+		return core.IndexOutOfBounds("StringArray assignment", int(intIdx.Value()), len(o.Value))
 	}
 
 	return gse.ErrInvalidIndexType

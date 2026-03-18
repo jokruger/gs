@@ -199,7 +199,7 @@ func (o *Array) Assign(index, value core.Object) (err error) {
 		return gse.ErrInvalidIndexType
 	}
 	if i < 0 || i >= int64(len(o.value)) {
-		return gse.ErrIndexOutOfBounds
+		return core.IndexOutOfBounds("array assignment", int(i), len(o.value))
 	}
 
 	o.value[i] = value

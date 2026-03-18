@@ -5,7 +5,6 @@ import (
 )
 
 var (
-	ErrIndexOutOfBounds    = errors.New("index out of bounds")
 	ErrInvalidAccessMode   = errors.New("invalid access mode")
 	ErrInvalidIndexType    = errors.New("invalid index type")
 	ErrInvalidIndexOnError = errors.New("invalid index on error")

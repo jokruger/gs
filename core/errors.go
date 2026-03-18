@@ -6,6 +6,7 @@ import (
 )
 
 var (
+	ErrLogicError          = errors.New("logic error")
 	ErrStackOverflow       = errors.New("stack overflow")
 	ErrObjectAllocLimit    = errors.New("object allocation limit exceeded")
 	ErrBytesLimit          = errors.New("bytes size limit exceeded")
@@ -13,7 +14,12 @@ var (
 	ErrDecodeBinarySize    = errors.New("invalid binary size")
 	ErrBinaryNotSupported  = errors.New("binary serialization not supported")
 	ErrInvalidArgumentType = errors.New("invalid argument type")
+	ErrIndexOutOfBounds    = errors.New("index out of bounds")
 )
+
+func LogicError(context string) error {
+	return fmt.Errorf("%w: %s", ErrLogicError, context)
+}
 
 func StackOverflow(context string) error {
 	return fmt.Errorf("%w: %s", ErrStackOverflow, context)
@@ -41,4 +47,8 @@ func BinaryNotSupported(obj Object) error {
 
 func InvalidArgumentType(context string, name string, expected string, got Object) error {
 	return fmt.Errorf("%w: %s argument '%s' expects type %s, got %s", ErrInvalidArgumentType, context, name, expected, got.TypeName())
+}
+
+func IndexOutOfBounds(context string, idx int, size int) error {
+	return fmt.Errorf("%w: %s: index %d out of range [0,%d)", ErrIndexOutOfBounds, context, idx, size)
 }

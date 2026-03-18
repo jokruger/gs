@@ -520,7 +520,7 @@ func builtinSplice(args ...core.Object) (core.Object, error) {
 		}
 		startIdx = int(arg1)
 		if startIdx < 0 || startIdx > arrayLen {
-			return nil, gse.ErrIndexOutOfBounds
+			return nil, core.IndexOutOfBounds("splice (start index)", startIdx, arrayLen)
 		}
 	}
 
@@ -532,7 +532,7 @@ func builtinSplice(args ...core.Object) (core.Object, error) {
 		}
 		delCount = int(arg2)
 		if delCount < 0 {
-			return nil, gse.ErrIndexOutOfBounds
+			return nil, core.LogicError("splice delete count must be non-negative")
 		}
 	}
 	// if count of to be deleted items is bigger than expected, truncate it

@@ -8,7 +8,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/value"
 )
 
@@ -766,8 +765,7 @@ func textSubstring(args ...core.Object) (ret core.Object, err error) {
 	}
 
 	if int(i2) > i3 {
-		err = gse.ErrInvalidIndexType
-		return
+		return nil, core.LogicError("text.substring expected second argument to be less than or equal to third argument")
 	}
 
 	if i2 < 0 {

@@ -67,11 +67,11 @@ func (o *Object) Copy() core.Object {
 }
 
 func (o *Object) Access(core.Object, core.Opcode) (core.Object, error) {
-	return nil, gse.ErrNotIndexable
+	return nil, core.NotAccessible(o)
 }
 
 func (o *Object) Assign(core.Object, core.Object) error {
-	return gse.ErrNotIndexAssignable
+	return core.NotAssignable(o)
 }
 
 func (o *Object) Iterate() core.Iterator {

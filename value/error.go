@@ -101,19 +101,19 @@ func (o *Error) Copy() core.Object {
 func (o *Error) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return nil, gse.ErrInvalidIndexOnError
+		return nil, core.InvalidIndexType("error access", "string", index)
 	}
 
 	switch k {
 	case "value":
 		return o.value, nil
 	default:
-		return nil, gse.ErrInvalidIndexOnError
+		return nil, core.InvalidSelector(o, k)
 	}
 }
 
 func (o *Error) Assign(core.Object, core.Object) error {
-	return gse.ErrNotIndexAssignable
+	return core.NotAssignable(o)
 }
 
 func (o *Error) Iterate() core.Iterator {

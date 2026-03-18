@@ -168,7 +168,7 @@ func (o *Map) Copy() core.Object {
 func (o *Map) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return nil, gse.ErrInvalidIndexType
+		return nil, core.InvalidIndexType("map access", "string", index)
 	}
 	r, ok := o.value[k]
 	if !ok {
@@ -179,12 +179,12 @@ func (o *Map) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 
 func (o *Map) Assign(index, value core.Object) error {
 	if o.immutable {
-		return gse.ErrNotIndexAssignable
+		return core.NotAssignable(o)
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return gse.ErrInvalidIndexType
+		return core.InvalidIndexType("map assignment", "string", index)
 	}
 	o.value[k] = value
 

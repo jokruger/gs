@@ -158,13 +158,13 @@ func (o *String) Copy() core.Object {
 }
 
 func (o *String) Access(index core.Object, mode core.Opcode) (res core.Object, err error) {
-	if mode != parser.OpIndex {
-		return nil, gse.ErrInvalidAccessMode
+	if mode == parser.OpSelect {
+		return nil, core.InvalidAccessMode("string", "select")
 	}
 
 	i, ok := index.AsInt()
 	if !ok {
-		err = gse.ErrInvalidIndexType
+		err = core.InvalidIndexType("string access", "int", index)
 		return
 	}
 	if i < 0 || i >= int64(len(o.runes)) {
@@ -176,7 +176,7 @@ func (o *String) Access(index core.Object, mode core.Opcode) (res core.Object, e
 }
 
 func (o *String) Assign(core.Object, core.Object) error {
-	return gse.ErrNotIndexAssignable
+	return core.NotAssignable(o)
 }
 
 func (o *String) Iterate() core.Iterator {

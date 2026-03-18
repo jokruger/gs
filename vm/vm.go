@@ -382,14 +382,6 @@ func (v *VM) run() {
 
 			val, err := left.Access(index, code)
 			if err != nil {
-				if err == gse.ErrNotIndexable {
-					v.err = fmt.Errorf("not indexable: %s", index.TypeName())
-					return
-				}
-				if err == gse.ErrInvalidIndexType {
-					v.err = fmt.Errorf("invalid index type: %s", index.TypeName())
-					return
-				}
 				v.err = err
 				return
 			}
@@ -854,26 +846,9 @@ func indexAssign(dst, src core.Object, selectors []core.Object) error {
 	for sidx := numSel - 1; sidx > 0; sidx-- {
 		next, err := dst.Access(selectors[sidx], parser.OpIndex)
 		if err != nil {
-			if err == gse.ErrNotIndexable {
-				return fmt.Errorf("not indexable: %s", dst.TypeName())
-			}
-			if err == gse.ErrInvalidIndexType {
-				return fmt.Errorf("invalid index type: %s",
-					selectors[sidx].TypeName())
-			}
 			return err
 		}
 		dst = next
 	}
-
-	if err := dst.Assign(selectors[0], src); err != nil {
-		if err == gse.ErrNotIndexAssignable {
-			return fmt.Errorf("not index-assignable: %s", dst.TypeName())
-		}
-		if err == gse.ErrInvalidIndexType {
-			return fmt.Errorf("invalid index type: %s", src.TypeName())
-		}
-		return err
-	}
-	return nil
+	return dst.Assign(selectors[0], src)
 }

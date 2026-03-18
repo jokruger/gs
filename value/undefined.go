@@ -75,7 +75,7 @@ func (o *Undefined) Access(core.Object, core.Opcode) (core.Object, error) {
 }
 
 func (o *Undefined) Assign(core.Object, core.Object) error {
-	return gse.ErrNotIndexAssignable
+	return core.NotAssignable(o)
 }
 
 func (o *Undefined) Iterate() core.Iterator {

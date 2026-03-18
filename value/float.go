@@ -172,11 +172,11 @@ func (o *Float) Copy() core.Object {
 }
 
 func (o *Float) Access(core.Object, core.Opcode) (core.Object, error) {
-	return nil, gse.ErrNotIndexable
+	return nil, core.NotAccessible(o)
 }
 
 func (o *Float) Assign(core.Object, core.Object) error {
-	return gse.ErrNotIndexAssignable
+	return core.NotAssignable(o)
 }
 
 func (o *Float) Iterate() core.Iterator {

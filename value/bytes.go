@@ -126,13 +126,13 @@ func (o *Bytes) Copy() core.Object {
 }
 
 func (o *Bytes) Access(index core.Object, mode core.Opcode) (core.Object, error) {
-	if mode != parser.OpIndex {
-		return nil, gse.ErrInvalidAccessMode
+	if mode == parser.OpSelect {
+		return nil, core.InvalidAccessMode("bytes", "select")
 	}
 
 	i, ok := index.AsInt()
 	if !ok {
-		return nil, gse.ErrInvalidIndexType
+		return nil, core.InvalidIndexType("bytes index", "int", index)
 	}
 
 	if i < 0 || i >= int64(len(o.value)) {
@@ -143,7 +143,7 @@ func (o *Bytes) Access(index core.Object, mode core.Opcode) (core.Object, error)
 }
 
 func (o *Bytes) Assign(core.Object, core.Object) error {
-	return gse.ErrNotIndexAssignable
+	return core.NotAssignable(o)
 }
 
 func (o *Bytes) Iterate() core.Iterator {

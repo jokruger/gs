@@ -449,7 +449,7 @@ a := {
 		f: [9, 8]
 	}
 }
-a.x.e = "bar"`, nil, "not index-assignable")
+a.x.e = "bar"`, nil, "object is not assignable: type undefined does not support assignment via indexing or field access")
 }
 
 func TestBitwise(t *testing.T) {
@@ -1006,7 +1006,7 @@ b := a(5)`,
 	expectError(t, `a := 5
 b := {}
 b.x.y = 10`,
-		nil, "Runtime Error: not index-assignable: undefined\n\tat test:3:1")
+		nil, "Runtime Error: object is not assignable: type undefined does not support assignment via indexing or field access\n\tat test:3:1")
 
 	expectError(t, `
 a := func() {
@@ -1143,9 +1143,9 @@ func TestError(t *testing.T) {
 	expectRun(t, `out = error("some error").value`, nil, "some error")
 	expectRun(t, `out = error("some error")["value"]`, nil, "some error")
 
-	expectError(t, `error("error").err`, nil, "invalid index on error")
-	expectError(t, `error("error").value_`, nil, "invalid index on error")
-	expectError(t, `error([1,2,3])[1]`, nil, "invalid index on error")
+	expectError(t, `error("error").err`, nil, "invalid selector: type error has no selector 'err'")
+	expectError(t, `error("error").value_`, nil, "invalid selector: type error has no selector 'value_'")
+	expectError(t, `error([1,2,3])[1]`, nil, "invalid selector: type error has no selector '1'")
 }
 
 func TestFloat(t *testing.T) {
@@ -1967,11 +1967,11 @@ func TestImmutable(t *testing.T) {
 	expectRun(t, `a := immutable(1); a = 5; out = a`, nil, 5)
 
 	// array
-	expectError(t, `a := immutable([1, 2, 3]); a[1] = 5`, nil, "not index-assignable")
-	expectError(t, `a := immutable(["foo", [1,2,3]]); a[1] = "bar"`, nil, "not index-assignable")
+	expectError(t, `a := immutable([1, 2, 3]); a[1] = 5`, nil, "object is not assignable: type immutable-array does not support assignment via indexing or field access")
+	expectError(t, `a := immutable(["foo", [1,2,3]]); a[1] = "bar"`, nil, "object is not assignable: type immutable-array does not support assignment via indexing or field access")
 	expectRun(t, `a := immutable(["foo", [1,2,3]]); a[1][1] = "bar"; out = a`, nil, IARR{"foo", ARR{1, "bar", 3}})
-	expectError(t, `a := immutable(["foo", immutable([1,2,3])]); a[1][1] = "bar"`, nil, "not index-assignable")
-	expectError(t, `a := ["foo", immutable([1,2,3])]; a[1][1] = "bar"`, nil, "not index-assignable")
+	expectError(t, `a := immutable(["foo", immutable([1,2,3])]); a[1][1] = "bar"`, nil, "object is not assignable: type immutable-array does not support assignment via indexing or field access")
+	expectError(t, `a := ["foo", immutable([1,2,3])]; a[1][1] = "bar"`, nil, "object is not assignable: type immutable-array does not support assignment via indexing or field access")
 	expectRun(t, `a := immutable([1,2,3]); b := copy(a); b[1] = 5; out = b`, nil, ARR{1, 5, 3})
 	expectRun(t, `a := immutable([1,2,3]); b := copy(a); b[1] = 5; out = a`, nil, IARR{1, 2, 3})
 	expectRun(t, `out = immutable([1,2,3]) == [1,2,3]`, nil, true)
@@ -1986,11 +1986,11 @@ func TestImmutable(t *testing.T) {
 	expectRun(t, `a := immutable([1, 2, 3]); out = a[5]`, nil, value.UndefinedValue)
 
 	// map
-	expectError(t, `a := immutable({b: 1, c: 2}); a.b = 5`, nil, "not index-assignable")
-	expectError(t, `a := immutable({b: 1, c: 2}); a["b"] = "bar"`, nil, "not index-assignable")
+	expectError(t, `a := immutable({b: 1, c: 2}); a.b = 5`, nil, "object is not assignable: type immutable-map does not support assignment via indexing or field access")
+	expectError(t, `a := immutable({b: 1, c: 2}); a["b"] = "bar"`, nil, "object is not assignable: type immutable-map does not support assignment via indexing or field access")
 	expectRun(t, `a := immutable({b: 1, c: [1,2,3]}); a.c[1] = "bar"; out = a`, nil, IMAP{"b": 1, "c": ARR{1, "bar", 3}})
-	expectError(t, `a := immutable({b: 1, c: immutable([1,2,3])}); a.c[1] = "bar"`, nil, "not index-assignable")
-	expectError(t, `a := {b: 1, c: immutable([1,2,3])}; a.c[1] = "bar"`, nil, "not index-assignable")
+	expectError(t, `a := immutable({b: 1, c: immutable([1,2,3])}); a.c[1] = "bar"`, nil, "object is not assignable: type immutable-array does not support assignment via indexing or field access")
+	expectError(t, `a := {b: 1, c: immutable([1,2,3])}; a.c[1] = "bar"`, nil, "object is not assignable: type immutable-array does not support assignment via indexing or field access")
 	expectRun(t, `out = immutable({a:1,b:2}) == {a:1,b:2}`, nil, true)
 	expectRun(t, `out = immutable({a:1,b:2}) == immutable({a:1,b:2})`, nil, true)
 	expectRun(t, `out = {a:1,b:2} == immutable({a:1,b:2})`, nil, true)
@@ -2003,7 +2003,7 @@ func TestImmutable(t *testing.T) {
 	expectRun(t, `a := immutable({a:1,b:2}); out = a.c`, nil, value.UndefinedValue)
 
 	expectRun(t, `a := immutable({b: 5, c: "foo"}); out = a.b`, nil, 5)
-	expectError(t, `a := immutable({b: 5, c: "foo"}); a.b = 10`, nil, "not index-assignable")
+	expectError(t, `a := immutable({b: 5, c: "foo"}); a.b = 10`, nil, "object is not assignable: type immutable-map does not support assignment via indexing or field access")
 }
 
 func TestIncDec(t *testing.T) {
@@ -2036,7 +2036,7 @@ func (o *StringDict) TypeName() string {
 func (o *StringDict) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 	strIdx, ok := index.(*value.String)
 	if !ok {
-		return nil, gse.ErrInvalidIndexType
+		return nil, core.InvalidIndexType("StringDict access", "string", index)
 	}
 
 	for k, v := range o.Value {
@@ -2051,12 +2051,12 @@ func (o *StringDict) Access(index core.Object, mode core.Opcode) (core.Object, e
 func (o *StringDict) Assign(i, v core.Object) error {
 	strIdx, ok := i.(*value.String)
 	if !ok {
-		return gse.ErrInvalidIndexType
+		return core.InvalidIndexType("StringDict assignment", "string", i)
 	}
 
 	strVal, ok := v.AsString()
 	if !ok {
-		return gse.ErrInvalidIndexType
+		return core.InvalidIndexType("StringDict assignment", "string(compatible)", v)
 	}
 
 	o.Value[strings.ToLower(strIdx.Value())] = strVal
@@ -2080,7 +2080,7 @@ func (o *StringCircle) String() string {
 func (o *StringCircle) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 	intIdx, ok := index.(*value.Int)
 	if !ok {
-		return nil, gse.ErrInvalidIndexType
+		return nil, core.InvalidIndexType("StringCircle access", "int", index)
 	}
 
 	r := int(intIdx.Value()) % len(o.Value)
@@ -2094,7 +2094,7 @@ func (o *StringCircle) Access(index core.Object, mode core.Opcode) (core.Object,
 func (o *StringCircle) Assign(i, v core.Object) error {
 	intIdx, ok := i.(*value.Int)
 	if !ok {
-		return gse.ErrInvalidIndexType
+		return core.InvalidIndexType("StringCircle assignment", "int", i)
 	}
 
 	r := int(intIdx.Value()) % len(o.Value)
@@ -2104,7 +2104,7 @@ func (o *StringCircle) Assign(i, v core.Object) error {
 
 	strVal, ok := v.AsString()
 	if !ok {
-		return gse.ErrInvalidIndexType
+		return core.InvalidIndexType("StringCircle assignment", "string(compatible)", v)
 	}
 
 	o.Value[r] = strVal
@@ -2187,13 +2187,13 @@ func (o *StringArray) Access(index core.Object, mode core.Opcode) (core.Object, 
 		return value.UndefinedValue, nil
 	}
 
-	return nil, gse.ErrInvalidIndexType
+	return nil, core.InvalidIndexType("StringArray access", "int or string", index)
 }
 
 func (o *StringArray) Assign(i, v core.Object) error {
 	strVal, ok := v.AsString()
 	if !ok {
-		return gse.ErrInvalidIndexType
+		return core.InvalidIndexType("StringArray assignment", "string(compatible)", v)
 	}
 
 	intIdx, ok := i.(*value.Int)
@@ -2205,7 +2205,7 @@ func (o *StringArray) Assign(i, v core.Object) error {
 		return core.IndexOutOfBounds("StringArray assignment", int(intIdx.Value()), len(o.Value))
 	}
 
-	return gse.ErrInvalidIndexType
+	return core.InvalidIndexType("StringArray assignment", "int", i)
 }
 
 func (o *StringArray) Call(vm core.VM, args ...core.Object) (ret core.Object, err error) {
@@ -2284,7 +2284,7 @@ func TestIndexAssignable(t *testing.T) {
 	expectRun(t, `dict["a"] = "1984"; out = dict["a"]`, Opts().Symbol("dict", dict()).Skip2ndPass(), "1984")
 	expectRun(t, `dict["c"] = "1984"; out = dict["c"]`, Opts().Symbol("dict", dict()).Skip2ndPass(), "1984")
 	expectRun(t, `dict["c"] = 1984; out = dict["C"]`, Opts().Symbol("dict", dict()).Skip2ndPass(), "1984")
-	expectError(t, `dict[0] = "1984"`, Opts().Symbol("dict", dict()).Skip2ndPass(), "invalid index type: string")
+	expectError(t, `dict[0] = "1984"`, Opts().Symbol("dict", dict()).Skip2ndPass(), "invalid index type: StringDict assignment: expected string, got int")
 
 	strCir := func() *StringCircle {
 		return &StringCircle{Value: []string{"one", "two", "three"}}
@@ -2510,10 +2510,8 @@ func TestUserModules(t *testing.T) {
 		Opts().Module("mod1", `export {a: 1, b: 2}`), IMAP{"a": 1, "b": 2})
 
 	// export value is immutable
-	expectError(t, `m1 := import("mod1"); m1.a = 5`,
-		Opts().Module("mod1", `export {a: 1, b: 2}`), "not index-assignable")
-	expectError(t, `m1 := import("mod1"); m1[1] = 5`,
-		Opts().Module("mod1", `export [1, 2, 3]`), "not index-assignable")
+	expectError(t, `m1 := import("mod1"); m1.a = 5`, Opts().Module("mod1", `export {a: 1, b: 2}`), "object is not assignable: type immutable-map does not support assignment via indexing or field access")
+	expectError(t, `m1 := import("mod1"); m1[1] = 5`, Opts().Module("mod1", `export [1, 2, 3]`), "object is not assignable: type immutable-array does not support assignment via indexing or field access")
 
 	// code after export statement will not be executed
 	expectRun(t, `out = import("mod1")`,
@@ -2996,12 +2994,12 @@ func() {
 }()
 `, nil, 9)
 
-	expectError(t, `a := {b: {c: 1}}; a.d.c = 2`, nil, "not index-assignable")
-	expectError(t, `a := [1, 2, 3]; a.b = 2`, nil, "invalid index type: int")
-	expectError(t, `a := "foo"; a.b = 2`, nil, "not index-assignable")
-	expectError(t, `func() { a := {b: {c: 1}}; a.d.c = 2 }()`, nil, "not index-assignable")
+	expectError(t, `a := {b: {c: 1}}; a.d.c = 2`, nil, "object is not assignable: type undefined does not support assignment via indexing or field access")
+	expectError(t, `a := [1, 2, 3]; a.b = 2`, nil, "invalid index type: array assignment: expected int, got string")
+	expectError(t, `a := "foo"; a.b = 2`, nil, "object is not assignable: type string does not support assignment via indexing or field access")
+	expectError(t, `func() { a := {b: {c: 1}}; a.d.c = 2 }()`, nil, "object is not assignable: type undefined does not support assignment via indexing or field access")
 	expectError(t, `func() { a := [1, 2, 3]; a.b = 2 }()`, nil, "invalid index type")
-	expectError(t, `func() { a := "foo"; a.b = 2 }()`, nil, "not index-assignable")
+	expectError(t, `func() { a := "foo"; a.b = 2 }()`, nil, "object is not assignable: type string does not support assignment via indexing or field access")
 }
 
 func TestSourceModules(t *testing.T) {

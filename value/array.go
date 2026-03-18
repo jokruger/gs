@@ -173,13 +173,13 @@ func (o *Array) Copy() core.Object {
 }
 
 func (o *Array) Access(index core.Object, mode core.Opcode) (core.Object, error) {
-	if mode != parser.OpIndex {
-		return nil, gse.ErrInvalidAccessMode
+	if mode == parser.OpSelect {
+		return nil, core.InvalidAccessMode("array", "select")
 	}
 
 	i, ok := index.AsInt()
 	if !ok {
-		return nil, gse.ErrInvalidIndexType
+		return nil, core.InvalidIndexType("array access", "int", index)
 	}
 
 	if i < 0 || i >= int64(len(o.value)) {
@@ -191,12 +191,12 @@ func (o *Array) Access(index core.Object, mode core.Opcode) (core.Object, error)
 
 func (o *Array) Assign(index, value core.Object) (err error) {
 	if o.immutable {
-		return gse.ErrNotIndexAssignable
+		return core.NotAssignable(o)
 	}
 
 	i, ok := index.AsInt()
 	if !ok {
-		return gse.ErrInvalidIndexType
+		return core.InvalidIndexType("array assignment", "int", index)
 	}
 	if i < 0 || i >= int64(len(o.value)) {
 		return core.IndexOutOfBounds("array assignment", int(i), len(o.value))

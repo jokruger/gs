@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
 
@@ -39,11 +38,11 @@ type Object struct {
 }
 
 func (o *Object) TypeName() string {
-	panic(gse.ErrNotImplemented)
+	return "<object>"
 }
 
 func (o *Object) String() string {
-	panic(gse.ErrNotImplemented)
+	return o.TypeName()
 }
 
 func (o *Object) Interface() any {
@@ -54,8 +53,8 @@ func (o *Object) Arity() int {
 	return 0
 }
 
-func (o *Object) BinaryOp(token.Token, core.Object) (core.Object, error) {
-	return nil, gse.ErrInvalidOperator
+func (o *Object) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+	return nil, core.InvalidBinaryOperator(op.String(), o, rhs)
 }
 
 func (o *Object) Equals(x core.Object) bool {

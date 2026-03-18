@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
 
@@ -208,7 +207,7 @@ func (o *Int) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 			return FalseValue, nil
 		}
 	}
-	return nil, gse.ErrInvalidOperator
+	return nil, core.InvalidBinaryOperator(op.String(), o, rhs)
 }
 
 func (o *Int) Equals(x core.Object) bool {

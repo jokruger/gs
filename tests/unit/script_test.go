@@ -13,7 +13,6 @@ import (
 
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/token"
@@ -535,7 +534,7 @@ func (n *customNumber) String() string {
 func (n *customNumber) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	i, ok := rhs.(*value.Int)
 	if !ok {
-		return nil, gse.ErrInvalidOperator
+		return nil, core.InvalidBinaryOperator(op.String(), n, rhs)
 	}
 	return n.binaryOpInt(op, i)
 }
@@ -565,7 +564,7 @@ func (n *customNumber) binaryOpInt(op token.Token, rhs *value.Int) (core.Object,
 		}
 		return value.FalseValue, nil
 	}
-	return nil, gse.ErrInvalidOperator
+	return nil, core.InvalidBinaryOperator(op.String(), n, rhs)
 }
 
 func TestScript_ImportError(t *testing.T) {

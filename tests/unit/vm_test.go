@@ -12,7 +12,6 @@ import (
 
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/tests/require"
@@ -512,12 +511,12 @@ func TestBoolean(t *testing.T) {
 	expectRun(t, `out = (1 > 2) == true`, nil, false)
 	expectRun(t, `out = (1 > 2) == false`, nil, true)
 
-	expectError(t, `5 + true`, nil, "invalid operation")
-	expectError(t, `5 + true; 5`, nil, "invalid operation")
+	expectError(t, `5 + true`, nil, "invalid binary operator: int + bool")
+	expectError(t, `5 + true; 5`, nil, "invalid binary operator: int + bool")
 	expectError(t, `-true`, nil, "invalid operation")
-	expectError(t, `true + false`, nil, "invalid operation")
-	expectError(t, `5; true + false; 5`, nil, "invalid operation")
-	expectError(t, `if (10 > 1) { true + false; }`, nil, "invalid operation")
+	expectError(t, `true + false`, nil, "invalid binary operator: bool + bool")
+	expectError(t, `5; true + false; 5`, nil, "invalid binary operator: bool + bool")
+	expectError(t, `if (10 > 1) { true + false; }`, nil, "invalid binary operator: bool + bool")
 	expectError(t, `
 func() {
 	if (10 > 1) {
@@ -528,11 +527,11 @@ func() {
 		return 1;
 	}
 }()
-`, nil, "invalid operation")
-	expectError(t, `if (true + false) { 10 }`, nil, "invalid operation")
-	expectError(t, `10 + (true + false)`, nil, "invalid operation")
-	expectError(t, `(true + false) + 20`, nil, "invalid operation")
-	expectError(t, `!(true + false)`, nil, "invalid operation")
+`, nil, "invalid binary operator: bool + bool")
+	expectError(t, `if (true + false) { 10 }`, nil, "invalid binary operator: bool + bool")
+	expectError(t, `10 + (true + false)`, nil, "invalid binary operator: bool + bool")
+	expectError(t, `(true + false) + 20`, nil, "invalid binary operator: bool + bool")
+	expectError(t, `!(true + false)`, nil, "invalid binary operator: bool + bool")
 }
 
 func TestUndefined(t *testing.T) {
@@ -997,7 +996,7 @@ func testEquality(t *testing.T, lhs, rhs string, expected bool) {
 func TestVMErrorInfo(t *testing.T) {
 	expectError(t, `a := 5
 a + "boo"`,
-		nil, "Runtime Error: invalid operation: int + string\n\tat test:2:1")
+		nil, "Runtime Error: invalid binary operator: int + string\n\tat test:2:1")
 
 	expectError(t, `a := 5
 b := a(5)`,
@@ -1014,12 +1013,12 @@ a := func() {
 	b += "foo"
 }
 a()`,
-		nil, "Runtime Error: invalid operation: int + string\n\tat test:4:2")
+		nil, "Runtime Error: invalid binary operator: int + string\n\tat test:4:2")
 
 	expectError(t, `a := 5
 a + import("mod1")`, Opts().Module(
 		"mod1", `export "foo"`,
-	), ": invalid operation: int + string\n\tat test:2:1")
+	), ": invalid binary operator: int + string\n\tat test:2:1")
 
 	expectError(t, `a := import("mod1")()`,
 		Opts().Module(
@@ -1027,7 +1026,7 @@ a + import("mod1")`, Opts().Module(
 export func() {
 	b := 5
 	return b + "foo"
-}`), "Runtime Error: invalid operation: int + string\n\tat mod1:4:9")
+}`), "Runtime Error: invalid binary operator: int + string\n\tat mod1:4:9")
 
 	expectError(t, `a := import("mod1")()`,
 		Opts().Module(
@@ -1037,7 +1036,7 @@ export func() {
 export func() {
 	b := 5
 	return b + "foo"
-}`), "Runtime Error: invalid operation: int + string\n\tat mod2:4:9")
+}`), "Runtime Error: invalid binary operator: int + string\n\tat mod2:4:9")
 
 	expectError(t, `a := [1, 2, 3]; b := a[:"invalid"];`, nil,
 		"Runtime Error: invalid slice index type: string")
@@ -2015,7 +2014,7 @@ func TestIncDec(t *testing.T) {
 	// this seems strange but it works because 'a += b' is
 	// translated into 'a = a + b' and string type takes other types for + operator.
 	expectRun(t, `a := "foo"; a++; out = a`, nil, "foo1")
-	expectError(t, `a := "foo"; a--`, nil, "invalid operation")
+	expectError(t, `a := "foo"; a--`, nil, "invalid binary operator: string - int")
 
 	expectError(t, `a++`, nil, "unresolved reference") // not declared
 	expectError(t, `a--`, nil, "unresolved reference") // not declared
@@ -2132,7 +2131,7 @@ func (o *StringArray) BinaryOp(op token.Token, rhs core.Object) (core.Object, er
 		}
 	}
 
-	return nil, gse.ErrInvalidOperator
+	return nil, core.InvalidBinaryOperator(op.String(), o, rhs)
 }
 
 func (o *StringArray) IsFalsy() bool {
@@ -3354,9 +3353,9 @@ func TestString(t *testing.T) {
 	// also works with "+=" operator
 	expectRun(t, `out = "foo"; out += 1.5`, nil, "foo1.5")
 	// string concats works only when string is LHS
-	expectError(t, `1 + "foo"`, nil, "invalid operation")
+	expectError(t, `1 + "foo"`, nil, "invalid binary operator: int + string")
 
-	expectError(t, `"foo" - "bar"`, nil, "invalid operation")
+	expectError(t, `"foo" - "bar"`, nil, "invalid binary operator: string - string")
 }
 
 func TestTailCall(t *testing.T) {

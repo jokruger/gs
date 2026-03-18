@@ -1,8 +1,9 @@
 package vm
 
 import (
+	"fmt"
+
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/formatter"
 	"github.com/jokruger/gs/value"
 )
@@ -263,7 +264,7 @@ func builtinRange(args ...core.Object) (core.Object, error) {
 		}
 
 		if i == 2 && v <= 0 {
-			return nil, gse.ErrInvalidRangeStep
+			return nil, core.LogicError(fmt.Sprintf("range step must be greater than 0, got %d", v))
 		}
 
 		switch i {

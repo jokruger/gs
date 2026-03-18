@@ -5,7 +5,6 @@ import (
 	"sync/atomic"
 
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
 	"github.com/jokruger/gs/value"
@@ -77,7 +76,7 @@ func (v *VM) Call(foo core.Object, args ...core.Object) (core.Object, error) {
 	//	...
 	//}
 
-	return nil, gse.ErrNotImplemented
+	return nil, core.NotImplemented("VM.Call")
 }
 
 // Run starts the execution.
@@ -133,11 +132,6 @@ func (v *VM) run() {
 			res, e := left.BinaryOp(tok, right)
 			if e != nil {
 				v.sp -= 2
-				if e == gse.ErrInvalidOperator {
-					v.err = fmt.Errorf("invalid operation: %s %s %s",
-						left.TypeName(), tok.String(), right.TypeName())
-					return
-				}
 				v.err = e
 				return
 			}

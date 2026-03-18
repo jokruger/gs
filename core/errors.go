@@ -6,21 +6,23 @@ import (
 )
 
 var (
-	ErrLogicError          = errors.New("logic error")
-	ErrStackOverflow       = errors.New("stack overflow")
-	ErrObjectAllocLimit    = errors.New("object allocation limit exceeded")
-	ErrBytesLimit          = errors.New("bytes size limit exceeded")
-	ErrStringLimit         = errors.New("string size limit exceeded")
-	ErrDecodeBinarySize    = errors.New("invalid binary size")
-	ErrBinaryNotSupported  = errors.New("binary serialization not supported")
-	ErrInvalidArgumentType = errors.New("invalid argument type")
-	ErrIndexOutOfBounds    = errors.New("index out of bounds")
-	ErrWrongNumArguments   = errors.New("wrong number of arguments")
-	ErrInvalidAccessMode   = errors.New("invalid access mode")
-	ErrNotAccessible       = errors.New("object is not accessible")
-	ErrNotAssignable       = errors.New("object is not assignable")
-	ErrInvalidIndexType    = errors.New("invalid index type")
-	ErrInvalidSelector     = errors.New("invalid selector")
+	ErrLogicError            = errors.New("logic error")
+	ErrStackOverflow         = errors.New("stack overflow")
+	ErrObjectAllocLimit      = errors.New("object allocation limit exceeded")
+	ErrBytesLimit            = errors.New("bytes size limit exceeded")
+	ErrStringLimit           = errors.New("string size limit exceeded")
+	ErrDecodeBinarySize      = errors.New("invalid binary size")
+	ErrBinaryNotSupported    = errors.New("binary serialization not supported")
+	ErrInvalidArgumentType   = errors.New("invalid argument type")
+	ErrIndexOutOfBounds      = errors.New("index out of bounds")
+	ErrWrongNumArguments     = errors.New("wrong number of arguments")
+	ErrInvalidAccessMode     = errors.New("invalid access mode")
+	ErrNotAccessible         = errors.New("object is not accessible")
+	ErrNotAssignable         = errors.New("object is not assignable")
+	ErrInvalidIndexType      = errors.New("invalid index type")
+	ErrInvalidSelector       = errors.New("invalid selector")
+	ErrNotImplemented        = errors.New("not implemented")
+	ErrInvalidBinaryOperator = errors.New("invalid binary operator")
 )
 
 func LogicError(context string) error {
@@ -81,4 +83,12 @@ func InvalidIndexType(context string, expected string, got Object) error {
 
 func InvalidSelector(obj Object, sel string) error {
 	return fmt.Errorf("%w: type %s has no selector '%s'", ErrInvalidSelector, obj.TypeName(), sel)
+}
+
+func NotImplemented(feature string) error {
+	return fmt.Errorf("%w: %s", ErrNotImplemented, feature)
+}
+
+func InvalidBinaryOperator(op string, left Object, right Object) error {
+	return fmt.Errorf("%w: %s %s %s", ErrInvalidBinaryOperator, left.TypeName(), op, right.TypeName())
 }

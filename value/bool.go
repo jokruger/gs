@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
 
@@ -61,8 +60,8 @@ func (o *Bool) Arity() int {
 	return 0
 }
 
-func (o *Bool) BinaryOp(token.Token, core.Object) (core.Object, error) {
-	return nil, gse.ErrInvalidOperator
+func (o *Bool) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+	return nil, core.InvalidBinaryOperator(op.String(), o, rhs)
 }
 
 func (o *Bool) Equals(x core.Object) bool {

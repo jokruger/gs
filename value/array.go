@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/jokruger/gs/core"
-	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
 )
@@ -139,7 +138,7 @@ func (o *Array) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 			return NewArray(append(o.value, rhs.value...), false), nil
 		}
 	}
-	return nil, gse.ErrInvalidOperator
+	return nil, core.InvalidBinaryOperator(op.String(), o, rhs)
 }
 
 func (o *Array) Equals(x core.Object) bool {

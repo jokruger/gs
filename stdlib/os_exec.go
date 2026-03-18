@@ -39,7 +39,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.Map {
 			return wrapError(err), nil
 		}
 		if len(res) > core.MaxBytesLen {
-			return nil, gse.ErrBytesLimit
+			return nil, core.BytesLimit("os.exec.combined_output")
 		}
 		return value.NewBytes(res), nil
 	}
@@ -53,7 +53,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.Map {
 			return wrapError(err), nil
 		}
 		if len(res) > core.MaxBytesLen {
-			return nil, gse.ErrBytesLimit
+			return nil, core.BytesLimit("os.exec.output")
 		}
 		return value.NewBytes(res), nil
 	}

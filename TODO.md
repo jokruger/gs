@@ -19,4 +19,3 @@
 - Investigate how .Copy is used - can we get rid of it?
 - Bytes/String - IndexSet
 - Review all stdlibs, check names for consistent style (snake-case, etc)
-- Change ErrNotIndexable, ErrNotIndexAssignable, etc errors to match new Access and Assign methods used instead of IndexGet/IndexSet

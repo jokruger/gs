@@ -99,7 +99,7 @@ func (o *Bytes) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 		switch rhs := rhs.(type) {
 		case *Bytes:
 			if len(o.value)+len(rhs.value) > core.MaxBytesLen {
-				return nil, gse.ErrBytesLimit
+				return nil, core.BytesLimit("bytes concatenation")
 			}
 			return NewBytes(append(o.value, rhs.value...)), nil
 		}

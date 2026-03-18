@@ -26,7 +26,7 @@ func hexDecodeString(args ...core.Object) (ret core.Object, err error) {
 		return wrapError(err), nil
 	}
 	if len(res) > core.MaxBytesLen {
-		return nil, gse.ErrBytesLimit
+		return nil, core.BytesLimit("hex.decode")
 	}
 	return value.NewBytes(res), nil
 }

@@ -429,14 +429,14 @@ func builtinBytes(args ...core.Object) (core.Object, error) {
 	// bytes(N) => create a new bytes with given size N
 	if n, ok := args[0].(*value.Int); ok {
 		if n.Value() > int64(core.MaxBytesLen) {
-			return nil, gse.ErrBytesLimit
+			return nil, core.BytesLimit("bytes constructor")
 		}
 		return value.NewBytes(make([]byte, int(n.Value()))), nil
 	}
 	v, ok := args[0].AsByteSlice()
 	if ok {
 		if len(v) > core.MaxBytesLen {
-			return nil, gse.ErrBytesLimit
+			return nil, core.BytesLimit("bytes constructor")
 		}
 		return value.NewBytes(v), nil
 	}

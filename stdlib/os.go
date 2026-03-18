@@ -616,7 +616,7 @@ func osReadFile(args ...core.Object) (ret core.Object, err error) {
 		return wrapError(err), nil
 	}
 	if len(bytes) > core.MaxBytesLen {
-		return nil, gse.ErrBytesLimit
+		return nil, core.BytesLimit("os.read_file")
 	}
 	return value.NewBytes(bytes), nil
 }

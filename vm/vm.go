@@ -144,7 +144,7 @@ func (v *VM) run() {
 
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = gse.ErrObjectAllocLimit
+				v.err = core.ErrObjectAllocLimit
 				return
 			}
 
@@ -203,7 +203,7 @@ func (v *VM) run() {
 				var res core.Object = value.NewInt(^x.Value())
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = gse.ErrObjectAllocLimit
+					v.err = core.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = res
@@ -223,7 +223,7 @@ func (v *VM) run() {
 				var res core.Object = value.NewInt(-x.Value())
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = gse.ErrObjectAllocLimit
+					v.err = core.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = res
@@ -232,7 +232,7 @@ func (v *VM) run() {
 				var res core.Object = value.NewFloat(-x.Value())
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = gse.ErrObjectAllocLimit
+					v.err = core.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = res
@@ -317,7 +317,7 @@ func (v *VM) run() {
 			var arr core.Object = value.NewArray(elements, false)
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = gse.ErrObjectAllocLimit
+				v.err = core.ErrObjectAllocLimit
 				return
 			}
 
@@ -338,7 +338,7 @@ func (v *VM) run() {
 			var m core.Object = value.NewMap(kv, false)
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = gse.ErrObjectAllocLimit
+				v.err = core.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp] = m
@@ -349,7 +349,7 @@ func (v *VM) run() {
 			var e core.Object = value.NewError(val)
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = gse.ErrObjectAllocLimit
+				v.err = core.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp-1] = e
@@ -361,7 +361,7 @@ func (v *VM) run() {
 				var immutableArray core.Object = value.NewArray(val.Value(), true)
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = gse.ErrObjectAllocLimit
+					v.err = core.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp-1] = immutableArray
@@ -369,7 +369,7 @@ func (v *VM) run() {
 				var immutableMap core.Object = value.NewMap(val.Value(), true)
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = gse.ErrObjectAllocLimit
+					v.err = core.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp-1] = immutableMap
@@ -445,7 +445,7 @@ func (v *VM) run() {
 				var val core.Object = value.NewArray(left.Slice(int(lowIdx), int(highIdx)), false)
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = gse.ErrObjectAllocLimit
+					v.err = core.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = val
@@ -478,7 +478,7 @@ func (v *VM) run() {
 				var val core.Object = value.NewString(left.Substring(int(lowIdx), int(highIdx)))
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = gse.ErrObjectAllocLimit
+					v.err = core.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = val
@@ -511,7 +511,7 @@ func (v *VM) run() {
 				var val core.Object = value.NewBytes(left.Slice(int(lowIdx), int(highIdx)))
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = gse.ErrObjectAllocLimit
+					v.err = core.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = val
@@ -588,7 +588,7 @@ func (v *VM) run() {
 					}
 				}
 				if v.framesIndex >= MaxFrames {
-					v.err = gse.ErrStackOverflow
+					v.err = core.ErrStackOverflow
 					return
 				}
 
@@ -628,7 +628,7 @@ func (v *VM) run() {
 				}
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = gse.ErrObjectAllocLimit
+					v.err = core.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = ret
@@ -746,7 +746,7 @@ func (v *VM) run() {
 			}
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = gse.ErrObjectAllocLimit
+				v.err = core.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp] = cl
@@ -816,7 +816,7 @@ func (v *VM) run() {
 			iterator = dst.Iterate()
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = gse.ErrObjectAllocLimit
+				v.err = core.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp] = iterator

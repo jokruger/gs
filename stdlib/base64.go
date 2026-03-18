@@ -32,7 +32,7 @@ func b64RawURLDecodeString(args ...core.Object) (ret core.Object, err error) {
 		return wrapError(err), nil
 	}
 	if len(res) > core.MaxBytesLen {
-		return nil, gse.ErrBytesLimit
+		return nil, core.BytesLimit("base64.raw_url_decode")
 	}
 	return value.NewBytes(res), nil
 }
@@ -50,7 +50,7 @@ func b64URLDecodeString(args ...core.Object) (ret core.Object, err error) {
 		return wrapError(err), nil
 	}
 	if len(res) > core.MaxBytesLen {
-		return nil, gse.ErrBytesLimit
+		return nil, core.BytesLimit("base64.url_decode")
 	}
 	return value.NewBytes(res), nil
 }
@@ -68,7 +68,7 @@ func b64RawDecodeString(args ...core.Object) (ret core.Object, err error) {
 		return wrapError(err), nil
 	}
 	if len(res) > core.MaxBytesLen {
-		return nil, gse.ErrBytesLimit
+		return nil, core.BytesLimit("base64.raw_decode")
 	}
 	return value.NewBytes(res), nil
 }
@@ -86,7 +86,7 @@ func b64DecodeString(args ...core.Object) (ret core.Object, err error) {
 		return wrapError(err), nil
 	}
 	if len(res) > core.MaxBytesLen {
-		return nil, gse.ErrBytesLimit
+		return nil, core.BytesLimit("base64.decode")
 	}
 	return value.NewBytes(res), nil
 }

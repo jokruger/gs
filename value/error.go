@@ -1,6 +1,8 @@
 package value
 
 import (
+	"bytes"
+	"encoding/gob"
 	"errors"
 	"fmt"
 	"time"
@@ -18,6 +20,43 @@ func NewError(value core.Object) *Error {
 	o := &Error{}
 	o.Set(value)
 	return o
+}
+
+func (o *Error) GobDecode(b []byte) error {
+	buf := bytes.NewBuffer(b)
+	dec := gob.NewDecoder(buf)
+
+	var hasValue bool
+	if err := dec.Decode(&hasValue); err != nil {
+		return err
+	}
+	if !hasValue {
+		o.Set(nil)
+		return nil
+	}
+
+	var v core.Object
+	if err := dec.Decode(&v); err != nil {
+		return err
+	}
+	o.Set(v)
+	return nil
+}
+
+func (o *Error) GobEncode() ([]byte, error) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+
+	hasValue := o.value != nil
+	if err := enc.Encode(hasValue); err != nil {
+		return nil, err
+	}
+	if hasValue {
+		if err := enc.Encode(o.value); err != nil {
+			return nil, err
+		}
+	}
+	return buf.Bytes(), nil
 }
 
 func (o *Error) Set(value core.Object) {

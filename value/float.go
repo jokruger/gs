@@ -1,6 +1,7 @@
 package value
 
 import (
+	"encoding/binary"
 	"math"
 	"strconv"
 	"time"
@@ -18,6 +19,20 @@ func NewFloat(value float64) *Float {
 	o := &Float{}
 	o.Set(value)
 	return o
+}
+
+func (o *Float) GobDecode(b []byte) error {
+	if len(b) != 8 {
+		return &gse.DecodeLengthError{Type: "Float", Expected: 8, Found: len(b)}
+	}
+	o.Set(math.Float64frombits(binary.BigEndian.Uint64(b)))
+	return nil
+}
+
+func (o *Float) GobEncode() ([]byte, error) {
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, math.Float64bits(o.value))
+	return b, nil
 }
 
 func (o *Float) Set(value float64) {

@@ -23,7 +23,7 @@ func (o *Bool) GobDecode(b []byte) error {
 	if len(b) != 1 {
 		return &gse.DecodeLengthError{Type: "Bool", Expected: 1, Found: len(b)}
 	}
-	o.value = b[0] == 1
+	o.Set(b[0] == 1)
 	return nil
 }
 
@@ -32,6 +32,10 @@ func (o *Bool) GobEncode() ([]byte, error) {
 		return []byte{1}, nil
 	}
 	return []byte{0}, nil
+}
+
+func (o *Bool) Set(value bool) {
+	o.value = value
 }
 
 func (o *Bool) Value() bool {

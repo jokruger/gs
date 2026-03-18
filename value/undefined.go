@@ -15,6 +15,21 @@ func NewUndefined() *Undefined {
 	return &Undefined{}
 }
 
+func (o *Undefined) GobDecode(b []byte) error {
+	if len(b) != 0 {
+		return &gse.DecodeLengthError{Type: "Undefined", Expected: 0, Found: len(b)}
+	}
+	o.Set()
+	return nil
+}
+
+func (o *Undefined) GobEncode() ([]byte, error) {
+	return []byte{}, nil
+}
+
+func (o *Undefined) Set() {
+}
+
 func (o *Undefined) Next() bool {
 	return false
 }

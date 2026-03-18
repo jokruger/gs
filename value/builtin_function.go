@@ -21,6 +21,14 @@ func NewBuiltinFunction(name string, value core.NativeFunc, arity int, variadic 
 	return o
 }
 
+func (o *BuiltinFunction) GobDecode([]byte) error {
+	return &gse.DecodeUnsupportedError{Type: "BuiltinFunction", Context: "native function is not serializable"}
+}
+
+func (o *BuiltinFunction) GobEncode() ([]byte, error) {
+	return nil, &gse.EncodeUnsupportedError{Type: "BuiltinFunction", Context: "native function is not serializable"}
+}
+
 func (o *BuiltinFunction) Set(name string, value core.NativeFunc, arity int, variadic bool) {
 	o.name = name
 	o.value = value

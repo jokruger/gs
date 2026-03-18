@@ -18,6 +18,19 @@ func NewTime(t time.Time) *Time {
 	return o
 }
 
+func (o *Time) GobDecode(b []byte) error {
+	var t time.Time
+	if err := t.GobDecode(b); err != nil {
+		return err
+	}
+	o.Set(t)
+	return nil
+}
+
+func (o *Time) GobEncode() ([]byte, error) {
+	return o.value.GobEncode()
+}
+
 func (o *Time) Set(t time.Time) {
 	o.value = t
 }

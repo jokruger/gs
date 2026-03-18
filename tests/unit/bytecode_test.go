@@ -1,15 +1,12 @@
 package gs_test
 
-/*
 import (
 	"bytes"
 	"testing"
-	"time"
 
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/value"
 	"github.com/jokruger/gs/vm"
 )
 
@@ -18,6 +15,110 @@ type srcfile struct {
 	size int
 }
 
+func TestBytecodeEmpty(t *testing.T) {
+	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray()))
+}
+
+/*
+	testBytecodeSerialization(t, bytecode(
+		concatInsts(), objectsArray(
+			value.NewChar('y'),
+			value.NewFloat(93.11),
+			compiledFunction(1, 0,
+				vm.MakeInstruction(parser.OpConstant, 3),
+				vm.MakeInstruction(parser.OpSetLocal, 0),
+				vm.MakeInstruction(parser.OpGetGlobal, 0),
+				vm.MakeInstruction(parser.OpGetFree, 0)),
+			value.NewFloat(39.2),
+			value.NewInt(192),
+			value.NewString("bar"),
+		)))
+
+	testBytecodeSerialization(t, bytecodeFileSet(
+		concatInsts(
+			vm.MakeInstruction(parser.OpConstant, 0),
+			vm.MakeInstruction(parser.OpSetGlobal, 0),
+			vm.MakeInstruction(parser.OpConstant, 6),
+			vm.MakeInstruction(parser.OpPop)),
+		objectsArray(
+			value.NewInt(55),
+			value.NewInt(66),
+			value.NewInt(77),
+			value.NewInt(88),
+			value.NewMap(map[string]core.Object{
+				"array": value.NewArray([]core.Object{
+					value.NewInt(1),
+					value.NewInt(2),
+					value.NewInt(3),
+					value.TrueValue,
+					value.FalseValue,
+					value.UndefinedValue,
+				}, true),
+				"true":  value.TrueValue,
+				"false": value.FalseValue,
+				"bytes": value.NewBytes(make([]byte, 16)),
+				"char":  value.NewChar('Y'),
+				"error": value.NewError(value.NewString("some error")),
+				"float": value.NewFloat(-19.84),
+				"immutable_array": value.NewArray([]core.Object{
+					value.NewInt(1),
+					value.NewInt(2),
+					value.NewInt(3),
+					value.TrueValue,
+					value.FalseValue,
+					value.UndefinedValue,
+				}, true),
+				"immutable_map": value.NewMap(map[string]core.Object{
+					"a": value.NewInt(1),
+					"b": value.NewInt(2),
+					"c": value.NewInt(3),
+					"d": value.TrueValue,
+					"e": value.FalseValue,
+					"f": value.UndefinedValue,
+				}, true),
+				"int": value.NewInt(91),
+				"map": value.NewMap(map[string]core.Object{
+					"a": value.NewInt(1),
+					"b": value.NewInt(2),
+					"c": value.NewInt(3),
+					"d": value.TrueValue,
+					"e": value.FalseValue,
+					"f": value.UndefinedValue,
+				}, false),
+				"string":    value.NewString("foo bar"),
+				"time":      value.NewTime(time.Now()),
+				"undefined": value.UndefinedValue,
+			}, true),
+			compiledFunction(1, 0,
+				vm.MakeInstruction(parser.OpConstant, 3),
+				vm.MakeInstruction(parser.OpSetLocal, 0),
+				vm.MakeInstruction(parser.OpGetGlobal, 0),
+				vm.MakeInstruction(parser.OpGetFree, 0),
+				vm.MakeInstruction(parser.OpBinaryOp, 11),
+				vm.MakeInstruction(parser.OpGetFree, 1),
+				vm.MakeInstruction(parser.OpBinaryOp, 11),
+				vm.MakeInstruction(parser.OpGetLocal, 0),
+				vm.MakeInstruction(parser.OpBinaryOp, 11),
+				vm.MakeInstruction(parser.OpReturn, 1)),
+			compiledFunction(1, 0,
+				vm.MakeInstruction(parser.OpConstant, 2),
+				vm.MakeInstruction(parser.OpSetLocal, 0),
+				vm.MakeInstruction(parser.OpGetFree, 0),
+				vm.MakeInstruction(parser.OpGetLocal, 0),
+				vm.MakeInstruction(parser.OpClosure, 4, 2),
+				vm.MakeInstruction(parser.OpReturn, 1)),
+			compiledFunction(1, 0,
+				vm.MakeInstruction(parser.OpConstant, 1),
+				vm.MakeInstruction(parser.OpSetLocal, 0),
+				vm.MakeInstruction(parser.OpGetLocal, 0),
+				vm.MakeInstruction(parser.OpClosure, 5, 1),
+				vm.MakeInstruction(parser.OpReturn, 1))),
+		fileSet(srcfile{name: "file1", size: 100},
+			srcfile{name: "file2", size: 200})))
+
+*/
+
+/*
 func TestBytecode(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray()))
 
@@ -243,6 +344,7 @@ func TestBytecode_CountObjects(t *testing.T) {
 				vm.MakeInstruction(parser.OpReturn, 1))))
 	require.Equal(t, 7, b.CountObjects())
 }
+*/
 
 func fileSet(files ...srcfile) *parser.SourceFileSet {
 	fileSet := parser.NewFileSet()
@@ -281,4 +383,3 @@ func testBytecodeSerialization(t *testing.T, b *vm.Bytecode) {
 	require.Equal(t, b.MainFunction, r.MainFunction)
 	require.Equal(t, b.Constants, r.Constants)
 }
-*/

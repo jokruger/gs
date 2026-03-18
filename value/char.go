@@ -1,6 +1,7 @@
 package value
 
 import (
+	"encoding/binary"
 	"time"
 
 	"github.com/jokruger/gs/core"
@@ -16,6 +17,20 @@ func NewChar(v rune) *Char {
 	o := &Char{}
 	o.Set(v)
 	return o
+}
+
+func (o *Char) GobDecode(b []byte) error {
+	if len(b) != 4 {
+		return &gse.DecodeLengthError{Type: "Char", Expected: 4, Found: len(b)}
+	}
+	o.Set(rune(int32(binary.BigEndian.Uint32(b))))
+	return nil
+}
+
+func (o *Char) GobEncode() ([]byte, error) {
+	b := make([]byte, 4)
+	binary.BigEndian.PutUint32(b, uint32(int32(o.value)))
+	return b, nil
 }
 
 func (o *Char) Set(v rune) {

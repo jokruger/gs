@@ -1,6 +1,8 @@
 package value
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"strings"
 	"time"
@@ -9,6 +11,8 @@ import (
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
+
+/* === Map === */
 
 type Map struct {
 	value     map[string]core.Object
@@ -19,6 +23,38 @@ func NewMap(val map[string]core.Object, immutable bool) *Map {
 	o := &Map{}
 	o.Set(val, immutable)
 	return o
+}
+
+func (o *Map) GobDecode(b []byte) error {
+	buf := bytes.NewBuffer(b)
+	dec := gob.NewDecoder(buf)
+
+	var vals map[string]core.Object
+	if err := dec.Decode(&vals); err != nil {
+		return err
+	}
+
+	var immutable bool
+	if err := dec.Decode(&immutable); err != nil {
+		return err
+	}
+
+	o.Set(vals, immutable)
+	return nil
+}
+
+func (o *Map) GobEncode() ([]byte, error) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+
+	if err := enc.Encode(o.value); err != nil {
+		return nil, err
+	}
+	if err := enc.Encode(o.immutable); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
 
 func (o *Map) Set(val map[string]core.Object, immutable bool) {
@@ -209,4 +245,67 @@ func (o *Map) AsByteSlice() ([]byte, bool) {
 
 func (o *Map) AsTime() (time.Time, bool) {
 	return time.Time{}, false
+}
+
+/* === Map Iterator === */
+
+type MapIterator struct {
+	Object
+	v map[string]core.Object
+	k []string
+	i int
+	l int
+}
+
+func NewMapIterator(m map[string]core.Object) *MapIterator {
+	o := &MapIterator{}
+	o.Set(m)
+	return o
+}
+
+func (o *MapIterator) Set(m map[string]core.Object) {
+	o.v = m
+	o.k = make([]string, 0, len(m))
+	for k := range m {
+		o.k = append(o.k, k)
+	}
+	o.i = 0
+	o.l = len(o.k)
+}
+
+func (o *MapIterator) Next() bool {
+	o.i++
+	return o.i <= o.l
+}
+
+func (o *MapIterator) Key() core.Object {
+	k := o.k[o.i-1]
+	return NewString(k)
+}
+
+func (o *MapIterator) Value() core.Object {
+	k := o.k[o.i-1]
+	return o.v[k]
+}
+
+func (o *MapIterator) TypeName() string {
+	return "map-iterator"
+}
+
+func (o *MapIterator) String() string {
+	return "<map-iterator>"
+}
+
+func (o *MapIterator) Equals(core.Object) bool {
+	return false
+}
+
+func (o *MapIterator) Copy() core.Object {
+	t := NewMapIterator(o.v)
+	t.i = o.i
+	return t
+}
+
+func (o *MapIterator) IsFalsy() bool {
+	return true
 }

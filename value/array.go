@@ -1,6 +1,8 @@
 package value
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"strings"
 	"time"
@@ -9,6 +11,8 @@ import (
 	gse "github.com/jokruger/gs/error"
 	"github.com/jokruger/gs/token"
 )
+
+/* === Array === */
 
 type Array struct {
 	value     []core.Object
@@ -19,6 +23,38 @@ func NewArray(val []core.Object, immutable bool) *Array {
 	o := &Array{}
 	o.Set(val, immutable)
 	return o
+}
+
+func (o *Array) GobDecode(b []byte) error {
+	buf := bytes.NewBuffer(b)
+	dec := gob.NewDecoder(buf)
+
+	var vals []core.Object
+	if err := dec.Decode(&vals); err != nil {
+		return err
+	}
+
+	var immutable bool
+	if err := dec.Decode(&immutable); err != nil {
+		return err
+	}
+
+	o.Set(vals, immutable)
+	return nil
+}
+
+func (o *Array) GobEncode() ([]byte, error) {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+
+	if err := enc.Encode(o.value); err != nil {
+		return nil, err
+	}
+	if err := enc.Encode(o.immutable); err != nil {
+		return nil, err
+	}
+
+	return buf.Bytes(), nil
 }
 
 func (o *Array) Set(val []core.Object, immutable bool) {
@@ -218,4 +254,60 @@ func (o *Array) AsByteSlice() ([]byte, bool) {
 
 func (o *Array) AsTime() (time.Time, bool) {
 	return time.Time{}, false
+}
+
+/* === Array Iterator === */
+
+type ArrayIterator struct {
+	Object
+	v []core.Object
+	i int
+	l int
+}
+
+func NewArrayIterator(v []core.Object) *ArrayIterator {
+	o := &ArrayIterator{}
+	o.Set(v)
+	return o
+}
+
+func (o *ArrayIterator) Set(v []core.Object) {
+	o.v = v
+	o.i = 0
+	o.l = len(v)
+}
+
+func (o *ArrayIterator) Next() bool {
+	o.i++
+	return o.i <= o.l
+}
+
+func (o *ArrayIterator) Key() core.Object {
+	return NewInt(int64(o.i - 1))
+}
+
+func (o *ArrayIterator) Value() core.Object {
+	return o.v[o.i-1]
+}
+
+func (o *ArrayIterator) TypeName() string {
+	return "array-iterator"
+}
+
+func (o *ArrayIterator) String() string {
+	return "<array-iterator>"
+}
+
+func (o *ArrayIterator) Equals(core.Object) bool {
+	return false
+}
+
+func (o *ArrayIterator) Copy() core.Object {
+	t := NewArrayIterator(o.v)
+	t.i = o.i
+	return t
+}
+
+func (o *ArrayIterator) IsFalsy() bool {
+	return true
 }

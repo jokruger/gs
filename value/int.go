@@ -1,6 +1,7 @@
 package value
 
 import (
+	"encoding/binary"
 	"strconv"
 	"time"
 
@@ -17,6 +18,20 @@ func NewInt(v int64) *Int {
 	o := &Int{}
 	o.Set(v)
 	return o
+}
+
+func (o *Int) GobDecode(b []byte) error {
+	if len(b) != 8 {
+		return &gse.DecodeLengthError{Type: "Int", Expected: 8, Found: len(b)}
+	}
+	o.Set(int64(binary.BigEndian.Uint64(b)))
+	return nil
+}
+
+func (o *Int) GobEncode() ([]byte, error) {
+	b := make([]byte, 8)
+	binary.BigEndian.PutUint64(b, uint64(o.value))
+	return b, nil
 }
 
 func (o *Int) Set(v int64) {

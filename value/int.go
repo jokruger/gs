@@ -22,7 +22,7 @@ func NewInt(v int64) *Int {
 
 func (o *Int) GobDecode(b []byte) error {
 	if len(b) != 8 {
-		return &gse.DecodeLengthError{Type: "Int", Expected: 8, Found: len(b)}
+		return core.DecodeBinarySize("Int", 8, len(b))
 	}
 	o.Set(int64(binary.BigEndian.Uint64(b)))
 	return nil

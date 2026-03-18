@@ -17,7 +17,7 @@ func NewUndefined() *Undefined {
 
 func (o *Undefined) GobDecode(b []byte) error {
 	if len(b) != 0 {
-		return &gse.DecodeLengthError{Type: "Undefined", Expected: 0, Found: len(b)}
+		core.DecodeBinarySize("Undefined", 0, len(b))
 	}
 	o.Set()
 	return nil

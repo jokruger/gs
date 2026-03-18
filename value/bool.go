@@ -21,7 +21,7 @@ func NewBool(value bool) *Bool {
 
 func (o *Bool) GobDecode(b []byte) error {
 	if len(b) != 1 {
-		return &gse.DecodeLengthError{Type: "Bool", Expected: 1, Found: len(b)}
+		return core.DecodeBinarySize("Bool", 1, len(b))
 	}
 	o.Set(b[0] == 1)
 	return nil

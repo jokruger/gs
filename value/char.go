@@ -21,7 +21,7 @@ func NewChar(v rune) *Char {
 
 func (o *Char) GobDecode(b []byte) error {
 	if len(b) != 4 {
-		return &gse.DecodeLengthError{Type: "Char", Expected: 4, Found: len(b)}
+		return core.DecodeBinarySize("Char", 4, len(b))
 	}
 	o.Set(rune(int32(binary.BigEndian.Uint32(b))))
 	return nil

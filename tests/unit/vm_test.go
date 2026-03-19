@@ -397,6 +397,15 @@ func TestArray(t *testing.T) {
 	expectError(t, fmt.Sprintf("%s[%d:]", arrStr, arrLen+1), nil, "invalid slice index")
 	expectError(t, fmt.Sprintf("%s[%d:%d]", arrStr, 0, -1), nil, "invalid slice index")
 	expectError(t, fmt.Sprintf("%s[%d:%d]", arrStr, 2, 1), nil, "invalid slice index")
+
+	expectRun(t, fmt.Sprintf(`out = [] == %s`, value.NewArray(nil, false).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = [] == %s`, value.NewArray(nil, true).String()), nil, true)
+
+	expectRun(t, fmt.Sprintf(`out = [1, undefined, "3"] == %s`, value.NewArray([]core.Object{
+		value.NewInt(1),
+		value.UndefinedValue,
+		value.NewString("3"),
+	}, false).String()), nil, true)
 }
 
 func TestAssignment(t *testing.T) {

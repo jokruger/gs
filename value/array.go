@@ -109,9 +109,9 @@ func (o *Array) TypeName() string {
 }
 
 func (o *Array) String() string {
-	var elements []string
-	for _, e := range o.value {
-		elements = append(elements, e.String())
+	elements := make([]string, len(o.value))
+	for i, e := range o.value {
+		elements[i] = e.String()
 	}
 	return fmt.Sprintf("[%s]", strings.Join(elements, ", "))
 }

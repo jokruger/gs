@@ -173,7 +173,7 @@ func (o *Char) IsCallable() bool {
 }
 
 func (o *Char) IsImmutable() bool {
-	return false
+	return true
 }
 
 func (o *Char) IsVariadic() bool {

@@ -108,7 +108,7 @@ func (o *Bool) IsCallable() bool {
 }
 
 func (o *Bool) IsImmutable() bool {
-	return false
+	return true
 }
 
 func (o *Bool) IsVariadic() bool {

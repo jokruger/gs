@@ -136,7 +136,7 @@ func (o *Error) IsCallable() bool {
 }
 
 func (o *Error) IsImmutable() bool {
-	return false
+	return true
 }
 
 func (o *Error) IsVariadic() bool {

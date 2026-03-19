@@ -199,7 +199,7 @@ func (o *String) IsCallable() bool {
 }
 
 func (o *String) IsImmutable() bool {
-	return false
+	return true
 }
 
 func (o *String) IsVariadic() bool {

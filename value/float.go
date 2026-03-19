@@ -199,7 +199,7 @@ func (o *Float) IsCallable() bool {
 }
 
 func (o *Float) IsImmutable() bool {
-	return false
+	return true
 }
 
 func (o *Float) IsVariadic() bool {

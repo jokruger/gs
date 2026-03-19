@@ -143,7 +143,7 @@ func (o *Time) IsCallable() bool {
 }
 
 func (o *Time) IsImmutable() bool {
-	return false
+	return true
 }
 
 func (o *Time) IsVariadic() bool {

@@ -251,7 +251,7 @@ func (o *Int) IsCallable() bool {
 }
 
 func (o *Int) IsImmutable() bool {
-	return false
+	return true
 }
 
 func (o *Int) IsVariadic() bool {

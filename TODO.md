@@ -1,8 +1,7 @@
-- return IsImmutable = true for basic types (int, string, bool, time, etc)
-
 - rename Map to Record
 - add Map, add builtin function to create a map from record (deep copy)
 
+- bytes and string should be similar to array (immutable flag, assign by index, etc)
 - BinaryOp, IndexGet, IndexSet, etc should receive VM as an argument so in future we can construct new objects through VM
 - use memory pools and arenas inside VM to reduce allocations
 - implement lambdas

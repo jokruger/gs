@@ -104,7 +104,7 @@ func (o *BuiltinFunction) IsCallable() bool {
 }
 
 func (o *BuiltinFunction) IsImmutable() bool {
-	return false
+	return true
 }
 
 func (o *BuiltinFunction) IsVariadic() bool {

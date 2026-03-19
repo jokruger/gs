@@ -166,7 +166,7 @@ func (o *Bytes) IsCallable() bool {
 }
 
 func (o *Bytes) IsImmutable() bool {
-	return false
+	return true
 }
 
 func (o *Bytes) IsVariadic() bool {

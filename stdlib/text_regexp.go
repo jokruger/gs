@@ -7,7 +7,7 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-func makeTextRegexp(re *regexp.Regexp) *value.Map {
+func makeTextRegexp(re *regexp.Regexp) *value.Record {
 	reMatch := func(args ...core.Object) (core.Object, error) {
 		if len(args) != 1 {
 			return nil, core.WrongNumArguments("text.regexp.match", "1", len(args))
@@ -43,7 +43,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.Map {
 
 			arr := value.NewArray(nil, false)
 			for i := 0; i < len(m); i += 2 {
-				arr.Append(value.NewMap(map[string]core.Object{
+				arr.Append(value.NewRecord(map[string]core.Object{
 					"text":  value.NewString(s1[m[i]:m[i+1]]),
 					"begin": value.NewInt(int64(m[i])),
 					"end":   value.NewInt(int64(m[i+1])),
@@ -66,7 +66,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.Map {
 		for _, m := range m {
 			subMatch := value.NewArray(nil, false)
 			for i := 0; i < len(m); i += 2 {
-				subMatch.Append(value.NewMap(map[string]core.Object{
+				subMatch.Append(value.NewRecord(map[string]core.Object{
 					"text":  value.NewString(s1[m[i]:m[i+1]]),
 					"begin": value.NewInt(int64(m[i])),
 					"end":   value.NewInt(int64(m[i+1])),
@@ -131,7 +131,7 @@ func makeTextRegexp(re *regexp.Regexp) *value.Map {
 		return value.NewArray(arr, false), nil
 	}
 
-	return value.NewMap(map[string]core.Object{
+	return value.NewRecord(map[string]core.Object{
 		"match":   value.NewBuiltinFunction("match", reMatch, 1, false),     // match(text) => bool
 		"find":    value.NewBuiltinFunction("find", reFind, 1, true),        // find(text[,maxCount]) => array(array({text:,begin:,end:}))/undefined
 		"replace": value.NewBuiltinFunction("replace", reReplace, 2, false), // replace(src, repl) => string

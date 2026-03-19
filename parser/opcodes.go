@@ -19,7 +19,7 @@ const (
 	OpJump          = core.Opcode(12) // Jump
 	OpNull          = core.Opcode(13) // Push null
 	OpArray         = core.Opcode(14) // Array object
-	OpMap           = core.Opcode(15) // Map object
+	OpRecord        = core.Opcode(15) // Record object
 	OpError         = core.Opcode(16) // Error object
 	OpImmutable     = core.Opcode(17) // Immutable object
 	OpIndex         = core.Opcode(18) // Index operation
@@ -70,7 +70,7 @@ var OpcodeNames = [...]string{
 	OpSetGlobal:     "SETG",
 	OpSetSelGlobal:  "SETSG",
 	OpArray:         "ARR",
-	OpMap:           "MAP",
+	OpRecord:        "RECORD",
 	OpError:         "ERROR",
 	OpImmutable:     "IMMUT",
 	OpIndex:         "INDEX",
@@ -117,7 +117,7 @@ var OpcodeOperands = [...][]int{
 	OpSetGlobal:     {2},
 	OpSetSelGlobal:  {2, 1},
 	OpArray:         {2},
-	OpMap:           {2},
+	OpRecord:        {2},
 	OpError:         {},
 	OpImmutable:     {},
 	OpIndex:         {},

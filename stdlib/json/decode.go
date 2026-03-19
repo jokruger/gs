@@ -184,7 +184,7 @@ func (d *decodeState) object() (core.Object, error) {
 			panic(phasePanicMsg)
 		}
 	}
-	return value.NewMap(m, false), nil
+	return value.NewRecord(m, false), nil
 }
 
 func (d *decodeState) literal() (core.Object, error) {

@@ -508,7 +508,7 @@ func osStat(args ...core.Object) (ret core.Object, err error) {
 	if err != nil {
 		return wrapError(err), nil
 	}
-	fstat := value.NewMap(map[string]core.Object{
+	fstat := value.NewRecord(map[string]core.Object{
 		"name":  value.NewString(stat.Name()),
 		"mtime": value.NewTime(stat.ModTime()),
 		"size":  value.NewInt(stat.Size()),

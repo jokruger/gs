@@ -672,7 +672,7 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = type_name(1.1)`, nil, "float")
 	expectRun(t, `out = type_name("a")`, nil, "string")
 	expectRun(t, `out = type_name([1,2,3])`, nil, "array")
-	expectRun(t, `out = type_name({k:1})`, nil, "map")
+	expectRun(t, `out = type_name({k:1})`, nil, "record")
 	expectRun(t, `out = type_name('a')`, nil, "char")
 	expectRun(t, `out = type_name(true)`, nil, "bool")
 	expectRun(t, `out = type_name(false)`, nil, "bool")
@@ -726,18 +726,18 @@ func TestBuiltinFunction(t *testing.T) {
 	expectError(t, `delete(1)`, nil, "wrong number of arguments: builtin function 'delete': expected 2 argument(s), got 1")
 	expectError(t, `delete(1, 2, 3)`, nil, "wrong number of arguments: builtin function 'delete': expected 2 argument(s), got 3")
 	expectError(t, `delete({}, "", 3)`, nil, "wrong number of arguments: builtin function 'delete': expected 2 argument(s), got 3")
-	expectError(t, `delete(1, 1)`, nil, `invalid argument type: delete argument 'first' expects type map, got int`)
-	expectError(t, `delete(1.0, 1)`, nil, `invalid argument type: delete argument 'first' expects type map, got float`)
-	expectError(t, `delete("str", 1)`, nil, `invalid argument type: delete argument 'first' expects type map, got string`)
-	expectError(t, `delete(bytes("str"), 1)`, nil, `invalid argument type: delete argument 'first' expects type map, got bytes`)
-	expectError(t, `delete(error("err"), 1)`, nil, `invalid argument type: delete argument 'first' expects type map, got error`)
-	expectError(t, `delete(true, 1)`, nil, `invalid argument type: delete argument 'first' expects type map, got bool`)
-	expectError(t, `delete(char('c'), 1)`, nil, `invalid argument type: delete argument 'first' expects type map, got char`)
-	expectError(t, `delete(undefined, 1)`, nil, `invalid argument type: delete argument 'first' expects type map, got undefined`)
-	expectError(t, `delete(time(1257894000), 1)`, nil, `invalid argument type: delete argument 'first' expects type map, got time`)
-	expectError(t, `delete(immutable({}), "key")`, nil, `invalid argument type: delete argument 'first' expects type mutable map, got immutable-map`)
-	expectError(t, `delete(immutable([]), "")`, nil, `invalid argument type: delete argument 'first' expects type map, got immutable-array`)
-	expectError(t, `delete([], "")`, nil, `invalid argument type: delete argument 'first' expects type map, got array`)
+	expectError(t, `delete(1, 1)`, nil, `invalid argument type: delete argument 'first' expects type record, got int`)
+	expectError(t, `delete(1.0, 1)`, nil, `invalid argument type: delete argument 'first' expects type record, got float`)
+	expectError(t, `delete("str", 1)`, nil, `invalid argument type: delete argument 'first' expects type record, got string`)
+	expectError(t, `delete(bytes("str"), 1)`, nil, `invalid argument type: delete argument 'first' expects type record, got bytes`)
+	expectError(t, `delete(error("err"), 1)`, nil, `invalid argument type: delete argument 'first' expects type record, got error`)
+	expectError(t, `delete(true, 1)`, nil, `invalid argument type: delete argument 'first' expects type record, got bool`)
+	expectError(t, `delete(char('c'), 1)`, nil, `invalid argument type: delete argument 'first' expects type record, got char`)
+	expectError(t, `delete(undefined, 1)`, nil, `invalid argument type: delete argument 'first' expects type record, got undefined`)
+	expectError(t, `delete(time(1257894000), 1)`, nil, `invalid argument type: delete argument 'first' expects type record, got time`)
+	expectError(t, `delete(immutable({}), "key")`, nil, `invalid argument type: delete argument 'first' expects type mutable record, got immutable-record`)
+	expectError(t, `delete(immutable([]), "")`, nil, `invalid argument type: delete argument 'first' expects type record, got immutable-array`)
+	expectError(t, `delete([], "")`, nil, `invalid argument type: delete argument 'first' expects type record, got array`)
 
 	expectError(t, `delete({}, undefined)`, nil, `invalid argument type: delete argument 'second' expects type string, got undefined`)
 
@@ -757,27 +757,27 @@ func TestBuiltinFunction(t *testing.T) {
 	expectError(t, `splice(char('c'))`, nil, `invalid argument type: splice argument 'first' expects type mutable array, got char`)
 	expectError(t, `splice(undefined)`, nil, `invalid argument type: splice argument 'first' expects type mutable array, got undefined`)
 	expectError(t, `splice(time(1257894000))`, nil, `invalid argument type: splice argument 'first' expects type mutable array, got time`)
-	expectError(t, `splice(immutable({}))`, nil, `invalid argument type: splice argument 'first' expects type mutable array, got immutable-map`)
+	expectError(t, `splice(immutable({}))`, nil, `invalid argument type: splice argument 'first' expects type mutable array, got immutable-record`)
 	expectError(t, `splice(immutable([]))`, nil, `invalid argument type: splice argument 'first' expects type mutable array, got immutable-array`)
-	expectError(t, `splice({})`, nil, `invalid argument type: splice argument 'first' expects type mutable array, got map`)
+	expectError(t, `splice({})`, nil, `invalid argument type: splice argument 'first' expects type mutable array, got record`)
 	expectError(t, `splice([], "str")`, nil, `invalid argument type: splice argument 'second' expects type int, got string`)
 	expectError(t, `splice([], bytes("str"))`, nil, `invalid argument type: splice argument 'second' expects type int, got bytes`)
 	expectError(t, `splice([], error("error"))`, nil, `invalid argument type: splice argument 'second' expects type int, got error`)
 	expectError(t, `splice([], undefined)`, nil, `invalid argument type: splice argument 'second' expects type int, got undefined`)
 	expectError(t, `splice([], time(0))`, nil, `invalid argument type: splice argument 'second' expects type int, got time`)
 	expectError(t, `splice([], [])`, nil, `invalid argument type: splice argument 'second' expects type int, got array`)
-	expectError(t, `splice([], {})`, nil, `invalid argument type: splice argument 'second' expects type int, got map`)
+	expectError(t, `splice([], {})`, nil, `invalid argument type: splice argument 'second' expects type int, got record`)
 	expectError(t, `splice([], immutable([]))`, nil, `invalid argument type: splice argument 'second' expects type int, got immutable-array`)
-	expectError(t, `splice([], immutable({}))`, nil, `invalid argument type: splice argument 'second' expects type int, got immutable-map`)
+	expectError(t, `splice([], immutable({}))`, nil, `invalid argument type: splice argument 'second' expects type int, got immutable-record`)
 	expectError(t, `splice([], 0, "string")`, nil, `invalid argument type: splice argument 'third' expects type int, got string`)
 	expectError(t, `splice([], 0, bytes("string"))`, nil, `invalid argument type: splice argument 'third' expects type int, got bytes`)
 	expectError(t, `splice([], 0, error("string"))`, nil, `invalid argument type: splice argument 'third' expects type int, got error`)
 	expectError(t, `splice([], 0, undefined)`, nil, `invalid argument type: splice argument 'third' expects type int, got undefined`)
 	expectError(t, `splice([], 0, time(0))`, nil, `invalid argument type: splice argument 'third' expects type int, got time`)
 	expectError(t, `splice([], 0, [])`, nil, `invalid argument type: splice argument 'third' expects type int, got array`)
-	expectError(t, `splice([], 0, {})`, nil, `invalid argument type: splice argument 'third' expects type int, got map`)
+	expectError(t, `splice([], 0, {})`, nil, `invalid argument type: splice argument 'third' expects type int, got record`)
 	expectError(t, `splice([], 0, immutable([]))`, nil, `invalid argument type: splice argument 'third' expects type int, got immutable-array`)
-	expectError(t, `splice([], 0, immutable({}))`, nil, `invalid argument type: splice argument 'third' expects type int, got immutable-map`)
+	expectError(t, `splice([], 0, immutable({}))`, nil, `invalid argument type: splice argument 'third' expects type int, got immutable-record`)
 	expectError(t, `splice([], 1)`, nil, "index out of bounds")
 	expectError(t, `splice([1, 2, 3], 0, -1)`, nil, "logic error: splice delete count must be non-negative")
 	expectError(t, `splice([1, 2, 3], 99, 0, "a", "b")`, nil, "index out of bounds")
@@ -1159,34 +1159,22 @@ func TestFloat(t *testing.T) {
 
 func TestForIn(t *testing.T) {
 	// array
-	expectRun(t, `out = 0; for x in [1, 2, 3] { out += x }`,
-		nil, 6) // value
-	expectRun(t, `out = 0; for i, x in [1, 2, 3] { out += i + x }`,
-		nil, 9) // index, value
-	expectRun(t, `out = 0; func() { for i, x in [1, 2, 3] { out += i + x } }()`,
-		nil, 9) // index, value
-	expectRun(t, `out = 0; for i, _ in [1, 2, 3] { out += i }`,
-		nil, 3) // index, _
-	expectRun(t, `out = 0; func() { for i, _ in [1, 2, 3] { out += i  } }()`,
-		nil, 3) // index, _
+	expectRun(t, `out = 0; for x in [1, 2, 3] { out += x }`, nil, 6)                     // value
+	expectRun(t, `out = 0; for i, x in [1, 2, 3] { out += i + x }`, nil, 9)              // index, value
+	expectRun(t, `out = 0; func() { for i, x in [1, 2, 3] { out += i + x } }()`, nil, 9) // index, value
+	expectRun(t, `out = 0; for i, _ in [1, 2, 3] { out += i }`, nil, 3)                  // index, _
+	expectRun(t, `out = 0; func() { for i, _ in [1, 2, 3] { out += i  } }()`, nil, 3)    // index, _
 
-	// map
-	expectRun(t, `out = 0; for v in {a:2,b:3,c:4} { out += v }`,
-		nil, 9) // value
-	expectRun(t, `out = ""; for k, v in {a:2,b:3,c:4} { out = k; if v==3 { break } }`,
-		nil, "b") // key, value
-	expectRun(t, `out = ""; for k, _ in {a:2} { out += k }`,
-		nil, "a") // key, _
-	expectRun(t, `out = 0; for _, v in {a:2,b:3,c:4} { out += v }`,
-		nil, 9) // _, value
-	expectRun(t, `out = ""; func() { for k, v in {a:2,b:3,c:4} { out = k; if v==3 { break } } }()`,
-		nil, "b") // key, value
+	// record
+	expectRun(t, `out = 0; for v in {a:2,b:3,c:4} { out += v }`, nil, 9)                                      // value
+	expectRun(t, `out = ""; for k, v in {a:2,b:3,c:4} { out = k; if v==3 { break } }`, nil, "b")              // key, value
+	expectRun(t, `out = ""; for k, _ in {a:2} { out += k }`, nil, "a")                                        // key, _
+	expectRun(t, `out = 0; for _, v in {a:2,b:3,c:4} { out += v }`, nil, 9)                                   // _, value
+	expectRun(t, `out = ""; func() { for k, v in {a:2,b:3,c:4} { out = k; if v==3 { break } } }()`, nil, "b") // key, value
 
 	// string
-	expectRun(t, `out = ""; for c in "abcde" { out += c }`,
-		nil, "abcde")
-	expectRun(t, `out = ""; for i, c in "abcde" { if i == 2 { continue }; out += c }`,
-		nil, "abde")
+	expectRun(t, `out = ""; for c in "abcde" { out += c }`, nil, "abcde")
+	expectRun(t, `out = ""; for i, c in "abcde" { if i == 2 { continue }; out += c }`, nil, "abde")
 }
 
 func TestFor(t *testing.T) {
@@ -1985,8 +1973,8 @@ func TestImmutable(t *testing.T) {
 	expectRun(t, `a := immutable([1, 2, 3]); out = a[5]`, nil, value.UndefinedValue)
 
 	// map
-	expectError(t, `a := immutable({b: 1, c: 2}); a.b = 5`, nil, "object is not assignable: type immutable-map does not support assignment via indexing or field access")
-	expectError(t, `a := immutable({b: 1, c: 2}); a["b"] = "bar"`, nil, "object is not assignable: type immutable-map does not support assignment via indexing or field access")
+	expectError(t, `a := immutable({b: 1, c: 2}); a.b = 5`, nil, "object is not assignable: type immutable-record does not support assignment via indexing or field access")
+	expectError(t, `a := immutable({b: 1, c: 2}); a["b"] = "bar"`, nil, "object is not assignable: type immutable-record does not support assignment via indexing or field access")
 	expectRun(t, `a := immutable({b: 1, c: [1,2,3]}); a.c[1] = "bar"; out = a`, nil, IMAP{"b": 1, "c": ARR{1, "bar", 3}})
 	expectError(t, `a := immutable({b: 1, c: immutable([1,2,3])}); a.c[1] = "bar"`, nil, "object is not assignable: type immutable-array does not support assignment via indexing or field access")
 	expectError(t, `a := {b: 1, c: immutable([1,2,3])}; a.c[1] = "bar"`, nil, "object is not assignable: type immutable-array does not support assignment via indexing or field access")
@@ -2002,7 +1990,7 @@ func TestImmutable(t *testing.T) {
 	expectRun(t, `a := immutable({a:1,b:2}); out = a.c`, nil, value.UndefinedValue)
 
 	expectRun(t, `a := immutable({b: 5, c: "foo"}); out = a.b`, nil, 5)
-	expectError(t, `a := immutable({b: 5, c: "foo"}); a.b = 10`, nil, "object is not assignable: type immutable-map does not support assignment via indexing or field access")
+	expectError(t, `a := immutable({b: 5, c: "foo"}); a.b = 10`, nil, "object is not assignable: type immutable-record does not support assignment via indexing or field access")
 }
 
 func TestIncDec(t *testing.T) {
@@ -2509,7 +2497,7 @@ func TestUserModules(t *testing.T) {
 		Opts().Module("mod1", `export {a: 1, b: 2}`), IMAP{"a": 1, "b": 2})
 
 	// export value is immutable
-	expectError(t, `m1 := import("mod1"); m1.a = 5`, Opts().Module("mod1", `export {a: 1, b: 2}`), "object is not assignable: type immutable-map does not support assignment via indexing or field access")
+	expectError(t, `m1 := import("mod1"); m1.a = 5`, Opts().Module("mod1", `export {a: 1, b: 2}`), "object is not assignable: type immutable-record does not support assignment via indexing or field access")
 	expectError(t, `m1 := import("mod1"); m1[1] = 5`, Opts().Module("mod1", `export [1, 2, 3]`), "object is not assignable: type immutable-array does not support assignment via indexing or field access")
 
 	// code after export statement will not be executed
@@ -3572,8 +3560,8 @@ func expectRun(t *testing.T, input string, opts *testopts, expected any) {
 		switch eo := expectedObj.(type) {
 		case *value.Array:
 			expectedObj = value.NewArray(eo.Value(), true)
-		case *value.Map:
-			expectedObj = value.NewMap(eo.Value(), true)
+		case *value.Record:
+			expectedObj = value.NewRecord(eo.Value(), true)
 		}
 
 		modules.AddSourceModule("__code__",
@@ -3811,7 +3799,7 @@ func toObject(v any) core.Object {
 		for k, v := range v {
 			objs[k] = toObject(v)
 		}
-		return value.NewMap(objs, false)
+		return value.NewRecord(objs, false)
 	case ARR:
 		var objs []core.Object
 		for _, e := range v {
@@ -3823,7 +3811,7 @@ func toObject(v any) core.Object {
 		for k, v := range v {
 			objs[k] = toObject(v)
 		}
-		return value.NewMap(objs, true)
+		return value.NewRecord(objs, true)
 	case IARR:
 		var objs []core.Object
 		for _, e := range v {
@@ -3849,8 +3837,8 @@ func objectZeroCopy(o core.Object) core.Object {
 		return value.NewString("")
 	case *value.Array:
 		return value.NewArray(nil, o.IsImmutable())
-	case *value.Map:
-		return value.NewMap(nil, o.IsImmutable())
+	case *value.Record:
+		return value.NewRecord(nil, o.IsImmutable())
 	case *value.Undefined:
 		return value.UndefinedValue
 	case *value.Error:

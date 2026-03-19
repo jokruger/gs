@@ -7,7 +7,7 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-func makeOSFile(file *os.File) *value.Map {
+func makeOSFile(file *os.File) *value.Record {
 	fileChdir := func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, core.WrongNumArguments("os.file.chdir", "0", len(args))
@@ -159,7 +159,7 @@ func makeOSFile(file *os.File) *value.Map {
 		return osStat(value.NewString(file.Name()))
 	}
 
-	return value.NewMap(map[string]core.Object{
+	return value.NewRecord(map[string]core.Object{
 		"chdir":        value.NewBuiltinFunction("chdir", fileChdir, 0, false),               // chdir() => true/error
 		"chown":        value.NewBuiltinFunction("chown", fileChown, 2, false),               // chown(uid int, gid int) => true/error
 		"close":        value.NewBuiltinFunction("close", fileClose, 0, false),               // close() => error

@@ -31,7 +31,7 @@ func Test_builtinDelete(t *testing.T) {
 		target    any
 	}{
 		{name: "invalid-arg", args: args{[]core.Object{value.NewString(""), value.NewString("")}},
-			wantedErr: "invalid argument type: delete argument 'first' expects type map, got string"},
+			wantedErr: "invalid argument type: delete argument 'first' expects type record, got string"},
 
 		{name: "no-args",
 			wantedErr: "wrong number of arguments: delete: expected 2 argument(s), got 0"},
@@ -39,46 +39,46 @@ func Test_builtinDelete(t *testing.T) {
 		{name: "empty-args", args: args{[]core.Object{}},
 			wantedErr: "wrong number of arguments: delete: expected 2 argument(s), got 0"},
 
-		{name: "3-args", args: args{[]core.Object{(*value.Map)(nil), (*value.String)(nil), (*value.String)(nil)}},
+		{name: "3-args", args: args{[]core.Object{(*value.Record)(nil), (*value.String)(nil), (*value.String)(nil)}},
 			wantedErr: "wrong number of arguments: delete: expected 2 argument(s), got 3"},
 
-		{name: "nil-map-no-key", args: args{[]core.Object{value.NewMap(nil, false)}},
+		{name: "nil-record-no-key", args: args{[]core.Object{value.NewRecord(nil, false)}},
 			wantedErr: "wrong number of arguments: delete: expected 2 argument(s), got 1"},
 
-		{name: "map-missing-key",
+		{name: "record-missing-key",
 			args: args{
 				[]core.Object{
-					value.NewMap(map[string]core.Object{
+					value.NewRecord(map[string]core.Object{
 						"key": value.NewString("value"),
 					}, false),
 					value.NewString("key1")}},
 			want: value.UndefinedValue,
-			target: value.NewMap(map[string]core.Object{
+			target: value.NewRecord(map[string]core.Object{
 				"key": value.NewString("value"),
 			}, false),
 		},
 
-		{name: "map-emptied",
+		{name: "record-emptied",
 			args: args{
 				[]core.Object{
-					value.NewMap(map[string]core.Object{
+					value.NewRecord(map[string]core.Object{
 						"key": value.NewString("value"),
 					}, false),
 					value.NewString("key")}},
 			want:   value.UndefinedValue,
-			target: value.NewMap(map[string]core.Object{}, false),
+			target: value.NewRecord(map[string]core.Object{}, false),
 		},
 
-		{name: "map-multi-keys",
+		{name: "record-multi-keys",
 			args: args{
 				[]core.Object{
-					value.NewMap(map[string]core.Object{
+					value.NewRecord(map[string]core.Object{
 						"key1": value.NewString("value1"),
 						"key2": value.NewInt(10),
 					}, false),
 					value.NewString("key1")}},
 			want: value.UndefinedValue,
-			target: value.NewMap(map[string]core.Object{
+			target: value.NewRecord(map[string]core.Object{
 				"key2": value.NewInt(10)}, false),
 		},
 	}
@@ -100,7 +100,7 @@ func Test_builtinDelete(t *testing.T) {
 			}
 			if tt.wantedErr == "" && tt.target != nil {
 				switch v := tt.args.args[0].(type) {
-				case *value.Map, *value.Array:
+				case *value.Record, *value.Array:
 					if !reflect.DeepEqual(tt.target, tt.args.args[0]) {
 						t.Errorf("builtinDelete() objects are not equal, got: %+v, want: %+v", tt.args.args[0], tt.target)
 					}
@@ -134,8 +134,8 @@ func Test_builtinSplice(t *testing.T) {
 		{name: "no args", args: []core.Object{},
 			wantedErr: "wrong number of arguments: splice: expected at least 1 argument(s), got 0"},
 
-		{name: "invalid args", args: []core.Object{value.NewMap(nil, false)},
-			wantedErr: "invalid argument type: splice argument 'first' expects type mutable array, got map"},
+		{name: "invalid args", args: []core.Object{value.NewRecord(nil, false)},
+			wantedErr: "invalid argument type: splice argument 'first' expects type mutable array, got record"},
 
 		{name: "invalid args", args: []core.Object{value.NewArray(nil, false), value.NewString("")},
 			wantedErr: "invalid argument type: splice argument 'second' expects type int, got string"},
@@ -294,10 +294,10 @@ func Test_builtinRange(t *testing.T) {
 		{name: "no args", args: []core.Object{},
 			wantedErr: "wrong number of arguments: range: expected 2 or 3 argument(s), got 0"},
 
-		{name: "single args", args: []core.Object{value.NewMap(nil, false)},
+		{name: "single args", args: []core.Object{value.NewRecord(nil, false)},
 			wantedErr: "wrong number of arguments: range: expected 2 or 3 argument(s), got 1"},
 
-		{name: "4 args", args: []core.Object{value.NewMap(nil, false), value.NewString(""), value.NewString(""), value.NewString("")},
+		{name: "4 args", args: []core.Object{value.NewRecord(nil, false), value.NewString(""), value.NewString(""), value.NewString("")},
 			wantedErr: "wrong number of arguments: range: expected 2 or 3 argument(s), got 4"},
 
 		{name: "invalid start", args: []core.Object{value.NewString(""), value.NewString("")},

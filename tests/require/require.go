@@ -146,8 +146,8 @@ func Equal(t *testing.T, expected, actual any, msg ...any) {
 		if !bytes.Equal(expected.Value(), actual.(*value.Bytes).Value()) {
 			failExpectedActual(t, string(expected.Value()), string(actual.(*value.Bytes).Value()), msg...)
 		}
-	case *value.Map:
-		equalObjectMap(t, expected.Value(), actual.(*value.Map).Value(), msg...)
+	case *value.Record:
+		equalObjectMap(t, expected.Value(), actual.(*value.Record).Value(), msg...)
 	case *vm.CompiledFunction:
 		equalCompiledFunction(t, expected, actual.(*vm.CompiledFunction), msg...)
 	case *value.Undefined:

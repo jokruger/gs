@@ -122,7 +122,7 @@ func (b *Bytecode) RemoveDuplicates() {
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
-		case *value.Map:
+		case *value.Record:
 			if !c.IsImmutable() {
 				panic(fmt.Errorf("unsupported top-level constant type: %s", c.TypeName()))
 			}
@@ -209,11 +209,11 @@ func fixDecodedObject(o core.Object, modules *ModuleMap) (core.Object, error) {
 			}
 			o.SetAt(i, fv)
 		}
-	case *value.Map:
+	case *value.Record:
 		if o.IsImmutable() {
 			modName := inferModuleName(o)
 			if mod := modules.GetBuiltinModule(modName); mod != nil {
-				return mod.AsImmutableMap(modName), nil
+				return mod.AsImmutableRecord(modName), nil
 			}
 
 			for k, v := range o.Value() {
@@ -270,7 +270,7 @@ func updateConstIndexes(insts []byte, indexMap map[int]int) {
 	}
 }
 
-func inferModuleName(mod *value.Map) string {
+func inferModuleName(mod *value.Record) string {
 	mn, ok := mod.Get("__module_name__")
 	if !ok {
 		return ""
@@ -293,7 +293,7 @@ func init() {
 	gob.Register(&value.Error{})
 	gob.Register(&value.Float{})
 	gob.Register(&value.Int{})
-	gob.Register(&value.Map{})
+	gob.Register(&value.Record{})
 	gob.Register(&value.String{})
 	gob.Register(&value.Time{})
 	gob.Register(&value.Undefined{})

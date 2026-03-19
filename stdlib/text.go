@@ -565,7 +565,7 @@ func textREFind(args ...core.Object) (core.Object, error) {
 		arr := value.NewArray(nil, false)
 		for i := 0; i < len(m); i += 2 {
 			if m[i] >= 0 && m[i+1] >= 0 {
-				arr.Append(value.NewMap(map[string]core.Object{
+				arr.Append(value.NewRecord(map[string]core.Object{
 					"text":  value.NewString(s2[m[i]:m[i+1]]),
 					"begin": value.NewInt(int64(m[i])),
 					"end":   value.NewInt(int64(m[i+1])),
@@ -590,7 +590,7 @@ func textREFind(args ...core.Object) (core.Object, error) {
 		subMatch := value.NewArray(nil, false)
 		for i := 0; i < len(m); i += 2 {
 			if m[i] >= 0 && m[i+1] >= 0 {
-				subMatch.Append(value.NewMap(map[string]core.Object{
+				subMatch.Append(value.NewRecord(map[string]core.Object{
 					"text":  value.NewString(s2[m[i]:m[i+1]]),
 					"begin": value.NewInt(int64(m[i])),
 					"end":   value.NewInt(int64(m[i+1])),

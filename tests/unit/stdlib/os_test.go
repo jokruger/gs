@@ -45,7 +45,7 @@ func TestFileStatFile(t *testing.T) {
 		return
 	}
 
-	module(t, "os").call("stat", tf.Name()).expect(value.NewMap(map[string]core.Object{
+	module(t, "os").call("stat", tf.Name()).expect(value.NewRecord(map[string]core.Object{
 		"name":      value.NewString(stat.Name()),
 		"mtime":     value.NewTime(stat.ModTime()),
 		"size":      value.NewInt(stat.Size()),
@@ -62,7 +62,7 @@ func TestFileStatDir(t *testing.T) {
 	stat, err := os.Stat(td)
 	require.NoError(t, err)
 
-	module(t, "os").call("stat", td).expect(value.NewMap(map[string]core.Object{
+	module(t, "os").call("stat", td).expect(value.NewRecord(map[string]core.Object{
 		"name":      value.NewString(stat.Name()),
 		"mtime":     value.NewTime(stat.ModTime()),
 		"size":      value.NewInt(stat.Size()),

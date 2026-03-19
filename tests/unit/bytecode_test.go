@@ -103,7 +103,7 @@ func TestBytecodeConstArray(t *testing.T) {
 
 func TestBytecodeConstMap(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewMap(map[string]core.Object{
+		value.NewRecord(map[string]core.Object{
 			"a": value.NewInt(1),
 			"b": value.NewFloat(2.0),
 			"c": value.NewChar('3'),
@@ -112,7 +112,7 @@ func TestBytecodeConstMap(t *testing.T) {
 	)))
 
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewMap(map[string]core.Object{
+		value.NewRecord(map[string]core.Object{
 			"a": value.NewInt(1),
 			"b": value.NewFloat(2.0),
 			"c": value.NewChar('3'),
@@ -155,7 +155,7 @@ func TestBytecode(t *testing.T) {
 			value.NewInt(66),
 			value.NewInt(77),
 			value.NewInt(88),
-			value.NewMap(map[string]core.Object{
+			value.NewRecord(map[string]core.Object{
 				"array": value.NewArray([]core.Object{
 					value.NewInt(1),
 					value.NewInt(2),
@@ -178,7 +178,7 @@ func TestBytecode(t *testing.T) {
 					value.FalseValue,
 					value.UndefinedValue,
 				}, true),
-				"immutable_map": value.NewMap(map[string]core.Object{
+				"immutable_map": value.NewRecord(map[string]core.Object{
 					"a": value.NewInt(1),
 					"b": value.NewInt(2),
 					"c": value.NewInt(3),
@@ -187,7 +187,7 @@ func TestBytecode(t *testing.T) {
 					"f": value.UndefinedValue,
 				}, true),
 				"int": value.NewInt(91),
-				"map": value.NewMap(map[string]core.Object{
+				"map": value.NewRecord(map[string]core.Object{
 					"a": value.NewInt(1),
 					"b": value.NewInt(2),
 					"c": value.NewInt(3),

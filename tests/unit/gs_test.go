@@ -78,13 +78,13 @@ func TestNumObjects(t *testing.T) {
 		value.NewInt(2),
 		value.NewArray([]core.Object{value.NewInt(3), value.NewInt(4), value.NewInt(5)}, true),
 	}, true), 7)
-	testCountObjects(t, value.NewMap(map[string]core.Object{
+	testCountObjects(t, value.NewRecord(map[string]core.Object{
 		"k1": value.NewInt(1),
 		"k2": value.NewInt(2),
 		"k3": value.NewArray([]core.Object{value.NewInt(3), value.NewInt(4), value.NewInt(5)}, false),
 	}, true), 7)
 	testCountObjects(t, value.NewInt(1984), 1)
-	testCountObjects(t, value.NewMap(map[string]core.Object{
+	testCountObjects(t, value.NewRecord(map[string]core.Object{
 		"k1": value.NewInt(1),
 		"k2": value.NewInt(2),
 		"k3": value.NewArray([]core.Object{value.NewInt(3), value.NewInt(4), value.NewInt(5)}, false),

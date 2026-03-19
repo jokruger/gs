@@ -14,7 +14,7 @@ func CountObjects(o core.Object) (c int) {
 		for _, v := range o.Value() {
 			c += CountObjects(v)
 		}
-	case *value.Map:
+	case *value.Record:
 		for _, v := range o.Value() {
 			c += CountObjects(v)
 		}

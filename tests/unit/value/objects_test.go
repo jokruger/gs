@@ -24,8 +24,8 @@ func TestObject_TypeName(t *testing.T) {
 	require.Equal(t, "bool", o.TypeName())
 	o = value.NewArray(nil, false)
 	require.Equal(t, "array", o.TypeName())
-	o = value.NewMap(nil, false)
-	require.Equal(t, "map", o.TypeName())
+	o = value.NewRecord(nil, false)
+	require.Equal(t, "record", o.TypeName())
 	o = value.NewArrayIterator(nil)
 	require.Equal(t, "array-iterator", o.TypeName())
 	o = value.NewStringIterator(nil)
@@ -65,9 +65,9 @@ func TestObject_IsFalsy(t *testing.T) {
 	require.True(t, o.IsFalsy())
 	o = value.NewArray([]core.Object{nil}, false) // nil is not valid but still count as 1 element
 	require.False(t, o.IsFalsy())
-	o = value.NewMap(nil, false)
+	o = value.NewRecord(nil, false)
 	require.True(t, o.IsFalsy())
-	o = value.NewMap(map[string]core.Object{"a": nil}, false) // nil is not valid but still count as 1 element
+	o = value.NewRecord(map[string]core.Object{"a": nil}, false) // nil is not valid but still count as 1 element
 	require.False(t, o.IsFalsy())
 	o = value.NewStringIterator(nil)
 	require.True(t, o.IsFalsy())
@@ -108,7 +108,7 @@ func TestObject_String(t *testing.T) {
 	require.Equal(t, `" "`, o.String())
 	o = value.NewArray(nil, false)
 	require.Equal(t, "[]", o.String())
-	o = value.NewMap(nil, false)
+	o = value.NewRecord(nil, false)
 	require.Equal(t, "{}", o.String())
 	o = value.NewError(nil)
 	require.Equal(t, "error", o.String())
@@ -135,7 +135,7 @@ func TestObject_BinaryOp(t *testing.T) {
 	o = value.NewBool(false)
 	_, err = o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
-	o = value.NewMap(nil, false)
+	o = value.NewRecord(nil, false)
 	_, err = o.BinaryOp(token.Add, value.UndefinedValue)
 	require.Error(t, err)
 	o = value.NewArrayIterator(nil)
@@ -684,8 +684,8 @@ func TestInt_BinaryOp(t *testing.T) {
 	}
 }
 
-func TestMap_Index(t *testing.T) {
-	m := value.NewMap(make(map[string]core.Object), false)
+func TestRecord_Index(t *testing.T) {
+	m := value.NewRecord(make(map[string]core.Object), false)
 	k := value.NewInt(1)
 	v := value.NewString("abcdef")
 	err := m.Assign(k, v)

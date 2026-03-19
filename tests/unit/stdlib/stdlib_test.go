@@ -132,7 +132,7 @@ func (c callres) call(funcName string, args ...any) callres {
 	case *value.BuiltinFunction:
 		res, err := o.Value()(oargs...)
 		return callres{t: c.t, o: res, e: err}
-	case *value.Map:
+	case *value.Record:
 		m, ok := o.Get(funcName)
 		if !ok {
 			return callres{t: c.t, e: fmt.Errorf("function not found: %s", funcName)}
@@ -196,28 +196,24 @@ func object(v any) core.Object {
 		for k, v := range v {
 			objs[k] = object(v)
 		}
-
-		return value.NewMap(objs, false)
+		return value.NewRecord(objs, false)
 	case ARR:
 		var objs []core.Object
 		for _, e := range v {
 			objs = append(objs, object(e))
 		}
-
 		return value.NewArray(objs, false)
 	case IMAP:
 		objs := make(map[string]core.Object)
 		for k, v := range v {
 			objs[k] = object(v)
 		}
-
-		return value.NewMap(objs, true)
+		return value.NewRecord(objs, true)
 	case IARR:
 		var objs []core.Object
 		for _, e := range v {
 			objs = append(objs, object(e))
 		}
-
 		return value.NewArray(objs, true)
 	case time.Time:
 		return value.NewTime(v)
@@ -226,7 +222,6 @@ func object(v any) core.Object {
 		for _, e := range v {
 			objs = append(objs, value.NewInt(int64(e)))
 		}
-
 		return value.NewArray(objs, false)
 	}
 

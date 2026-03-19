@@ -144,7 +144,7 @@ func Encode(o core.Object) ([]byte, error) {
 			}
 		}
 		b = append(b, ']')
-	case *value.Map:
+	case *value.Record:
 		b = append(b, '{')
 		len1 := o.Len() - 1
 		idx := 0

@@ -1,5 +1,5 @@
 is_enumerable := func(x) {
-  return is_array(x) || is_map(x)
+  return is_array(x) || is_record(x)
 }
 
 is_array_like := func(x) {

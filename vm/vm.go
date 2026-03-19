@@ -318,7 +318,7 @@ func (v *VM) run() {
 			v.stack[v.sp] = arr
 			v.sp++
 
-		case parser.OpMap:
+		case parser.OpRecord:
 			v.ip += 2
 			numElements := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
 			kv := make(map[string]core.Object, numElements)
@@ -329,7 +329,7 @@ func (v *VM) run() {
 			}
 			v.sp -= numElements
 
-			var m core.Object = value.NewMap(kv, false)
+			var m core.Object = value.NewRecord(kv, false)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = core.ErrObjectAllocLimit
@@ -359,8 +359,8 @@ func (v *VM) run() {
 					return
 				}
 				v.stack[v.sp-1] = immutableArray
-			case *value.Map:
-				var immutableMap core.Object = value.NewMap(val.Value(), true)
+			case *value.Record:
+				var immutableMap core.Object = value.NewRecord(val.Value(), true)
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit

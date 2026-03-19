@@ -353,7 +353,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		}
 		c.emit(node, parser.OpArray, len(node.Elements))
 
-	case *parser.MapLit:
+	case *parser.RecordLit:
 		for _, elt := range node.Elements {
 			// key
 			if len(elt.Key) > core.MaxStringLen {
@@ -367,7 +367,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 				return err
 			}
 		}
-		c.emit(node, parser.OpMap, len(node.Elements)*2)
+		c.emit(node, parser.OpRecord, len(node.Elements)*2)
 
 	case *parser.SelectorExpr: // selector on RHS side
 		if err := c.Compile(node.Expr); err != nil {

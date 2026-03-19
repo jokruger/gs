@@ -337,7 +337,7 @@ func TestCompiler_Compile(t *testing.T) {
 	expectCompile(t, `{}`,
 		bytecode(
 			concatInsts(
-				vm.MakeInstruction(parser.OpMap, 0),
+				vm.MakeInstruction(parser.OpRecord, 0),
 				vm.MakeInstruction(parser.OpPop),
 				vm.MakeInstruction(parser.OpSuspend)),
 			objectsArray()))
@@ -351,7 +351,7 @@ func TestCompiler_Compile(t *testing.T) {
 				vm.MakeInstruction(parser.OpConstant, 3),
 				vm.MakeInstruction(parser.OpConstant, 4),
 				vm.MakeInstruction(parser.OpConstant, 5),
-				vm.MakeInstruction(parser.OpMap, 6),
+				vm.MakeInstruction(parser.OpRecord, 6),
 				vm.MakeInstruction(parser.OpPop),
 				vm.MakeInstruction(parser.OpSuspend)),
 			objectsArray(
@@ -373,7 +373,7 @@ func TestCompiler_Compile(t *testing.T) {
 				vm.MakeInstruction(parser.OpConstant, 4),
 				vm.MakeInstruction(parser.OpConstant, 5),
 				vm.MakeInstruction(parser.OpBinaryOp, 13),
-				vm.MakeInstruction(parser.OpMap, 4),
+				vm.MakeInstruction(parser.OpRecord, 4),
 				vm.MakeInstruction(parser.OpPop),
 				vm.MakeInstruction(parser.OpSuspend)),
 			objectsArray(
@@ -407,7 +407,7 @@ func TestCompiler_Compile(t *testing.T) {
 			concatInsts(
 				vm.MakeInstruction(parser.OpConstant, 0),
 				vm.MakeInstruction(parser.OpConstant, 1),
-				vm.MakeInstruction(parser.OpMap, 2),
+				vm.MakeInstruction(parser.OpRecord, 2),
 				vm.MakeInstruction(parser.OpConstant, 1),
 				vm.MakeInstruction(parser.OpConstant, 2),
 				vm.MakeInstruction(parser.OpBinaryOp, 12),
@@ -950,7 +950,7 @@ func() {
 	expectCompile(t, `m := {}; for k, v in m {}`,
 		bytecode(
 			concatInsts(
-				vm.MakeInstruction(parser.OpMap, 0),
+				vm.MakeInstruction(parser.OpRecord, 0),
 				vm.MakeInstruction(parser.OpSetGlobal, 0),
 				vm.MakeInstruction(parser.OpGetGlobal, 0),
 				vm.MakeInstruction(parser.OpIteratorInit),

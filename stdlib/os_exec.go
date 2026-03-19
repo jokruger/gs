@@ -7,7 +7,7 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-func makeOSExecCommand(cmd *exec.Cmd) *value.Map {
+func makeOSExecCommand(cmd *exec.Cmd) *value.Record {
 	cmdRun := func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, core.WrongNumArguments("os.exec.run", "0", len(args))
@@ -108,7 +108,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *value.Map {
 		return makeOSProcess(cmd.Process), nil
 	}
 
-	return value.NewMap(map[string]core.Object{
+	return value.NewRecord(map[string]core.Object{
 		"combined_output": value.NewBuiltinFunction("combined_output", cmdCombinedOutput, 0, false), // combined_output() => bytes/error
 		"output":          value.NewBuiltinFunction("output", cmdOutput, 0, false),                  // output() => bytes/error
 		"run":             value.NewBuiltinFunction("run", cmdRun, 0, false),                        // run() => error

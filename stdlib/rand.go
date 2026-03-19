@@ -116,7 +116,7 @@ func randInt63(args ...core.Object) (ret core.Object, err error) {
 	return value.NewInt(rand.Int63()), nil
 }
 
-func randRand(r *rand.Rand) *value.Map {
+func randRand(r *rand.Rand) *value.Record {
 	rInt63 := func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, core.WrongNumArguments("rand.rand.int", "0", len(args))
@@ -202,7 +202,7 @@ func randRand(r *rand.Rand) *value.Map {
 		return value.NewArray(arr, false), nil
 	}
 
-	return value.NewMap(map[string]core.Object{
+	return value.NewRecord(map[string]core.Object{
 		"int":        value.NewBuiltinFunction("int", rInt63, 0, false),
 		"float":      value.NewBuiltinFunction("float", rFloat64, 0, false),
 		"intn":       value.NewBuiltinFunction("intn", rInt63n, 1, false),

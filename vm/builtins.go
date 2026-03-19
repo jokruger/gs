@@ -27,7 +27,7 @@ var BuiltinFuncs = map[int]*value.BuiltinFunction{
 	17: value.NewBuiltinFunction("is_bytes", builtinIsBytes, 1, false),
 	23: value.NewBuiltinFunction("is_time", builtinIsTime, 1, false),
 	18: value.NewBuiltinFunction("is_array", builtinIsArray, 1, false),
-	20: value.NewBuiltinFunction("is_map", builtinIsMap, 1, false),
+	20: value.NewBuiltinFunction("is_record", builtinIsRecord, 1, false),
 
 	24: value.NewBuiltinFunction("is_error", builtinIsError, 1, false),
 	25: value.NewBuiltinFunction("is_undefined", builtinIsUndefined, 1, false),
@@ -123,11 +123,11 @@ func builtinIsArray(args ...core.Object) (core.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsMap(args ...core.Object) (core.Object, error) {
+func builtinIsRecord(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
-		return nil, core.WrongNumArguments("is_map", "1", len(args))
+		return nil, core.WrongNumArguments("is_record", "1", len(args))
 	}
-	if _, ok := args[0].(*value.Map); ok {
+	if _, ok := args[0].(*value.Record); ok {
 		return value.TrueValue, nil
 	}
 	return value.FalseValue, nil
@@ -216,7 +216,7 @@ func builtinLen(args ...core.Object) (core.Object, error) {
 		return value.NewInt(int64(arg.Len())), nil
 	case *value.Bytes:
 		return value.NewInt(int64(arg.Len())), nil
-	case *value.Map:
+	case *value.Record:
 		return value.NewInt(int64(arg.Len())), nil
 	default:
 		return nil, core.InvalidArgumentType("len", "first", "array/string/bytes/map", arg)
@@ -466,9 +466,9 @@ func builtinDelete(args ...core.Object) (core.Object, error) {
 		return nil, core.WrongNumArguments("delete", "2", argsLen)
 	}
 	switch arg := args[0].(type) {
-	case *value.Map:
+	case *value.Record:
 		if arg.IsImmutable() {
-			return nil, core.InvalidArgumentType("delete", "first", "mutable map", arg)
+			return nil, core.InvalidArgumentType("delete", "first", "mutable record", arg)
 		}
 		if key, ok := args[1].AsString(); ok {
 			arg.Delete(key)
@@ -476,7 +476,7 @@ func builtinDelete(args ...core.Object) (core.Object, error) {
 		}
 		return nil, core.InvalidArgumentType("delete", "second", "string", args[1])
 	default:
-		return nil, core.InvalidArgumentType("delete", "first", "map", arg)
+		return nil, core.InvalidArgumentType("delete", "first", "record", arg)
 	}
 }
 

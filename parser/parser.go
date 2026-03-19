@@ -451,8 +451,8 @@ func (p *Parser) parseOperand() Expr {
 		}
 	case token.LBrack: // array literal
 		return p.parseArrayLit()
-	case token.LBrace: // map literal
-		return p.parseMapLit()
+	case token.LBrace: // record literal
+		return p.parseRecordLit()
 	case token.Func: // function literal
 		return p.parseFuncLit()
 	case token.Error: // error expression
@@ -1034,9 +1034,9 @@ func (p *Parser) parseExprList() (list []Expr) {
 	return
 }
 
-func (p *Parser) parseMapElementLit() *MapElementLit {
+func (p *Parser) parseRecordElementLit() *RecordElementLit {
 	if p.trace {
-		defer untracep(tracep(p, "MapElementLit"))
+		defer untracep(tracep(p, "RecordElementLit"))
 	}
 
 	pos := p.pos
@@ -1047,12 +1047,12 @@ func (p *Parser) parseMapElementLit() *MapElementLit {
 		v, _ := strconv.Unquote(p.tokenLit)
 		name = v
 	} else {
-		p.errorExpected(pos, "map key")
+		p.errorExpected(pos, "record key")
 	}
 	p.next()
 	colonPos := p.expect(token.Colon)
 	valueExpr := p.parseExpr()
-	return &MapElementLit{
+	return &RecordElementLit{
 		Key:      name,
 		KeyPos:   pos,
 		ColonPos: colonPos,
@@ -1060,26 +1060,26 @@ func (p *Parser) parseMapElementLit() *MapElementLit {
 	}
 }
 
-func (p *Parser) parseMapLit() *MapLit {
+func (p *Parser) parseRecordLit() *RecordLit {
 	if p.trace {
-		defer untracep(tracep(p, "MapLit"))
+		defer untracep(tracep(p, "RecordLit"))
 	}
 
 	lbrace := p.expect(token.LBrace)
 	p.exprLevel++
 
-	var elements []*MapElementLit
+	var elements []*RecordElementLit
 	for p.token != token.RBrace && p.token != token.EOF {
-		elements = append(elements, p.parseMapElementLit())
+		elements = append(elements, p.parseRecordElementLit())
 
-		if !p.expectComma(token.RBrace, "map element") {
+		if !p.expectComma(token.RBrace, "record element") {
 			break
 		}
 	}
 
 	p.exprLevel--
 	rbrace := p.expect(token.RBrace)
-	return &MapLit{
+	return &RecordLit{
 		LBrace:   lbrace,
 		RBrace:   rbrace,
 		Elements: elements,

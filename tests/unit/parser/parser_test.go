@@ -1908,22 +1908,14 @@ func arrayLit(lbracket, rbracket core.Pos, list ...Expr) *ArrayLit {
 	return &ArrayLit{LBrack: lbracket, RBrack: rbracket, Elements: list}
 }
 
-func mapElementLit(
-	key string,
-	keyPos core.Pos,
-	colonPos core.Pos,
-	value Expr,
-) *MapElementLit {
-	return &MapElementLit{
+func mapElementLit(key string, keyPos core.Pos, colonPos core.Pos, value Expr) *RecordElementLit {
+	return &RecordElementLit{
 		Key: key, KeyPos: keyPos, ColonPos: colonPos, Value: value,
 	}
 }
 
-func mapLit(
-	lbrace, rbrace core.Pos,
-	list ...*MapElementLit,
-) *MapLit {
-	return &MapLit{LBrace: lbrace, RBrace: rbrace, Elements: list}
+func mapLit(lbrace, rbrace core.Pos, list ...*RecordElementLit) *RecordLit {
+	return &RecordLit{LBrace: lbrace, RBrace: rbrace, Elements: list}
 }
 
 func funcLit(funcType *FuncType, body *BlockStmt) *FuncLit {
@@ -2100,13 +2092,13 @@ func equalExpr(t *testing.T, expected, actual Expr) {
 			actual.(*ArrayLit).RBrack)
 		equalExprs(t, expected.Elements,
 			actual.(*ArrayLit).Elements)
-	case *MapLit:
+	case *RecordLit:
 		require.Equal(t, expected.LBrace,
-			actual.(*MapLit).LBrace)
+			actual.(*RecordLit).LBrace)
 		require.Equal(t, expected.RBrace,
-			actual.(*MapLit).RBrace)
+			actual.(*RecordLit).RBrace)
 		equalMapElements(t, expected.Elements,
-			actual.(*MapLit).Elements)
+			actual.(*RecordLit).Elements)
 	case *BinaryExpr:
 		equalExpr(t, expected.LHS,
 			actual.(*BinaryExpr).LHS)
@@ -2230,7 +2222,7 @@ func equalStmts(t *testing.T, expected, actual []Stmt) {
 
 func equalMapElements(
 	t *testing.T,
-	expected, actual []*MapElementLit,
+	expected, actual []*RecordElementLit,
 ) {
 	require.Equal(t, len(expected), len(actual))
 	for i := 0; i < len(expected); i++ {

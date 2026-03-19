@@ -34,7 +34,7 @@ func FromInterface(v any) (core.Object, error) {
 	case error:
 		return value.NewError(value.NewString(v.Error())), nil
 	case map[string]core.Object:
-		return value.NewMap(v, false), nil
+		return value.NewRecord(v, false), nil
 	case map[string]any:
 		kv := make(map[string]core.Object)
 		for vk, vv := range v {
@@ -44,7 +44,7 @@ func FromInterface(v any) (core.Object, error) {
 			}
 			kv[vk] = vo
 		}
-		return value.NewMap(kv, false), nil
+		return value.NewRecord(kv, false), nil
 	case []core.Object:
 		return value.NewArray(v, false), nil
 	case []any:

@@ -9,17 +9,17 @@ type Module struct {
 	Attrs map[string]core.Object
 }
 
-// Import returns an immutable map for the module.
+// Import returns an immutable record for the module.
 func (m *Module) Import(moduleName string) (any, error) {
-	return m.AsImmutableMap(moduleName), nil
+	return m.AsImmutableRecord(moduleName), nil
 }
 
-// AsImmutableMap converts builtin module into an immutable map.
-func (m *Module) AsImmutableMap(moduleName string) *value.Map {
+// AsImmutableRecord converts builtin module into an immutable record.
+func (m *Module) AsImmutableRecord(moduleName string) *value.Record {
 	attrs := make(map[string]core.Object, len(m.Attrs))
 	for k, v := range m.Attrs {
 		attrs[k] = v.Copy()
 	}
 	attrs["__module_name__"] = value.NewString(moduleName)
-	return value.NewMap(attrs, true)
+	return value.NewRecord(attrs, true)
 }

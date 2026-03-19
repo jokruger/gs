@@ -8,7 +8,7 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-func makeOSProcessState(state *os.ProcessState) *value.Map {
+func makeOSProcessState(state *os.ProcessState) *value.Record {
 	statePid := func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, core.WrongNumArguments("os.state.pid", "0", len(args))
@@ -47,7 +47,7 @@ func makeOSProcessState(state *os.ProcessState) *value.Map {
 		return value.NewString(s), nil
 	}
 
-	return value.NewMap(map[string]core.Object{
+	return value.NewRecord(map[string]core.Object{
 		"exited":  value.NewBuiltinFunction("exited", stateExited, 0, false),
 		"pid":     value.NewBuiltinFunction("pid", statePid, 0, false),
 		"string":  value.NewBuiltinFunction("string", stateString, 0, false),
@@ -55,7 +55,7 @@ func makeOSProcessState(state *os.ProcessState) *value.Map {
 	}, true)
 }
 
-func makeOSProcess(proc *os.Process) *value.Map {
+func makeOSProcess(proc *os.Process) *value.Record {
 	procKill := func(args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, core.WrongNumArguments("os.process.kill", "0", len(args))
@@ -92,7 +92,7 @@ func makeOSProcess(proc *os.Process) *value.Map {
 		return makeOSProcessState(state), nil
 	}
 
-	return value.NewMap(map[string]core.Object{
+	return value.NewRecord(map[string]core.Object{
 		"kill":    value.NewBuiltinFunction("kill", procKill, 0, false),
 		"release": value.NewBuiltinFunction("release", procRelease, 0, false),
 		"signal":  value.NewBuiltinFunction("signal", procSignal, 1, false),

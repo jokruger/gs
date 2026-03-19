@@ -3717,7 +3717,7 @@ func traceCompileRun(
 		valueCopy := value
 		globals[sym.Index] = valueCopy
 	}
-	for idx, fn := range vm.GetAllBuiltinFunctions() {
+	for idx, fn := range vm.BuiltinFuncs {
 		symTable.DefineBuiltin(idx, fn.Name())
 	}
 

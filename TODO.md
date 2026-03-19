@@ -1,7 +1,3 @@
-- hardcode builtin function indexes so we can add new functions, change their order in source code without breaking compatibility
-
-- remove is_immutable_array, is_immutable_map
-- add is_immutable
 - return IsImmutable = true for basic types (int, string, bool, time, etc)
 
 - rename Map to Record

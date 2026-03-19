@@ -1,9 +1,9 @@
 is_enumerable := func(x) {
-  return is_array(x) || is_map(x) || is_immutable_array(x) || is_immutable_map(x)
+  return is_array(x) || is_map(x)
 }
 
 is_array_like := func(x) {
-  return is_array(x) || is_immutable_array(x)
+  return is_array(x)
 }
 
 export {

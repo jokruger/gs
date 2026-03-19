@@ -155,7 +155,7 @@ func RunREPL(modules *vm.ModuleMap, in io.Reader, out io.Writer) {
 	fileSet := parser.NewFileSet()
 	globals := make([]core.Object, vm.GlobalsSize)
 	symbolTable := vm.NewSymbolTable()
-	for idx, fn := range vm.GetAllBuiltinFunctions() {
+	for idx, fn := range vm.BuiltinFuncs {
 		symbolTable.DefineBuiltin(idx, fn.Name())
 	}
 

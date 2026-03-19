@@ -8,43 +8,42 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-var BuiltinFuncs = []*value.BuiltinFunction{
-	value.NewBuiltinFunction("len", builtinLen, 1, false),
-	value.NewBuiltinFunction("copy", builtinCopy, 1, false),
-	value.NewBuiltinFunction("append", builtinAppend, 2, true),
-	value.NewBuiltinFunction("delete", builtinDelete, 2, false),
-	value.NewBuiltinFunction("splice", builtinSplice, 1, true),
-	value.NewBuiltinFunction("string", builtinString, 1, true),
-	value.NewBuiltinFunction("int", builtinInt, 1, true),
-	value.NewBuiltinFunction("bool", builtinBool, 1, true),
-	value.NewBuiltinFunction("float", builtinFloat, 1, true),
-	value.NewBuiltinFunction("char", builtinChar, 1, true),
-	value.NewBuiltinFunction("bytes", builtinBytes, 1, true),
-	value.NewBuiltinFunction("time", builtinTime, 1, true),
-	value.NewBuiltinFunction("is_int", builtinIsInt, 1, false),
-	value.NewBuiltinFunction("is_float", builtinIsFloat, 1, false),
-	value.NewBuiltinFunction("is_string", builtinIsString, 1, false),
-	value.NewBuiltinFunction("is_bool", builtinIsBool, 1, false),
-	value.NewBuiltinFunction("is_char", builtinIsChar, 1, false),
-	value.NewBuiltinFunction("is_bytes", builtinIsBytes, 1, false),
-	value.NewBuiltinFunction("is_array", builtinIsArray, 1, false),
-	value.NewBuiltinFunction("is_immutable_array", builtinIsImmutableArray, 1, false),
-	value.NewBuiltinFunction("is_map", builtinIsMap, 1, false),
-	value.NewBuiltinFunction("is_immutable_map", builtinIsImmutableMap, 1, false),
-	value.NewBuiltinFunction("is_iterable", builtinIsIterable, 1, false),
-	value.NewBuiltinFunction("is_time", builtinIsTime, 1, false),
-	value.NewBuiltinFunction("is_error", builtinIsError, 1, false),
-	value.NewBuiltinFunction("is_undefined", builtinIsUndefined, 1, false),
-	value.NewBuiltinFunction("is_function", builtinIsFunction, 1, false),
-	value.NewBuiltinFunction("is_callable", builtinIsCallable, 1, false),
-	value.NewBuiltinFunction("type_name", builtinTypeName, 1, false),
-	value.NewBuiltinFunction("format", builtinFormat, 1, true),
-	value.NewBuiltinFunction("range", builtinRange, 2, true),
-}
+// do not change builtin function indexes as it will break compatibility
+// 21, 31..99 are reserved for future builtin functions
+var BuiltinFuncs = map[int]*value.BuiltinFunction{
+	7:  value.NewBuiltinFunction("bool", builtinBool, 1, true),
+	9:  value.NewBuiltinFunction("char", builtinChar, 1, true),
+	6:  value.NewBuiltinFunction("int", builtinInt, 1, true),
+	8:  value.NewBuiltinFunction("float", builtinFloat, 1, true),
+	5:  value.NewBuiltinFunction("string", builtinString, 1, true),
+	10: value.NewBuiltinFunction("bytes", builtinBytes, 1, true),
+	11: value.NewBuiltinFunction("time", builtinTime, 1, true),
 
-// GetAllBuiltinFunctions returns all builtin function objects.
-func GetAllBuiltinFunctions() []*value.BuiltinFunction {
-	return append([]*value.BuiltinFunction{}, BuiltinFuncs...)
+	15: value.NewBuiltinFunction("is_bool", builtinIsBool, 1, false),
+	16: value.NewBuiltinFunction("is_char", builtinIsChar, 1, false),
+	12: value.NewBuiltinFunction("is_int", builtinIsInt, 1, false),
+	13: value.NewBuiltinFunction("is_float", builtinIsFloat, 1, false),
+	14: value.NewBuiltinFunction("is_string", builtinIsString, 1, false),
+	17: value.NewBuiltinFunction("is_bytes", builtinIsBytes, 1, false),
+	23: value.NewBuiltinFunction("is_time", builtinIsTime, 1, false),
+	18: value.NewBuiltinFunction("is_array", builtinIsArray, 1, false),
+	20: value.NewBuiltinFunction("is_map", builtinIsMap, 1, false),
+
+	24: value.NewBuiltinFunction("is_error", builtinIsError, 1, false),
+	25: value.NewBuiltinFunction("is_undefined", builtinIsUndefined, 1, false),
+	26: value.NewBuiltinFunction("is_function", builtinIsFunction, 1, false),
+	27: value.NewBuiltinFunction("is_callable", builtinIsCallable, 1, false),
+	22: value.NewBuiltinFunction("is_iterable", builtinIsIterable, 1, false),
+	19: value.NewBuiltinFunction("is_immutable", builtinIsImmutable, 1, false),
+
+	0:  value.NewBuiltinFunction("len", builtinLen, 1, false),
+	1:  value.NewBuiltinFunction("copy", builtinCopy, 1, false),
+	2:  value.NewBuiltinFunction("append", builtinAppend, 2, true),
+	3:  value.NewBuiltinFunction("delete", builtinDelete, 2, false),
+	4:  value.NewBuiltinFunction("splice", builtinSplice, 1, true),
+	29: value.NewBuiltinFunction("format", builtinFormat, 1, true),
+	30: value.NewBuiltinFunction("range", builtinRange, 2, true),
+	28: value.NewBuiltinFunction("type_name", builtinTypeName, 1, false),
 }
 
 func builtinTypeName(args ...core.Object) (core.Object, error) {
@@ -124,19 +123,6 @@ func builtinIsArray(args ...core.Object) (core.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsImmutableArray(args ...core.Object) (core.Object, error) {
-	if len(args) != 1 {
-		return nil, core.WrongNumArguments("is_immutable_array", "1", len(args))
-	}
-	if !args[0].IsImmutable() {
-		return value.FalseValue, nil
-	}
-	if _, ok := args[0].(*value.Array); ok {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
-}
-
 func builtinIsMap(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.WrongNumArguments("is_map", "1", len(args))
@@ -147,14 +133,11 @@ func builtinIsMap(args ...core.Object) (core.Object, error) {
 	return value.FalseValue, nil
 }
 
-func builtinIsImmutableMap(args ...core.Object) (core.Object, error) {
+func builtinIsImmutable(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
-		return nil, core.WrongNumArguments("is_immutable_map", "1", len(args))
+		return nil, core.WrongNumArguments("is_immutable", "1", len(args))
 	}
-	if !args[0].IsImmutable() {
-		return value.FalseValue, nil
-	}
-	if _, ok := args[0].(*value.Map); ok {
+	if args[0].IsImmutable() {
 		return value.TrueValue, nil
 	}
 	return value.FalseValue, nil

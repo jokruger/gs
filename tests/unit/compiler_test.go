@@ -1412,7 +1412,7 @@ func traceCompile(input string, symbols map[string]core.Object) (res *vm.Bytecod
 	for name := range symbols {
 		symTable.Define(name)
 	}
-	for idx, fn := range vm.GetAllBuiltinFunctions() {
+	for idx, fn := range vm.BuiltinFuncs {
 		symTable.DefineBuiltin(idx, fn.Name())
 	}
 

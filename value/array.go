@@ -254,7 +254,15 @@ func (o *Array) AsRune() (rune, bool) {
 }
 
 func (o *Array) AsByteSlice() ([]byte, bool) {
-	return nil, false
+	bs := make([]byte, len(o.value))
+	for i, e := range o.value {
+		b, ok := e.AsInt()
+		if !ok || b < 0 || b > 255 {
+			return nil, false
+		}
+		bs[i] = byte(b)
+	}
+	return bs, true
 }
 
 func (o *Array) AsTime() (time.Time, bool) {

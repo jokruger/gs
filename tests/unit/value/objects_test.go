@@ -123,9 +123,9 @@ func TestObject_String(t *testing.T) {
 	o = value.UndefinedValue
 	require.Equal(t, "undefined", o.String())
 	o = value.NewBytes(nil)
-	require.Equal(t, "", o.String())
+	require.Equal(t, "bytes([])", o.String())
 	o = value.NewBytes([]byte("foo"))
-	require.Equal(t, "foo", o.String())
+	require.Equal(t, "bytes([102, 111, 111])", o.String())
 }
 
 func TestObject_BinaryOp(t *testing.T) {

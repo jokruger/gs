@@ -493,6 +493,25 @@ func TestTime(t *testing.T) {
 	expectRun(t, fmt.Sprintf(`out = time("2020-06-20 01:02:03.000000004 +0000 UTC") == %s`, o.String()), nil, true)
 }
 
+func TestBytes(t *testing.T) {
+	expectRun(t, `out = bytes("Hello World!")`, nil, []byte("Hello World!"))
+	expectRun(t, `out = bytes("Hello") + bytes(" ") + bytes("World!")`, nil, []byte("Hello World!"))
+
+	// bytes[] -> int
+	expectRun(t, `out = bytes("abcde")[0]`, nil, 97)
+	expectRun(t, `out = bytes("abcde")[1]`, nil, 98)
+	expectRun(t, `out = bytes("abcde")[4]`, nil, 101)
+	expectRun(t, `out = bytes("abcde")[10]`, nil, value.UndefinedValue)
+
+	o := value.NewBytes([]byte("Hello World!"))
+	s, _ := o.AsString()
+	require.Equal(t, "Hello World!", s)
+	require.Equal(t, "bytes([72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 33])", o.String())
+
+	expectRun(t, fmt.Sprintf(`out = bytes([72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 33]) == %s`, o.String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = bytes("hello") == %s`, value.NewBytes([]byte("hello")).String()), nil, true)
+}
+
 func TestAssignment(t *testing.T) {
 	expectRun(t, `a := 1; a = 2; out = a`, nil, 2)
 	expectRun(t, `a := 1; a = 2; out = a`, nil, 2)
@@ -916,7 +935,7 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = bytes(true)`, nil, value.UndefinedValue)
 	expectRun(t, `out = bytes(false)`, nil, value.UndefinedValue)
 	expectRun(t, `out = bytes('8')`, nil, value.UndefinedValue)
-	expectRun(t, `out = bytes([1])`, nil, value.UndefinedValue)
+	expectRun(t, `out = bytes([1])`, nil, value.NewBytes([]byte{1}))
 	expectRun(t, `out = bytes({a: 1})`, nil, value.UndefinedValue)
 	expectRun(t, `out = bytes(undefined)`, nil, value.UndefinedValue)
 	expectRun(t, `out = bytes("-522", ['8'])`, nil, []byte{'-', '5', '2', '2'})
@@ -1098,18 +1117,6 @@ func TestBytesN(t *testing.T) {
 	core.MaxBytesLen = 1000
 	expectRun(t, `out = bytes(1000)`, nil, make([]byte, 1000))
 	expectError(t, `bytes(1001)`, nil, "bytes size limit")
-}
-
-func TestBytes(t *testing.T) {
-	expectRun(t, `out = bytes("Hello World!")`, nil, []byte("Hello World!"))
-	expectRun(t, `out = bytes("Hello") + bytes(" ") + bytes("World!")`,
-		nil, []byte("Hello World!"))
-
-	// bytes[] -> int
-	expectRun(t, `out = bytes("abcde")[0]`, nil, 97)
-	expectRun(t, `out = bytes("abcde")[1]`, nil, 98)
-	expectRun(t, `out = bytes("abcde")[4]`, nil, 101)
-	expectRun(t, `out = bytes("abcde")[10]`, nil, value.UndefinedValue)
 }
 
 func TestCall(t *testing.T) {

@@ -2,6 +2,8 @@ package value
 
 import (
 	"bytes"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jokruger/gs/core"
@@ -81,7 +83,11 @@ func (o *Bytes) TypeName() string {
 }
 
 func (o *Bytes) String() string {
-	return string(o.value)
+	es := make([]string, len(o.value))
+	for i, b := range o.value {
+		es[i] = fmt.Sprintf("%d", b)
+	}
+	return fmt.Sprintf("bytes([%s])", strings.Join(es, ", "))
 }
 
 func (o *Bytes) Interface() any {
@@ -174,7 +180,7 @@ func (o *Bytes) IsVariadic() bool {
 }
 
 func (o *Bytes) AsString() (string, bool) {
-	return o.String(), true
+	return string(o.value), true
 }
 
 func (o *Bytes) AsInt() (int64, bool) {

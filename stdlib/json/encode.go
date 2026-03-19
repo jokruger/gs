@@ -144,6 +144,7 @@ func Encode(o core.Object) ([]byte, error) {
 			}
 		}
 		b = append(b, ']')
+
 	case *value.Record:
 		b = append(b, '{')
 		len1 := o.Len() - 1
@@ -162,12 +163,33 @@ func Encode(o core.Object) ([]byte, error) {
 			idx++
 		}
 		b = append(b, '}')
+
+	case *value.Map:
+		b = append(b, '{')
+		len1 := o.Len() - 1
+		idx := 0
+		for key, value := range o.Value() {
+			b = encodeString(b, key)
+			b = append(b, ':')
+			eb, err := Encode(value)
+			if err != nil {
+				return nil, err
+			}
+			b = append(b, eb...)
+			if idx < len1 {
+				b = append(b, ',')
+			}
+			idx++
+		}
+		b = append(b, '}')
+
 	case *value.Bool:
 		if o.IsFalsy() {
 			b = strconv.AppendBool(b, false)
 		} else {
 			b = strconv.AppendBool(b, true)
 		}
+
 	case *value.Bytes:
 		b = append(b, '"')
 		encodedLen := base64.StdEncoding.EncodedLen(o.Len())
@@ -175,8 +197,10 @@ func Encode(o core.Object) ([]byte, error) {
 		base64.StdEncoding.Encode(dst, o.Value())
 		b = append(b, dst...)
 		b = append(b, '"')
+
 	case *value.Char:
 		b = strconv.AppendInt(b, int64(o.Value()), 10)
+
 	case *value.Float:
 		var y []byte
 
@@ -205,16 +229,20 @@ func Encode(o core.Object) ([]byte, error) {
 		}
 
 		b = append(b, y...)
+
 	case *value.Int:
 		b = strconv.AppendInt(b, o.Value(), 10)
+
 	case *value.String:
 		b = encodeString(b, o.Value())
+
 	case *value.Time:
 		y, err := o.Value().MarshalJSON()
 		if err != nil {
 			return nil, err
 		}
 		b = append(b, y...)
+
 	case *value.Undefined:
 		b = append(b, "null"...)
 	default:

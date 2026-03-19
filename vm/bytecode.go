@@ -109,7 +109,7 @@ func (b *Bytecode) RemoveDuplicates() {
 	strings := make(map[string]int)
 	floats := make(map[float64]int)
 	chars := make(map[rune]int)
-	immutableMaps := make(map[string]int) // for modules
+	immutableRecords := make(map[string]int) // for modules
 
 	for curIdx, c := range b.Constants {
 		switch c := c.(type) {
@@ -122,20 +122,22 @@ func (b *Bytecode) RemoveDuplicates() {
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
+
 		case *value.Record:
 			if !c.IsImmutable() {
 				panic(fmt.Errorf("unsupported top-level constant type: %s", c.TypeName()))
 			}
 			modName := inferModuleName(c)
-			newIdx, ok := immutableMaps[modName]
+			newIdx, ok := immutableRecords[modName]
 			if modName != "" && ok {
 				indexMap[curIdx] = newIdx
 			} else {
 				newIdx = len(deduped)
-				immutableMaps[modName] = newIdx
+				immutableRecords[modName] = newIdx
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
+
 		case *value.Int:
 			if newIdx, ok := ints[c.Value()]; ok {
 				indexMap[curIdx] = newIdx
@@ -145,6 +147,7 @@ func (b *Bytecode) RemoveDuplicates() {
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
+
 		case *value.String:
 			if newIdx, ok := strings[c.Value()]; ok {
 				indexMap[curIdx] = newIdx
@@ -154,6 +157,7 @@ func (b *Bytecode) RemoveDuplicates() {
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
+
 		case *value.Float:
 			if newIdx, ok := floats[c.Value()]; ok {
 				indexMap[curIdx] = newIdx
@@ -163,6 +167,7 @@ func (b *Bytecode) RemoveDuplicates() {
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
+
 		case *value.Char:
 			if newIdx, ok := chars[c.Value()]; ok {
 				indexMap[curIdx] = newIdx
@@ -172,6 +177,7 @@ func (b *Bytecode) RemoveDuplicates() {
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
+
 		default:
 			panic(fmt.Errorf("unsupported top-level constant type: %s", c.TypeName()))
 		}
@@ -199,8 +205,10 @@ func fixDecodedObject(o core.Object, modules *ModuleMap) (core.Object, error) {
 			return value.FalseValue, nil
 		}
 		return value.TrueValue, nil
+
 	case *value.Undefined:
 		return value.UndefinedValue, nil
+
 	case *value.Array:
 		for i, v := range o.Value() {
 			fv, err := fixDecodedObject(v, modules)
@@ -209,6 +217,7 @@ func fixDecodedObject(o core.Object, modules *ModuleMap) (core.Object, error) {
 			}
 			o.SetAt(i, fv)
 		}
+
 	case *value.Record:
 		if o.IsImmutable() {
 			modName := inferModuleName(o)
@@ -236,6 +245,15 @@ func fixDecodedObject(o core.Object, modules *ModuleMap) (core.Object, error) {
 				}
 				o.SetKey(k, fv)
 			}
+		}
+
+	case *value.Map:
+		for k, v := range o.Value() {
+			fv, err := fixDecodedObject(v, modules)
+			if err != nil {
+				return nil, err
+			}
+			o.SetKey(k, fv)
 		}
 	}
 	return o, nil
@@ -286,16 +304,17 @@ func init() {
 	gob.Register(&parser.SourceFile{})
 	gob.Register(&CompiledFunction{})
 
-	gob.Register(&value.Array{})
 	gob.Register(&value.Bool{})
-	gob.Register(&value.Bytes{})
 	gob.Register(&value.Char{})
-	gob.Register(&value.Error{})
-	gob.Register(&value.Float{})
 	gob.Register(&value.Int{})
-	gob.Register(&value.Record{})
+	gob.Register(&value.Float{})
+	gob.Register(&value.Bytes{})
 	gob.Register(&value.String{})
 	gob.Register(&value.Time{})
+	gob.Register(&value.Array{})
+	gob.Register(&value.Record{})
+	gob.Register(&value.Map{})
+	gob.Register(&value.Error{})
 	gob.Register(&value.Undefined{})
 	gob.Register(&value.BuiltinFunction{})
 }

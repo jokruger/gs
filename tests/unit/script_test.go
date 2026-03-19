@@ -179,7 +179,7 @@ a += b * 2
 
 arr := [a, b, c]
 arrstr := string(arr)
-map := {a: a, b: b, c: c}
+map1 := {a: a, b: b, c: c}
 
 d := a + b + c
 s := 0

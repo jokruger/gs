@@ -352,21 +352,29 @@ func (v *VM) run() {
 			val := v.stack[v.sp-1]
 			switch val := val.(type) {
 			case *value.Array:
-				var immutableArray core.Object = value.NewArray(val.Value(), true)
+				var t core.Object = value.NewArray(val.Value(), true)
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
 					return
 				}
-				v.stack[v.sp-1] = immutableArray
+				v.stack[v.sp-1] = t
 			case *value.Record:
-				var immutableMap core.Object = value.NewRecord(val.Value(), true)
+				var t core.Object = value.NewRecord(val.Value(), true)
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
 					return
 				}
-				v.stack[v.sp-1] = immutableMap
+				v.stack[v.sp-1] = t
+			case *value.Map:
+				var t core.Object = value.NewMap(val.Value(), true)
+				v.allocs--
+				if v.allocs == 0 {
+					v.err = core.ErrObjectAllocLimit
+					return
+				}
+				v.stack[v.sp-1] = t
 			}
 
 		case parser.OpIndex, parser.OpSelect:

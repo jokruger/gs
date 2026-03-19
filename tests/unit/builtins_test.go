@@ -100,7 +100,7 @@ func Test_builtinDelete(t *testing.T) {
 			}
 			if tt.wantedErr == "" && tt.target != nil {
 				switch v := tt.args.args[0].(type) {
-				case *value.Record, *value.Array:
+				case *value.Record, *value.Map, *value.Array:
 					if !reflect.DeepEqual(tt.target, tt.args.args[0]) {
 						t.Errorf("builtinDelete() objects are not equal, got: %+v, want: %+v", tt.args.args[0], tt.target)
 					}

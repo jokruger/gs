@@ -11,18 +11,18 @@ import (
 	"github.com/jokruger/gs/token"
 )
 
-type Record struct {
+type Map struct {
 	value     map[string]core.Object
 	immutable bool
 }
 
-func NewRecord(val map[string]core.Object, immutable bool) *Record {
-	o := &Record{}
+func NewMap(val map[string]core.Object, immutable bool) *Map {
+	o := &Map{}
 	o.Set(val, immutable)
 	return o
 }
 
-func (o *Record) GobDecode(b []byte) error {
+func (o *Map) GobDecode(b []byte) error {
 	buf := bytes.NewBuffer(b)
 	dec := gob.NewDecoder(buf)
 
@@ -40,7 +40,7 @@ func (o *Record) GobDecode(b []byte) error {
 	return nil
 }
 
-func (o *Record) GobEncode() ([]byte, error) {
+func (o *Map) GobEncode() ([]byte, error) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 
@@ -54,7 +54,7 @@ func (o *Record) GobEncode() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (o *Record) Set(val map[string]core.Object, immutable bool) {
+func (o *Map) Set(val map[string]core.Object, immutable bool) {
 	o.value = val
 	if o.value == nil {
 		o.value = make(map[string]core.Object)
@@ -63,33 +63,33 @@ func (o *Record) Set(val map[string]core.Object, immutable bool) {
 	o.immutable = immutable
 }
 
-func (o *Record) Value() map[string]core.Object {
+func (o *Map) Value() map[string]core.Object {
 	return o.value
 }
 
-func (o *Record) IsEmpty() bool {
+func (o *Map) IsEmpty() bool {
 	return len(o.value) == 0
 }
 
-func (o *Record) Len() int {
+func (o *Map) Len() int {
 	return len(o.value)
 }
 
-func (o *Record) Delete(key string) {
+func (o *Map) Delete(key string) {
 	delete(o.value, key)
 }
 
-func (o *Record) Has(key string) bool {
+func (o *Map) Has(key string) bool {
 	_, ok := o.value[key]
 	return ok
 }
 
-func (o *Record) Get(key string) (core.Object, bool) {
+func (o *Map) Get(key string) (core.Object, bool) {
 	v, ok := o.value[key]
 	return v, ok
 }
 
-func (o *Record) Keys() []string {
+func (o *Map) Keys() []string {
 	keys := make([]string, 0, len(o.value))
 	for k := range o.value {
 		keys = append(keys, k)
@@ -97,26 +97,26 @@ func (o *Record) Keys() []string {
 	return keys
 }
 
-func (o *Record) SetKey(key string, value core.Object) {
+func (o *Map) SetKey(key string, value core.Object) {
 	o.value[key] = value
 }
 
-func (o *Record) TypeName() string {
+func (o *Map) TypeName() string {
 	if o.immutable {
-		return "immutable-record"
+		return "immutable-map"
 	}
-	return "record"
+	return "map"
 }
 
-func (o *Record) String() string {
+func (o *Map) String() string {
 	var pairs []string
 	for k, v := range o.value {
 		pairs = append(pairs, fmt.Sprintf("%s: %s", k, v.String()))
 	}
-	return fmt.Sprintf("{%s}", strings.Join(pairs, ", "))
+	return fmt.Sprintf("map({%s})", strings.Join(pairs, ", "))
 }
 
-func (o *Record) Interface() any {
+func (o *Map) Interface() any {
 	res := make(map[string]any)
 	for key, v := range o.value {
 		res[key] = v.Interface()
@@ -124,21 +124,21 @@ func (o *Record) Interface() any {
 	return res
 }
 
-func (o *Record) Arity() int {
+func (o *Map) Arity() int {
 	return 0
 }
 
-func (o *Record) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Map) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	return nil, core.InvalidBinaryOperator(op.String(), o, rhs)
 }
 
-func (o *Record) Equals(x core.Object) bool {
+func (o *Map) Equals(x core.Object) bool {
 	if o == x {
 		return true
 	}
 
 	switch x := x.(type) {
-	case *Record:
+	case *Map:
 		if len(o.value) != len(x.value) {
 			return false
 		}
@@ -148,7 +148,7 @@ func (o *Record) Equals(x core.Object) bool {
 			}
 		}
 		return true
-	case *Map:
+	case *Record:
 		if len(o.value) != len(x.value) {
 			return false
 		}
@@ -163,19 +163,19 @@ func (o *Record) Equals(x core.Object) bool {
 	}
 }
 
-func (o *Record) Copy() core.Object {
-	// perform a deep copy of the record even if it is immutable (since the values may be mutable)
+func (o *Map) Copy() core.Object {
+	// perform a deep copy of the map even if it is immutable (since the values may be mutable)
 	c := make(map[string]core.Object, len(o.value))
 	for k, v := range o.value {
 		c[k] = v.Copy()
 	}
-	return NewRecord(c, false) // copy always returns a mutable record
+	return NewMap(c, false) // copy always returns a mutable map
 }
 
-func (o *Record) Access(index core.Object, mode core.Opcode) (core.Object, error) {
+func (o *Map) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return nil, core.InvalidIndexType("record access", "string", index)
+		return nil, core.InvalidIndexType("map access", "string", index)
 	}
 	r, ok := o.value[k]
 	if !ok {
@@ -184,72 +184,72 @@ func (o *Record) Access(index core.Object, mode core.Opcode) (core.Object, error
 	return r, nil
 }
 
-func (o *Record) Assign(index, value core.Object) error {
+func (o *Map) Assign(index, value core.Object) error {
 	if o.immutable {
 		return core.NotAssignable(o)
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return core.InvalidIndexType("record assignment", "string", index)
+		return core.InvalidIndexType("map assignment", "string", index)
 	}
 	o.value[k] = value
 
 	return nil
 }
 
-func (o *Record) Iterate() core.Iterator {
+func (o *Map) Iterate() core.Iterator {
 	return NewMapIterator(o.value)
 }
 
-func (o *Record) Call(core.VM, ...core.Object) (core.Object, error) {
+func (o *Map) Call(core.VM, ...core.Object) (core.Object, error) {
 	return nil, nil
 }
 
-func (o *Record) IsFalsy() bool {
+func (o *Map) IsFalsy() bool {
 	return len(o.value) == 0
 }
 
-func (o *Record) IsIterable() bool {
+func (o *Map) IsIterable() bool {
 	return true
 }
 
-func (o *Record) IsCallable() bool {
+func (o *Map) IsCallable() bool {
 	return false
 }
 
-func (o *Record) IsImmutable() bool {
+func (o *Map) IsImmutable() bool {
 	return o.immutable
 }
 
-func (o *Record) IsVariadic() bool {
+func (o *Map) IsVariadic() bool {
 	return false
 }
 
-func (o *Record) AsString() (string, bool) {
+func (o *Map) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Record) AsInt() (int64, bool) {
+func (o *Map) AsInt() (int64, bool) {
 	return 0, false
 }
 
-func (o *Record) AsFloat() (float64, bool) {
+func (o *Map) AsFloat() (float64, bool) {
 	return 0, false
 }
 
-func (o *Record) AsBool() (bool, bool) {
+func (o *Map) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Record) AsRune() (rune, bool) {
+func (o *Map) AsRune() (rune, bool) {
 	return 0, false
 }
 
-func (o *Record) AsByteSlice() ([]byte, bool) {
+func (o *Map) AsByteSlice() ([]byte, bool) {
 	return nil, false
 }
 
-func (o *Record) AsTime() (time.Time, bool) {
+func (o *Map) AsTime() (time.Time, bool) {
 	return time.Time{}, false
 }

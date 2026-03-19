@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/formatter"
@@ -9,15 +10,16 @@ import (
 )
 
 // do not change builtin function indexes as it will break compatibility
-// 21, 31..99 are reserved for future builtin functions
+// 32..99 are reserved for future builtin functions
 var BuiltinFuncs = map[int]*value.BuiltinFunction{
-	7:  value.NewBuiltinFunction("bool", builtinBool, 1, true),
-	9:  value.NewBuiltinFunction("char", builtinChar, 1, true),
-	6:  value.NewBuiltinFunction("int", builtinInt, 1, true),
-	8:  value.NewBuiltinFunction("float", builtinFloat, 1, true),
-	5:  value.NewBuiltinFunction("string", builtinString, 1, true),
-	10: value.NewBuiltinFunction("bytes", builtinBytes, 1, true),
-	11: value.NewBuiltinFunction("time", builtinTime, 1, true),
+	7:  value.NewBuiltinFunction("bool", builtinBool, 0, true),
+	9:  value.NewBuiltinFunction("char", builtinChar, 0, true),
+	6:  value.NewBuiltinFunction("int", builtinInt, 0, true),
+	8:  value.NewBuiltinFunction("float", builtinFloat, 0, true),
+	5:  value.NewBuiltinFunction("string", builtinString, 0, true),
+	10: value.NewBuiltinFunction("bytes", builtinBytes, 0, true),
+	11: value.NewBuiltinFunction("time", builtinTime, 0, true),
+	21: value.NewBuiltinFunction("map", builtinMap, 0, true),
 
 	15: value.NewBuiltinFunction("is_bool", builtinIsBool, 1, false),
 	16: value.NewBuiltinFunction("is_char", builtinIsChar, 1, false),
@@ -28,6 +30,7 @@ var BuiltinFuncs = map[int]*value.BuiltinFunction{
 	23: value.NewBuiltinFunction("is_time", builtinIsTime, 1, false),
 	18: value.NewBuiltinFunction("is_array", builtinIsArray, 1, false),
 	20: value.NewBuiltinFunction("is_record", builtinIsRecord, 1, false),
+	31: value.NewBuiltinFunction("is_map", builtinIsMap, 1, false),
 
 	24: value.NewBuiltinFunction("is_error", builtinIsError, 1, false),
 	25: value.NewBuiltinFunction("is_undefined", builtinIsUndefined, 1, false),
@@ -133,6 +136,16 @@ func builtinIsRecord(args ...core.Object) (core.Object, error) {
 	return value.FalseValue, nil
 }
 
+func builtinIsMap(args ...core.Object) (core.Object, error) {
+	if len(args) != 1 {
+		return nil, core.WrongNumArguments("is_map", "1", len(args))
+	}
+	if _, ok := args[0].(*value.Map); ok {
+		return value.TrueValue, nil
+	}
+	return value.FalseValue, nil
+}
+
 func builtinIsImmutable(args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.WrongNumArguments("is_immutable", "1", len(args))
@@ -218,8 +231,10 @@ func builtinLen(args ...core.Object) (core.Object, error) {
 		return value.NewInt(int64(arg.Len())), nil
 	case *value.Record:
 		return value.NewInt(int64(arg.Len())), nil
+	case *value.Map:
+		return value.NewInt(int64(arg.Len())), nil
 	default:
-		return nil, core.InvalidArgumentType("len", "first", "array/string/bytes/map", arg)
+		return nil, core.InvalidArgumentType("len", "first", "record/map/array/string/bytes", arg)
 	}
 }
 
@@ -309,13 +324,18 @@ func builtinCopy(args ...core.Object) (core.Object, error) {
 }
 
 func builtinString(args ...core.Object) (core.Object, error) {
-	argsLen := len(args)
-	if !(argsLen == 1 || argsLen == 2) {
-		return nil, core.WrongNumArguments("string", "1 or 2", argsLen)
+	if len(args) == 0 {
+		return value.NewString(""), nil
 	}
+
+	if len(args) != 1 && len(args) != 2 {
+		return nil, core.WrongNumArguments("string", "0, 1 or 2", len(args))
+	}
+
 	if _, ok := args[0].(*value.String); ok {
 		return args[0], nil
 	}
+
 	v, ok := args[0].AsString()
 	if ok {
 		if len(v) > core.MaxStringLen {
@@ -323,55 +343,74 @@ func builtinString(args ...core.Object) (core.Object, error) {
 		}
 		return value.NewString(v), nil
 	}
-	if argsLen == 2 {
+
+	if len(args) == 2 {
 		return args[1], nil
 	}
 	return value.UndefinedValue, nil
 }
 
 func builtinInt(args ...core.Object) (core.Object, error) {
-	argsLen := len(args)
-	if !(argsLen == 1 || argsLen == 2) {
-		return nil, core.WrongNumArguments("int", "1 or 2", argsLen)
+	if len(args) == 0 {
+		return value.NewInt(0), nil
 	}
+
+	if len(args) != 1 && len(args) != 2 {
+		return nil, core.WrongNumArguments("int", "0, 1 or 2", len(args))
+	}
+
 	if _, ok := args[0].(*value.Int); ok {
 		return args[0], nil
 	}
+
 	v, ok := args[0].AsInt()
 	if ok {
 		return value.NewInt(v), nil
 	}
-	if argsLen == 2 {
+
+	if len(args) == 2 {
 		return args[1], nil
 	}
 	return value.UndefinedValue, nil
 }
 
 func builtinFloat(args ...core.Object) (core.Object, error) {
-	argsLen := len(args)
-	if !(argsLen == 1 || argsLen == 2) {
-		return nil, core.WrongNumArguments("float", "1 or 2", argsLen)
+	if len(args) == 0 {
+		return value.NewFloat(0), nil
 	}
+
+	if len(args) != 1 && len(args) != 2 {
+		return nil, core.WrongNumArguments("float", "0, 1 or 2", len(args))
+	}
+
 	if _, ok := args[0].(*value.Float); ok {
 		return args[0], nil
 	}
+
 	v, ok := args[0].AsFloat()
 	if ok {
 		return value.NewFloat(v), nil
 	}
-	if argsLen == 2 {
+
+	if len(args) == 2 {
 		return args[1], nil
 	}
 	return value.UndefinedValue, nil
 }
 
 func builtinBool(args ...core.Object) (core.Object, error) {
-	if len(args) != 1 {
-		return nil, core.WrongNumArguments("bool", "1", len(args))
+	if len(args) == 0 {
+		return value.FalseValue, nil
 	}
+
+	if len(args) != 1 {
+		return nil, core.WrongNumArguments("bool", "0 or 1", len(args))
+	}
+
 	if _, ok := args[0].(*value.Bool); ok {
 		return args[0], nil
 	}
+
 	v, ok := args[0].AsBool()
 	if ok {
 		if v {
@@ -383,27 +422,40 @@ func builtinBool(args ...core.Object) (core.Object, error) {
 }
 
 func builtinChar(args ...core.Object) (core.Object, error) {
-	argsLen := len(args)
-	if !(argsLen == 1 || argsLen == 2) {
-		return nil, core.WrongNumArguments("char", "1 or 2", argsLen)
+	if len(args) == 0 {
+		return value.NewChar(0), nil
 	}
+
+	if len(args) != 1 && len(args) != 2 {
+		return nil, core.WrongNumArguments("char", "0, 1 or 2", len(args))
+	}
+
 	if _, ok := args[0].(*value.Char); ok {
 		return args[0], nil
 	}
+
 	v, ok := args[0].AsRune()
 	if ok {
 		return value.NewChar(v), nil
 	}
-	if argsLen == 2 {
+
+	if len(args) == 2 {
 		return args[1], nil
 	}
 	return value.UndefinedValue, nil
 }
 
 func builtinBytes(args ...core.Object) (core.Object, error) {
-	argsLen := len(args)
-	if !(argsLen == 1 || argsLen == 2) {
-		return nil, core.WrongNumArguments("bytes", "1 or 2", argsLen)
+	if len(args) == 0 {
+		return value.NewBytes([]byte{}), nil
+	}
+
+	if len(args) != 1 && len(args) != 2 {
+		return nil, core.WrongNumArguments("bytes", "0, 1 or 2", len(args))
+	}
+
+	if _, ok := args[0].(*value.Bytes); ok {
+		return args[0], nil
 	}
 
 	// bytes(N) => create a new bytes with given size N
@@ -413,6 +465,7 @@ func builtinBytes(args ...core.Object) (core.Object, error) {
 		}
 		return value.NewBytes(make([]byte, int(n.Value()))), nil
 	}
+
 	v, ok := args[0].AsByteSlice()
 	if ok {
 		if len(v) > core.MaxBytesLen {
@@ -420,28 +473,62 @@ func builtinBytes(args ...core.Object) (core.Object, error) {
 		}
 		return value.NewBytes(v), nil
 	}
-	if argsLen == 2 {
+
+	if len(args) == 2 {
 		return args[1], nil
 	}
 	return value.UndefinedValue, nil
 }
 
 func builtinTime(args ...core.Object) (core.Object, error) {
-	argsLen := len(args)
-	if !(argsLen == 1 || argsLen == 2) {
-		return nil, core.WrongNumArguments("time", "1 or 2", argsLen)
+	if len(args) == 0 {
+		return value.NewTime(time.Time{}), nil
 	}
+
+	if len(args) != 1 && len(args) != 2 {
+		return nil, core.WrongNumArguments("time", "0, 1 or 2", len(args))
+	}
+
 	if _, ok := args[0].(*value.Time); ok {
 		return args[0], nil
 	}
+
 	v, ok := args[0].AsTime()
 	if ok {
 		return value.NewTime(v), nil
 	}
-	if argsLen == 2 {
+
+	if len(args) == 2 {
 		return args[1], nil
 	}
 	return value.UndefinedValue, nil
+}
+
+func builtinMap(args ...core.Object) (core.Object, error) {
+	if len(args) == 0 {
+		return value.NewMap(nil, false), nil
+	}
+
+	if len(args) != 1 {
+		return nil, core.WrongNumArguments("map", "0 or 1", len(args))
+	}
+
+	switch arg := args[0].(type) {
+	case *value.Map:
+		v := make(map[string]core.Object, arg.Len())
+		for k, o := range arg.Value() {
+			v[k] = o.Copy()
+		}
+		return value.NewMap(v, false), nil
+	case *value.Record:
+		v := make(map[string]core.Object, arg.Len())
+		for k, o := range arg.Value() {
+			v[k] = o.Copy()
+		}
+		return value.NewMap(v, false), nil
+	default:
+		return nil, core.InvalidArgumentType("map", "first", "map or record", arg)
+	}
 }
 
 // append(arr, items...)
@@ -467,6 +554,15 @@ func builtinDelete(args ...core.Object) (core.Object, error) {
 	}
 	switch arg := args[0].(type) {
 	case *value.Record:
+		if arg.IsImmutable() {
+			return nil, core.InvalidArgumentType("delete", "first", "mutable record", arg)
+		}
+		if key, ok := args[1].AsString(); ok {
+			arg.Delete(key)
+			return value.UndefinedValue, nil
+		}
+		return nil, core.InvalidArgumentType("delete", "second", "string", args[1])
+	case *value.Map:
 		if arg.IsImmutable() {
 			return nil, core.InvalidArgumentType("delete", "first", "mutable record", arg)
 		}

@@ -129,9 +129,11 @@ func (c callres) call(funcName string, args ...any) callres {
 
 		res, err := f.Value()(oargs...)
 		return callres{t: c.t, o: res, e: err}
+
 	case *value.BuiltinFunction:
 		res, err := o.Value()(oargs...)
 		return callres{t: c.t, o: res, e: err}
+
 	case *value.Record:
 		m, ok := o.Get(funcName)
 		if !ok {

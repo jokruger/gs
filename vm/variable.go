@@ -84,6 +84,12 @@ func (v *Variable) Map() map[string]any {
 			kv[mk] = mv.Interface()
 		}
 		return kv
+	case *value.Map:
+		kv := make(map[string]any)
+		for mk, mv := range val.Value() {
+			kv[mk] = mv.Interface()
+		}
+		return kv
 	}
 	return nil
 }

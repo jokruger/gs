@@ -18,6 +18,10 @@ func CountObjects(o core.Object) (c int) {
 		for _, v := range o.Value() {
 			c += CountObjects(v)
 		}
+	case *value.Map:
+		for _, v := range o.Value() {
+			c += CountObjects(v)
+		}
 	case *value.Error:
 		c += CountObjects(o.Value())
 	}

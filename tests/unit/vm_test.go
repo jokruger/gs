@@ -111,86 +111,62 @@ func TestArray(t *testing.T) {
 	expectRun(t, `out = [1, 2 * 2, 3 + 3]`, nil, ARR{1, 4, 6})
 
 	// array copy-by-reference
-	expectRun(t, `a1 := [1, 2, 3]; a2 := a1; a1[0] = 5; out = a2`,
-		nil, ARR{5, 2, 3})
-	expectRun(t, `func () { a1 := [1, 2, 3]; a2 := a1; a1[0] = 5; out = a2 }()`,
-		nil, ARR{5, 2, 3})
+	expectRun(t, `a1 := [1, 2, 3]; a2 := a1; a1[0] = 5; out = a2`, nil, ARR{5, 2, 3})
+	expectRun(t, `func () { a1 := [1, 2, 3]; a2 := a1; a1[0] = 5; out = a2 }()`, nil, ARR{5, 2, 3})
 
 	// array index set
-	expectError(t, `a1 := [1, 2, 3]; a1[3] = 5`,
-		nil, "index out of bounds")
+	expectError(t, `a1 := [1, 2, 3]; a1[3] = 5`, nil, "index out of bounds")
 
 	// index operator
 	arr := ARR{1, 2, 3, 4, 5, 6}
 	arrStr := `[1, 2, 3, 4, 5, 6]`
 	arrLen := 6
 	for idx := 0; idx < arrLen; idx++ {
-		expectRun(t, fmt.Sprintf("out = %s[%d]", arrStr, idx),
-			nil, arr[idx])
-		expectRun(t, fmt.Sprintf("out = %s[0 + %d]", arrStr, idx),
-			nil, arr[idx])
-		expectRun(t, fmt.Sprintf("out = %s[1 + %d - 1]", arrStr, idx),
-			nil, arr[idx])
-		expectRun(t, fmt.Sprintf("idx := %d; out = %s[idx]", idx, arrStr),
-			nil, arr[idx])
+		expectRun(t, fmt.Sprintf("out = %s[%d]", arrStr, idx), nil, arr[idx])
+		expectRun(t, fmt.Sprintf("out = %s[0 + %d]", arrStr, idx), nil, arr[idx])
+		expectRun(t, fmt.Sprintf("out = %s[1 + %d - 1]", arrStr, idx), nil, arr[idx])
+		expectRun(t, fmt.Sprintf("idx := %d; out = %s[idx]", idx, arrStr), nil, arr[idx])
 	}
 
-	expectRun(t, fmt.Sprintf("%s[%d]", arrStr, -1),
-		nil, value.UndefinedValue)
-	expectRun(t, fmt.Sprintf("%s[%d]", arrStr, arrLen),
-		nil, value.UndefinedValue)
+	expectRun(t, fmt.Sprintf("%s[%d]", arrStr, -1), nil, value.UndefinedValue)
+	expectRun(t, fmt.Sprintf("%s[%d]", arrStr, arrLen), nil, value.UndefinedValue)
 
 	// slice operator
 	for low := 0; low < arrLen; low++ {
-		expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, low, low),
-			nil, ARR{})
+		expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, low, low), nil, ARR{})
 		for high := low; high <= arrLen; high++ {
-			expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, low, high),
-				nil, arr[low:high])
-			expectRun(t, fmt.Sprintf("out = %s[0 + %d : 0 + %d]",
-				arrStr, low, high), nil, arr[low:high])
-			expectRun(t, fmt.Sprintf("out = %s[1 + %d - 1 : 1 + %d - 1]",
-				arrStr, low, high), nil, arr[low:high])
-			expectRun(t, fmt.Sprintf("out = %s[:%d]", arrStr, high),
-				nil, arr[:high])
-			expectRun(t, fmt.Sprintf("out = %s[%d:]", arrStr, low),
-				nil, arr[low:])
+			expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, low, high), nil, arr[low:high])
+			expectRun(t, fmt.Sprintf("out = %s[0 + %d : 0 + %d]", arrStr, low, high), nil, arr[low:high])
+			expectRun(t, fmt.Sprintf("out = %s[1 + %d - 1 : 1 + %d - 1]", arrStr, low, high), nil, arr[low:high])
+			expectRun(t, fmt.Sprintf("out = %s[:%d]", arrStr, high), nil, arr[:high])
+			expectRun(t, fmt.Sprintf("out = %s[%d:]", arrStr, low), nil, arr[low:])
 		}
 	}
 
-	expectRun(t, fmt.Sprintf("out = %s[:]", arrStr),
-		nil, arr)
-	expectRun(t, fmt.Sprintf("out = %s[%d:]", arrStr, -1),
-		nil, arr)
-	expectRun(t, fmt.Sprintf("out = %s[:%d]", arrStr, arrLen+1),
-		nil, arr)
-	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, 2, 2),
-		nil, ARR{})
+	expectRun(t, fmt.Sprintf("out = %s[:]", arrStr), nil, arr)
+	expectRun(t, fmt.Sprintf("out = %s[%d:]", arrStr, -1), nil, arr)
+	expectRun(t, fmt.Sprintf("out = %s[:%d]", arrStr, arrLen+1), nil, arr)
+	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, 2, 2), nil, ARR{})
 
-	expectError(t, fmt.Sprintf("%s[:%d]", arrStr, -1),
-		nil, "invalid slice index")
-	expectError(t, fmt.Sprintf("%s[%d:]", arrStr, arrLen+1),
-		nil, "invalid slice index")
-	expectError(t, fmt.Sprintf("%s[%d:%d]", arrStr, 0, -1),
-		nil, "invalid slice index")
-	expectError(t, fmt.Sprintf("%s[%d:%d]", arrStr, 2, 1),
-		nil, "invalid slice index")
+	expectError(t, fmt.Sprintf("%s[:%d]", arrStr, -1), nil, "invalid slice index")
+	expectError(t, fmt.Sprintf("%s[%d:]", arrStr, arrLen+1), nil, "invalid slice index")
+	expectError(t, fmt.Sprintf("%s[%d:%d]", arrStr, 0, -1), nil, "invalid slice index")
+	expectError(t, fmt.Sprintf("%s[%d:%d]", arrStr, 2, 1), nil, "invalid slice index")
 }
 
 func TestAssignment(t *testing.T) {
 	expectRun(t, `a := 1; a = 2; out = a`, nil, 2)
 	expectRun(t, `a := 1; a = 2; out = a`, nil, 2)
 	expectRun(t, `a := 1; a = a + 4; out = a`, nil, 5)
-	expectRun(t, `a := 1; f1 := func() { a = 2; return a }; out = f1()`,
-		nil, 2)
-	expectRun(t, `a := 1; f1 := func() { a := 3; a = 2; return a }; out = f1()`,
-		nil, 2)
+	expectRun(t, `a := 1; f1 := func() { a = 2; return a }; out = f1()`, nil, 2)
+	expectRun(t, `a := 1; f1 := func() { a := 3; a = 2; return a }; out = f1()`, nil, 2)
 
 	expectRun(t, `a := 1; out = a`, nil, 1)
 	expectRun(t, `a := 1; a = 2; out = a`, nil, 2)
 	expectRun(t, `a := 1; func() { a = 2 }(); out = a`, nil, 2)
 	expectRun(t, `a := 1; func() { a := 2 }(); out = a`, nil, 1) // "a := 2" defines a new local variable 'a'
 	expectRun(t, `a := 1; func() { b := 2; out = b }()`, nil, 2)
+
 	expectRun(t, `
 out = func() { 
 	a := 2
@@ -240,23 +216,16 @@ f1 := func() {
 }; 
 
 out = f1();`, nil, 3)
-	expectRun(t, `f1 := func() { f2 := func() { a := 1; a += 4 - 2; return a }; return f2(); }; out = f1()`,
-		nil, 3)
-	expectRun(t, `f1 := func() { f2 := func() { a := 3; a -= 1; return a }; return f2(); }; out = f1()`,
-		nil, 2)
-	expectRun(t, `f1 := func() { f2 := func() { a := 3; a -= 5 - 4; return a }; return f2(); }; out = f1()`,
-		nil, 2)
-	expectRun(t, `f1 := func() { f2 := func() { a := 2; a *= 4; return a }; return f2(); }; out = f1()`,
-		nil, 8)
-	expectRun(t, `f1 := func() { f2 := func() { a := 2; a *= 1 + 3; return a }; return f2(); }; out = f1()`,
-		nil, 8)
-	expectRun(t, `f1 := func() { f2 := func() { a := 10; a /= 2; return a }; return f2(); }; out = f1()`,
-		nil, 5)
-	expectRun(t, `f1 := func() { f2 := func() { a := 10; a /= 5 - 3; return a }; return f2(); }; out = f1()`,
-		nil, 5)
 
-	expectRun(t, `a := 1; f1 := func() { f2 := func() { a += 2; return a }; return f2(); }; out = f1()`,
-		nil, 3)
+	expectRun(t, `f1 := func() { f2 := func() { a := 1; a += 4 - 2; return a }; return f2(); }; out = f1()`, nil, 3)
+	expectRun(t, `f1 := func() { f2 := func() { a := 3; a -= 1; return a }; return f2(); }; out = f1()`, nil, 2)
+	expectRun(t, `f1 := func() { f2 := func() { a := 3; a -= 5 - 4; return a }; return f2(); }; out = f1()`, nil, 2)
+	expectRun(t, `f1 := func() { f2 := func() { a := 2; a *= 4; return a }; return f2(); }; out = f1()`, nil, 8)
+	expectRun(t, `f1 := func() { f2 := func() { a := 2; a *= 1 + 3; return a }; return f2(); }; out = f1()`, nil, 8)
+	expectRun(t, `f1 := func() { f2 := func() { a := 10; a /= 2; return a }; return f2(); }; out = f1()`, nil, 5)
+	expectRun(t, `f1 := func() { f2 := func() { a := 10; a /= 5 - 3; return a }; return f2(); }; out = f1()`, nil, 5)
+
+	expectRun(t, `a := 1; f1 := func() { f2 := func() { a += 2; return a }; return f2(); }; out = f1()`, nil, 3)
 
 	expectRun(t, `
 	f1 := func(a) {
@@ -391,6 +360,7 @@ out = func() {
 	// assigning different type value
 	expectRun(t, `a := 1; a = "foo"; out = a`, nil, "foo")              // global
 	expectRun(t, `func() { a := 1; a = "foo"; out = a }()`, nil, "foo") // local
+
 	expectRun(t, `
 out = func() { 
 	a := 5
@@ -401,10 +371,8 @@ out = func() {
 }()`, nil, "foo") // free
 
 	// variables declared in if/for blocks
-	expectRun(t, `for a:=0; a<5; a++ {}; a := "foo"; out = a`,
-		nil, "foo")
-	expectRun(t, `func() { for a:=0; a<5; a++ {}; a := "foo"; out = a }()`,
-		nil, "foo")
+	expectRun(t, `for a:=0; a<5; a++ {}; a := "foo"; out = a`, nil, "foo")
+	expectRun(t, `func() { for a:=0; a<5; a++ {}; a := "foo"; out = a }()`, nil, "foo")
 
 	// selectors
 	expectRun(t, `a:=[1,2,3]; a[1] = 5; out = a[1]`, nil, 5)
@@ -413,6 +381,7 @@ out = func() {
 	expectRun(t, `a:={b:1,c:2}; a.b += 5; out = a.b`, nil, 6)
 	expectRun(t, `a:={b:1,c:2}; a.b += a.c; out = a.b`, nil, 3)
 	expectRun(t, `a:={b:1,c:2}; a.b += a.c; out = a.c`, nil, 2)
+
 	expectRun(t, `
 a := {
 	b: [1, 2, 3],
@@ -484,7 +453,33 @@ func TestBitwise(t *testing.T) {
 	expectRun(t, `out = ^-55`, nil, ^-55)
 }
 
+func TestMapRecord(t *testing.T) {
+	expectRun(t, `out = len({})`, nil, 0)
+	expectRun(t, `out = len(map())`, nil, 0)
+	expectRun(t, `out = len(map({}))`, nil, 0)
+
+	expectRun(t, `out = len({a: 1})`, nil, 1)
+	expectRun(t, `out = len(map({a: 1}))`, nil, 1)
+
+	expectRun(t, `out = len({a: 1, b: 2})`, nil, 2)
+	expectRun(t, `out = len(map({a: 1, b: 2}))`, nil, 2)
+
+	expectRun(t, `out = map() == ""`, nil, false)
+	expectRun(t, `out = map() == {}`, nil, true)
+	expectRun(t, `out = map({a: 1}) == {a: 1}`, nil, true)
+	expectRun(t, `out = map({a: 1}) == {a: 1, b: 1}`, nil, false)
+
+	expectRun(t, `out = {a: 1}["a"]`, nil, 1)
+	expectRun(t, `out = {a: 1}.a`, nil, 1)
+
+	expectRun(t, `out = map({a: 1})["a"]`, nil, 1)
+}
+
 func TestBoolean(t *testing.T) {
+	expectRun(t, `out = bool()`, nil, false)
+	expectRun(t, `out = bool(true)`, nil, true)
+	expectRun(t, `out = bool(false)`, nil, false)
+
 	expectRun(t, `out = true`, nil, true)
 	expectRun(t, `out = false`, nil, false)
 
@@ -517,6 +512,7 @@ func TestBoolean(t *testing.T) {
 	expectError(t, `true + false`, nil, "invalid binary operator: bool + bool")
 	expectError(t, `5; true + false; 5`, nil, "invalid binary operator: bool + bool")
 	expectError(t, `if (10 > 1) { true + false; }`, nil, "invalid binary operator: bool + bool")
+
 	expectError(t, `
 func() {
 	if (10 > 1) {
@@ -528,6 +524,7 @@ func() {
 	}
 }()
 `, nil, "invalid binary operator: bool + bool")
+
 	expectError(t, `if (true + false) { 10 }`, nil, "invalid binary operator: bool + bool")
 	expectError(t, `10 + (true + false)`, nil, "invalid binary operator: bool + bool")
 	expectError(t, `(true + false) + 20`, nil, "invalid binary operator: bool + bool")
@@ -560,7 +557,7 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = len(immutable([1, 2, 3]))`, nil, 3)
 	expectRun(t, `out = len(immutable({}))`, nil, 0)
 	expectRun(t, `out = len(immutable({a:1, b:2}))`, nil, 2)
-	expectError(t, `len(1)`, nil, "invalid argument type: len argument 'first' expects type array/string/bytes/map, got int")
+	expectError(t, `len(1)`, nil, "invalid argument type: len argument 'first' expects type record/map/array/string/bytes, got int")
 	expectError(t, `len("one", "two")`, nil, "wrong number of arguments")
 
 	expectRun(t, `out = copy(1)`, nil, 1)
@@ -568,8 +565,7 @@ func TestBuiltinFunction(t *testing.T) {
 
 	expectRun(t, `out = append([1, 2, 3], 4)`, nil, ARR{1, 2, 3, 4})
 	expectRun(t, `out = append([1, 2, 3], 4, 5, 6)`, nil, ARR{1, 2, 3, 4, 5, 6})
-	expectRun(t, `out = append([1, 2, 3], "foo", false)`,
-		nil, ARR{1, 2, 3, "foo", false})
+	expectRun(t, `out = append([1, 2, 3], "foo", false)`, nil, ARR{1, 2, 3, "foo", false})
 
 	expectRun(t, `out = int(1)`, nil, 1)
 	expectRun(t, `out = int(1.8)`, nil, 1)
@@ -689,6 +685,7 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = is_function(len)`, nil, false)                                              // builtin function
 	expectRun(t, `a := func(x) { return func() { return x } }; out = is_function(a)`, nil, true)    // function
 	expectRun(t, `a := func(x) { return func() { return x } }; out = is_function(a(5))`, nil, true) // closure
+
 	expectRun(t, `out = is_function(x)`,
 		Opts().Symbol("x", &StringArray{
 			Value: []string{"foo", "bar"},
@@ -699,11 +696,10 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = is_callable(1)`, nil, false)
 	expectRun(t, `out = is_callable(func() {})`, nil, true)
 	expectRun(t, `out = is_callable(func(x) { return x })`, nil, true)
-	expectRun(t, `out = is_callable(len)`, nil, true) // builtin function
-	expectRun(t, `a := func(x) { return func() { return x } }; out = is_callable(a)`,
-		nil, true) // function
-	expectRun(t, `a := func(x) { return func() { return x } }; out = is_callable(a(5))`,
-		nil, true) // closure
+	expectRun(t, `out = is_callable(len)`, nil, true)                                               // builtin function
+	expectRun(t, `a := func(x) { return func() { return x } }; out = is_callable(a)`, nil, true)    // function
+	expectRun(t, `a := func(x) { return func() { return x } }; out = is_callable(a(5))`, nil, true) // closure
+
 	expectRun(t, `out = is_callable(x)`,
 		Opts().Symbol("x", &StringArray{
 			Value: []string{"foo", "bar"},
@@ -744,6 +740,8 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = delete({}, "")`, nil, value.UndefinedValue)
 	expectRun(t, `out = {key1: 1}; delete(out, "key1")`, nil, MAP{})
 	expectRun(t, `out = {key1: 1, key2: "2"}; delete(out, "key1")`, nil, MAP{"key2": "2"})
+	expectRun(t, `out = map({key1: 1}); delete(out, "key1")`, nil, MAP{})
+	expectRun(t, `out = map({key1: 1, key2: "2"}); delete(out, "key1")`, nil, MAP{"key2": "2"})
 	expectRun(t, `out = [1, "2", {a: "b", c: 10}]; delete(out[2], "c")`, nil, ARR{1, "2", MAP{"a": "b"}})
 
 	// splice
@@ -3562,6 +3560,8 @@ func expectRun(t *testing.T, input string, opts *testopts, expected any) {
 			expectedObj = value.NewArray(eo.Value(), true)
 		case *value.Record:
 			expectedObj = value.NewRecord(eo.Value(), true)
+		case *value.Map:
+			expectedObj = value.NewMap(eo.Value(), true)
 		}
 
 		modules.AddSourceModule("__code__",
@@ -3839,6 +3839,8 @@ func objectZeroCopy(o core.Object) core.Object {
 		return value.NewArray(nil, o.IsImmutable())
 	case *value.Record:
 		return value.NewRecord(nil, o.IsImmutable())
+	case *value.Map:
+		return value.NewMap(nil, o.IsImmutable())
 	case *value.Undefined:
 		return value.UndefinedValue
 	case *value.Error:

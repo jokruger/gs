@@ -1,6 +1,7 @@
 package value
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/jokruger/gs/core"
@@ -43,7 +44,7 @@ func (o *Time) TypeName() string {
 }
 
 func (o *Time) String() string {
-	return o.value.String()
+	return fmt.Sprintf("time(%q)", o.value.String())
 }
 
 func (o *Time) Interface() any {
@@ -151,7 +152,7 @@ func (o *Time) IsVariadic() bool {
 }
 
 func (o *Time) AsString() (string, bool) {
-	return o.String(), true
+	return o.value.String(), true
 }
 
 func (o *Time) AsInt() (int64, bool) {

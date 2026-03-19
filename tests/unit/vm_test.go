@@ -9,6 +9,7 @@ import (
 	_runtime "runtime"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/core"
@@ -120,6 +121,10 @@ func TestUndefined(t *testing.T) {
 	expectRun(t, `out = undefined == float([])`, nil, true)
 	expectRun(t, `out = float([]) == undefined`, nil, true)
 
+	s, _ := value.UndefinedValue.AsString()
+	require.Equal(t, "", s)
+	require.Equal(t, "undefined", value.UndefinedValue.String())
+
 	expectRun(t, fmt.Sprintf(`out = undefined == %s`, value.UndefinedValue.String()), nil, true)
 }
 
@@ -177,6 +182,10 @@ func() {
 	expectError(t, `10 + (true + false)`, nil, "invalid binary operator: bool + bool")
 	expectError(t, `(true + false) + 20`, nil, "invalid binary operator: bool + bool")
 	expectError(t, `!(true + false)`, nil, "invalid binary operator: bool + bool")
+
+	s, _ := value.TrueValue.AsString()
+	require.Equal(t, "true", s)
+	require.Equal(t, "true", value.TrueValue.String())
 
 	expectRun(t, fmt.Sprintf(`out = true == %s`, value.TrueValue.String()), nil, true)
 	expectRun(t, fmt.Sprintf(`out = false == %s`, value.FalseValue.String()), nil, true)
@@ -243,6 +252,10 @@ func TestChar(t *testing.T) {
 	expectRun(t, `out = '4' > '4'`, nil, false)
 	expectRun(t, `out = '4' <= '4'`, nil, true)
 	expectRun(t, `out = '4' >= '4'`, nil, true)
+
+	s, _ := value.NewChar('A').AsString()
+	require.Equal(t, "A", s)
+	require.Equal(t, "'A'", value.NewChar('A').String())
 
 	expectRun(t, fmt.Sprintf(`out = '0' == %s`, value.NewChar('0').String()), nil, true)
 	expectRun(t, fmt.Sprintf(`out = 'A' == %s`, value.NewChar('A').String()), nil, true)
@@ -326,7 +339,10 @@ func TestString(t *testing.T) {
 	// undefined cannot be added to string
 	expectError(t, `"foo" + undefined`, nil, "invalid binary operator: string + undefined")
 
-	// .String()
+	s, _ := value.NewString("abc").AsString()
+	require.Equal(t, "abc", s)
+	require.Equal(t, `"abc"`, value.NewString("abc").String())
+
 	expectRun(t, fmt.Sprintf(`out = "" == %s`, value.NewString("").String()), nil, true)
 	expectRun(t, fmt.Sprintf(`out = "hello" == %s`, value.NewString("hello").String()), nil, true)
 	expectRun(t, fmt.Sprintf(`out = "hello \"world\"" == %s`, value.NewString("hello \"world\"").String()), nil, true)
@@ -347,6 +363,10 @@ func TestError(t *testing.T) {
 	expectError(t, `error("error").err`, nil, "invalid selector: type error has no selector 'err'")
 	expectError(t, `error("error").value_`, nil, "invalid selector: type error has no selector 'value_'")
 	expectError(t, `error([1,2,3])[1]`, nil, "invalid selector: type error has no selector '1'")
+
+	s, _ := value.NewError(value.NewString("abc")).AsString()
+	require.Equal(t, "abc", s)
+	require.Equal(t, `error("abc")`, value.NewError(value.NewString("abc")).String())
 
 	expectRun(t, fmt.Sprintf(`out = error(undefined) == %s`, value.NewError(nil).String()), nil, true)
 	expectRun(t, fmt.Sprintf(`out = error("some error") == %s`, value.NewError(value.NewString("some error")).String()), nil, true)
@@ -462,6 +482,15 @@ func TestMap(t *testing.T) {
 		"b": value.UndefinedValue,
 		"c": value.NewString("3"),
 	}, false).String()), nil, true)
+}
+
+func TestTime(t *testing.T) {
+	o := value.NewTime(time.Date(2020, 6, 20, 1, 2, 3, 4, time.UTC))
+	s, _ := o.AsString()
+	require.Equal(t, "2020-06-20 01:02:03.000000004 +0000 UTC", s)
+	require.Equal(t, `time("2020-06-20 01:02:03.000000004 +0000 UTC")`, o.String())
+
+	expectRun(t, fmt.Sprintf(`out = time("2020-06-20 01:02:03.000000004 +0000 UTC") == %s`, o.String()), nil, true)
 }
 
 func TestAssignment(t *testing.T) {

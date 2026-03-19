@@ -121,7 +121,7 @@ func TestObject_String(t *testing.T) {
 	o = value.NewMapIterator(nil)
 	require.Equal(t, "<map-iterator>", o.String())
 	o = value.UndefinedValue
-	require.Equal(t, "<undefined>", o.String())
+	require.Equal(t, "undefined", o.String())
 	o = value.NewBytes(nil)
 	require.Equal(t, "", o.String())
 	o = value.NewBytes([]byte("foo"))

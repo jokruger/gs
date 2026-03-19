@@ -9,7 +9,7 @@ import (
 // Object represents an object in the VM.
 type Object interface {
 	TypeName() string // return type name
-	String() string   // return string representation of the object (must be valid GS string literal) or empty string if no string representation exists
+	String() string   // return string representation of the object (should be valid GS string literal if possible)
 	Interface() any   // return underlying value as empty interface
 	Arity() int       // return number of positional arguments (or minimum number of variadic arguments) for callable objects
 

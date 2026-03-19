@@ -107,6 +107,81 @@ func (c *customError) Unwrap() error {
 	return c.err
 }
 
+func TestUndefined(t *testing.T) {
+	expectRun(t, `out = undefined`, nil, value.UndefinedValue)
+	expectRun(t, `out = undefined.a`, nil, value.UndefinedValue)
+	expectRun(t, `out = undefined[1]`, nil, value.UndefinedValue)
+	expectRun(t, `out = undefined.a.b`, nil, value.UndefinedValue)
+	expectRun(t, `out = undefined[1][2]`, nil, value.UndefinedValue)
+	expectRun(t, `out = undefined ? 1 : 2`, nil, 2)
+	expectRun(t, `out = undefined == undefined`, nil, true)
+	expectRun(t, `out = undefined == 1`, nil, false)
+	expectRun(t, `out = 1 == undefined`, nil, false)
+	expectRun(t, `out = undefined == float([])`, nil, true)
+	expectRun(t, `out = float([]) == undefined`, nil, true)
+
+	expectRun(t, fmt.Sprintf(`out = %s == undefined`, value.UndefinedValue.String()), nil, true)
+}
+
+func TestBoolean(t *testing.T) {
+	expectRun(t, `out = bool()`, nil, false)
+	expectRun(t, `out = bool(true)`, nil, true)
+	expectRun(t, `out = bool(false)`, nil, false)
+
+	expectRun(t, `out = true`, nil, true)
+	expectRun(t, `out = false`, nil, false)
+
+	expectRun(t, `out = 1 < 2`, nil, true)
+	expectRun(t, `out = 1 > 2`, nil, false)
+	expectRun(t, `out = 1 < 1`, nil, false)
+	expectRun(t, `out = 1 > 2`, nil, false)
+	expectRun(t, `out = 1 == 1`, nil, true)
+	expectRun(t, `out = 1 != 1`, nil, false)
+	expectRun(t, `out = 1 == 2`, nil, false)
+	expectRun(t, `out = 1 != 2`, nil, true)
+	expectRun(t, `out = 1 <= 2`, nil, true)
+	expectRun(t, `out = 1 >= 2`, nil, false)
+	expectRun(t, `out = 1 <= 1`, nil, true)
+	expectRun(t, `out = 1 >= 2`, nil, false)
+
+	expectRun(t, `out = true == true`, nil, true)
+	expectRun(t, `out = false == false`, nil, true)
+	expectRun(t, `out = true == false`, nil, false)
+	expectRun(t, `out = true != false`, nil, true)
+	expectRun(t, `out = false != true`, nil, true)
+	expectRun(t, `out = (1 < 2) == true`, nil, true)
+	expectRun(t, `out = (1 < 2) == false`, nil, false)
+	expectRun(t, `out = (1 > 2) == true`, nil, false)
+	expectRun(t, `out = (1 > 2) == false`, nil, true)
+
+	expectError(t, `5 + true`, nil, "invalid binary operator: int + bool")
+	expectError(t, `5 + true; 5`, nil, "invalid binary operator: int + bool")
+	expectError(t, `-true`, nil, "invalid operation")
+	expectError(t, `true + false`, nil, "invalid binary operator: bool + bool")
+	expectError(t, `5; true + false; 5`, nil, "invalid binary operator: bool + bool")
+	expectError(t, `if (10 > 1) { true + false; }`, nil, "invalid binary operator: bool + bool")
+
+	expectError(t, `
+func() {
+	if (10 > 1) {
+		if (10 > 1) {
+			return true + false;
+		}
+
+		return 1;
+	}
+}()
+`, nil, "invalid binary operator: bool + bool")
+
+	expectError(t, `if (true + false) { 10 }`, nil, "invalid binary operator: bool + bool")
+	expectError(t, `10 + (true + false)`, nil, "invalid binary operator: bool + bool")
+	expectError(t, `(true + false) + 20`, nil, "invalid binary operator: bool + bool")
+	expectError(t, `!(true + false)`, nil, "invalid binary operator: bool + bool")
+
+	expectRun(t, fmt.Sprintf(`out = %s == true`, value.TrueValue.String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = %s == false`, value.FalseValue.String()), nil, true)
+}
+
 func TestArray(t *testing.T) {
 	expectRun(t, `out = [1, 2 * 2, 3 + 3]`, nil, ARR{1, 4, 6})
 
@@ -473,76 +548,6 @@ func TestMapRecord(t *testing.T) {
 	expectRun(t, `out = {a: 1}.a`, nil, 1)
 
 	expectRun(t, `out = map({a: 1})["a"]`, nil, 1)
-}
-
-func TestBoolean(t *testing.T) {
-	expectRun(t, `out = bool()`, nil, false)
-	expectRun(t, `out = bool(true)`, nil, true)
-	expectRun(t, `out = bool(false)`, nil, false)
-
-	expectRun(t, `out = true`, nil, true)
-	expectRun(t, `out = false`, nil, false)
-
-	expectRun(t, `out = 1 < 2`, nil, true)
-	expectRun(t, `out = 1 > 2`, nil, false)
-	expectRun(t, `out = 1 < 1`, nil, false)
-	expectRun(t, `out = 1 > 2`, nil, false)
-	expectRun(t, `out = 1 == 1`, nil, true)
-	expectRun(t, `out = 1 != 1`, nil, false)
-	expectRun(t, `out = 1 == 2`, nil, false)
-	expectRun(t, `out = 1 != 2`, nil, true)
-	expectRun(t, `out = 1 <= 2`, nil, true)
-	expectRun(t, `out = 1 >= 2`, nil, false)
-	expectRun(t, `out = 1 <= 1`, nil, true)
-	expectRun(t, `out = 1 >= 2`, nil, false)
-
-	expectRun(t, `out = true == true`, nil, true)
-	expectRun(t, `out = false == false`, nil, true)
-	expectRun(t, `out = true == false`, nil, false)
-	expectRun(t, `out = true != false`, nil, true)
-	expectRun(t, `out = false != true`, nil, true)
-	expectRun(t, `out = (1 < 2) == true`, nil, true)
-	expectRun(t, `out = (1 < 2) == false`, nil, false)
-	expectRun(t, `out = (1 > 2) == true`, nil, false)
-	expectRun(t, `out = (1 > 2) == false`, nil, true)
-
-	expectError(t, `5 + true`, nil, "invalid binary operator: int + bool")
-	expectError(t, `5 + true; 5`, nil, "invalid binary operator: int + bool")
-	expectError(t, `-true`, nil, "invalid operation")
-	expectError(t, `true + false`, nil, "invalid binary operator: bool + bool")
-	expectError(t, `5; true + false; 5`, nil, "invalid binary operator: bool + bool")
-	expectError(t, `if (10 > 1) { true + false; }`, nil, "invalid binary operator: bool + bool")
-
-	expectError(t, `
-func() {
-	if (10 > 1) {
-		if (10 > 1) {
-			return true + false;
-		}
-
-		return 1;
-	}
-}()
-`, nil, "invalid binary operator: bool + bool")
-
-	expectError(t, `if (true + false) { 10 }`, nil, "invalid binary operator: bool + bool")
-	expectError(t, `10 + (true + false)`, nil, "invalid binary operator: bool + bool")
-	expectError(t, `(true + false) + 20`, nil, "invalid binary operator: bool + bool")
-	expectError(t, `!(true + false)`, nil, "invalid binary operator: bool + bool")
-}
-
-func TestUndefined(t *testing.T) {
-	expectRun(t, `out = undefined`, nil, value.UndefinedValue)
-	expectRun(t, `out = undefined.a`, nil, value.UndefinedValue)
-	expectRun(t, `out = undefined[1]`, nil, value.UndefinedValue)
-	expectRun(t, `out = undefined.a.b`, nil, value.UndefinedValue)
-	expectRun(t, `out = undefined[1][2]`, nil, value.UndefinedValue)
-	expectRun(t, `out = undefined ? 1 : 2`, nil, 2)
-	expectRun(t, `out = undefined == undefined`, nil, true)
-	expectRun(t, `out = undefined == 1`, nil, false)
-	expectRun(t, `out = 1 == undefined`, nil, false)
-	expectRun(t, `out = undefined == float([])`, nil, true)
-	expectRun(t, `out = float([]) == undefined`, nil, true)
 }
 
 func TestBuiltinFunction(t *testing.T) {
@@ -3334,7 +3339,7 @@ func TestString(t *testing.T) {
 	expectRun(t, `out = "foo" + true`, nil, "footrue")
 	expectRun(t, `out = "foo" + 'X'`, nil, "fooX")
 	expectRun(t, `out = "foo" + error(5)`, nil, "fooerror: 5")
-	expectRun(t, `out = "foo" + undefined`, nil, "foo<undefined>")
+	expectRun(t, `out = "foo" + undefined`, nil, "fooundefined")
 	expectRun(t, `out = "foo" + [1,2,3]`, nil, "foo[1, 2, 3]")
 	// also works with "+=" operator
 	expectRun(t, `out = "foo"; out += 1.5`, nil, "foo1.5")

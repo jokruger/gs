@@ -42,7 +42,7 @@ func (o *Undefined) TypeName() string {
 }
 
 func (o *Undefined) String() string {
-	return "<undefined>"
+	return "undefined"
 }
 
 func (o *Undefined) Interface() any {

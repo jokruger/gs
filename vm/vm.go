@@ -68,15 +68,15 @@ func (v *VM) IsStackEmpty() bool {
 }
 
 // Call calls a compiled function with the given arguments and returns the result.
-func (v *VM) Call(foo core.Object, args ...core.Object) (core.Object, error) {
-	// TODO: implement this method (to be used with callbacks from Go)
-
-	//f, ok := foo.(*CompiledFunction)
-	//if !ok {
-	//	...
-	//}
-
-	return nil, core.NewNotImplementedError("VM.Call")
+func (v *VM) Call(fn core.Object, args ...core.Object) (core.Object, error) {
+	switch f := fn.(type) {
+	case *CompiledFunction:
+		return v.call(f, args...)
+	case *value.BuiltinFunction:
+		return f.Call(v, args...)
+	default:
+		return nil, core.NewInvalidArgumentTypeError("vm.Call", "fn", "callable", fn)
+	}
 }
 
 // Run starts the execution.
@@ -853,4 +853,116 @@ func indexAssign(dst, src core.Object, selectors []core.Object) error {
 		dst = next
 	}
 	return dst.Assign(selectors[0], src)
+}
+
+func (v *VM) call(fn *CompiledFunction, args ...core.Object) (core.Object, error) {
+	// Check argument count and roll up variadic args if needed
+	numArgs := len(args)
+	if fn.VarArgs {
+		if numArgs < fn.NumParameters-1 {
+			return nil, core.NewWrongNumArgumentsError("call", fmt.Sprintf("at least %d", fn.NumParameters-1), numArgs)
+		}
+		realArgs := fn.NumParameters - 1
+		varArgs := numArgs - realArgs
+		if varArgs >= 0 {
+			varArgsArray := make([]core.Object, varArgs)
+			copy(varArgsArray, args[realArgs:])
+			args = append(args[:realArgs], value.NewArray(varArgsArray, false))
+			numArgs = realArgs + 1
+		}
+	} else if numArgs != fn.NumParameters {
+		return nil, core.NewWrongNumArgumentsError("call", fmt.Sprintf("%d", fn.NumParameters), numArgs)
+	}
+
+	// Save current VM state
+	savedFramesIndex := v.framesIndex
+	savedSp := v.sp
+	savedIp := v.ip
+	savedCurFrame := v.curFrame
+	savedCurInsts := v.curInsts
+	savedErr := v.err
+
+	// Clear error for fresh call
+	v.err = nil
+
+	// Check if we have room for frames
+	if v.framesIndex >= MaxFrames {
+		v.err = core.ErrStackOverflow
+		return nil, v.err
+	}
+
+	// Create synthetic trampoline frame with just OpSuspend
+	// This acts as the "caller" that the callback will return to
+	trampolineFrame := &v.frames[v.framesIndex]
+	trampolineFrame.fn = &CompiledFunction{
+		Instructions:  []byte{parser.OpSuspend},
+		NumLocals:     0,
+		NumParameters: 0,
+		VarArgs:       false,
+		SourceMap:     nil,
+		Free:          nil,
+	}
+	trampolineFrame.freeVars = nil
+	trampolineFrame.ip = -1 // Will be set to 0 before OpSuspend executes
+	trampolineFrame.basePointer = v.sp
+	v.framesIndex++
+
+	// Push callee slot (matches normal OpCall stack layout)
+	// This is where OpReturn will write the return value
+	if v.sp >= StackSize {
+		v.err = core.ErrStackOverflow
+		return nil, v.err
+	}
+	v.stack[v.sp] = fn // Use the function itself as placeholder
+	v.sp++
+
+	// Push arguments onto stack
+	if v.sp+numArgs > StackSize {
+		v.err = core.ErrStackOverflow
+		return nil, v.err
+	}
+	for _, arg := range args {
+		v.stack[v.sp] = arg
+		v.sp++
+	}
+
+	// Set up callback frame (similar to OpCall for CompiledFunction)
+	v.curFrame = &v.frames[v.framesIndex]
+	v.curFrame.fn = fn
+	v.curFrame.freeVars = fn.Free
+	v.curFrame.basePointer = v.sp - numArgs // Points to first arg (after callee slot)
+	v.curFrame.ip = -1
+	v.curInsts = fn.Instructions
+	v.ip = -1
+	v.framesIndex++
+	v.sp = v.sp - numArgs + fn.NumLocals
+
+	// Execute the callback by calling run()
+	// When callback returns (OpReturn), it will return to trampoline frame
+	// Trampoline executes OpSuspend, which exits run()
+	v.run()
+
+	// Extract result before restoring state
+	// OpReturn places the result at sp-1, which is the callee slot we reserved
+	var result core.Object
+	if v.err == nil {
+		// The return value is at savedSp (the callee slot position)
+		result = v.stack[savedSp]
+		if result == nil {
+			result = value.UndefinedValue
+		}
+	}
+
+	// Restore VM state
+	v.framesIndex = savedFramesIndex
+	v.sp = savedSp
+	v.ip = savedIp
+	v.curFrame = savedCurFrame
+	v.curInsts = savedCurInsts
+
+	// Preserve error from callback, but restore if no error
+	err := v.err
+	v.err = savedErr
+
+	return result, err
 }

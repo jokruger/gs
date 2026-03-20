@@ -360,9 +360,9 @@ func TestError(t *testing.T) {
 	expectRun(t, `out = error("some error").value`, nil, "some error")
 	expectRun(t, `out = error("some error")["value"]`, nil, "some error")
 
-	expectError(t, `error("error").err`, nil, "invalid selector: type error has no selector 'err'")
-	expectError(t, `error("error").value_`, nil, "invalid selector: type error has no selector 'value_'")
-	expectError(t, `error([1,2,3])[1]`, nil, "invalid selector: type error has no selector '1'")
+	expectError(t, `error("error").err`, nil, "invalid selector: type error has no property or method 'err'")
+	expectError(t, `error("error").value_`, nil, "invalid selector: type error has no property or method 'value_'")
+	expectError(t, `error([1,2,3])[1]`, nil, "invalid selector: type error has no property or method '1'")
 
 	s, _ := value.NewError(value.NewString("abc")).AsString()
 	require.Equal(t, "abc", s)
@@ -426,6 +426,13 @@ func TestArray(t *testing.T) {
 		value.UndefinedValue,
 		value.NewString("3"),
 	}, false).String()), nil, true)
+
+	expectError(t, `[1, 2, 3].q`, nil, "Runtime Error: invalid selector: type array has no property or method 'q'\n\tat test:1:11")
+	expectRun(t, `t := []; out = t.empty`, nil, true)
+	expectRun(t, `t := [1, 2, 3]; out = t.empty`, nil, false)
+	expectRun(t, `t := []; out = t.len`, nil, 0)
+	expectRun(t, `t := [1, 2, 3]; out = t.len`, nil, 3)
+	expectRun(t, `t := [3, 1, 2]; out = string(t.sort())`, nil, "[1, 2, 3]")
 }
 
 func TestRecord(t *testing.T) {
@@ -457,7 +464,6 @@ m := {
 out = m["foo"](2) + m["foo"](3)
 `, nil, 10)
 
-	// map assignment is copy-by-reference
 	expectRun(t, `m1 := {k1: 1, k2: "foo"}; m2 := m1; m1.k1 = 5; out = m2.k1`, nil, 5)
 	expectRun(t, `m1 := {k1: 1, k2: "foo"}; m2 := m1; m2.k1 = 3; out = m1.k1`, nil, 3)
 	expectRun(t, `func() { m1 := {k1: 1, k2: "foo"}; m2 := m1; m1.k1 = 5; out = m2.k1 }()`, nil, 5)
@@ -471,6 +477,13 @@ out = m["foo"](2) + m["foo"](3)
 		"b": value.UndefinedValue,
 		"c": value.NewString("3"),
 	}, false).String()), nil, true)
+
+	expectRun(t, `out = {a: 1, b: 2}["b"]`, nil, 2)
+	expectRun(t, `out = {a: 1, b: 2}["q"]`, nil, value.UndefinedValue)
+	expectRun(t, `out = {a: 1, b: 2}.b`, nil, 2)
+	expectRun(t, `out = {a: 1, b: 2}.q`, nil, value.UndefinedValue)
+	expectRun(t, `t := {a: 1, b: 2}; t["a"] = 3; out = t.a`, nil, 3)
+	expectRun(t, `t := {a: 1, b: 2}; t.a = 3; out = t["a"]`, nil, 3)
 }
 
 func TestMap(t *testing.T) {
@@ -482,6 +495,16 @@ func TestMap(t *testing.T) {
 		"b": value.UndefinedValue,
 		"c": value.NewString("3"),
 	}, false).String()), nil, true)
+
+	expectRun(t, `out = map({a: 1, b: 2})["b"]`, nil, 2)
+	expectRun(t, `out = map({a: 1, b: 2})["q"]`, nil, value.UndefinedValue)
+	expectRun(t, `t := map({a: 1, b: 2}); t["a"] = 3; out = t["a"]`, nil, 3)
+	expectError(t, `map({a: 1, b: 2}).q`, nil, "Runtime Error: invalid selector: type map has no property or method 'q'\n\tat test:1:19")
+	expectRun(t, `t := map({a: 1, b: 2}); out = t.empty`, nil, false)
+	expectRun(t, `t := map(); out = t.empty`, nil, true)
+	expectRun(t, `t := map({a: 1, b: 2}); out = t.len`, nil, 2)
+	expectRun(t, `t := map(); out = t.len`, nil, 0)
+	expectRun(t, `t := map({a: 1, b: 2}); out = string(t.keys.sort())`, nil, `["a", "b"]`)
 }
 
 func TestTime(t *testing.T) {

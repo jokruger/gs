@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -172,20 +173,58 @@ func (o *Array) Copy() core.Object {
 }
 
 func (o *Array) Access(index core.Object, mode core.Opcode) (core.Object, error) {
-	if mode == parser.OpSelect {
-		return nil, core.NewInvalidAccessModeError("array", "select")
+	if mode == parser.OpIndex {
+		i, ok := index.AsInt()
+		if !ok {
+			return nil, core.NewInvalidIndexTypeError("array access", "int", index)
+		}
+
+		if i < 0 || i >= int64(len(o.value)) {
+			return UndefinedValue, nil
+		}
+
+		return o.value[i], nil
 	}
 
-	i, ok := index.AsInt()
+	k, ok := index.AsString()
 	if !ok {
-		return nil, core.NewInvalidIndexTypeError("array access", "int", index)
+		return nil, core.NewInvalidSelectorError(o, k)
 	}
 
-	if i < 0 || i >= int64(len(o.value)) {
-		return UndefinedValue, nil
-	}
+	switch k {
+	case "empty":
+		return NewBool(len(o.value) == 0), nil
 
-	return o.value[i], nil
+	case "len":
+		return NewInt(int64(len(o.value))), nil
+
+	case "sort":
+		return NewBuiltinFunction("array.sort", func(args ...core.Object) (core.Object, error) {
+			if len(args) != 0 {
+				return nil, core.NewWrongNumArgumentsError("array.sort", "0", len(args))
+			}
+			r := o.Copy().(*Array)
+			var err error
+			slices.SortFunc(r.value, func(a, b core.Object) int {
+				less, e := a.BinaryOp(token.Less, b)
+				if e != nil {
+					err = e
+					return 0
+				}
+				if less.IsFalsy() {
+					if a.Equals(b) {
+						return 0
+					}
+					return 1
+				}
+				return -1
+			})
+			return r, err
+		}, 0, false), nil
+
+	default:
+		return nil, core.NewInvalidSelectorError(o, k)
+	}
 }
 
 func (o *Array) Assign(index, value core.Object) (err error) {

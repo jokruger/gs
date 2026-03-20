@@ -82,7 +82,7 @@ func NewInvalidIndexTypeError(context string, expected string, got Object) error
 }
 
 func NewInvalidSelectorError(obj Object, sel string) error {
-	return fmt.Errorf("%w: type %s has no selector '%s'", ErrInvalidSelector, obj.TypeName(), sel)
+	return fmt.Errorf("%w: type %s has no property or method '%s'", ErrInvalidSelector, obj.TypeName(), sel)
 }
 
 func NewNotImplementedError(feature string) error {

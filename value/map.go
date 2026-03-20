@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
 )
 
@@ -177,11 +178,32 @@ func (o *Map) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 	if !ok {
 		return nil, core.NewInvalidIndexTypeError("map access", "string", index)
 	}
-	r, ok := o.value[k]
-	if !ok {
-		return UndefinedValue, nil
+
+	if mode == parser.OpIndex {
+		r, ok := o.value[k]
+		if !ok {
+			return UndefinedValue, nil
+		}
+		return r, nil
 	}
-	return r, nil
+
+	switch k {
+	case "empty":
+		return NewBool(len(o.value) == 0), nil
+
+	case "len":
+		return NewInt(int64(len(o.value))), nil
+
+	case "keys":
+		keys := make([]core.Object, 0, len(o.value))
+		for k := range o.value {
+			keys = append(keys, NewString(k))
+		}
+		return NewArray(keys, false), nil
+
+	default:
+		return nil, core.NewInvalidSelectorError(o, k)
+	}
 }
 
 func (o *Map) Assign(index, value core.Object) error {

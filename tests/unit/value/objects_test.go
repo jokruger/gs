@@ -33,9 +33,9 @@ func TestObject_TypeName(t *testing.T) {
 	o = value.NewMapIterator(nil)
 	require.Equal(t, "map-iterator", o.TypeName())
 	o = value.NewBuiltinFunction("fn", nil, 0, false)
-	require.Equal(t, "builtin-function:fn", o.TypeName())
+	require.Equal(t, "<builtin-function:fn/0>", o.TypeName())
 	o = &vm.CompiledFunction{}
-	require.Equal(t, "compiled-function", o.TypeName())
+	require.Equal(t, "<compiled-function/0>", o.TypeName())
 	o = value.UndefinedValue
 	require.Equal(t, "undefined", o.TypeName())
 	o = value.NewError(nil)

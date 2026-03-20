@@ -1,6 +1,8 @@
 package vm
 
 import (
+	"fmt"
+
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/value"
 )
@@ -16,11 +18,14 @@ type CompiledFunction struct {
 }
 
 func (o *CompiledFunction) TypeName() string {
-	return "compiled-function"
+	if o.VarArgs {
+		return fmt.Sprintf("<compiled-function/%d+>", o.NumParameters)
+	}
+	return fmt.Sprintf("<compiled-function/%d>", o.NumParameters)
 }
 
 func (o *CompiledFunction) String() string {
-	return "<compiled-function>"
+	return o.TypeName()
 }
 
 func (o *CompiledFunction) Arity() int {

@@ -31,19 +31,19 @@ func Test_builtinDelete(t *testing.T) {
 		target    any
 	}{
 		{name: "invalid-arg", args: args{[]core.Object{value.NewString(""), value.NewString("")}},
-			wantedErr: "invalid argument type: delete argument 'first' expects type record, got string"},
+			wantedErr: "invalid argument type: (delete) argument first expects type record, got string"},
 
 		{name: "no-args",
-			wantedErr: "wrong number of arguments: builtin function 'delete': expected 2 argument(s), got 0"},
+			wantedErr: "wrong number of arguments: (delete) expected 2 argument(s), got 0"},
 
 		{name: "empty-args", args: args{[]core.Object{}},
-			wantedErr: "wrong number of arguments: builtin function 'delete': expected 2 argument(s), got 0"},
+			wantedErr: "wrong number of arguments: (delete) expected 2 argument(s), got 0"},
 
 		{name: "3-args", args: args{[]core.Object{(*value.Record)(nil), (*value.String)(nil), (*value.String)(nil)}},
-			wantedErr: "wrong number of arguments: builtin function 'delete': expected 2 argument(s), got 3"},
+			wantedErr: "wrong number of arguments: (delete) expected 2 argument(s), got 3"},
 
 		{name: "nil-record-no-key", args: args{[]core.Object{value.NewRecord(nil, false)}},
-			wantedErr: "wrong number of arguments: builtin function 'delete': expected 2 argument(s), got 1"},
+			wantedErr: "wrong number of arguments: (delete) expected 2 argument(s), got 1"},
 
 		{name: "record-missing-key",
 			args: args{
@@ -132,16 +132,16 @@ func Test_builtinSplice(t *testing.T) {
 		wantedErr string
 	}{
 		{name: "no args", args: []core.Object{},
-			wantedErr: "wrong number of arguments: splice: expected at least 1 argument(s), got 0"},
+			wantedErr: "wrong number of arguments: (splice) expected at least 1 argument(s), got 0"},
 
 		{name: "invalid args", args: []core.Object{value.NewRecord(nil, false)},
-			wantedErr: "invalid argument type: splice argument 'first' expects type mutable array, got record"},
+			wantedErr: "invalid argument type: (splice) argument first expects type mutable array, got record"},
 
 		{name: "invalid args", args: []core.Object{value.NewArray(nil, false), value.NewString("")},
-			wantedErr: "invalid argument type: splice argument 'second' expects type int, got string"},
+			wantedErr: "invalid argument type: (splice) argument second expects type int, got string"},
 
 		{name: "negative index", args: []core.Object{value.NewArray(nil, false), value.NewInt(-1)},
-			wantedErr: "index out of bounds: splice (start index): index -1 out of range [0,0)"},
+			wantedErr: "index out of bounds: (splice, start index) -1 out of range [0, 0]"},
 
 		{name: "non int count",
 			args: []core.Object{
@@ -149,7 +149,7 @@ func Test_builtinSplice(t *testing.T) {
 				value.NewInt(0),
 				value.NewString(""),
 			},
-			wantedErr: "invalid argument type: splice argument 'third' expects type int, got string"},
+			wantedErr: "invalid argument type: (splice) argument third expects type int, got string"},
 
 		{name: "negative count",
 			args: []core.Object{
@@ -292,22 +292,22 @@ func Test_builtinRange(t *testing.T) {
 		wantedErr string
 	}{
 		{name: "no args", args: []core.Object{},
-			wantedErr: "wrong number of arguments: range: expected 2 or 3 argument(s), got 0"},
+			wantedErr: "wrong number of arguments: (range) expected 2 or 3 argument(s), got 0"},
 
 		{name: "single args", args: []core.Object{value.NewRecord(nil, false)},
-			wantedErr: "wrong number of arguments: range: expected 2 or 3 argument(s), got 1"},
+			wantedErr: "wrong number of arguments: (range) expected 2 or 3 argument(s), got 1"},
 
 		{name: "4 args", args: []core.Object{value.NewRecord(nil, false), value.NewString(""), value.NewString(""), value.NewString("")},
-			wantedErr: "wrong number of arguments: range: expected 2 or 3 argument(s), got 4"},
+			wantedErr: "wrong number of arguments: (range) expected 2 or 3 argument(s), got 4"},
 
 		{name: "invalid start", args: []core.Object{value.NewString(""), value.NewString("")},
-			wantedErr: "invalid argument type: range argument 'start' expects type int, got string"},
+			wantedErr: "invalid argument type: (range) argument start expects type int, got string"},
 
 		{name: "invalid stop", args: []core.Object{value.NewInt(0), value.NewString("")},
-			wantedErr: "invalid argument type: range argument 'stop' expects type int, got string"},
+			wantedErr: "invalid argument type: (range) argument stop expects type int, got string"},
 
 		{name: "invalid step", args: []core.Object{value.NewInt(0), value.NewInt(0), value.NewString("")},
-			wantedErr: "invalid argument type: range argument 'step' expects type int, got string"},
+			wantedErr: "invalid argument type: (range) argument step expects type int, got string"},
 
 		{name: "zero step", args: []core.Object{value.NewInt(0), value.NewInt(0), value.NewInt(0)}, //must greate than 0
 			wantedErr: "logic error: range step must be greater than 0, got 0"},

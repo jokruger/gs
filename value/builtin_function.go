@@ -75,11 +75,14 @@ func (o *BuiltinFunction) Name() string {
 }
 
 func (o *BuiltinFunction) TypeName() string {
-	return "builtin-function:" + o.name
+	if o.variadic {
+		return fmt.Sprintf("<builtin-function:%s/%d+>", o.name, o.arity)
+	}
+	return fmt.Sprintf("<builtin-function:%s/%d>", o.name, o.arity)
 }
 
 func (o *BuiltinFunction) String() string {
-	return "<builtin-function>"
+	return o.TypeName()
 }
 
 func (o *BuiltinFunction) Interface() any {
@@ -118,11 +121,6 @@ func (o *BuiltinFunction) Call(vm core.VM, args ...core.Object) (core.Object, er
 	if o.value == nil {
 		return nil, core.NewLogicError(fmt.Sprintf("built-in function %s is referencing nil", o.name))
 	}
-
-	if !o.variadic && len(args) != o.arity {
-		return nil, core.NewWrongNumArgumentsError("builtin function '"+o.name+"'", fmt.Sprintf("%d", o.arity), len(args))
-	}
-
 	return o.value(args...)
 }
 

@@ -54,19 +54,19 @@ func NewBinaryNotSupportedError(obj Object) error {
 }
 
 func NewInvalidArgumentTypeError(context string, name string, expected string, got Object) error {
-	return fmt.Errorf("%w: %s argument '%s' expects type %s, got %s", ErrInvalidArgumentType, context, name, expected, got.TypeName())
+	return fmt.Errorf("%w: (%s) argument %s expects type %s, got %s", ErrInvalidArgumentType, context, name, expected, got.TypeName())
 }
 
 func NewIndexOutOfBoundsError(context string, idx int, size int) error {
-	return fmt.Errorf("%w: %s: index %d out of range [0,%d)", ErrIndexOutOfBounds, context, idx, size)
+	return fmt.Errorf("%w: (%s) %d out of range [0, %d]", ErrIndexOutOfBounds, context, idx, size)
 }
 
 func NewWrongNumArgumentsError(context string, expected string, got int) error {
-	return fmt.Errorf("%w: %s: expected %s argument(s), got %d", ErrWrongNumArguments, context, expected, got)
+	return fmt.Errorf("%w: (%s) expected %s argument(s), got %d", ErrWrongNumArguments, context, expected, got)
 }
 
 func NewInvalidAccessModeError(dt string, mode string) error {
-	return fmt.Errorf("%w: type %s does not support access mode '%s'", ErrInvalidAccessMode, dt, mode)
+	return fmt.Errorf("%w: type %s does not support %s access", ErrInvalidAccessMode, dt, mode)
 }
 
 func NewNotAccessibleError(obj Object) error {
@@ -78,11 +78,11 @@ func NewNotAssignableError(obj Object) error {
 }
 
 func NewInvalidIndexTypeError(context string, expected string, got Object) error {
-	return fmt.Errorf("%w: %s: expected %s, got %s", ErrInvalidIndexType, context, expected, got.TypeName())
+	return fmt.Errorf("%w: (%s) expected %s, got %s", ErrInvalidIndexType, context, expected, got.TypeName())
 }
 
 func NewInvalidSelectorError(obj Object, sel string) error {
-	return fmt.Errorf("%w: type %s has no property or method '%s'", ErrInvalidSelector, obj.TypeName(), sel)
+	return fmt.Errorf("%w: type %s has no property or method %s", ErrInvalidSelector, obj.TypeName(), sel)
 }
 
 func NewNotImplementedError(feature string) error {

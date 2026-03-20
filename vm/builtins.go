@@ -600,7 +600,7 @@ func builtinSplice(args ...core.Object) (core.Object, error) {
 		}
 		startIdx = int(arg1)
 		if startIdx < 0 || startIdx > arrayLen {
-			return nil, core.NewIndexOutOfBoundsError("splice (start index)", startIdx, arrayLen)
+			return nil, core.NewIndexOutOfBoundsError("splice, start index", startIdx, arrayLen)
 		}
 	}
 

@@ -94,7 +94,7 @@ func b64RawURLEncodeToString(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("base64.raw_url_encode", "1", len(args))
 	}
-	y1, ok := args[0].AsByteSlice()
+	y1, ok := args[0].AsBytes()
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("base64.raw_url_encode", "first", "bytes(compatible)", args[0])
 	}
@@ -106,7 +106,7 @@ func b64URLEncodeToString(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("base64.url_encode", "1", len(args))
 	}
-	y1, ok := args[0].AsByteSlice()
+	y1, ok := args[0].AsBytes()
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("base64.url_encode", "first", "bytes(compatible)", args[0])
 	}
@@ -118,7 +118,7 @@ func b64RawEncodeToString(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("base64.raw_encode", "1", len(args))
 	}
-	y1, ok := args[0].AsByteSlice()
+	y1, ok := args[0].AsBytes()
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("base64.raw_encode", "first", "bytes(compatible)", args[0])
 	}
@@ -130,7 +130,7 @@ func b64EncodeToString(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("base64.encode", "1", len(args))
 	}
-	y1, ok := args[0].AsByteSlice()
+	y1, ok := args[0].AsBytes()
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("base64.encode", "first", "bytes(compatible)", args[0])
 	}

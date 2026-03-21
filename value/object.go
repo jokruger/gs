@@ -94,7 +94,7 @@ func (o *Object) AsRune() (rune, bool) {
 	return 0, false
 }
 
-func (o *Object) AsByteSlice() ([]byte, bool) {
+func (o *Object) AsBytes() ([]byte, bool) {
 	return nil, false
 }
 

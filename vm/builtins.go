@@ -466,7 +466,7 @@ func builtinBytes(args ...core.Object) (core.Object, error) {
 		return value.NewBytes(make([]byte, int(n.Value()))), nil
 	}
 
-	v, ok := args[0].AsByteSlice()
+	v, ok := args[0].AsBytes()
 	if ok {
 		if len(v) > core.MaxBytesLen {
 			return nil, core.NewBytesLimitError("bytes constructor")

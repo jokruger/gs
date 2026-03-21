@@ -27,11 +27,11 @@ type Object interface {
 	IsImmutable() bool // return whether the object is immutable (i.e. cannot be modified after creation)
 	IsVariadic() bool  // return whether the object is variadic (i.e. can accept a variable number of arguments)
 
-	AsString() (string, bool)    // return string value and whether the conversion was successful
-	AsInt() (int64, bool)        // return int value and whether the conversion was successful
-	AsFloat() (float64, bool)    // return float value and whether the conversion was successful
-	AsBool() (bool, bool)        // return bool value and whether the conversion was successful
-	AsRune() (rune, bool)        // return rune value and whether the conversion was successful
-	AsByteSlice() ([]byte, bool) // return byte slice value and whether the conversion was successful
-	AsTime() (time.Time, bool)   // return time value and whether the conversion was successful
+	AsString() (string, bool)  // return string value and whether the conversion was successful
+	AsInt() (int64, bool)      // return int value and whether the conversion was successful
+	AsFloat() (float64, bool)  // return float value and whether the conversion was successful
+	AsBool() (bool, bool)      // return bool value and whether the conversion was successful
+	AsRune() (rune, bool)      // return rune value and whether the conversion was successful
+	AsBytes() ([]byte, bool)   // return byte slice value and whether the conversion was successful
+	AsTime() (time.Time, bool) // return time value and whether the conversion was successful
 }

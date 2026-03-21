@@ -34,7 +34,7 @@ func hexEncodeToString(args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("hex.encode", "1", len(args))
 	}
-	y1, ok := args[0].AsByteSlice()
+	y1, ok := args[0].AsBytes()
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("hex.encode", "first", "bytes(compatible)", args[0])
 	}

@@ -223,7 +223,7 @@ func (o *String) AsRune() (rune, bool) {
 	return 0, false
 }
 
-func (o *String) AsByteSlice() ([]byte, bool) {
+func (o *String) AsBytes() ([]byte, bool) {
 	return []byte(o.value), true
 }
 

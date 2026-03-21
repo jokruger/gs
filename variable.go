@@ -111,7 +111,7 @@ func (v *Variable) String() string {
 // Bytes returns a byte slice of the variable value. It returns nil if the
 // value is not convertible to byte slice.
 func (v *Variable) Bytes() []byte {
-	c, _ := v.value.AsByteSlice()
+	c, _ := v.value.AsBytes()
 	return c
 }
 

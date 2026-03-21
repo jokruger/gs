@@ -113,7 +113,7 @@ func (o *Bytes) Equals(x core.Object) bool {
 		return true
 	}
 
-	t, ok := x.AsByteSlice()
+	t, ok := x.AsBytes()
 	if !ok {
 		return false
 	}
@@ -171,6 +171,6 @@ func (o *Bytes) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Bytes) AsByteSlice() ([]byte, bool) {
+func (o *Bytes) AsBytes() ([]byte, bool) {
 	return o.value, true
 }

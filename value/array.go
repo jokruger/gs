@@ -264,7 +264,7 @@ func (o *Array) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
 }
 
-func (o *Array) AsByteSlice() ([]byte, bool) {
+func (o *Array) AsBytes() ([]byte, bool) {
 	bs := make([]byte, len(o.value))
 	for i, e := range o.value {
 		b, ok := e.AsInt()

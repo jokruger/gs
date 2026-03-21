@@ -1,4 +1,4 @@
-package gs_test
+package unit
 
 import (
 	"fmt"
@@ -1273,7 +1273,7 @@ func TestCompiler_custom_extension(t *testing.T) {
 	file, err := p.ParseFile()
 	require.NoError(t, err)
 
-	c := gs.NewCompiler(srcFile, nil, nil, modules, nil)
+	c := gs.NewCompiler(alloc, srcFile, nil, nil, modules, nil)
 	c.EnableFileImport(true)
 	c.SetImportDir(filepath.Dir(pathFileSource))
 
@@ -1290,7 +1290,7 @@ func TestCompilerNewCompiler_default_file_extension(t *testing.T) {
 	fileSet := parser.NewFileSet()
 	file := fileSet.AddFile("test", -1, len(input))
 
-	c := gs.NewCompiler(file, nil, nil, modules, nil)
+	c := gs.NewCompiler(alloc, file, nil, nil, modules, nil)
 	c.EnableFileImport(true)
 
 	require.Equal(t, []string{".gs"}, c.GetImportFileExt(), "newly created compiler object must contain the default extension")
@@ -1417,7 +1417,7 @@ func traceCompile(input string, symbols map[string]core.Object) (res *vm.Bytecod
 	}
 
 	tr := &compileTracer{}
-	c := gs.NewCompiler(file, symTable, nil, nil, tr)
+	c := gs.NewCompiler(alloc, file, symTable, nil, nil, tr)
 	parsed, err := p.ParseFile()
 	if err != nil {
 		return
@@ -1445,11 +1445,11 @@ func objectsArray(o ...core.Object) []core.Object {
 }
 
 func intObject(v int64) *value.Int {
-	return value.NewInt(v)
+	return alloc.NewInt(v).(*value.Int)
 }
 
 func stringObject(v string) *value.String {
-	return value.NewString(v)
+	return alloc.NewString(v).(*value.String)
 }
 
 func compiledFunction(numLocals, numParams int, insts ...[]byte) *value.CompiledFunction {

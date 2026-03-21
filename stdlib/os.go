@@ -12,82 +12,82 @@ import (
 )
 
 var osModule = map[string]core.Object{
-	"platform":            value.NewString(runtime.GOOS),
-	"arch":                value.NewString(runtime.GOARCH),
-	"o_rdonly":            value.NewInt(int64(os.O_RDONLY)),
-	"o_wronly":            value.NewInt(int64(os.O_WRONLY)),
-	"o_rdwr":              value.NewInt(int64(os.O_RDWR)),
-	"o_append":            value.NewInt(int64(os.O_APPEND)),
-	"o_create":            value.NewInt(int64(os.O_CREATE)),
-	"o_excl":              value.NewInt(int64(os.O_EXCL)),
-	"o_sync":              value.NewInt(int64(os.O_SYNC)),
-	"o_trunc":             value.NewInt(int64(os.O_TRUNC)),
-	"mode_dir":            value.NewInt(int64(os.ModeDir)),
-	"mode_append":         value.NewInt(int64(os.ModeAppend)),
-	"mode_exclusive":      value.NewInt(int64(os.ModeExclusive)),
-	"mode_temporary":      value.NewInt(int64(os.ModeTemporary)),
-	"mode_symlink":        value.NewInt(int64(os.ModeSymlink)),
-	"mode_device":         value.NewInt(int64(os.ModeDevice)),
-	"mode_named_pipe":     value.NewInt(int64(os.ModeNamedPipe)),
-	"mode_socket":         value.NewInt(int64(os.ModeSocket)),
-	"mode_setuid":         value.NewInt(int64(os.ModeSetuid)),
-	"mode_setgui":         value.NewInt(int64(os.ModeSetgid)),
-	"mode_char_device":    value.NewInt(int64(os.ModeCharDevice)),
-	"mode_sticky":         value.NewInt(int64(os.ModeSticky)),
-	"mode_type":           value.NewInt(int64(os.ModeType)),
-	"mode_perm":           value.NewInt(int64(os.ModePerm)),
-	"path_separator":      value.NewChar(os.PathSeparator),
-	"path_list_separator": value.NewChar(os.PathListSeparator),
-	"dev_null":            value.NewString(os.DevNull),
-	"seek_set":            value.NewInt(int64(io.SeekStart)),
-	"seek_cur":            value.NewInt(int64(io.SeekCurrent)),
-	"seek_end":            value.NewInt(int64(io.SeekEnd)),
+	"platform":            value.NewStaticString(runtime.GOOS),
+	"arch":                value.NewStaticString(runtime.GOARCH),
+	"o_rdonly":            value.NewStaticInt(int64(os.O_RDONLY)),
+	"o_wronly":            value.NewStaticInt(int64(os.O_WRONLY)),
+	"o_rdwr":              value.NewStaticInt(int64(os.O_RDWR)),
+	"o_append":            value.NewStaticInt(int64(os.O_APPEND)),
+	"o_create":            value.NewStaticInt(int64(os.O_CREATE)),
+	"o_excl":              value.NewStaticInt(int64(os.O_EXCL)),
+	"o_sync":              value.NewStaticInt(int64(os.O_SYNC)),
+	"o_trunc":             value.NewStaticInt(int64(os.O_TRUNC)),
+	"mode_dir":            value.NewStaticInt(int64(os.ModeDir)),
+	"mode_append":         value.NewStaticInt(int64(os.ModeAppend)),
+	"mode_exclusive":      value.NewStaticInt(int64(os.ModeExclusive)),
+	"mode_temporary":      value.NewStaticInt(int64(os.ModeTemporary)),
+	"mode_symlink":        value.NewStaticInt(int64(os.ModeSymlink)),
+	"mode_device":         value.NewStaticInt(int64(os.ModeDevice)),
+	"mode_named_pipe":     value.NewStaticInt(int64(os.ModeNamedPipe)),
+	"mode_socket":         value.NewStaticInt(int64(os.ModeSocket)),
+	"mode_setuid":         value.NewStaticInt(int64(os.ModeSetuid)),
+	"mode_setgui":         value.NewStaticInt(int64(os.ModeSetgid)),
+	"mode_char_device":    value.NewStaticInt(int64(os.ModeCharDevice)),
+	"mode_sticky":         value.NewStaticInt(int64(os.ModeSticky)),
+	"mode_type":           value.NewStaticInt(int64(os.ModeType)),
+	"mode_perm":           value.NewStaticInt(int64(os.ModePerm)),
+	"path_separator":      value.NewStaticChar(os.PathSeparator),
+	"path_list_separator": value.NewStaticChar(os.PathListSeparator),
+	"dev_null":            value.NewStaticString(os.DevNull),
+	"seek_set":            value.NewStaticInt(int64(io.SeekStart)),
+	"seek_cur":            value.NewStaticInt(int64(io.SeekCurrent)),
+	"seek_end":            value.NewStaticInt(int64(io.SeekEnd)),
 
-	"args":           value.NewBuiltinFunction("args", osArgs, 0, false),                  // args() => array(string)
-	"chdir":          value.NewBuiltinFunction("chdir", osChdir, 1, false),                // chdir(dir string) => error
-	"chmod":          value.NewBuiltinFunction("chmod", osChmod, 2, false),                // chmod(name string, mode int) => error
-	"chown":          value.NewBuiltinFunction("chown", osChown, 3, false),                // chown(name string, uid int, gid int) => error
-	"clearenv":       value.NewBuiltinFunction("clearenv", osClearenv, 0, false),          // clearenv()
-	"environ":        value.NewBuiltinFunction("environ", osEnviron, 0, false),            // environ() => array(string)
-	"exit":           value.NewBuiltinFunction("exit", osExit, 1, false),                  // exit(code int)
-	"expand_env":     value.NewBuiltinFunction("expand_env", osExpandEnv, 1, false),       // expand_env(s string) => string
-	"getegid":        value.NewBuiltinFunction("getegid", osGetegid, 0, false),            // getegid() => int
-	"getenv":         value.NewBuiltinFunction("getenv", osGetenv, 1, false),              // getenv(s string) => string
-	"geteuid":        value.NewBuiltinFunction("geteuid", osGeteuid, 0, false),            // geteuid() => int
-	"getgid":         value.NewBuiltinFunction("getgid", osGetgid, 0, false),              // getgid() => int
-	"getgroups":      value.NewBuiltinFunction("getgroups", osGetgroups, 0, false),        // getgroups() => array(string)/error
-	"getpagesize":    value.NewBuiltinFunction("getpagesize", osGetpagesize, 0, false),    // getpagesize() => int
-	"getpid":         value.NewBuiltinFunction("getpid", osGetpid, 0, false),              // getpid() => int
-	"getppid":        value.NewBuiltinFunction("getppid", osGetppid, 0, false),            // getppid() => int
-	"getuid":         value.NewBuiltinFunction("getuid", osGetuid, 0, false),              // getuid() => int
-	"getwd":          value.NewBuiltinFunction("getwd", osGetwd, 0, false),                // getwd() => string/error
-	"hostname":       value.NewBuiltinFunction("hostname", osHostname, 0, false),          // hostname() => string/error
-	"lchown":         value.NewBuiltinFunction("lchown", osLchown, 3, false),              // lchown(name string, uid int, gid int) => error
-	"link":           value.NewBuiltinFunction("link", osLink, 2, false),                  // link(oldname string, newname string) => error
-	"lookup_env":     value.NewBuiltinFunction("lookup_env", osLookupEnv, 1, false),       // lookup_env(key string) => string/false
-	"mkdir":          value.NewBuiltinFunction("mkdir", osMkdir, 2, false),                // mkdir(name string, perm int) => error
-	"mkdir_all":      value.NewBuiltinFunction("mkdir_all", osMkdirAll, 2, false),         // mkdir_all(name string, perm int) => error
-	"readlink":       value.NewBuiltinFunction("readlink", osReadlink, 1, false),          // readlink(name string) => string/error
-	"remove":         value.NewBuiltinFunction("remove", osRemove, 1, false),              // remove(name string) => error
-	"remove_all":     value.NewBuiltinFunction("remove_all", osRemoveAll, 1, false),       // remove_all(name string) => error
-	"rename":         value.NewBuiltinFunction("rename", osRename, 2, false),              // rename(oldpath string, newpath string) => error
-	"setenv":         value.NewBuiltinFunction("setenv", osSetenv, 2, false),              // setenv(key string, value string) => error
-	"symlink":        value.NewBuiltinFunction("symlink", osSymlink, 2, false),            // symlink(oldname string newname string) => error
-	"temp_dir":       value.NewBuiltinFunction("temp_dir", osTempDir, 0, false),           // temp_dir() => string
-	"truncate":       value.NewBuiltinFunction("truncate", osTruncate, 2, false),          // truncate(name string, size int) => error
-	"unsetenv":       value.NewBuiltinFunction("unsetenv", osUnsetenv, 1, false),          // unsetenv(key string) => error
-	"create":         value.NewBuiltinFunction("create", osCreate, 1, false),              // create(name string) => imap(file)/error
-	"open":           value.NewBuiltinFunction("open", osOpen, 1, false),                  // open(name string) => imap(file)/error
-	"open_file":      value.NewBuiltinFunction("open_file", osOpenFile, 3, false),         // open_file(name string, flag int, perm int) => imap(file)/error
-	"find_process":   value.NewBuiltinFunction("find_process", osFindProcess, 1, false),   // find_process(pid int) => imap(process)/error
-	"start_process":  value.NewBuiltinFunction("start_process", osStartProcess, 4, false), // start_process(name string, argv array(string), dir string, env array(string)) => imap(process)/error
-	"exec_look_path": value.NewBuiltinFunction("exec_look_path", execLookPath, 1, false),  // exec_look_path(file) => string/error
-	"exec":           value.NewBuiltinFunction("exec", osExec, 1, true),                   // exec(name, args...) => command
-	"stat":           value.NewBuiltinFunction("stat", osStat, 1, false),                  // stat(name) => imap(fileinfo)/error
-	"read_file":      value.NewBuiltinFunction("read_file", osReadFile, 1, false),         // readfile(name) => array(byte)/error
+	"args":           value.NewStaticBuiltinFunction("args", osArgs, 0, false),                  // args() => array(string)
+	"chdir":          value.NewStaticBuiltinFunction("chdir", osChdir, 1, false),                // chdir(dir string) => error
+	"chmod":          value.NewStaticBuiltinFunction("chmod", osChmod, 2, false),                // chmod(name string, mode int) => error
+	"chown":          value.NewStaticBuiltinFunction("chown", osChown, 3, false),                // chown(name string, uid int, gid int) => error
+	"clearenv":       value.NewStaticBuiltinFunction("clearenv", osClearenv, 0, false),          // clearenv()
+	"environ":        value.NewStaticBuiltinFunction("environ", osEnviron, 0, false),            // environ() => array(string)
+	"exit":           value.NewStaticBuiltinFunction("exit", osExit, 1, false),                  // exit(code int)
+	"expand_env":     value.NewStaticBuiltinFunction("expand_env", osExpandEnv, 1, false),       // expand_env(s string) => string
+	"getegid":        value.NewStaticBuiltinFunction("getegid", osGetegid, 0, false),            // getegid() => int
+	"getenv":         value.NewStaticBuiltinFunction("getenv", osGetenv, 1, false),              // getenv(s string) => string
+	"geteuid":        value.NewStaticBuiltinFunction("geteuid", osGeteuid, 0, false),            // geteuid() => int
+	"getgid":         value.NewStaticBuiltinFunction("getgid", osGetgid, 0, false),              // getgid() => int
+	"getgroups":      value.NewStaticBuiltinFunction("getgroups", osGetgroups, 0, false),        // getgroups() => array(string)/error
+	"getpagesize":    value.NewStaticBuiltinFunction("getpagesize", osGetpagesize, 0, false),    // getpagesize() => int
+	"getpid":         value.NewStaticBuiltinFunction("getpid", osGetpid, 0, false),              // getpid() => int
+	"getppid":        value.NewStaticBuiltinFunction("getppid", osGetppid, 0, false),            // getppid() => int
+	"getuid":         value.NewStaticBuiltinFunction("getuid", osGetuid, 0, false),              // getuid() => int
+	"getwd":          value.NewStaticBuiltinFunction("getwd", osGetwd, 0, false),                // getwd() => string/error
+	"hostname":       value.NewStaticBuiltinFunction("hostname", osHostname, 0, false),          // hostname() => string/error
+	"lchown":         value.NewStaticBuiltinFunction("lchown", osLchown, 3, false),              // lchown(name string, uid int, gid int) => error
+	"link":           value.NewStaticBuiltinFunction("link", osLink, 2, false),                  // link(oldname string, newname string) => error
+	"lookup_env":     value.NewStaticBuiltinFunction("lookup_env", osLookupEnv, 1, false),       // lookup_env(key string) => string/false
+	"mkdir":          value.NewStaticBuiltinFunction("mkdir", osMkdir, 2, false),                // mkdir(name string, perm int) => error
+	"mkdir_all":      value.NewStaticBuiltinFunction("mkdir_all", osMkdirAll, 2, false),         // mkdir_all(name string, perm int) => error
+	"readlink":       value.NewStaticBuiltinFunction("readlink", osReadlink, 1, false),          // readlink(name string) => string/error
+	"remove":         value.NewStaticBuiltinFunction("remove", osRemove, 1, false),              // remove(name string) => error
+	"remove_all":     value.NewStaticBuiltinFunction("remove_all", osRemoveAll, 1, false),       // remove_all(name string) => error
+	"rename":         value.NewStaticBuiltinFunction("rename", osRename, 2, false),              // rename(oldpath string, newpath string) => error
+	"setenv":         value.NewStaticBuiltinFunction("setenv", osSetenv, 2, false),              // setenv(key string, value string) => error
+	"symlink":        value.NewStaticBuiltinFunction("symlink", osSymlink, 2, false),            // symlink(oldname string newname string) => error
+	"temp_dir":       value.NewStaticBuiltinFunction("temp_dir", osTempDir, 0, false),           // temp_dir() => string
+	"truncate":       value.NewStaticBuiltinFunction("truncate", osTruncate, 2, false),          // truncate(name string, size int) => error
+	"unsetenv":       value.NewStaticBuiltinFunction("unsetenv", osUnsetenv, 1, false),          // unsetenv(key string) => error
+	"create":         value.NewStaticBuiltinFunction("create", osCreate, 1, false),              // create(name string) => imap(file)/error
+	"open":           value.NewStaticBuiltinFunction("open", osOpen, 1, false),                  // open(name string) => imap(file)/error
+	"open_file":      value.NewStaticBuiltinFunction("open_file", osOpenFile, 3, false),         // open_file(name string, flag int, perm int) => imap(file)/error
+	"find_process":   value.NewStaticBuiltinFunction("find_process", osFindProcess, 1, false),   // find_process(pid int) => imap(process)/error
+	"start_process":  value.NewStaticBuiltinFunction("start_process", osStartProcess, 4, false), // start_process(name string, argv array(string), dir string, env array(string)) => imap(process)/error
+	"exec_look_path": value.NewStaticBuiltinFunction("exec_look_path", execLookPath, 1, false),  // exec_look_path(file) => string/error
+	"exec":           value.NewStaticBuiltinFunction("exec", osExec, 1, true),                   // exec(name, args...) => command
+	"stat":           value.NewStaticBuiltinFunction("stat", osStat, 1, false),                  // stat(name) => imap(fileinfo)/error
+	"read_file":      value.NewStaticBuiltinFunction("read_file", osReadFile, 1, false),         // readfile(name) => array(byte)/error
 }
 
-func osChmod(args ...core.Object) (core.Object, error) {
+func osChmod(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 2 {
 		return nil, core.NewWrongNumArgumentsError("os.chmod", "2", len(args))
 	}
@@ -99,10 +99,10 @@ func osChmod(args ...core.Object) (core.Object, error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.chmod", "second", "int(compatible)", args[1])
 	}
-	return wrapError(os.Chmod(s1, os.FileMode(i2))), nil
+	return wrapError(alloc, os.Chmod(s1, os.FileMode(i2))), nil
 }
 
-func osMkdir(args ...core.Object) (core.Object, error) {
+func osMkdir(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 2 {
 		return nil, core.NewWrongNumArgumentsError("os.mkdir", "2", len(args))
 	}
@@ -114,10 +114,10 @@ func osMkdir(args ...core.Object) (core.Object, error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.mkdir", "second", "int(compatible)", args[1])
 	}
-	return wrapError(os.Mkdir(s1, os.FileMode(i2))), nil
+	return wrapError(alloc, os.Mkdir(s1, os.FileMode(i2))), nil
 }
 
-func osMkdirAll(args ...core.Object) (core.Object, error) {
+func osMkdirAll(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 2 {
 		return nil, core.NewWrongNumArgumentsError("os.mkdir_all", "2", len(args))
 	}
@@ -129,10 +129,10 @@ func osMkdirAll(args ...core.Object) (core.Object, error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.mkdir_all", "second", "int(compatible)", args[1])
 	}
-	return wrapError(os.MkdirAll(s1, os.FileMode(i2))), nil
+	return wrapError(alloc, os.MkdirAll(s1, os.FileMode(i2))), nil
 }
 
-func osLchown(args ...core.Object) (ret core.Object, err error) {
+func osLchown(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 3 {
 		return nil, core.NewWrongNumArgumentsError("os.lchown", "3", len(args))
 	}
@@ -148,10 +148,10 @@ func osLchown(args ...core.Object) (ret core.Object, err error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.lchown", "third", "int(compatible)", args[2])
 	}
-	return wrapError(os.Lchown(s1, int(i2), int(i3))), nil
+	return wrapError(alloc, os.Lchown(s1, int(i2), int(i3))), nil
 }
 
-func osChown(args ...core.Object) (ret core.Object, err error) {
+func osChown(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 3 {
 		return nil, core.NewWrongNumArgumentsError("os.chown", "3", len(args))
 	}
@@ -167,10 +167,10 @@ func osChown(args ...core.Object) (ret core.Object, err error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.chown", "third", "int(compatible)", args[2])
 	}
-	return wrapError(os.Chown(s1, int(i2), int(i3))), nil
+	return wrapError(alloc, os.Chown(s1, int(i2), int(i3))), nil
 }
 
-func osTruncate(args ...core.Object) (ret core.Object, err error) {
+func osTruncate(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
 		return nil, core.NewWrongNumArgumentsError("os.truncate", "2", len(args))
 	}
@@ -182,10 +182,10 @@ func osTruncate(args ...core.Object) (ret core.Object, err error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.truncate", "second", "int(compatible)", args[1])
 	}
-	return wrapError(os.Truncate(s1, i2)), nil
+	return wrapError(alloc, os.Truncate(s1, i2)), nil
 }
 
-func osSymlink(args ...core.Object) (core.Object, error) {
+func osSymlink(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 2 {
 		return nil, core.NewWrongNumArgumentsError("os.symlink", "2", len(args))
 	}
@@ -197,10 +197,10 @@ func osSymlink(args ...core.Object) (core.Object, error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.symlink", "second", "string(compatible)", args[1])
 	}
-	return wrapError(os.Symlink(s1, s2)), nil
+	return wrapError(alloc, os.Symlink(s1, s2)), nil
 }
 
-func osSetenv(args ...core.Object) (core.Object, error) {
+func osSetenv(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 2 {
 		return nil, core.NewWrongNumArgumentsError("os.setenv", "2", len(args))
 	}
@@ -212,10 +212,10 @@ func osSetenv(args ...core.Object) (core.Object, error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.setenv", "second", "string(compatible)", args[1])
 	}
-	return wrapError(os.Setenv(s1, s2)), nil
+	return wrapError(alloc, os.Setenv(s1, s2)), nil
 }
 
-func osRename(args ...core.Object) (core.Object, error) {
+func osRename(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 2 {
 		return nil, core.NewWrongNumArgumentsError("os.rename", "2", len(args))
 	}
@@ -227,10 +227,10 @@ func osRename(args ...core.Object) (core.Object, error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.rename", "second", "string(compatible)", args[1])
 	}
-	return wrapError(os.Rename(s1, s2)), nil
+	return wrapError(alloc, os.Rename(s1, s2)), nil
 }
 
-func osLink(args ...core.Object) (core.Object, error) {
+func osLink(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 2 {
 		return nil, core.NewWrongNumArgumentsError("os.link", "2", len(args))
 	}
@@ -242,10 +242,10 @@ func osLink(args ...core.Object) (core.Object, error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.link", "second", "string(compatible)", args[1])
 	}
-	return wrapError(os.Link(s1, s2)), nil
+	return wrapError(alloc, os.Link(s1, s2)), nil
 }
 
-func osUnsetenv(args ...core.Object) (core.Object, error) {
+func osUnsetenv(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.unsetenv", "1", len(args))
 	}
@@ -253,10 +253,10 @@ func osUnsetenv(args ...core.Object) (core.Object, error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.unsetenv", "first", "string(compatible)", args[0])
 	}
-	return wrapError(os.Unsetenv(s1)), nil
+	return wrapError(alloc, os.Unsetenv(s1)), nil
 }
 
-func osRemoveAll(args ...core.Object) (core.Object, error) {
+func osRemoveAll(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.remove_all", "1", len(args))
 	}
@@ -264,10 +264,10 @@ func osRemoveAll(args ...core.Object) (core.Object, error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.remove_all", "first", "string(compatible)", args[0])
 	}
-	return wrapError(os.RemoveAll(s1)), nil
+	return wrapError(alloc, os.RemoveAll(s1)), nil
 }
 
-func osRemove(args ...core.Object) (core.Object, error) {
+func osRemove(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.remove", "1", len(args))
 	}
@@ -275,10 +275,10 @@ func osRemove(args ...core.Object) (core.Object, error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.remove", "first", "string(compatible)", args[0])
 	}
-	return wrapError(os.Remove(s1)), nil
+	return wrapError(alloc, os.Remove(s1)), nil
 }
 
-func osChdir(args ...core.Object) (core.Object, error) {
+func osChdir(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.chdir", "1", len(args))
 	}
@@ -286,10 +286,10 @@ func osChdir(args ...core.Object) (core.Object, error) {
 	if !ok {
 		return nil, core.NewInvalidArgumentTypeError("os.chdir", "first", "string(compatible)", args[0])
 	}
-	return wrapError(os.Chdir(s1)), nil
+	return wrapError(alloc, os.Chdir(s1)), nil
 }
 
-func execLookPath(args ...core.Object) (core.Object, error) {
+func execLookPath(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.exec_look_path", "1", len(args))
 	}
@@ -299,15 +299,15 @@ func execLookPath(args ...core.Object) (core.Object, error) {
 	}
 	res, err := exec.LookPath(s1)
 	if err != nil {
-		return wrapError(err), nil
+		return wrapError(alloc, err), nil
 	}
 	if len(res) > core.MaxStringLen {
 		return nil, core.NewStringLimitError("os.exec_look_path")
 	}
-	return value.NewString(res), nil
+	return alloc.NewString(res), nil
 }
 
-func osReadlink(args ...core.Object) (core.Object, error) {
+func osReadlink(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.readlink", "1", len(args))
 	}
@@ -317,15 +317,15 @@ func osReadlink(args ...core.Object) (core.Object, error) {
 	}
 	res, err := os.Readlink(s1)
 	if err != nil {
-		return wrapError(err), nil
+		return wrapError(alloc, err), nil
 	}
 	if len(res) > core.MaxStringLen {
 		return nil, core.NewStringLimitError("os.readlink")
 	}
-	return value.NewString(res), nil
+	return alloc.NewString(res), nil
 }
 
-func osGetenv(args ...core.Object) (core.Object, error) {
+func osGetenv(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.getenv", "1", len(args))
 	}
@@ -337,10 +337,10 @@ func osGetenv(args ...core.Object) (core.Object, error) {
 	if len(s) > core.MaxStringLen {
 		return nil, core.NewStringLimitError("os.getenv")
 	}
-	return value.NewString(s), nil
+	return alloc.NewString(s), nil
 }
 
-func osExit(args ...core.Object) (ret core.Object, err error) {
+func osExit(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.exit", "1", len(args))
 	}
@@ -349,25 +349,25 @@ func osExit(args ...core.Object) (ret core.Object, err error) {
 		return nil, core.NewInvalidArgumentTypeError("os.exit", "first", "int(compatible)", args[0])
 	}
 	os.Exit(int(i1))
-	return value.UndefinedValue, nil
+	return alloc.NewUndefined(), nil
 }
 
-func osGetgroups(args ...core.Object) (ret core.Object, err error) {
+func osGetgroups(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.getgroups", "0", len(args))
 	}
 	res, err := os.Getgroups()
 	if err != nil {
-		return wrapError(err), nil
+		return wrapError(alloc, err), nil
 	}
 	arr := make([]core.Object, 0, len(res))
 	for _, v := range res {
-		arr = append(arr, value.NewInt(int64(v)))
+		arr = append(arr, alloc.NewInt(int64(v)))
 	}
-	return value.NewArray(arr, false), nil
+	return alloc.NewArray(arr, false), nil
 }
 
-func osEnviron(args ...core.Object) (ret core.Object, err error) {
+func osEnviron(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.environ", "0", len(args))
 	}
@@ -377,40 +377,40 @@ func osEnviron(args ...core.Object) (ret core.Object, err error) {
 		if len(elem) > core.MaxStringLen {
 			return nil, core.NewStringLimitError("os.environ")
 		}
-		arr = append(arr, value.NewString(elem))
+		arr = append(arr, alloc.NewString(elem))
 	}
-	return value.NewArray(arr, false), nil
+	return alloc.NewArray(arr, false), nil
 }
 
-func osHostname(args ...core.Object) (ret core.Object, err error) {
+func osHostname(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.hostname", "0", len(args))
 	}
 	res, err := os.Hostname()
 	if err != nil {
-		return wrapError(err), nil
+		return wrapError(alloc, err), nil
 	}
 	if len(res) > core.MaxStringLen {
 		return nil, core.NewStringLimitError("os.hostname")
 	}
-	return value.NewString(res), nil
+	return alloc.NewString(res), nil
 }
 
-func osGetwd(args ...core.Object) (ret core.Object, err error) {
+func osGetwd(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.getwd", "0", len(args))
 	}
 	res, err := os.Getwd()
 	if err != nil {
-		return wrapError(err), nil
+		return wrapError(alloc, err), nil
 	}
 	if len(res) > core.MaxStringLen {
 		return nil, core.NewStringLimitError("os.getwd")
 	}
-	return value.NewString(res), nil
+	return alloc.NewString(res), nil
 }
 
-func osTempDir(args ...core.Object) (ret core.Object, err error) {
+func osTempDir(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.temp_dir", "0", len(args))
 	}
@@ -418,67 +418,67 @@ func osTempDir(args ...core.Object) (ret core.Object, err error) {
 	if len(s) > core.MaxStringLen {
 		return nil, core.NewStringLimitError("os.temp_dir")
 	}
-	return value.NewString(s), nil
+	return alloc.NewString(s), nil
 }
 
-func osGetuid(args ...core.Object) (ret core.Object, err error) {
+func osGetuid(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.getuid", "0", len(args))
 	}
-	return value.NewInt(int64(os.Getuid())), nil
+	return alloc.NewInt(int64(os.Getuid())), nil
 }
 
-func osGetppid(args ...core.Object) (ret core.Object, err error) {
+func osGetppid(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.getppid", "0", len(args))
 	}
-	return value.NewInt(int64(os.Getppid())), nil
+	return alloc.NewInt(int64(os.Getppid())), nil
 }
 
-func osGetpid(args ...core.Object) (ret core.Object, err error) {
+func osGetpid(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.getpid", "0", len(args))
 	}
-	return value.NewInt(int64(os.Getpid())), nil
+	return alloc.NewInt(int64(os.Getpid())), nil
 }
 
-func osGetpagesize(args ...core.Object) (ret core.Object, err error) {
+func osGetpagesize(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.getpagesize", "0", len(args))
 	}
-	return value.NewInt(int64(os.Getpagesize())), nil
+	return alloc.NewInt(int64(os.Getpagesize())), nil
 }
 
-func osGetgid(args ...core.Object) (ret core.Object, err error) {
+func osGetgid(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.getgid", "0", len(args))
 	}
-	return value.NewInt(int64(os.Getgid())), nil
+	return alloc.NewInt(int64(os.Getgid())), nil
 }
 
-func osGeteuid(args ...core.Object) (ret core.Object, err error) {
+func osGeteuid(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.geteuid", "0", len(args))
 	}
-	return value.NewInt(int64(os.Geteuid())), nil
+	return alloc.NewInt(int64(os.Geteuid())), nil
 }
 
-func osGetegid(args ...core.Object) (ret core.Object, err error) {
+func osGetegid(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.getegid", "0", len(args))
 	}
-	return value.NewInt(int64(os.Getegid())), nil
+	return alloc.NewInt(int64(os.Getegid())), nil
 }
 
-func osClearenv(args ...core.Object) (ret core.Object, err error) {
+func osClearenv(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.clearenv", "0", len(args))
 	}
 	os.Clearenv()
-	return value.UndefinedValue, nil
+	return alloc.NewUndefined(), nil
 }
 
-func osReadFile(args ...core.Object) (ret core.Object, err error) {
+func osReadFile(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.read_file", "1", len(args))
 	}
@@ -488,15 +488,15 @@ func osReadFile(args ...core.Object) (ret core.Object, err error) {
 	}
 	bytes, err := os.ReadFile(fname)
 	if err != nil {
-		return wrapError(err), nil
+		return wrapError(alloc, err), nil
 	}
 	if len(bytes) > core.MaxBytesLen {
 		return nil, core.NewBytesLimitError("os.read_file")
 	}
-	return value.NewBytes(bytes), nil
+	return alloc.NewBytes(bytes), nil
 }
 
-func osStat(args ...core.Object) (ret core.Object, err error) {
+func osStat(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.stat", "1", len(args))
 	}
@@ -506,23 +506,19 @@ func osStat(args ...core.Object) (ret core.Object, err error) {
 	}
 	stat, err := os.Stat(fname)
 	if err != nil {
-		return wrapError(err), nil
+		return wrapError(alloc, err), nil
 	}
-	fstat := value.NewRecord(map[string]core.Object{
-		"name":  value.NewString(stat.Name()),
-		"mtime": value.NewTime(stat.ModTime()),
-		"size":  value.NewInt(stat.Size()),
-		"mode":  value.NewInt(int64(stat.Mode())),
-	}, true)
-	if stat.IsDir() {
-		fstat.SetKey("directory", value.TrueValue)
-	} else {
-		fstat.SetKey("directory", value.FalseValue)
-	}
+	fstat := alloc.NewRecord(map[string]core.Object{
+		"name":  alloc.NewString(stat.Name()),
+		"mtime": alloc.NewTime(stat.ModTime()),
+		"size":  alloc.NewInt(stat.Size()),
+		"mode":  alloc.NewInt(int64(stat.Mode())),
+	}, true).(*value.Record)
+	fstat.SetKey("directory", alloc.NewBool(stat.IsDir()))
 	return fstat, nil
 }
 
-func osCreate(args ...core.Object) (core.Object, error) {
+func osCreate(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.create", "1", len(args))
 	}
@@ -532,12 +528,12 @@ func osCreate(args ...core.Object) (core.Object, error) {
 	}
 	res, err := os.Create(s1)
 	if err != nil {
-		return wrapError(err), nil
+		return wrapError(alloc, err), nil
 	}
-	return makeOSFile(res), nil
+	return makeOSFile(alloc, res), nil
 }
 
-func osOpen(args ...core.Object) (core.Object, error) {
+func osOpen(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.open", "1", len(args))
 	}
@@ -547,12 +543,12 @@ func osOpen(args ...core.Object) (core.Object, error) {
 	}
 	res, err := os.Open(s1)
 	if err != nil {
-		return wrapError(err), nil
+		return wrapError(alloc, err), nil
 	}
-	return makeOSFile(res), nil
+	return makeOSFile(alloc, res), nil
 }
 
-func osOpenFile(args ...core.Object) (core.Object, error) {
+func osOpenFile(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 3 {
 		return nil, core.NewWrongNumArgumentsError("os.open_file", "3", len(args))
 	}
@@ -570,12 +566,12 @@ func osOpenFile(args ...core.Object) (core.Object, error) {
 	}
 	res, err := os.OpenFile(s1, int(i2), os.FileMode(i3))
 	if err != nil {
-		return wrapError(err), nil
+		return wrapError(alloc, err), nil
 	}
-	return makeOSFile(res), nil
+	return makeOSFile(alloc, res), nil
 }
 
-func osArgs(args ...core.Object) (core.Object, error) {
+func osArgs(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 0 {
 		return nil, core.NewWrongNumArgumentsError("os.args", "0", len(args))
 	}
@@ -584,12 +580,12 @@ func osArgs(args ...core.Object) (core.Object, error) {
 		if len(osArg) > core.MaxStringLen {
 			return nil, core.NewStringLimitError("os.args")
 		}
-		arr = append(arr, value.NewString(osArg))
+		arr = append(arr, alloc.NewString(osArg))
 	}
-	return value.NewArray(arr, false), nil
+	return alloc.NewArray(arr, false), nil
 }
 
-func osLookupEnv(args ...core.Object) (core.Object, error) {
+func osLookupEnv(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.lookup_env", "1", len(args))
 	}
@@ -599,15 +595,15 @@ func osLookupEnv(args ...core.Object) (core.Object, error) {
 	}
 	res, ok := os.LookupEnv(s1)
 	if !ok {
-		return value.FalseValue, nil
+		return alloc.NewBool(false), nil
 	}
 	if len(res) > core.MaxStringLen {
 		return nil, core.NewStringLimitError("os.lookup_env")
 	}
-	return value.NewString(res), nil
+	return alloc.NewString(res), nil
 }
 
-func osExpandEnv(args ...core.Object) (core.Object, error) {
+func osExpandEnv(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.expand_env", "1", len(args))
 	}
@@ -635,10 +631,10 @@ func osExpandEnv(args ...core.Object) (core.Object, error) {
 	if failed || len(s) > core.MaxStringLen {
 		return nil, core.NewStringLimitError("os.expand_env")
 	}
-	return value.NewString(s), nil
+	return alloc.NewString(s), nil
 }
 
-func osExec(args ...core.Object) (core.Object, error) {
+func osExec(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) == 0 {
 		return nil, core.NewWrongNumArgumentsError("os.exec", "at least 1", len(args))
 	}
@@ -654,10 +650,10 @@ func osExec(args ...core.Object) (core.Object, error) {
 		}
 		execArgs = append(execArgs, execArg)
 	}
-	return makeOSExecCommand(exec.Command(name, execArgs...)), nil
+	return makeOSExecCommand(alloc, exec.Command(name, execArgs...)), nil
 }
 
-func osFindProcess(args ...core.Object) (core.Object, error) {
+func osFindProcess(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("os.find_process", "1", len(args))
 	}
@@ -667,12 +663,12 @@ func osFindProcess(args ...core.Object) (core.Object, error) {
 	}
 	proc, err := os.FindProcess(int(i1))
 	if err != nil {
-		return wrapError(err), nil
+		return wrapError(alloc, err), nil
 	}
-	return makeOSProcess(proc), nil
+	return makeOSProcess(alloc, proc), nil
 }
 
-func osStartProcess(args ...core.Object) (core.Object, error) {
+func osStartProcess(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 4 {
 		return nil, core.NewWrongNumArgumentsError("os.start_process", "4", len(args))
 	}
@@ -713,9 +709,9 @@ func osStartProcess(args ...core.Object) (core.Object, error) {
 		Env: env,
 	})
 	if err != nil {
-		return wrapError(err), nil
+		return wrapError(alloc, err), nil
 	}
-	return makeOSProcess(proc), nil
+	return makeOSProcess(alloc, proc), nil
 }
 
 func stringArray(arr []core.Object, argName string) ([]string, error) {

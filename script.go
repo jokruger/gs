@@ -8,12 +8,12 @@ import (
 
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/value"
 	"github.com/jokruger/gs/vm"
 )
 
 // Script can simplify compilation and execution of embedded scripts.
 type Script struct {
+	alloc            core.Allocator
 	variables        map[string]*Variable
 	modules          vm.ModuleGetter
 	input            []byte
@@ -24,8 +24,9 @@ type Script struct {
 }
 
 // NewScript creates a Script instance with an input script.
-func NewScript(input []byte) *Script {
+func NewScript(alloc core.Allocator, input []byte) *Script {
 	return &Script{
+		alloc:           alloc,
 		variables:       make(map[string]*Variable),
 		input:           input,
 		maxAllocs:       -1,
@@ -38,8 +39,7 @@ func (s *Script) Add(name string, val core.Object) {
 	s.variables[name] = NewVariable(name, val)
 }
 
-// Remove removes (undefine) an existing variable for the script. It returns
-// false if the variable name is not defined.
+// Remove removes (undefine) an existing variable for the script. It returns false if the variable name is not defined.
 func (s *Script) Remove(name string) bool {
 	if _, ok := s.variables[name]; !ok {
 		return false
@@ -63,27 +63,23 @@ func (s *Script) SetImportDir(dir string) error {
 	return nil
 }
 
-// SetMaxAllocs sets the maximum number of objects allocations during the run
-// time. Compiled script will return gse.ErrObjectAllocLimit error if it
-// exceeds this limit.
+// SetMaxAllocs sets the maximum number of objects allocations during the run time.
+// Compiled script will return gse.ErrObjectAllocLimit error if it exceeds this limit.
 func (s *Script) SetMaxAllocs(n int64) {
 	s.maxAllocs = n
 }
 
-// SetMaxConstObjects sets the maximum number of objects in the compiled
-// constants.
+// SetMaxConstObjects sets the maximum number of objects in the compiled constants.
 func (s *Script) SetMaxConstObjects(n int) {
 	s.maxConstObjects = n
 }
 
-// EnableFileImport enables or disables module loading from local files. Local
-// file modules are disabled by default.
+// EnableFileImport enables or disables module loading from local files. Local file modules are disabled by default.
 func (s *Script) EnableFileImport(enable bool) {
 	s.enableFileImport = enable
 }
 
-// Compile compiles the script with all the defined variables, and, returns
-// Compiled object.
+// Compile compiles the script with all the defined variables, and, returns Compiled object.
 func (s *Script) Compile() (*Compiled, error) {
 	symbolTable, globals, err := s.prepCompile()
 	if err != nil {
@@ -98,7 +94,7 @@ func (s *Script) Compile() (*Compiled, error) {
 		return nil, err
 	}
 
-	c := NewCompiler(srcFile, symbolTable, nil, s.modules, nil)
+	c := NewCompiler(s.alloc, srcFile, symbolTable, nil, s.modules, nil)
 	c.EnableFileImport(s.enableFileImport)
 	c.SetImportDir(s.importDir)
 	if err := c.Compile(file); err != nil {
@@ -129,6 +125,7 @@ func (s *Script) Compile() (*Compiled, error) {
 		}
 	}
 	return &Compiled{
+		alloc:         s.alloc,
 		globalIndexes: globalIndexes,
 		bytecode:      bytecode,
 		globals:       globals,
@@ -136,8 +133,7 @@ func (s *Script) Compile() (*Compiled, error) {
 	}, nil
 }
 
-// Run compiles and runs the scripts. Use returned compiled object to access
-// global variables.
+// Run compiles and runs the scripts. Use returned compiled object to access global variables.
 func (s *Script) Run() (compiled *Compiled, err error) {
 	compiled, err = s.Compile()
 	if err != nil {
@@ -148,9 +144,7 @@ func (s *Script) Run() (compiled *Compiled, err error) {
 }
 
 // RunContext is like Run but includes a context.
-func (s *Script) RunContext(
-	ctx context.Context,
-) (compiled *Compiled, err error) {
+func (s *Script) RunContext(ctx context.Context) (compiled *Compiled, err error) {
 	compiled, err = s.Compile()
 	if err != nil {
 		return
@@ -159,11 +153,7 @@ func (s *Script) RunContext(
 	return
 }
 
-func (s *Script) prepCompile() (
-	symbolTable *vm.SymbolTable,
-	globals []core.Object,
-	err error,
-) {
+func (s *Script) prepCompile() (symbolTable *vm.SymbolTable, globals []core.Object, err error) {
 	var names []string
 	for name := range s.variables {
 		names = append(names, name)
@@ -179,17 +169,16 @@ func (s *Script) prepCompile() (
 	for idx, name := range names {
 		symbol := symbolTable.Define(name)
 		if symbol.Index != idx {
-			panic(fmt.Errorf("wrong symbol index: %d != %d",
-				idx, symbol.Index))
+			panic(fmt.Errorf("wrong symbol index: %d != %d", idx, symbol.Index))
 		}
 		globals[symbol.Index] = s.variables[name].Value()
 	}
 	return
 }
 
-// Compiled is a compiled instance of the user script. Use Script.Compile() to
-// create Compiled object.
+// Compiled is a compiled instance of the user script. Use Script.Compile() to create Compiled object.
 type Compiled struct {
+	alloc         core.Allocator
 	globalIndexes map[string]int // global symbol name to index
 	bytecode      *vm.Bytecode
 	globals       []core.Object
@@ -202,7 +191,7 @@ func (c *Compiled) Run() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	v := vm.NewVM(c.bytecode, c.globals, c.maxAllocs)
+	v := vm.NewVM(c.alloc, c.bytecode, c.globals, c.maxAllocs)
 	return v.Run()
 }
 
@@ -211,7 +200,7 @@ func (c *Compiled) RunContext(ctx context.Context) (err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	v := vm.NewVM(c.bytecode, c.globals, c.maxAllocs)
+	v := vm.NewVM(c.alloc, c.bytecode, c.globals, c.maxAllocs)
 	ch := make(chan error, 1)
 	go func() {
 		defer func() {
@@ -239,8 +228,7 @@ func (c *Compiled) RunContext(ctx context.Context) (err error) {
 	return
 }
 
-// Size of compiled script in bytes
-// (as much as we can calculate it without reflection and black magic)
+// Size of compiled script in bytes (as much as we can calculate it without reflection and black magic)
 func (c *Compiled) Size() int64 {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
@@ -248,29 +236,30 @@ func (c *Compiled) Size() int64 {
 	return c.bytecode.Size() + int64(len(c.globalIndexes)+len(c.globals))
 }
 
-// Clone creates a new copy of Compiled. Cloned copies are safe for concurrent
-// use by multiple goroutines.
+// Clone creates a new copy of Compiled. Cloned copies are safe for concurrent use by multiple goroutines.
 func (c *Compiled) Clone() *Compiled {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
 	clone := &Compiled{
+		alloc:         c.alloc,
 		globalIndexes: c.globalIndexes,
 		bytecode:      c.bytecode,
 		globals:       make([]core.Object, len(c.globals)),
 		maxAllocs:     c.maxAllocs,
 	}
+
 	// copy global objects
 	for idx, g := range c.globals {
 		if g != nil {
-			clone.globals[idx] = g.Copy()
+			clone.globals[idx] = g.Copy(c.alloc)
 		}
 	}
+
 	return clone
 }
 
-// IsDefined returns true if the variable name is defined (has value) before or
-// after the execution.
+// IsDefined returns true if the variable name is defined (has value) before or after the execution.
 func (c *Compiled) IsDefined(name string) bool {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
@@ -283,7 +272,8 @@ func (c *Compiled) IsDefined(name string) bool {
 	if v == nil {
 		return false
 	}
-	return v != value.UndefinedValue
+
+	return !v.IsUndefined()
 }
 
 // Get returns a variable identified by the name.
@@ -293,11 +283,11 @@ func (c *Compiled) Get(name string) *Variable {
 
 	var v core.Object
 
-	v = value.UndefinedValue
+	v = c.alloc.NewUndefined()
 	if idx, ok := c.globalIndexes[name]; ok {
 		v = c.globals[idx]
 		if v == nil {
-			v = value.UndefinedValue
+			v = c.alloc.NewUndefined()
 		}
 	}
 
@@ -313,7 +303,7 @@ func (c *Compiled) GetAll() []*Variable {
 	for name, idx := range c.globalIndexes {
 		v := c.globals[idx]
 		if v == nil {
-			v = value.UndefinedValue
+			v = c.alloc.NewUndefined()
 		}
 		vars = append(vars, NewVariable(name, v))
 	}

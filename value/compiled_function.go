@@ -6,6 +6,10 @@ import (
 	"github.com/jokruger/gs/core"
 )
 
+/*
+	CompiledFunction is different from other objects as it is created and managed by compiler and VM directly.
+*/
+
 type CompiledFunction struct {
 	Object
 	Instructions  []byte
@@ -43,7 +47,7 @@ func (o *CompiledFunction) Size() int64 {
 	return int64(len(o.Instructions) + len(o.SourceMap) + len(o.Free))
 }
 
-func (o *CompiledFunction) Copy() core.Object {
+func (o *CompiledFunction) Copy(core.Allocator) core.Object {
 	return &CompiledFunction{
 		Instructions:  append([]byte{}, o.Instructions...),
 		NumLocals:     o.NumLocals,

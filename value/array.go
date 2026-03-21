@@ -12,18 +12,10 @@ import (
 	"github.com/jokruger/gs/token"
 )
 
-/* === Array === */
-
 type Array struct {
 	Object
 	value     []core.Object
 	immutable bool
-}
-
-func NewArray(val []core.Object, immutable bool) *Array {
-	o := &Array{}
-	o.Set(val, immutable)
-	return o
 }
 
 func (o *Array) GobDecode(b []byte) error {
@@ -87,13 +79,6 @@ func (o *Array) At(i int) core.Object {
 	return o.value[i]
 }
 
-func (o *Array) Get(i int) (core.Object, bool) {
-	if i < 0 || i >= len(o.value) {
-		return UndefinedValue, false
-	}
-	return o.value[i], true
-}
-
 func (o *Array) Append(vals ...core.Object) {
 	o.value = append(o.value, vals...)
 }
@@ -125,14 +110,14 @@ func (o *Array) Interface() any {
 	return res
 }
 
-func (o *Array) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Array) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	if rhs, ok := rhs.(*Array); ok {
 		switch op {
 		case token.Add:
 			if len(rhs.value) == 0 {
 				return o, nil
 			}
-			return NewArray(append(o.value, rhs.value...), false), nil
+			return alloc.NewArray(append(o.value, rhs.value...), false), nil
 		}
 	}
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
@@ -159,16 +144,16 @@ func (o *Array) Equals(x core.Object) bool {
 	}
 }
 
-func (o *Array) Copy() core.Object {
+func (o *Array) Copy(alloc core.Allocator) core.Object {
 	// Deep copy the array and its elements even if it is immutable (since the elements themselves may be mutable)
 	c := make([]core.Object, len(o.value))
 	for i, e := range o.value {
-		c[i] = e.Copy()
+		c[i] = e.Copy(alloc)
 	}
-	return NewArray(c, false) // copy always returns a mutable array
+	return alloc.NewArray(c, false) // copy always returns a mutable array
 }
 
-func (o *Array) Access(index core.Object, mode core.Opcode) (core.Object, error) {
+func (o *Array) Access(alloc core.Allocator, index core.Object, mode core.Opcode) (core.Object, error) {
 	if mode == parser.OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
@@ -176,7 +161,7 @@ func (o *Array) Access(index core.Object, mode core.Opcode) (core.Object, error)
 		}
 
 		if i < 0 || i >= int64(len(o.value)) {
-			return UndefinedValue, nil
+			return alloc.NewUndefined(), nil
 		}
 
 		return o.value[i], nil
@@ -189,25 +174,25 @@ func (o *Array) Access(index core.Object, mode core.Opcode) (core.Object, error)
 
 	switch k {
 	case "empty":
-		return NewBool(len(o.value) == 0), nil
+		return alloc.NewBool(len(o.value) == 0), nil
 
 	case "len":
-		return NewInt(int64(len(o.value))), nil
+		return alloc.NewInt(int64(len(o.value))), nil
 
 	case "sort":
-		return NewBuiltinFunction("array.sort", func(args ...core.Object) (core.Object, error) {
+		return alloc.NewBuiltinFunction("array.sort", func(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 			if len(args) != 0 {
 				return nil, core.NewWrongNumArgumentsError("array.sort", "0", len(args))
 			}
-			r := o.Copy().(*Array)
+			r := o.Copy(alloc).(*Array)
 			var err error
 			slices.SortFunc(r.value, func(a, b core.Object) int {
-				less, e := a.BinaryOp(token.Less, b)
+				less, e := a.BinaryOp(alloc, token.Less, b)
 				if e != nil {
 					err = e
 					return 0
 				}
-				if less.IsFalsy() {
+				if less.IsFalse() {
 					if a.Equals(b) {
 						return 0
 					}
@@ -240,11 +225,15 @@ func (o *Array) Assign(index, value core.Object) (err error) {
 	return nil
 }
 
-func (o *Array) Iterate() core.Iterator {
-	return NewArrayIterator(o.value)
+func (o *Array) Iterate(alloc core.Allocator) core.Iterator {
+	return alloc.NewArrayIterator(o.value)
 }
 
-func (o *Array) IsFalsy() bool {
+func (o *Array) IsTrue() bool {
+	return len(o.value) > 0
+}
+
+func (o *Array) IsFalse() bool {
 	return len(o.value) == 0
 }
 
@@ -261,7 +250,7 @@ func (o *Array) AsString() (string, bool) {
 }
 
 func (o *Array) AsBool() (bool, bool) {
-	return !o.IsFalsy(), true
+	return o.IsTrue(), true
 }
 
 func (o *Array) AsBytes() ([]byte, bool) {

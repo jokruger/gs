@@ -45,6 +45,7 @@ func (e *CompilerError) Error() string {
 
 // Compiler compiles the AST into a bytecode.
 type Compiler struct {
+	alloc           core.Allocator
 	file            *parser.SourceFile
 	parent          *Compiler
 	modulePath      string
@@ -65,6 +66,7 @@ type Compiler struct {
 
 // NewCompiler creates a Compiler.
 func NewCompiler(
+	alloc core.Allocator,
 	file *parser.SourceFile,
 	symbolTable *vm.SymbolTable,
 	constants []core.Object,
@@ -92,6 +94,7 @@ func NewCompiler(
 	}
 
 	return &Compiler{
+		alloc:           alloc,
 		file:            file,
 		symbolTable:     symbolTable,
 		constants:       constants,
@@ -196,10 +199,10 @@ func (c *Compiler) Compile(node parser.Node) error {
 		}
 
 	case *parser.IntLit:
-		c.emit(node, parser.OpConstant, c.addConstant(value.NewInt(node.Value)))
+		c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewInt(node.Value)))
 
 	case *parser.FloatLit:
-		c.emit(node, parser.OpConstant, c.addConstant(value.NewFloat(node.Value)))
+		c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewFloat(node.Value)))
 
 	case *parser.BoolLit:
 		if node.Value {
@@ -212,10 +215,10 @@ func (c *Compiler) Compile(node parser.Node) error {
 		if len(node.Value) > core.MaxStringLen {
 			return c.error(node, core.NewStringLimitError("string literal compiler"))
 		}
-		c.emit(node, parser.OpConstant, c.addConstant(value.NewString(node.Value)))
+		c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewString(node.Value)))
 
 	case *parser.CharLit:
-		c.emit(node, parser.OpConstant, c.addConstant(value.NewChar(node.Value)))
+		c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewChar(node.Value)))
 
 	case *parser.UndefinedLit:
 		c.emit(node, parser.OpNull)
@@ -360,7 +363,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 				return c.error(node, core.NewStringLimitError("map literal key compiler"))
 			}
 			c.emit(node, parser.OpConstant,
-				c.addConstant(value.NewString(elt.Key)))
+				c.addConstant(c.alloc.NewString(elt.Key)))
 
 			// value
 			if err := c.Compile(elt.Value); err != nil {
@@ -531,7 +534,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		}
 
 		if mod := c.modules.Get(node.ModuleName); mod != nil {
-			v, err := mod.Import(node.ModuleName)
+			v, err := mod.Import(c.alloc, node.ModuleName)
 			if err != nil {
 				return err
 			}
@@ -1106,10 +1109,7 @@ func (c *Compiler) enterScope() {
 	}
 }
 
-func (c *Compiler) leaveScope() (
-	instructions []byte,
-	sourceMap map[int]core.Pos,
-) {
+func (c *Compiler) leaveScope() (instructions []byte, sourceMap map[int]core.Pos) {
 	instructions = c.currentInstructions()
 	sourceMap = c.currentSourceMap()
 	c.scopes = c.scopes[:len(c.scopes)-1]
@@ -1121,13 +1121,8 @@ func (c *Compiler) leaveScope() (
 	return
 }
 
-func (c *Compiler) fork(
-	file *parser.SourceFile,
-	modulePath string,
-	symbolTable *vm.SymbolTable,
-	isFile bool,
-) *Compiler {
-	child := NewCompiler(file, symbolTable, nil, c.modules, c.trace)
+func (c *Compiler) fork(file *parser.SourceFile, modulePath string, symbolTable *vm.SymbolTable, isFile bool) *Compiler {
+	child := NewCompiler(c.alloc, file, symbolTable, nil, c.modules, c.trace)
 	child.modulePath = modulePath // module file path
 	child.parent = c              // parent to set to current compiler
 	child.allowFileImport = c.allowFileImport

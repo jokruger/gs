@@ -12,234 +12,197 @@ import (
 // do not change builtin function indexes as it will break compatibility
 // 32..99 are reserved for future builtin functions
 var BuiltinFuncs = map[int]*value.BuiltinFunction{
-	7:  value.NewBuiltinFunction("bool", builtinBool, 0, true),
-	9:  value.NewBuiltinFunction("char", builtinChar, 0, true),
-	6:  value.NewBuiltinFunction("int", builtinInt, 0, true),
-	8:  value.NewBuiltinFunction("float", builtinFloat, 0, true),
-	5:  value.NewBuiltinFunction("string", builtinString, 0, true),
-	10: value.NewBuiltinFunction("bytes", builtinBytes, 0, true),
-	11: value.NewBuiltinFunction("time", builtinTime, 0, true),
-	21: value.NewBuiltinFunction("map", builtinMap, 0, true),
+	7:  value.NewStaticBuiltinFunction("bool", builtinBool, 0, true),
+	9:  value.NewStaticBuiltinFunction("char", builtinChar, 0, true),
+	6:  value.NewStaticBuiltinFunction("int", builtinInt, 0, true),
+	8:  value.NewStaticBuiltinFunction("float", builtinFloat, 0, true),
+	5:  value.NewStaticBuiltinFunction("string", builtinString, 0, true),
+	10: value.NewStaticBuiltinFunction("bytes", builtinBytes, 0, true),
+	11: value.NewStaticBuiltinFunction("time", builtinTime, 0, true),
+	21: value.NewStaticBuiltinFunction("map", builtinMap, 0, true),
 
-	15: value.NewBuiltinFunction("is_bool", builtinIsBool, 1, false),
-	16: value.NewBuiltinFunction("is_char", builtinIsChar, 1, false),
-	12: value.NewBuiltinFunction("is_int", builtinIsInt, 1, false),
-	13: value.NewBuiltinFunction("is_float", builtinIsFloat, 1, false),
-	14: value.NewBuiltinFunction("is_string", builtinIsString, 1, false),
-	17: value.NewBuiltinFunction("is_bytes", builtinIsBytes, 1, false),
-	23: value.NewBuiltinFunction("is_time", builtinIsTime, 1, false),
-	18: value.NewBuiltinFunction("is_array", builtinIsArray, 1, false),
-	20: value.NewBuiltinFunction("is_record", builtinIsRecord, 1, false),
-	31: value.NewBuiltinFunction("is_map", builtinIsMap, 1, false),
+	15: value.NewStaticBuiltinFunction("is_bool", builtinIsBool, 1, false),
+	16: value.NewStaticBuiltinFunction("is_char", builtinIsChar, 1, false),
+	12: value.NewStaticBuiltinFunction("is_int", builtinIsInt, 1, false),
+	13: value.NewStaticBuiltinFunction("is_float", builtinIsFloat, 1, false),
+	14: value.NewStaticBuiltinFunction("is_string", builtinIsString, 1, false),
+	17: value.NewStaticBuiltinFunction("is_bytes", builtinIsBytes, 1, false),
+	23: value.NewStaticBuiltinFunction("is_time", builtinIsTime, 1, false),
+	18: value.NewStaticBuiltinFunction("is_array", builtinIsArray, 1, false),
+	20: value.NewStaticBuiltinFunction("is_record", builtinIsRecord, 1, false),
+	31: value.NewStaticBuiltinFunction("is_map", builtinIsMap, 1, false),
 
-	24: value.NewBuiltinFunction("is_error", builtinIsError, 1, false),
-	25: value.NewBuiltinFunction("is_undefined", builtinIsUndefined, 1, false),
-	26: value.NewBuiltinFunction("is_function", builtinIsFunction, 1, false),
-	27: value.NewBuiltinFunction("is_callable", builtinIsCallable, 1, false),
-	22: value.NewBuiltinFunction("is_iterable", builtinIsIterable, 1, false),
-	19: value.NewBuiltinFunction("is_immutable", builtinIsImmutable, 1, false),
+	24: value.NewStaticBuiltinFunction("is_error", builtinIsError, 1, false),
+	25: value.NewStaticBuiltinFunction("is_undefined", builtinIsUndefined, 1, false),
+	26: value.NewStaticBuiltinFunction("is_function", builtinIsFunction, 1, false),
+	27: value.NewStaticBuiltinFunction("is_callable", builtinIsCallable, 1, false),
+	22: value.NewStaticBuiltinFunction("is_iterable", builtinIsIterable, 1, false),
+	19: value.NewStaticBuiltinFunction("is_immutable", builtinIsImmutable, 1, false),
 
-	0:  value.NewBuiltinFunction("len", builtinLen, 1, false),
-	1:  value.NewBuiltinFunction("copy", builtinCopy, 1, false),
-	2:  value.NewBuiltinFunction("append", builtinAppend, 2, true),
-	3:  value.NewBuiltinFunction("delete", builtinDelete, 2, false),
-	4:  value.NewBuiltinFunction("splice", builtinSplice, 1, true),
-	29: value.NewBuiltinFunction("format", builtinFormat, 1, true),
-	30: value.NewBuiltinFunction("range", builtinRange, 2, true),
-	28: value.NewBuiltinFunction("type_name", builtinTypeName, 1, false),
+	0:  value.NewStaticBuiltinFunction("len", builtinLen, 1, false),
+	1:  value.NewStaticBuiltinFunction("copy", builtinCopy, 1, false),
+	2:  value.NewStaticBuiltinFunction("append", builtinAppend, 2, true),
+	3:  value.NewStaticBuiltinFunction("delete", builtinDelete, 2, false),
+	4:  value.NewStaticBuiltinFunction("splice", builtinSplice, 1, true),
+	29: value.NewStaticBuiltinFunction("format", builtinFormat, 1, true),
+	30: value.NewStaticBuiltinFunction("range", builtinRange, 2, true),
+	28: value.NewStaticBuiltinFunction("type_name", builtinTypeName, 1, false),
 }
 
-func builtinTypeName(args ...core.Object) (core.Object, error) {
+func builtinTypeName(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("type_name", "1", len(args))
 	}
-	return value.NewString(args[0].TypeName()), nil
+	return alloc.NewString(args[0].TypeName()), nil
 }
 
-func builtinIsString(args ...core.Object) (core.Object, error) {
+func builtinIsString(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_string", "1", len(args))
 	}
-	if _, ok := args[0].(*value.String); ok {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	_, ok := args[0].(*value.String)
+	return alloc.NewBool(ok), nil
 }
 
-func builtinIsInt(args ...core.Object) (core.Object, error) {
+func builtinIsInt(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_int", "1", len(args))
 	}
-	if _, ok := args[0].(*value.Int); ok {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	_, ok := args[0].(*value.Int)
+	return alloc.NewBool(ok), nil
 }
 
-func builtinIsFloat(args ...core.Object) (core.Object, error) {
+func builtinIsFloat(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_float", "1", len(args))
 	}
-	if _, ok := args[0].(*value.Float); ok {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	_, ok := args[0].(*value.Float)
+	return alloc.NewBool(ok), nil
 }
 
-func builtinIsBool(args ...core.Object) (core.Object, error) {
+func builtinIsBool(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_bool", "1", len(args))
 	}
-	if _, ok := args[0].(*value.Bool); ok {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	_, ok := args[0].(*value.Bool)
+	return alloc.NewBool(ok), nil
 }
 
-func builtinIsChar(args ...core.Object) (core.Object, error) {
+func builtinIsChar(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_char", "1", len(args))
 	}
-	if _, ok := args[0].(*value.Char); ok {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	_, ok := args[0].(*value.Char)
+	return alloc.NewBool(ok), nil
 }
 
-func builtinIsBytes(args ...core.Object) (core.Object, error) {
+func builtinIsBytes(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_bytes", "1", len(args))
 	}
-	if _, ok := args[0].(*value.Bytes); ok {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	_, ok := args[0].(*value.Bytes)
+	return alloc.NewBool(ok), nil
 }
 
-func builtinIsArray(args ...core.Object) (core.Object, error) {
+func builtinIsArray(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_array", "1", len(args))
 	}
-	if _, ok := args[0].(*value.Array); ok {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	_, ok := args[0].(*value.Array)
+	return alloc.NewBool(ok), nil
 }
 
-func builtinIsRecord(args ...core.Object) (core.Object, error) {
+func builtinIsRecord(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_record", "1", len(args))
 	}
-	if _, ok := args[0].(*value.Record); ok {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	_, ok := args[0].(*value.Record)
+	return alloc.NewBool(ok), nil
 }
 
-func builtinIsMap(args ...core.Object) (core.Object, error) {
+func builtinIsMap(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_map", "1", len(args))
 	}
-	if _, ok := args[0].(*value.Map); ok {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	_, ok := args[0].(*value.Map)
+	return alloc.NewBool(ok), nil
 }
 
-func builtinIsImmutable(args ...core.Object) (core.Object, error) {
+func builtinIsImmutable(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_immutable", "1", len(args))
 	}
-	if args[0].IsImmutable() {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	return alloc.NewBool(args[0].IsImmutable()), nil
 }
 
-func builtinIsTime(args ...core.Object) (core.Object, error) {
+func builtinIsTime(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_time", "1", len(args))
 	}
-	if _, ok := args[0].(*value.Time); ok {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	_, ok := args[0].(*value.Time)
+	return alloc.NewBool(ok), nil
 }
 
-func builtinIsError(args ...core.Object) (core.Object, error) {
+func builtinIsError(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_error", "1", len(args))
 	}
-	if _, ok := args[0].(*value.Error); ok {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	_, ok := args[0].(*value.Error)
+	return alloc.NewBool(ok), nil
 }
 
-func builtinIsUndefined(args ...core.Object) (core.Object, error) {
+func builtinIsUndefined(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_undefined", "1", len(args))
 	}
-	if args[0] == value.UndefinedValue {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	return alloc.NewBool(args[0].IsUndefined()), nil
 }
 
-func builtinIsFunction(args ...core.Object) (core.Object, error) {
+func builtinIsFunction(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_function", "1", len(args))
 	}
-	switch args[0].(type) {
-	case *value.CompiledFunction:
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	_, ok := args[0].(*value.CompiledFunction)
+	return alloc.NewBool(ok), nil
 }
 
-func builtinIsCallable(args ...core.Object) (core.Object, error) {
+func builtinIsCallable(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_callable", "1", len(args))
 	}
-	if args[0].IsCallable() {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	return alloc.NewBool(args[0].IsCallable()), nil
 }
 
-func builtinIsIterable(args ...core.Object) (core.Object, error) {
+func builtinIsIterable(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("is_iterable", "1", len(args))
 	}
-	if args[0].IsIterable() {
-		return value.TrueValue, nil
-	}
-	return value.FalseValue, nil
+	return alloc.NewBool(args[0].IsIterable()), nil
 }
 
 // len(obj object) => int
-func builtinLen(args ...core.Object) (core.Object, error) {
+func builtinLen(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("len", "1", len(args))
 	}
 	switch arg := args[0].(type) {
 	case *value.Array:
-		return value.NewInt(int64(arg.Len())), nil
+		return alloc.NewInt(int64(arg.Len())), nil
 	case *value.String:
-		return value.NewInt(int64(arg.Len())), nil
+		return alloc.NewInt(int64(arg.Len())), nil
 	case *value.Bytes:
-		return value.NewInt(int64(arg.Len())), nil
+		return alloc.NewInt(int64(arg.Len())), nil
 	case *value.Record:
-		return value.NewInt(int64(arg.Len())), nil
+		return alloc.NewInt(int64(arg.Len())), nil
 	case *value.Map:
-		return value.NewInt(int64(arg.Len())), nil
+		return alloc.NewInt(int64(arg.Len())), nil
 	default:
 		return nil, core.NewInvalidArgumentTypeError("len", "first", "record/map/array/string/bytes", arg)
 	}
 }
 
 // range(start, stop[, step])
-func builtinRange(args ...core.Object) (core.Object, error) {
+func builtinRange(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	numArgs := len(args)
 	if numArgs < 2 || numArgs > 3 {
 		return nil, core.NewWrongNumArgumentsError("range", "2 or 3", numArgs)
@@ -279,24 +242,24 @@ func builtinRange(args ...core.Object) (core.Object, error) {
 		step = 1
 	}
 
-	return buildRange(start, stop, step), nil
+	return buildRange(alloc, start, stop, step), nil
 }
 
-func buildRange(start, stop, step int64) *value.Array {
+func buildRange(alloc core.Allocator, start, stop, step int64) core.Object {
 	array := make([]core.Object, 0)
 	if start <= stop {
 		for i := start; i < stop; i += step {
-			array = append(array, value.NewInt(i))
+			array = append(array, alloc.NewInt(i))
 		}
 	} else {
 		for i := start; i > stop; i -= step {
-			array = append(array, value.NewInt(i))
+			array = append(array, alloc.NewInt(i))
 		}
 	}
-	return value.NewArray(array, false)
+	return alloc.NewArray(array, false)
 }
 
-func builtinFormat(args ...core.Object) (core.Object, error) {
+func builtinFormat(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	numArgs := len(args)
 	if numArgs == 0 {
 		return nil, core.NewWrongNumArgumentsError("format", "at least 1", numArgs)
@@ -307,25 +270,25 @@ func builtinFormat(args ...core.Object) (core.Object, error) {
 	}
 	if numArgs == 1 {
 		// okay to return 'format' directly as String is immutable
-		return value.NewString(format), nil
+		return alloc.NewString(format), nil
 	}
 	s, err := formatter.Format(format, args[1:]...)
 	if err != nil {
 		return nil, err
 	}
-	return value.NewString(s), nil
+	return alloc.NewString(s), nil
 }
 
-func builtinCopy(args ...core.Object) (core.Object, error) {
+func builtinCopy(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
 		return nil, core.NewWrongNumArgumentsError("copy", "1", len(args))
 	}
-	return args[0].Copy(), nil
+	return args[0].Copy(alloc), nil
 }
 
-func builtinString(args ...core.Object) (core.Object, error) {
+func builtinString(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) == 0 {
-		return value.NewString(""), nil
+		return alloc.NewString(""), nil
 	}
 
 	if len(args) != 1 && len(args) != 2 {
@@ -341,18 +304,18 @@ func builtinString(args ...core.Object) (core.Object, error) {
 		if len(v) > core.MaxStringLen {
 			return nil, core.NewStringLimitError("string constructor")
 		}
-		return value.NewString(v), nil
+		return alloc.NewString(v), nil
 	}
 
 	if len(args) == 2 {
 		return args[1], nil
 	}
-	return value.UndefinedValue, nil
+	return alloc.NewUndefined(), nil
 }
 
-func builtinInt(args ...core.Object) (core.Object, error) {
+func builtinInt(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) == 0 {
-		return value.NewInt(0), nil
+		return alloc.NewInt(0), nil
 	}
 
 	if len(args) != 1 && len(args) != 2 {
@@ -365,18 +328,18 @@ func builtinInt(args ...core.Object) (core.Object, error) {
 
 	v, ok := args[0].AsInt()
 	if ok {
-		return value.NewInt(v), nil
+		return alloc.NewInt(v), nil
 	}
 
 	if len(args) == 2 {
 		return args[1], nil
 	}
-	return value.UndefinedValue, nil
+	return alloc.NewUndefined(), nil
 }
 
-func builtinFloat(args ...core.Object) (core.Object, error) {
+func builtinFloat(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) == 0 {
-		return value.NewFloat(0), nil
+		return alloc.NewFloat(0), nil
 	}
 
 	if len(args) != 1 && len(args) != 2 {
@@ -389,18 +352,18 @@ func builtinFloat(args ...core.Object) (core.Object, error) {
 
 	v, ok := args[0].AsFloat()
 	if ok {
-		return value.NewFloat(v), nil
+		return alloc.NewFloat(v), nil
 	}
 
 	if len(args) == 2 {
 		return args[1], nil
 	}
-	return value.UndefinedValue, nil
+	return alloc.NewUndefined(), nil
 }
 
-func builtinBool(args ...core.Object) (core.Object, error) {
+func builtinBool(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) == 0 {
-		return value.FalseValue, nil
+		return alloc.NewBool(false), nil
 	}
 
 	if len(args) != 1 {
@@ -413,17 +376,15 @@ func builtinBool(args ...core.Object) (core.Object, error) {
 
 	v, ok := args[0].AsBool()
 	if ok {
-		if v {
-			return value.TrueValue, nil
-		}
-		return value.FalseValue, nil
+		return alloc.NewBool(v), nil
 	}
-	return value.UndefinedValue, nil
+
+	return alloc.NewUndefined(), nil
 }
 
-func builtinChar(args ...core.Object) (core.Object, error) {
+func builtinChar(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) == 0 {
-		return value.NewChar(0), nil
+		return alloc.NewChar(0), nil
 	}
 
 	if len(args) != 1 && len(args) != 2 {
@@ -436,18 +397,18 @@ func builtinChar(args ...core.Object) (core.Object, error) {
 
 	v, ok := args[0].AsRune()
 	if ok {
-		return value.NewChar(v), nil
+		return alloc.NewChar(v), nil
 	}
 
 	if len(args) == 2 {
 		return args[1], nil
 	}
-	return value.UndefinedValue, nil
+	return alloc.NewUndefined(), nil
 }
 
-func builtinBytes(args ...core.Object) (core.Object, error) {
+func builtinBytes(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) == 0 {
-		return value.NewBytes([]byte{}), nil
+		return alloc.NewBytes([]byte{}), nil
 	}
 
 	if len(args) != 1 && len(args) != 2 {
@@ -463,7 +424,7 @@ func builtinBytes(args ...core.Object) (core.Object, error) {
 		if n.Value() > int64(core.MaxBytesLen) {
 			return nil, core.NewBytesLimitError("bytes constructor")
 		}
-		return value.NewBytes(make([]byte, int(n.Value()))), nil
+		return alloc.NewBytes(make([]byte, int(n.Value()))), nil
 	}
 
 	v, ok := args[0].AsBytes()
@@ -471,18 +432,18 @@ func builtinBytes(args ...core.Object) (core.Object, error) {
 		if len(v) > core.MaxBytesLen {
 			return nil, core.NewBytesLimitError("bytes constructor")
 		}
-		return value.NewBytes(v), nil
+		return alloc.NewBytes(v), nil
 	}
 
 	if len(args) == 2 {
 		return args[1], nil
 	}
-	return value.UndefinedValue, nil
+	return alloc.NewUndefined(), nil
 }
 
-func builtinTime(args ...core.Object) (core.Object, error) {
+func builtinTime(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) == 0 {
-		return value.NewTime(time.Time{}), nil
+		return alloc.NewTime(time.Time{}), nil
 	}
 
 	if len(args) != 1 && len(args) != 2 {
@@ -495,18 +456,18 @@ func builtinTime(args ...core.Object) (core.Object, error) {
 
 	v, ok := args[0].AsTime()
 	if ok {
-		return value.NewTime(v), nil
+		return alloc.NewTime(v), nil
 	}
 
 	if len(args) == 2 {
 		return args[1], nil
 	}
-	return value.UndefinedValue, nil
+	return alloc.NewUndefined(), nil
 }
 
-func builtinMap(args ...core.Object) (core.Object, error) {
+func builtinMap(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) == 0 {
-		return value.NewMap(nil, false), nil
+		return alloc.NewMap(nil, false), nil
 	}
 
 	if len(args) != 1 {
@@ -517,28 +478,28 @@ func builtinMap(args ...core.Object) (core.Object, error) {
 	case *value.Map:
 		v := make(map[string]core.Object, arg.Len())
 		for k, o := range arg.Value() {
-			v[k] = o.Copy()
+			v[k] = o.Copy(alloc)
 		}
-		return value.NewMap(v, false), nil
+		return alloc.NewMap(v, false), nil
 	case *value.Record:
 		v := make(map[string]core.Object, arg.Len())
 		for k, o := range arg.Value() {
-			v[k] = o.Copy()
+			v[k] = o.Copy(alloc)
 		}
-		return value.NewMap(v, false), nil
+		return alloc.NewMap(v, false), nil
 	default:
 		return nil, core.NewInvalidArgumentTypeError("map", "first", "map or record", arg)
 	}
 }
 
 // append(arr, items...)
-func builtinAppend(args ...core.Object) (core.Object, error) {
+func builtinAppend(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	if len(args) < 2 {
 		return nil, core.NewWrongNumArgumentsError("append", "at least 2", len(args))
 	}
 	switch arg := args[0].(type) {
 	case *value.Array:
-		return value.NewArray(append(arg.Value(), args[1:]...), false), nil
+		return alloc.NewArray(append(arg.Value(), args[1:]...), false), nil
 	default:
 		return nil, core.NewInvalidArgumentTypeError("append", "first", "array", arg)
 	}
@@ -547,7 +508,7 @@ func builtinAppend(args ...core.Object) (core.Object, error) {
 // builtinDelete deletes Map keys
 // usage: delete(map, "key")
 // key must be a string
-func builtinDelete(args ...core.Object) (core.Object, error) {
+func builtinDelete(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	argsLen := len(args)
 	if argsLen != 2 {
 		return nil, core.NewWrongNumArgumentsError("delete", "2", argsLen)
@@ -559,7 +520,7 @@ func builtinDelete(args ...core.Object) (core.Object, error) {
 		}
 		if key, ok := args[1].AsString(); ok {
 			arg.Delete(key)
-			return value.UndefinedValue, nil
+			return alloc.NewUndefined(), nil
 		}
 		return nil, core.NewInvalidArgumentTypeError("delete", "second", "string", args[1])
 	case *value.Map:
@@ -568,7 +529,7 @@ func builtinDelete(args ...core.Object) (core.Object, error) {
 		}
 		if key, ok := args[1].AsString(); ok {
 			arg.Delete(key)
-			return value.UndefinedValue, nil
+			return alloc.NewUndefined(), nil
 		}
 		return nil, core.NewInvalidArgumentTypeError("delete", "second", "string", args[1])
 	default:
@@ -579,7 +540,7 @@ func builtinDelete(args ...core.Object) (core.Object, error) {
 // builtinSplice deletes and changes given Array, returns deleted items.
 // usage:
 // deleted_items := splice(array[,start[,delete_count[,item1[,item2[,...]]]])
-func builtinSplice(args ...core.Object) (core.Object, error) {
+func builtinSplice(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 	argsLen := len(args)
 	if argsLen == 0 {
 		return nil, core.NewWrongNumArgumentsError("splice", "at least 1", argsLen)
@@ -635,5 +596,5 @@ func builtinSplice(args ...core.Object) (core.Object, error) {
 	array.Set(append(head, items...), false)
 
 	// return deleted items
-	return value.NewArray(deleted, false), nil
+	return alloc.NewArray(deleted, false), nil
 }

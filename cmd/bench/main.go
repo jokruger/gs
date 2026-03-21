@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/alloc"
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/value"
@@ -18,6 +19,7 @@ func main() {
 }
 
 func runFib(n int) {
+	a := alloc.NewHeapAllocator()
 	start := time.Now()
 	nativeResult := fib(n)
 	nativeTime := time.Since(start)
@@ -34,7 +36,7 @@ fib := func(x) {
 }
 ` + fmt.Sprintf("out = fib(%d)", n)
 
-	parseTime, compileTime, runTime, result, err := runBench([]byte(input))
+	parseTime, compileTime, runTime, result, err := runBench(a, []byte(input))
 	if err != nil {
 		panic(err)
 	}
@@ -54,6 +56,7 @@ fib := func(x) {
 }
 
 func runFibTC1(n int) {
+	a := alloc.NewHeapAllocator()
 	start := time.Now()
 	nativeResult := fibTC1(n, 0)
 	nativeTime := time.Since(start)
@@ -70,7 +73,7 @@ fib := func(x, s) {
 }
 ` + fmt.Sprintf("out = fib(%d, 0)", n)
 
-	parseTime, compileTime, runTime, result, err := runBench([]byte(input))
+	parseTime, compileTime, runTime, result, err := runBench(a, []byte(input))
 	if err != nil {
 		panic(err)
 	}
@@ -90,6 +93,7 @@ fib := func(x, s) {
 }
 
 func runFibTC2(n int) {
+	a := alloc.NewHeapAllocator()
 	start := time.Now()
 	nativeResult := fibTC2(n, 0, 1)
 	nativeTime := time.Since(start)
@@ -106,7 +110,7 @@ fib := func(x, a, b) {
 }
 ` + fmt.Sprintf("out = fib(%d, 0, 1)", n)
 
-	parseTime, compileTime, runTime, result, err := runBench([]byte(input))
+	parseTime, compileTime, runTime, result, err := runBench(a, []byte(input))
 	if err != nil {
 		panic(err)
 	}
@@ -154,15 +158,7 @@ func fibTC2(n, a, b int) int {
 	}
 }
 
-func runBench(
-	input []byte,
-) (
-	parseTime time.Duration,
-	compileTime time.Duration,
-	runTime time.Duration,
-	result core.Object,
-	err error,
-) {
+func runBench(a core.Allocator, input []byte) (parseTime time.Duration, compileTime time.Duration, runTime time.Duration, result core.Object, err error) {
 	var astFile *parser.File
 	parseTime, astFile, err = parse(input)
 	if err != nil {
@@ -170,12 +166,12 @@ func runBench(
 	}
 
 	var bytecode *vm.Bytecode
-	compileTime, bytecode, err = compileFile(astFile)
+	compileTime, bytecode, err = compileFile(a, astFile)
 	if err != nil {
 		return
 	}
 
-	runTime, result, err = runVM(bytecode)
+	runTime, result, err = runVM(a, bytecode)
 
 	return
 }
@@ -195,13 +191,13 @@ func parse(input []byte) (time.Duration, *parser.File, error) {
 	return time.Since(start), file, nil
 }
 
-func compileFile(file *parser.File) (time.Duration, *vm.Bytecode, error) {
+func compileFile(a core.Allocator, file *parser.File) (time.Duration, *vm.Bytecode, error) {
 	symTable := vm.NewSymbolTable()
 	symTable.Define("out")
 
 	start := time.Now()
 
-	c := gs.NewCompiler(file.InputFile, symTable, nil, nil, nil)
+	c := gs.NewCompiler(a, file.InputFile, symTable, nil, nil, nil)
 	if err := c.Compile(file); err != nil {
 		return time.Since(start), nil, err
 	}
@@ -212,12 +208,12 @@ func compileFile(file *parser.File) (time.Duration, *vm.Bytecode, error) {
 	return time.Since(start), bytecode, nil
 }
 
-func runVM(bytecode *vm.Bytecode) (time.Duration, core.Object, error) {
+func runVM(a core.Allocator, bytecode *vm.Bytecode) (time.Duration, core.Object, error) {
 	globals := make([]core.Object, vm.GlobalsSize)
 
 	start := time.Now()
 
-	v := vm.NewVM(bytecode, globals, -1)
+	v := vm.NewVM(a, bytecode, globals, -1)
 	if err := v.Run(); err != nil {
 		return time.Since(start), nil, err
 	}

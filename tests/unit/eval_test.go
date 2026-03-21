@@ -1,4 +1,4 @@
-package gs_test
+package unit
 
 import (
 	"context"
@@ -11,16 +11,16 @@ import (
 
 func TestEval(t *testing.T) {
 	eval := func(expr string, params map[string]any, expected any) {
-		e, err := require.FromInterface(expected)
+		e, err := require.FromInterface(alloc, expected)
 		require.NoError(t, err)
 		ctx := context.Background()
 		ps := make(map[string]core.Object)
 		for k, v := range params {
-			o, err := require.FromInterface(v)
+			o, err := require.FromInterface(alloc, v)
 			require.NoError(t, err)
 			ps[k] = o
 		}
-		actual, err := gs.Eval(ctx, expr, ps)
+		actual, err := gs.Eval(ctx, alloc, expr, ps)
 		require.NoError(t, err)
 		require.Equal(t, e, actual)
 	}

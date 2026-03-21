@@ -182,11 +182,7 @@ func Encode(o core.Object) ([]byte, error) {
 		b = append(b, '}')
 
 	case *value.Bool:
-		if o.IsFalsy() {
-			b = strconv.AppendBool(b, false)
-		} else {
-			b = strconv.AppendBool(b, true)
-		}
+		b = strconv.AppendBool(b, o.Value())
 
 	case *value.Bytes:
 		b = append(b, '"')

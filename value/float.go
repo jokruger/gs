@@ -14,9 +14,10 @@ type Float struct {
 	value float64
 }
 
-func NewFloat(value float64) *Float {
+// Should be used only for static initialization. For dynamic creation of built-in functions, use Allocator.NewFloat.
+func NewStaticFloat(v float64) core.Object {
 	o := &Float{}
-	o.Set(value)
+	o.Set(v)
 	return o
 }
 
@@ -54,101 +55,45 @@ func (o *Float) Interface() any {
 	return o.value
 }
 
-func (o *Float) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Float) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	switch rhs := rhs.(type) {
 	case *Float:
 		switch op {
 		case token.Add:
-			r := o.value + rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewFloat(r), nil
+			return alloc.NewFloat(o.value + rhs.value), nil
 		case token.Sub:
-			r := o.value - rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewFloat(r), nil
+			return alloc.NewFloat(o.value - rhs.value), nil
 		case token.Mul:
-			r := o.value * rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewFloat(r), nil
+			return alloc.NewFloat(o.value * rhs.value), nil
 		case token.Quo:
-			r := o.value / rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewFloat(r), nil
+			return alloc.NewFloat(o.value / rhs.value), nil
 		case token.Less:
-			if o.value < rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value < rhs.value), nil
 		case token.Greater:
-			if o.value > rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value > rhs.value), nil
 		case token.LessEq:
-			if o.value <= rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value <= rhs.value), nil
 		case token.GreaterEq:
-			if o.value >= rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value >= rhs.value), nil
 		}
 	case *Int:
 		switch op {
 		case token.Add:
-			r := o.value + float64(rhs.value)
-			if r == o.value {
-				return o, nil
-			}
-			return NewFloat(r), nil
+			return alloc.NewFloat(o.value + float64(rhs.value)), nil
 		case token.Sub:
-			r := o.value - float64(rhs.value)
-			if r == o.value {
-				return o, nil
-			}
-			return NewFloat(r), nil
+			return alloc.NewFloat(o.value - float64(rhs.value)), nil
 		case token.Mul:
-			r := o.value * float64(rhs.value)
-			if r == o.value {
-				return o, nil
-			}
-			return NewFloat(r), nil
+			return alloc.NewFloat(o.value * float64(rhs.value)), nil
 		case token.Quo:
-			r := o.value / float64(rhs.value)
-			if r == o.value {
-				return o, nil
-			}
-			return NewFloat(r), nil
+			return alloc.NewFloat(o.value / float64(rhs.value)), nil
 		case token.Less:
-			if o.value < float64(rhs.value) {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value < float64(rhs.value)), nil
 		case token.Greater:
-			if o.value > float64(rhs.value) {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value > float64(rhs.value)), nil
 		case token.LessEq:
-			if o.value <= float64(rhs.value) {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value <= float64(rhs.value)), nil
 		case token.GreaterEq:
-			if o.value >= float64(rhs.value) {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value >= float64(rhs.value)), nil
 		}
 	}
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
@@ -162,11 +107,11 @@ func (o *Float) Equals(x core.Object) bool {
 	return o.value == t
 }
 
-func (o *Float) Copy() core.Object {
-	return NewFloat(o.value)
+func (o *Float) Copy(alloc core.Allocator) core.Object {
+	return alloc.NewFloat(o.value)
 }
 
-func (o *Float) Access(core.Object, core.Opcode) (core.Object, error) {
+func (o *Float) Access(core.Allocator, core.Object, core.Opcode) (core.Object, error) {
 	return nil, core.NewNotAccessibleError(o)
 }
 
@@ -174,7 +119,11 @@ func (o *Float) Assign(core.Object, core.Object) error {
 	return core.NewNotAssignableError(o)
 }
 
-func (o *Float) IsFalsy() bool {
+func (o *Float) IsTrue() bool {
+	return !o.IsFalse()
+}
+
+func (o *Float) IsFalse() bool {
 	return math.IsNaN(o.value)
 }
 
@@ -195,5 +144,5 @@ func (o *Float) AsFloat() (float64, bool) {
 }
 
 func (o *Float) AsBool() (bool, bool) {
-	return !o.IsFalsy(), true
+	return !o.IsFalse(), true
 }

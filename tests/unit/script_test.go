@@ -1,4 +1,4 @@
-package gs_test
+package unit
 
 import (
 	"context"
@@ -21,7 +21,7 @@ import (
 )
 
 func add(s *gs.Script, name string, value any) error {
-	v, err := require.FromInterface(value)
+	v, err := require.FromInterface(alloc, value)
 	if err != nil {
 		return err
 	}
@@ -30,7 +30,7 @@ func add(s *gs.Script, name string, value any) error {
 }
 
 func set(c *gs.Compiled, name string, value any) error {
-	v, err := require.FromInterface(value)
+	v, err := require.FromInterface(alloc, value)
 	if err != nil {
 		return err
 	}
@@ -38,18 +38,18 @@ func set(c *gs.Compiled, name string, value any) error {
 }
 
 func TestScript_Add(t *testing.T) {
-	s := gs.NewScript([]byte(`a := b; c := test(b); d := test(5)`))
+	s := gs.NewScript(alloc, []byte(`a := b; c := test(b); d := test(5)`))
 	require.NoError(t, add(s, "b", 5))     // b = 5
 	require.NoError(t, add(s, "b", "foo")) // b = "foo"  (re-define before compilation)
 	require.NoError(t, add(s, "test",
-		func(args ...core.Object) (ret core.Object, err error) {
+		func(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 			if len(args) > 0 {
 				switch arg := args[0].(type) {
 				case *value.Int:
-					return value.NewInt(arg.Value() + 1), nil
+					return alloc.NewInt(arg.Value() + 1), nil
 				}
 			}
-			return value.NewInt(0), nil
+			return alloc.NewInt(0), nil
 		}))
 	c, err := s.Compile()
 	require.NoError(t, err)
@@ -61,7 +61,7 @@ func TestScript_Add(t *testing.T) {
 }
 
 func TestScript_Remove(t *testing.T) {
-	s := gs.NewScript([]byte(`a := b`))
+	s := gs.NewScript(alloc, []byte(`a := b`))
 	err := add(s, "b", 5)
 	require.NoError(t, err)
 	require.True(t, s.Remove("b")) // b is removed
@@ -70,7 +70,7 @@ func TestScript_Remove(t *testing.T) {
 }
 
 func TestScript_Run(t *testing.T) {
-	s := gs.NewScript([]byte(`a := b`))
+	s := gs.NewScript(alloc, []byte(`a := b`))
 	err := add(s, "b", 5)
 	require.NoError(t, err)
 	c, err := s.Run()
@@ -80,7 +80,7 @@ func TestScript_Run(t *testing.T) {
 }
 
 func TestScript_BuiltinModules(t *testing.T) {
-	s := gs.NewScript([]byte(`math := import("math"); a := math.abs(-19.84)`))
+	s := gs.NewScript(alloc, []byte(`math := import("math"); a := math.abs(-19.84)`))
 	s.SetImports(stdlib.GetModuleMap("math"))
 	c, err := s.Run()
 	require.NoError(t, err)
@@ -102,7 +102,7 @@ func TestScript_BuiltinModules(t *testing.T) {
 }
 
 func TestScript_SourceModules(t *testing.T) {
-	s := gs.NewScript([]byte(`
+	s := gs.NewScript(alloc, []byte(`
 enum := import("enum")
 a := enum.all([1,2,3], func(_, v) { 
 	return v > 0 
@@ -121,7 +121,7 @@ a := enum.all([1,2,3], func(_, v) {
 
 func TestScript_SetMaxConstObjects(t *testing.T) {
 	// one constant '5'
-	s := gs.NewScript([]byte(`a := 5`))
+	s := gs.NewScript(alloc, []byte(`a := 5`))
 	s.SetMaxConstObjects(1) // limit = 1
 	_, err := s.Compile()
 	require.NoError(t, err)
@@ -131,7 +131,7 @@ func TestScript_SetMaxConstObjects(t *testing.T) {
 	require.Equal(t, "exceeding constant objects limit: 1", err.Error())
 
 	// two constants '5' and '1'
-	s = gs.NewScript([]byte(`a := 5 + 1`))
+	s = gs.NewScript(alloc, []byte(`a := 5 + 1`))
 	s.SetMaxConstObjects(2) // limit = 2
 	_, err = s.Compile()
 	require.NoError(t, err)
@@ -141,7 +141,7 @@ func TestScript_SetMaxConstObjects(t *testing.T) {
 	require.Equal(t, "exceeding constant objects limit: 2", err.Error())
 
 	// duplicates will be removed
-	s = gs.NewScript([]byte(`a := 5 + 5`))
+	s = gs.NewScript(alloc, []byte(`a := 5 + 5`))
 	s.SetMaxConstObjects(1) // limit = 1
 	_, err = s.Compile()
 	require.NoError(t, err)
@@ -151,7 +151,7 @@ func TestScript_SetMaxConstObjects(t *testing.T) {
 	require.Equal(t, "exceeding constant objects limit: 1", err.Error())
 
 	// no limit set
-	s = gs.NewScript([]byte(`a := 1 + 2 + 3 + 4 + 5`))
+	s = gs.NewScript(alloc, []byte(`a := 1 + 2 + 3 + 4 + 5`))
 	_, err = s.Compile()
 	require.NoError(t, err)
 }
@@ -191,11 +191,11 @@ for i:=1; i<=d; i++ {
 e := mod1.double(s)
 `)
 	mod1 := map[string]core.Object{
-		"double": value.NewBuiltinFunction(
+		"double": alloc.NewBuiltinFunction(
 			"unknown",
-			func(args ...core.Object) (ret core.Object, err error) {
+			func(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 				arg0, _ := args[0].AsInt()
-				ret = value.NewInt(arg0 * 2)
+				ret = alloc.NewInt(arg0 * 2)
 				return
 			},
 			1,
@@ -203,7 +203,7 @@ e := mod1.double(s)
 		),
 	}
 
-	scr := gs.NewScript(code)
+	scr := gs.NewScript(alloc, code)
 	_ = add(scr, "a", 0)
 	_ = add(scr, "b", 0)
 	_ = add(scr, "c", 0)
@@ -214,9 +214,9 @@ e := mod1.double(s)
 	require.NoError(t, err)
 
 	executeFn := func(compiled *gs.Compiled, a, b, c int) (d, e int) {
-		av, _ := require.FromInterface(a)
-		bv, _ := require.FromInterface(b)
-		cv, _ := require.FromInterface(c)
+		av, _ := require.FromInterface(alloc, a)
+		bv, _ := require.FromInterface(alloc, b)
+		cv, _ := require.FromInterface(alloc, c)
 		_ = compiled.Set("a", av)
 		_ = compiled.Set("b", bv)
 		_ = compiled.Set("c", cv)
@@ -270,7 +270,7 @@ func (o *Counter) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Counter) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Counter) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	switch rhs := rhs.(type) {
 	case *Counter:
 		switch op {
@@ -291,7 +291,7 @@ func (o *Counter) BinaryOp(op token.Token, rhs core.Object) (core.Object, error)
 	return nil, errors.New("invalid operator")
 }
 
-func (o *Counter) IsFalsy() bool {
+func (o *Counter) IsFalse() bool {
 	return o.value == 0
 }
 
@@ -303,12 +303,12 @@ func (o *Counter) Equals(t core.Object) bool {
 	return false
 }
 
-func (o *Counter) Copy() core.Object {
+func (o *Counter) Copy(alloc core.Allocator) core.Object {
 	return &Counter{value: o.value}
 }
 
 func (o *Counter) Call(core.VM, ...core.Object) (core.Object, error) {
-	return value.NewInt(o.value), nil
+	return alloc.NewInt(o.value), nil
 }
 
 func (o *Counter) IsCallable() bool {
@@ -351,7 +351,7 @@ func compiledGetCounter(
 
 func TestScriptSourceModule(t *testing.T) {
 	// script1 imports "mod1"
-	scr := gs.NewScript([]byte(`out := import("mod")`))
+	scr := gs.NewScript(alloc, []byte(`out := import("mod")`))
 	mods := vm.NewModuleMap()
 	mods.AddSourceModule("mod", []byte(`export 5`))
 	scr.SetImports(mods)
@@ -360,7 +360,7 @@ func TestScriptSourceModule(t *testing.T) {
 	require.Equal(t, int64(5), c.Get("out").Value().Interface())
 
 	// executing module function
-	scr = gs.NewScript([]byte(`fn := import("mod"); out := fn()`))
+	scr = gs.NewScript(alloc, []byte(`fn := import("mod"); out := fn()`))
 	mods = vm.NewModuleMap()
 	mods.AddSourceModule("mod",
 		[]byte(`a := 3; export func() { return a + 5 }`))
@@ -369,15 +369,15 @@ func TestScriptSourceModule(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int64(8), c.Get("out").Value().Interface())
 
-	scr = gs.NewScript([]byte(`out := import("mod")`))
+	scr = gs.NewScript(alloc, []byte(`out := import("mod")`))
 	mods = vm.NewModuleMap()
 	mods.AddSourceModule("mod", []byte(`text := import("text"); export text.title("foo")`))
 	mods.AddBuiltinModule("text", map[string]core.Object{
-		"title": value.NewBuiltinFunction(
+		"title": alloc.NewBuiltinFunction(
 			"title",
-			func(args ...core.Object) (core.Object, error) {
+			func(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 				s, _ := args[0].AsString()
-				return value.NewString(strings.Title(s)), nil
+				return alloc.NewString(strings.Title(s)), nil
 			},
 			1,
 			false,
@@ -409,7 +409,7 @@ func BenchmarkArrayIndexCompare(b *testing.B) {
 }
 
 func bench(n int, input string) {
-	s := gs.NewScript([]byte(input))
+	s := gs.NewScript(alloc, []byte(input))
 	c, err := s.Compile()
 	if err != nil {
 		panic(err)
@@ -531,7 +531,7 @@ func (n *customNumber) String() string {
 	return strconv.FormatInt(n.value, 10)
 }
 
-func (n *customNumber) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (n *customNumber) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	i, ok := rhs.(*value.Int)
 	if !ok {
 		return nil, core.NewInvalidBinaryOperatorError(op.String(), n, rhs)
@@ -544,25 +544,13 @@ func (n *customNumber) binaryOpInt(op token.Token, rhs *value.Int) (core.Object,
 
 	switch op {
 	case token.Less:
-		if i < rhs.Value() {
-			return value.TrueValue, nil
-		}
-		return value.FalseValue, nil
+		return alloc.NewBool(i < rhs.Value()), nil
 	case token.Greater:
-		if i > rhs.Value() {
-			return value.TrueValue, nil
-		}
-		return value.FalseValue, nil
+		return alloc.NewBool(i > rhs.Value()), nil
 	case token.LessEq:
-		if i <= rhs.Value() {
-			return value.TrueValue, nil
-		}
-		return value.FalseValue, nil
+		return alloc.NewBool(i <= rhs.Value()), nil
 	case token.GreaterEq:
-		if i >= rhs.Value() {
-			return value.TrueValue, nil
-		}
-		return value.FalseValue, nil
+		return alloc.NewBool(i >= rhs.Value()), nil
 	}
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), n, rhs)
 }
@@ -585,7 +573,7 @@ export func(ctx) {
 	return closure()
 }`
 
-	s := gs.NewScript([]byte(m))
+	s := gs.NewScript(alloc, []byte(m))
 	mods := vm.NewModuleMap()
 	mods.AddSourceModule("expression", []byte(src))
 	s.SetImports(mods)
@@ -600,7 +588,7 @@ export func(ctx) {
 }
 
 func compile(t *testing.T, input string, vars M) *gs.Compiled {
-	s := gs.NewScript([]byte(input))
+	s := gs.NewScript(alloc, []byte(input))
 	for vn, vv := range vars {
 		err := add(s, vn, vv)
 		require.NoError(t, err)
@@ -613,7 +601,7 @@ func compile(t *testing.T, input string, vars M) *gs.Compiled {
 }
 
 func compileError(t *testing.T, input string, vars M) {
-	s := gs.NewScript([]byte(input))
+	s := gs.NewScript(alloc, []byte(input))
 	for vn, vv := range vars {
 		err := add(s, vn, vv)
 		require.NoError(t, err)
@@ -628,7 +616,7 @@ func compiledRun(t *testing.T, c *gs.Compiled) {
 }
 
 func compiledGet(t *testing.T, c *gs.Compiled, name string, expected any) {
-	e, err := require.FromInterface(expected)
+	e, err := require.FromInterface(alloc, expected)
 	require.NoError(t, err)
 	v := c.Get(name)
 	require.NotNil(t, v)
@@ -640,7 +628,7 @@ func compiledGetAll(t *testing.T, c *gs.Compiled, expected M) {
 	require.Equal(t, len(expected), len(vars))
 
 	for k, ev := range expected {
-		v, err := require.FromInterface(ev)
+		v, err := require.FromInterface(alloc, ev)
 		require.NoError(t, err)
 		var found bool
 		for _, e := range vars {
@@ -657,7 +645,7 @@ func compiledIsDefined(t *testing.T, c *gs.Compiled, name string, expected bool)
 	require.Equal(t, expected, c.IsDefined(name))
 }
 func TestCompiled_Clone(t *testing.T) {
-	script := gs.NewScript([]byte(`
+	script := gs.NewScript(alloc, []byte(`
 count += 1
 data["b"] = 2
 `))

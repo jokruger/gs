@@ -11,13 +11,13 @@ import (
 // Eval compiles and executes given expr with params, and returns an evaluated value.
 // Argument `expr` must be an expression. Otherwise it will fail to compile.
 // Expression must not use or define variable "__res__" as it's reserved for the internal usage.
-func Eval(ctx context.Context, expr string, params map[string]core.Object) (any, error) {
+func Eval(ctx context.Context, alloc core.Allocator, expr string, params map[string]core.Object) (any, error) {
 	expr = strings.TrimSpace(expr)
 	if expr == "" {
 		return nil, fmt.Errorf("empty expression")
 	}
 
-	script := NewScript([]byte(fmt.Sprintf("__res__ := (%s)", expr)))
+	script := NewScript(alloc, []byte(fmt.Sprintf("__res__ := (%s)", expr)))
 	for pk, pv := range params {
 		script.Add(pk, pv)
 	}

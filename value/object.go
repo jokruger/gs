@@ -26,7 +26,7 @@ func (o *Object) Arity() int {
 	return 0
 }
 
-func (o *Object) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Object) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
 }
 
@@ -34,11 +34,11 @@ func (o *Object) Equals(x core.Object) bool {
 	return o == x
 }
 
-func (o *Object) Copy() core.Object {
+func (o *Object) Copy(core.Allocator) core.Object {
 	return o
 }
 
-func (o *Object) Access(core.Object, core.Opcode) (core.Object, error) {
+func (o *Object) Access(core.Allocator, core.Object, core.Opcode) (core.Object, error) {
 	return nil, core.NewNotAccessibleError(o)
 }
 
@@ -46,7 +46,7 @@ func (o *Object) Assign(core.Object, core.Object) error {
 	return core.NewNotAssignableError(o)
 }
 
-func (o *Object) Iterate() core.Iterator {
+func (o *Object) Iterate(core.Allocator) core.Iterator {
 	return nil
 }
 
@@ -54,7 +54,15 @@ func (o *Object) Call(core.VM, ...core.Object) (core.Object, error) {
 	return nil, nil
 }
 
-func (o *Object) IsFalsy() bool {
+func (o *Object) IsUndefined() bool {
+	return false
+}
+
+func (o *Object) IsTrue() bool {
+	return o != nil
+}
+
+func (o *Object) IsFalse() bool {
 	return o == nil
 }
 

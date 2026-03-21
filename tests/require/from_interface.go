@@ -5,64 +5,60 @@ import (
 	"time"
 
 	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/value"
 )
 
-func FromInterface(v any) (core.Object, error) {
+func FromInterface(alloc core.Allocator, v any) (core.Object, error) {
 	switch v := v.(type) {
 	case nil:
-		return value.UndefinedValue, nil
+		return alloc.NewUndefined(), nil
 	case string:
-		return value.NewString(v), nil
+		return alloc.NewString(v), nil
 	case int64:
-		return value.NewInt(v), nil
+		return alloc.NewInt(v), nil
 	case int:
-		return value.NewInt(int64(v)), nil
+		return alloc.NewInt(int64(v)), nil
 	case bool:
-		if v {
-			return value.TrueValue, nil
-		}
-		return value.FalseValue, nil
+		return alloc.NewBool(v), nil
 	case rune:
-		return value.NewChar(v), nil
+		return alloc.NewChar(v), nil
 	case byte:
-		return value.NewChar(rune(v)), nil
+		return alloc.NewChar(rune(v)), nil
 	case float64:
-		return value.NewFloat(v), nil
+		return alloc.NewFloat(v), nil
 	case []byte:
-		return value.NewBytes(v), nil
+		return alloc.NewBytes(v), nil
 	case error:
-		return value.NewError(value.NewString(v.Error())), nil
+		return alloc.NewError(alloc.NewString(v.Error())), nil
 	case map[string]core.Object:
-		return value.NewRecord(v, false), nil
+		return alloc.NewRecord(v, false), nil
 	case map[string]any:
 		kv := make(map[string]core.Object)
 		for vk, vv := range v {
-			vo, err := FromInterface(vv)
+			vo, err := FromInterface(alloc, vv)
 			if err != nil {
 				return nil, err
 			}
 			kv[vk] = vo
 		}
-		return value.NewRecord(kv, false), nil
+		return alloc.NewRecord(kv, false), nil
 	case []core.Object:
-		return value.NewArray(v, false), nil
+		return alloc.NewArray(v, false), nil
 	case []any:
 		arr := make([]core.Object, len(v))
 		for i, e := range v {
-			vo, err := FromInterface(e)
+			vo, err := FromInterface(alloc, e)
 			if err != nil {
 				return nil, err
 			}
 			arr[i] = vo
 		}
-		return value.NewArray(arr, false), nil
+		return alloc.NewArray(arr, false), nil
 	case time.Time:
-		return value.NewTime(v), nil
+		return alloc.NewTime(v), nil
 	case core.Object:
 		return v, nil
 	case core.NativeFunc:
-		return value.NewBuiltinFunction("anonymous", v, 0, true), nil
+		return alloc.NewBuiltinFunction("anonymous", v, 0, true), nil
 	}
 	return nil, fmt.Errorf("cannot convert to object: %T", v)
 }

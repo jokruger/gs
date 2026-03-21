@@ -9,10 +9,6 @@ type Undefined struct {
 	Object
 }
 
-func NewUndefined() *Undefined {
-	return &Undefined{}
-}
-
 func (o *Undefined) GobDecode(b []byte) error {
 	if len(b) != 0 {
 		core.NewDecodeBinarySizeError(o, 0, len(b))
@@ -28,11 +24,11 @@ func (o *Undefined) Next() bool {
 	return false
 }
 
-func (o *Undefined) Key() core.Object {
+func (o *Undefined) Key(core.Allocator) core.Object {
 	return o
 }
 
-func (o *Undefined) Value() core.Object {
+func (o *Undefined) Value(core.Allocator) core.Object {
 	return o
 }
 
@@ -48,7 +44,7 @@ func (o *Undefined) Interface() any {
 	return nil
 }
 
-func (o *Undefined) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Undefined) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
 }
 
@@ -56,23 +52,31 @@ func (o *Undefined) Equals(x core.Object) bool {
 	return o == x
 }
 
-func (o *Undefined) Copy() core.Object {
-	return o
+func (o *Undefined) Copy(alloc core.Allocator) core.Object {
+	return alloc.NewUndefined()
 }
 
-func (o *Undefined) Access(core.Object, core.Opcode) (core.Object, error) {
-	return UndefinedValue, nil
+func (o *Undefined) Access(alloc core.Allocator, index core.Object, mode core.Opcode) (core.Object, error) {
+	return alloc.NewUndefined(), nil
 }
 
 func (o *Undefined) Assign(core.Object, core.Object) error {
 	return core.NewNotAssignableError(o)
 }
 
-func (o *Undefined) Iterate() core.Iterator {
+func (o *Undefined) Iterate(core.Allocator) core.Iterator {
 	return o
 }
 
-func (o *Undefined) IsFalsy() bool {
+func (o *Undefined) IsUndefined() bool {
+	return true
+}
+
+func (o *Undefined) IsTrue() bool {
+	return false
+}
+
+func (o *Undefined) IsFalse() bool {
 	return true
 }
 

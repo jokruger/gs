@@ -14,7 +14,8 @@ type Int struct {
 	value int64
 }
 
-func NewInt(v int64) *Int {
+// Should be used only for static initialization. For dynamic creation of built-in functions, use Allocator.NewInt.
+func NewStaticInt(v int64) core.Object {
 	o := &Int{}
 	o.Set(v)
 	return o
@@ -54,154 +55,74 @@ func (o *Int) Interface() any {
 	return o.value
 }
 
-func (o *Int) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Int) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	switch rhs := rhs.(type) {
 	case *Int:
 		switch op {
 		case token.Add:
-			r := o.value + rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewInt(r), nil
+			return alloc.NewInt(o.value + rhs.value), nil
 		case token.Sub:
-			r := o.value - rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewInt(r), nil
+			return alloc.NewInt(o.value - rhs.value), nil
 		case token.Mul:
-			r := o.value * rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewInt(r), nil
+			return alloc.NewInt(o.value * rhs.value), nil
 		case token.Quo:
-			r := o.value / rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewInt(r), nil
+			return alloc.NewInt(o.value / rhs.value), nil
 		case token.Rem:
-			r := o.value % rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewInt(r), nil
+			return alloc.NewInt(o.value % rhs.value), nil
 		case token.And:
-			r := o.value & rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewInt(r), nil
+			return alloc.NewInt(o.value & rhs.value), nil
 		case token.Or:
-			r := o.value | rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewInt(r), nil
+			return alloc.NewInt(o.value | rhs.value), nil
 		case token.Xor:
-			r := o.value ^ rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewInt(r), nil
+			return alloc.NewInt(o.value ^ rhs.value), nil
 		case token.AndNot:
-			r := o.value &^ rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewInt(r), nil
+			return alloc.NewInt(o.value &^ rhs.value), nil
 		case token.Shl:
-			r := o.value << uint64(rhs.value)
-			if r == o.value {
-				return o, nil
-			}
-			return NewInt(r), nil
+			return alloc.NewInt(o.value << uint64(rhs.value)), nil
 		case token.Shr:
-			r := o.value >> uint64(rhs.value)
-			if r == o.value {
-				return o, nil
-			}
-			return NewInt(r), nil
+			return alloc.NewInt(o.value >> uint64(rhs.value)), nil
 		case token.Less:
-			if o.value < rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value < rhs.value), nil
 		case token.Greater:
-			if o.value > rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value > rhs.value), nil
 		case token.LessEq:
-			if o.value <= rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value <= rhs.value), nil
 		case token.GreaterEq:
-			if o.value >= rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value >= rhs.value), nil
 		}
 	case *Float:
 		switch op {
 		case token.Add:
-			return NewFloat(float64(o.value) + rhs.value), nil
+			return alloc.NewFloat(float64(o.value) + rhs.value), nil
 		case token.Sub:
-			return NewFloat(float64(o.value) - rhs.value), nil
+			return alloc.NewFloat(float64(o.value) - rhs.value), nil
 		case token.Mul:
-			return NewFloat(float64(o.value) * rhs.value), nil
+			return alloc.NewFloat(float64(o.value) * rhs.value), nil
 		case token.Quo:
-			return NewFloat(float64(o.value) / rhs.value), nil
+			return alloc.NewFloat(float64(o.value) / rhs.value), nil
 		case token.Less:
-			if float64(o.value) < rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(float64(o.value) < rhs.value), nil
 		case token.Greater:
-			if float64(o.value) > rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(float64(o.value) > rhs.value), nil
 		case token.LessEq:
-			if float64(o.value) <= rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(float64(o.value) <= rhs.value), nil
 		case token.GreaterEq:
-			if float64(o.value) >= rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(float64(o.value) >= rhs.value), nil
 		}
 	case *Char:
 		switch op {
 		case token.Add:
-			return NewChar(rune(o.value) + rhs.value), nil
+			return alloc.NewInt(o.value + int64(rhs.value)), nil
 		case token.Sub:
-			return NewChar(rune(o.value) - rhs.value), nil
+			return alloc.NewInt(o.value - int64(rhs.value)), nil
 		case token.Less:
-			if o.value < int64(rhs.value) {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value < int64(rhs.value)), nil
 		case token.Greater:
-			if o.value > int64(rhs.value) {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value > int64(rhs.value)), nil
 		case token.LessEq:
-			if o.value <= int64(rhs.value) {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value <= int64(rhs.value)), nil
 		case token.GreaterEq:
-			if o.value >= int64(rhs.value) {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value >= int64(rhs.value)), nil
 		}
 	}
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
@@ -215,11 +136,11 @@ func (o *Int) Equals(x core.Object) bool {
 	return o.value == t
 }
 
-func (o *Int) Copy() core.Object {
-	return NewInt(o.value)
+func (o *Int) Copy(alloc core.Allocator) core.Object {
+	return alloc.NewInt(o.value)
 }
 
-func (o *Int) Access(core.Object, core.Opcode) (core.Object, error) {
+func (o *Int) Access(core.Allocator, core.Object, core.Opcode) (core.Object, error) {
 	return nil, core.NewNotAccessibleError(o)
 }
 
@@ -227,7 +148,11 @@ func (o *Int) Assign(core.Object, core.Object) error {
 	return core.NewNotAssignableError(o)
 }
 
-func (o *Int) IsFalsy() bool {
+func (o *Int) IsTrue() bool {
+	return o.value != 0
+}
+
+func (o *Int) IsFalse() bool {
 	return o.value == 0
 }
 
@@ -248,7 +173,7 @@ func (o *Int) AsFloat() (float64, bool) {
 }
 
 func (o *Int) AsBool() (bool, bool) {
-	return !o.IsFalsy(), true
+	return o.IsTrue(), true
 }
 
 func (o *Int) AsRune() (rune, bool) {

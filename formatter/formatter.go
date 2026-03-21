@@ -10,8 +10,7 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-// Strings for use with fmtbuf.WriteString. This is less overhead than using
-// fmtbuf.Write with byte arrays.
+// Strings for use with fmtbuf.WriteString. This is less overhead than using fmtbuf.Write with byte arrays.
 const (
 	commaSpaceString  = ", "
 	nilParenString    = "(nil)"
@@ -44,8 +43,7 @@ type fmtFlags struct {
 	space       bool
 	zero        bool
 
-	// For the formats %+v %#v, we set the plusV/sharpV flags
-	// and clear the plus/sharp flags since %+v and %#v are in effect
+	// For the formats %+v %#v, we set the plusV/sharpV flags and clear the plus/sharp flags since %+v and %#v are in effect
 	// different, flagless formats set at the top level.
 	plusV  bool
 	sharpV bool
@@ -56,8 +54,7 @@ type fmtFlags struct {
 	needColon   bool
 }
 
-// A formatter is the raw formatter used by Printf etc.
-// It prints into a fmtbuf that must be set up separately.
+// A formatter is the raw formatter used by Printf etc. It prints into a fmtbuf that must be set up separately.
 type formatter struct {
 	buf *fmtbuf
 
@@ -66,8 +63,7 @@ type formatter struct {
 	wid  int // width
 	prec int // precision
 
-	// intbuf is large enough to store %b of an int64 with a sign and
-	// avoids padding at the end of the struct on 32 bit architectures.
+	// intbuf is large enough to store %b of an int64 with a sign and avoids padding at the end of the struct on 32 bit architectures.
 	intbuf [68]byte
 }
 
@@ -800,7 +796,7 @@ func (p *pp) badVerb(verb rune) {
 		_, _ = p.WriteSingleByte('=')
 		p.printArg(p.arg, 'v')
 	default:
-		_, _ = p.WriteString(value.UndefinedValue.String())
+		_, _ = p.WriteString("undefined")
 	}
 	_, _ = p.WriteSingleByte(')')
 	p.erroring = false
@@ -936,14 +932,12 @@ func (p *pp) fmtBytes(v []byte, verb rune, typeString string) {
 
 func (p *pp) printArg(arg core.Object, verb rune) {
 	p.arg = arg
-
 	if arg == nil {
-		arg = value.UndefinedValue
+		p.fmt.fmtS("undefined")
 	}
 
 	// Special processing considerations.
-	// %T (the value's type) and %p (its address) are special; we always do
-	// them first.
+	// %T (the value's type) and %p (its address) are special; we always do them first.
 	switch verb {
 	case 'T':
 		p.fmt.fmtS(arg.TypeName())
@@ -956,7 +950,7 @@ func (p *pp) printArg(arg core.Object, verb rune) {
 	// Some types can be done without reflection.
 	switch f := arg.(type) {
 	case *value.Bool:
-		p.fmtBool(!f.IsFalsy(), verb)
+		p.fmtBool(f.IsTrue(), verb)
 	case *value.Float:
 		p.fmtFloat(f.Value(), 64, verb)
 	case *value.Int:
@@ -970,8 +964,7 @@ func (p *pp) printArg(arg core.Object, verb rune) {
 	}
 }
 
-// intFromArg gets the argNumth element of a. On return, isInt reports whether
-// the argument has integer type.
+// intFromArg gets the argNumth element of a. On return, isInt reports whether the argument has integer type.
 func intFromArg(a []core.Object, argNum int) (num int, isInt bool, newArgNum int) {
 	newArgNum = argNum
 	if argNum < len(a) {
@@ -1225,7 +1218,7 @@ formatLoop:
 				_, _ = p.WriteString(commaSpaceString)
 			}
 			if arg == nil {
-				_, _ = p.WriteString(value.UndefinedValue.String())
+				_, _ = p.WriteString("undefined")
 			} else {
 				_, _ = p.WriteString(arg.TypeName())
 				_, _ = p.WriteSingleByte('=')

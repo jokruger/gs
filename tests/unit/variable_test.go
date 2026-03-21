@@ -1,4 +1,4 @@
-package gs_test
+package unit
 
 import (
 	"testing"
@@ -6,7 +6,6 @@ import (
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/value"
 )
 
 type VariableTest struct {
@@ -33,7 +32,7 @@ func TestVariable(t *testing.T) {
 			CharValue:   rune(1),
 			BoolValue:   true,
 			StringValue: "1",
-			Object:      value.NewInt(1),
+			Object:      alloc.NewInt(1),
 		},
 		{
 			Name:        "b",
@@ -42,7 +41,7 @@ func TestVariable(t *testing.T) {
 			FloatValue:  52.11,
 			StringValue: "52.11",
 			BoolValue:   true,
-			Object:      value.NewString("52.11"),
+			Object:      alloc.NewString("52.11"),
 		},
 		{
 			Name:        "c",
@@ -52,19 +51,19 @@ func TestVariable(t *testing.T) {
 			FloatValue:  0,
 			BoolValue:   true,
 			StringValue: "true",
-			Object:      value.TrueValue,
+			Object:      alloc.NewBool(true),
 		},
 		{
 			Name:        "d",
 			Value:       nil,
 			ValueType:   "undefined",
-			Object:      value.UndefinedValue,
+			Object:      alloc.NewUndefined(),
 			IsUndefined: true,
 		},
 	}
 
 	for _, tc := range vars {
-		o, err := require.FromInterface(tc.Value)
+		o, err := require.FromInterface(alloc, tc.Value)
 		require.NoError(t, err)
 
 		v := gs.NewVariable(tc.Name, o)

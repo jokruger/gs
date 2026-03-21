@@ -15,9 +15,10 @@ type String struct {
 	runes []rune
 }
 
-func NewString(s string) *String {
+// Should be used only for static initialization. For dynamic creation of built-in functions, use Allocator.NewString.
+func NewStaticString(v string) core.Object {
 	o := &String{}
-	o.Set(s)
+	o.Set(v)
 	return o
 }
 
@@ -87,7 +88,7 @@ func (o *String) Interface() any {
 	return o.value
 }
 
-func (o *String) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *String) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	switch op {
 	case token.Add:
 		switch rhs := rhs.(type) {
@@ -95,7 +96,7 @@ func (o *String) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) 
 			if len(o.value)+len(rhs.value) > core.MaxStringLen {
 				return nil, core.NewStringLimitError("string concatenation")
 			}
-			return NewString(o.value + rhs.value), nil
+			return alloc.NewString(o.value + rhs.value), nil
 		default:
 			s, ok := rhs.AsString()
 			if !ok {
@@ -104,39 +105,27 @@ func (o *String) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) 
 			if len(o.value)+len(s) > core.MaxStringLen {
 				return nil, core.NewStringLimitError("string concatenation")
 			}
-			return NewString(o.value + s), nil
+			return alloc.NewString(o.value + s), nil
 		}
 	case token.Less:
 		switch rhs := rhs.(type) {
 		case *String:
-			if o.value < rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value < rhs.value), nil
 		}
 	case token.LessEq:
 		switch rhs := rhs.(type) {
 		case *String:
-			if o.value <= rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value <= rhs.value), nil
 		}
 	case token.Greater:
 		switch rhs := rhs.(type) {
 		case *String:
-			if o.value > rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value > rhs.value), nil
 		}
 	case token.GreaterEq:
 		switch rhs := rhs.(type) {
 		case *String:
-			if o.value >= rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value >= rhs.value), nil
 		}
 	}
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
@@ -150,37 +139,38 @@ func (o *String) Equals(x core.Object) bool {
 	return o.value == t.value
 }
 
-func (o *String) Copy() core.Object {
-	return NewString(o.value)
+func (o *String) Copy(alloc core.Allocator) core.Object {
+	return alloc.NewString(o.value)
 }
 
-func (o *String) Access(index core.Object, mode core.Opcode) (res core.Object, err error) {
+func (o *String) Access(alloc core.Allocator, index core.Object, mode core.Opcode) (core.Object, error) {
 	if mode == parser.OpSelect {
 		return nil, core.NewInvalidAccessModeError("string", "select")
 	}
 
 	i, ok := index.AsInt()
 	if !ok {
-		err = core.NewInvalidIndexTypeError("string access", "int", index)
-		return
+		return nil, core.NewInvalidIndexTypeError("string access", "int", index)
 	}
 	if i < 0 || i >= int64(len(o.runes)) {
-		res = UndefinedValue
-		return
+		return alloc.NewUndefined(), nil
 	}
-	res = NewChar(o.runes[i])
-	return
+	return alloc.NewChar(o.runes[i]), nil
 }
 
 func (o *String) Assign(core.Object, core.Object) error {
 	return core.NewNotAssignableError(o)
 }
 
-func (o *String) Iterate() core.Iterator {
-	return NewStringIterator(o.runes)
+func (o *String) Iterate(alloc core.Allocator) core.Iterator {
+	return alloc.NewStringIterator(o.runes)
 }
 
-func (o *String) IsFalsy() bool {
+func (o *String) IsTrue() bool {
+	return len(o.value) > 0
+}
+
+func (o *String) IsFalse() bool {
 	return len(o.value) == 0
 }
 
@@ -213,7 +203,7 @@ func (o *String) AsFloat() (float64, bool) {
 }
 
 func (o *String) AsBool() (bool, bool) {
-	return !o.IsFalsy(), true
+	return o.IsTrue(), true
 }
 
 func (o *String) AsRune() (rune, bool) {

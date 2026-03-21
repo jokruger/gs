@@ -9,13 +9,13 @@ import (
 )
 
 var fmtModule = map[string]core.Object{
-	"print":   value.NewBuiltinFunction("print", fmtPrint, 0, true),
-	"printf":  value.NewBuiltinFunction("printf", fmtPrintf, 1, true),
-	"println": value.NewBuiltinFunction("println", fmtPrintln, 0, true),
-	"sprintf": value.NewBuiltinFunction("sprintf", fmtSprintf, 1, true),
+	"print":   value.NewStaticBuiltinFunction("print", fmtPrint, 0, true),
+	"printf":  value.NewStaticBuiltinFunction("printf", fmtPrintf, 1, true),
+	"println": value.NewStaticBuiltinFunction("println", fmtPrintln, 0, true),
+	"sprintf": value.NewStaticBuiltinFunction("sprintf", fmtSprintf, 1, true),
 }
 
-func fmtPrint(args ...core.Object) (ret core.Object, err error) {
+func fmtPrint(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	printArgs, err := getPrintArgs(args...)
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func fmtPrint(args ...core.Object) (ret core.Object, err error) {
 	return nil, nil
 }
 
-func fmtPrintf(args ...core.Object) (ret core.Object, err error) {
+func fmtPrintf(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	numArgs := len(args)
 	if numArgs == 0 {
 		return nil, core.NewWrongNumArgumentsError("fmt.printf", "at least 1", numArgs)
@@ -47,7 +47,7 @@ func fmtPrintf(args ...core.Object) (ret core.Object, err error) {
 	return nil, nil
 }
 
-func fmtPrintln(args ...core.Object) (ret core.Object, err error) {
+func fmtPrintln(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	printArgs, err := getPrintArgs(args...)
 	if err != nil {
 		return nil, err
@@ -57,7 +57,7 @@ func fmtPrintln(args ...core.Object) (ret core.Object, err error) {
 	return nil, nil
 }
 
-func fmtSprintf(args ...core.Object) (ret core.Object, err error) {
+func fmtSprintf(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 	numArgs := len(args)
 	if numArgs == 0 {
 		return nil, core.NewWrongNumArgumentsError("fmt.sprintf", "at least 1", numArgs)
@@ -68,13 +68,13 @@ func fmtSprintf(args ...core.Object) (ret core.Object, err error) {
 		return nil, core.NewInvalidArgumentTypeError("fmt.sprintf", "format", "string", args[0])
 	}
 	if numArgs == 1 {
-		return value.NewString(format), nil
+		return alloc.NewString(format), nil
 	}
 	s, err := formatter.Format(format, args[1:]...)
 	if err != nil {
 		return nil, err
 	}
-	return value.NewString(s), nil
+	return alloc.NewString(s), nil
 }
 
 func getPrintArgs(args ...core.Object) ([]any, error) {

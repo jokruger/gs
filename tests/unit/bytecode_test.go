@@ -1,4 +1,4 @@
-package gs_test
+package unit
 
 import (
 	"bytes"
@@ -23,107 +23,107 @@ func TestBytecodeEmpty(t *testing.T) {
 
 func TestBytecodeConstUndefined(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.UndefinedValue,
+		alloc.NewUndefined(),
 	)))
 }
 
 func TestBytecodeConstBool(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.TrueValue,
-		value.FalseValue,
+		alloc.NewBool(true),
+		alloc.NewBool(false),
 	)))
 }
 
 func TestBytecodeConstChar(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewChar('a'),
-		value.NewChar('b'),
-		value.NewChar('c'),
+		alloc.NewChar('a'),
+		alloc.NewChar('b'),
+		alloc.NewChar('c'),
 	)))
 }
 
 func TestBytecodeConstInt(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewInt(1),
-		value.NewInt(2),
-		value.NewInt(3),
-		value.NewInt(1234567890),
+		alloc.NewInt(1),
+		alloc.NewInt(2),
+		alloc.NewInt(3),
+		alloc.NewInt(1234567890),
 	)))
 }
 
 func TestBytecodeConstFloat(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewFloat(0.123),
-		value.NewFloat(123456.789),
+		alloc.NewFloat(0.123),
+		alloc.NewFloat(123456.789),
 	)))
 }
 
 func TestBytecodeConstString(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewString(""),
-		value.NewString("foo"),
-		value.NewString("foo bar"),
+		alloc.NewString(""),
+		alloc.NewString("foo"),
+		alloc.NewString("foo bar"),
 	)))
 }
 
 func TestBytecodeConstBytes(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewBytes([]byte{}),
-		value.NewBytes([]byte{1, 2, 3}),
-		value.NewBytes([]byte("foo bar")),
+		alloc.NewBytes([]byte{}),
+		alloc.NewBytes([]byte{1, 2, 3}),
+		alloc.NewBytes([]byte("foo bar")),
 	)))
 }
 
 func TestBytecodeConstTime(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewTime(time.Unix(0, 0)),
-		value.NewTime(time.Unix(1234567890, 123456789)),
+		alloc.NewTime(time.Unix(0, 0)),
+		alloc.NewTime(time.Unix(1234567890, 123456789)),
 	)))
 }
 
 func TestBytecodeConstArray(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewArray([]core.Object{
-			value.NewInt(1),
-			value.NewFloat(2.0),
-			value.NewChar('3'),
-			value.NewString("four"),
+		alloc.NewArray([]core.Object{
+			alloc.NewInt(1),
+			alloc.NewFloat(2.0),
+			alloc.NewChar('3'),
+			alloc.NewString("four"),
 		}, true),
 	)))
 
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewArray([]core.Object{
-			value.NewInt(1),
-			value.NewFloat(2.0),
-			value.NewChar('3'),
-			value.NewString("four"),
+		alloc.NewArray([]core.Object{
+			alloc.NewInt(1),
+			alloc.NewFloat(2.0),
+			alloc.NewChar('3'),
+			alloc.NewString("four"),
 		}, false),
 	)))
 }
 
 func TestBytecodeConstMap(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewRecord(map[string]core.Object{
-			"a": value.NewInt(1),
-			"b": value.NewFloat(2.0),
-			"c": value.NewChar('3'),
-			"d": value.NewString("four"),
+		alloc.NewRecord(map[string]core.Object{
+			"a": alloc.NewInt(1),
+			"b": alloc.NewFloat(2.0),
+			"c": alloc.NewChar('3'),
+			"d": alloc.NewString("four"),
 		}, true),
 	)))
 
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewRecord(map[string]core.Object{
-			"a": value.NewInt(1),
-			"b": value.NewFloat(2.0),
-			"c": value.NewChar('3'),
-			"d": value.NewString("four"),
+		alloc.NewRecord(map[string]core.Object{
+			"a": alloc.NewInt(1),
+			"b": alloc.NewFloat(2.0),
+			"c": alloc.NewChar('3'),
+			"d": alloc.NewString("four"),
 		}, false),
 	)))
 }
 
 func TestBytecodeConstError(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		value.NewError(value.NewString("some error")),
+		alloc.NewError(alloc.NewString("some error")),
 	)))
 }
 
@@ -132,16 +132,16 @@ func TestBytecode(t *testing.T) {
 
 	testBytecodeSerialization(t, bytecode(
 		concatInsts(), objectsArray(
-			value.NewChar('y'),
-			value.NewFloat(93.11),
+			alloc.NewChar('y'),
+			alloc.NewFloat(93.11),
 			compiledFunction(1, 0,
 				vm.MakeInstruction(parser.OpConstant, 3),
 				vm.MakeInstruction(parser.OpSetLocal, 0),
 				vm.MakeInstruction(parser.OpGetGlobal, 0),
 				vm.MakeInstruction(parser.OpGetFree, 0)),
-			value.NewFloat(39.2),
-			value.NewInt(192),
-			value.NewString("bar"),
+			alloc.NewFloat(39.2),
+			alloc.NewInt(192),
+			alloc.NewString("bar"),
 		)))
 
 	testBytecodeSerialization(t, bytecodeFileSet(
@@ -151,53 +151,53 @@ func TestBytecode(t *testing.T) {
 			vm.MakeInstruction(parser.OpConstant, 6),
 			vm.MakeInstruction(parser.OpPop)),
 		objectsArray(
-			value.NewInt(55),
-			value.NewInt(66),
-			value.NewInt(77),
-			value.NewInt(88),
-			value.NewRecord(map[string]core.Object{
-				"array": value.NewArray([]core.Object{
-					value.NewInt(1),
-					value.NewInt(2),
-					value.NewInt(3),
-					value.TrueValue,
-					value.FalseValue,
-					value.UndefinedValue,
+			alloc.NewInt(55),
+			alloc.NewInt(66),
+			alloc.NewInt(77),
+			alloc.NewInt(88),
+			alloc.NewRecord(map[string]core.Object{
+				"array": alloc.NewArray([]core.Object{
+					alloc.NewInt(1),
+					alloc.NewInt(2),
+					alloc.NewInt(3),
+					alloc.NewBool(true),
+					alloc.NewBool(false),
+					alloc.NewUndefined(),
 				}, true),
-				"true":  value.TrueValue,
-				"false": value.FalseValue,
-				"bytes": value.NewBytes(make([]byte, 16)),
-				"char":  value.NewChar('Y'),
-				"error": value.NewError(value.NewString("some error")),
-				"float": value.NewFloat(-19.84),
-				"immutable_array": value.NewArray([]core.Object{
-					value.NewInt(1),
-					value.NewInt(2),
-					value.NewInt(3),
-					value.TrueValue,
-					value.FalseValue,
-					value.UndefinedValue,
+				"true":  alloc.NewBool(true),
+				"false": alloc.NewBool(false),
+				"bytes": alloc.NewBytes(make([]byte, 16)),
+				"char":  alloc.NewChar('Y'),
+				"error": alloc.NewError(alloc.NewString("some error")),
+				"float": alloc.NewFloat(-19.84),
+				"immutable_array": alloc.NewArray([]core.Object{
+					alloc.NewInt(1),
+					alloc.NewInt(2),
+					alloc.NewInt(3),
+					alloc.NewBool(true),
+					alloc.NewBool(false),
+					alloc.NewUndefined(),
 				}, true),
-				"immutable_map": value.NewRecord(map[string]core.Object{
-					"a": value.NewInt(1),
-					"b": value.NewInt(2),
-					"c": value.NewInt(3),
-					"d": value.TrueValue,
-					"e": value.FalseValue,
-					"f": value.UndefinedValue,
+				"immutable_map": alloc.NewRecord(map[string]core.Object{
+					"a": alloc.NewInt(1),
+					"b": alloc.NewInt(2),
+					"c": alloc.NewInt(3),
+					"d": alloc.NewBool(true),
+					"e": alloc.NewBool(false),
+					"f": alloc.NewUndefined(),
 				}, true),
-				"int": value.NewInt(91),
-				"map": value.NewRecord(map[string]core.Object{
-					"a": value.NewInt(1),
-					"b": value.NewInt(2),
-					"c": value.NewInt(3),
-					"d": value.TrueValue,
-					"e": value.FalseValue,
-					"f": value.UndefinedValue,
+				"int": alloc.NewInt(91),
+				"map": alloc.NewRecord(map[string]core.Object{
+					"a": alloc.NewInt(1),
+					"b": alloc.NewInt(2),
+					"c": alloc.NewInt(3),
+					"d": alloc.NewBool(true),
+					"e": alloc.NewBool(false),
+					"f": alloc.NewUndefined(),
 				}, false),
-				"string":    value.NewString("foo bar"),
-				"time":      value.NewTime(time.Now()),
-				"undefined": value.UndefinedValue,
+				"string":    alloc.NewString("foo bar"),
+				"time":      alloc.NewTime(time.Now()),
+				"undefined": alloc.NewUndefined(),
 			}, true),
 			compiledFunction(1, 0,
 				vm.MakeInstruction(parser.OpConstant, 3),
@@ -231,28 +231,28 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 	testBytecodeRemoveDuplicates(t,
 		bytecode(
 			concatInsts(), objectsArray(
-				value.NewChar('y'),
-				value.NewFloat(93.11),
+				alloc.NewChar('y'),
+				alloc.NewFloat(93.11),
 				compiledFunction(1, 0,
 					vm.MakeInstruction(parser.OpConstant, 3),
 					vm.MakeInstruction(parser.OpSetLocal, 0),
 					vm.MakeInstruction(parser.OpGetGlobal, 0),
 					vm.MakeInstruction(parser.OpGetFree, 0)),
-				value.NewFloat(39.2),
-				value.NewInt(192),
-				value.NewString("bar"))),
+				alloc.NewFloat(39.2),
+				alloc.NewInt(192),
+				alloc.NewString("bar"))),
 		bytecode(
 			concatInsts(), objectsArray(
-				value.NewChar('y'),
-				value.NewFloat(93.11),
+				alloc.NewChar('y'),
+				alloc.NewFloat(93.11),
 				compiledFunction(1, 0,
 					vm.MakeInstruction(parser.OpConstant, 3),
 					vm.MakeInstruction(parser.OpSetLocal, 0),
 					vm.MakeInstruction(parser.OpGetGlobal, 0),
 					vm.MakeInstruction(parser.OpGetFree, 0)),
-				value.NewFloat(39.2),
-				value.NewInt(192),
-				value.NewString("bar"))))
+				alloc.NewFloat(39.2),
+				alloc.NewInt(192),
+				alloc.NewString("bar"))))
 
 	testBytecodeRemoveDuplicates(t,
 		bytecode(
@@ -268,20 +268,20 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 				vm.MakeInstruction(parser.OpConstant, 8),
 				vm.MakeInstruction(parser.OpClosure, 4, 1)),
 			objectsArray(
-				value.NewInt(1),
-				value.NewFloat(2.0),
-				value.NewChar('3'),
-				value.NewString("four"),
+				alloc.NewInt(1),
+				alloc.NewFloat(2.0),
+				alloc.NewChar('3'),
+				alloc.NewString("four"),
 				compiledFunction(1, 0,
 					vm.MakeInstruction(parser.OpConstant, 3),
 					vm.MakeInstruction(parser.OpConstant, 7),
 					vm.MakeInstruction(parser.OpSetLocal, 0),
 					vm.MakeInstruction(parser.OpGetGlobal, 0),
 					vm.MakeInstruction(parser.OpGetFree, 0)),
-				value.NewInt(1),
-				value.NewFloat(2.0),
-				value.NewChar('3'),
-				value.NewString("four"))),
+				alloc.NewInt(1),
+				alloc.NewFloat(2.0),
+				alloc.NewChar('3'),
+				alloc.NewString("four"))),
 		bytecode(
 			concatInsts(
 				vm.MakeInstruction(parser.OpConstant, 0),
@@ -295,10 +295,10 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 				vm.MakeInstruction(parser.OpConstant, 3),
 				vm.MakeInstruction(parser.OpClosure, 4, 1)),
 			objectsArray(
-				value.NewInt(1),
-				value.NewFloat(2.0),
-				value.NewChar('3'),
-				value.NewString("four"),
+				alloc.NewInt(1),
+				alloc.NewFloat(2.0),
+				alloc.NewChar('3'),
+				alloc.NewString("four"),
 				compiledFunction(1, 0,
 					vm.MakeInstruction(parser.OpConstant, 3),
 					vm.MakeInstruction(parser.OpConstant, 2),
@@ -315,11 +315,11 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 				vm.MakeInstruction(parser.OpConstant, 3),
 				vm.MakeInstruction(parser.OpConstant, 4)),
 			objectsArray(
-				value.NewInt(1),
-				value.NewInt(2),
-				value.NewInt(3),
-				value.NewInt(1),
-				value.NewInt(3))),
+				alloc.NewInt(1),
+				alloc.NewInt(2),
+				alloc.NewInt(3),
+				alloc.NewInt(1),
+				alloc.NewInt(3))),
 		bytecode(
 			concatInsts(
 				vm.MakeInstruction(parser.OpConstant, 0),
@@ -328,19 +328,19 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 				vm.MakeInstruction(parser.OpConstant, 0),
 				vm.MakeInstruction(parser.OpConstant, 2)),
 			objectsArray(
-				value.NewInt(1),
-				value.NewInt(2),
-				value.NewInt(3))))
+				alloc.NewInt(1),
+				alloc.NewInt(2),
+				alloc.NewInt(3))))
 }
 
 func TestBytecode_CountObjects(t *testing.T) {
 	b := bytecode(
 		concatInsts(),
 		objectsArray(
-			value.NewInt(55),
-			value.NewInt(66),
-			value.NewInt(77),
-			value.NewInt(88),
+			alloc.NewInt(55),
+			alloc.NewInt(66),
+			alloc.NewInt(77),
+			alloc.NewInt(88),
 			compiledFunction(1, 0,
 				vm.MakeInstruction(parser.OpConstant, 3),
 				vm.MakeInstruction(parser.OpReturn, 1)),
@@ -383,7 +383,7 @@ func testBytecodeSerialization(t *testing.T, b *vm.Bytecode) {
 	require.NoError(t, err)
 
 	r := &vm.Bytecode{}
-	err = r.Decode(bytes.NewReader(buf.Bytes()), nil)
+	err = r.Decode(alloc, bytes.NewReader(buf.Bytes()), nil)
 	require.NoError(t, err)
 
 	require.Equal(t, b.FileSet, r.FileSet)

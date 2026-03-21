@@ -20,6 +20,7 @@ type frame struct {
 
 // VM is a virtual machine that executes the bytecode compiled by Compiler.
 type VM struct {
+	alloc       core.Allocator
 	constants   []core.Object
 	stack       [StackSize]core.Object
 	sp          int
@@ -37,11 +38,12 @@ type VM struct {
 }
 
 // NewVM creates a VM.
-func NewVM(bytecode *Bytecode, globals []core.Object, maxAllocs int64) *VM {
+func NewVM(alloc core.Allocator, bytecode *Bytecode, globals []core.Object, maxAllocs int64) *VM {
 	if globals == nil {
 		globals = make([]core.Object, GlobalsSize)
 	}
 	v := &VM{
+		alloc:       alloc,
 		constants:   bytecode.Constants,
 		sp:          0,
 		globals:     globals,
@@ -55,6 +57,11 @@ func NewVM(bytecode *Bytecode, globals []core.Object, maxAllocs int64) *VM {
 	v.curFrame = &v.frames[0]
 	v.curInsts = v.curFrame.fn.Instructions
 	return v
+}
+
+// Allocator returns the allocator used by the VM.
+func (v *VM) Allocator() core.Allocator {
+	return v.alloc
 }
 
 // Abort aborts the execution.
@@ -121,7 +128,7 @@ func (v *VM) run() {
 			v.sp++
 
 		case parser.OpNull:
-			v.stack[v.sp] = value.UndefinedValue
+			v.stack[v.sp] = v.alloc.NewUndefined()
 			v.sp++
 
 		case parser.OpBinaryOp:
@@ -129,7 +136,7 @@ func (v *VM) run() {
 			right := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
 			tok := token.Token(v.curInsts[v.ip])
-			res, e := left.BinaryOp(tok, right)
+			res, e := left.BinaryOp(v.alloc, tok, right)
 			if e != nil {
 				v.sp -= 2
 				v.err = e
@@ -149,43 +156,31 @@ func (v *VM) run() {
 			right := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
 			v.sp -= 2
-			if left.Equals(right) {
-				v.stack[v.sp] = value.TrueValue
-			} else {
-				v.stack[v.sp] = value.FalseValue
-			}
+			v.stack[v.sp] = v.alloc.NewBool(left.Equals(right))
 			v.sp++
 
 		case parser.OpNotEqual:
 			right := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
 			v.sp -= 2
-			if left.Equals(right) {
-				v.stack[v.sp] = value.FalseValue
-			} else {
-				v.stack[v.sp] = value.TrueValue
-			}
+			v.stack[v.sp] = v.alloc.NewBool(!left.Equals(right))
 			v.sp++
 
 		case parser.OpPop:
 			v.sp--
 
 		case parser.OpTrue:
-			v.stack[v.sp] = value.TrueValue
+			v.stack[v.sp] = v.alloc.NewBool(true)
 			v.sp++
 
 		case parser.OpFalse:
-			v.stack[v.sp] = value.FalseValue
+			v.stack[v.sp] = v.alloc.NewBool(false)
 			v.sp++
 
 		case parser.OpLNot:
 			operand := v.stack[v.sp-1]
 			v.sp--
-			if operand.IsFalsy() {
-				v.stack[v.sp] = value.TrueValue
-			} else {
-				v.stack[v.sp] = value.FalseValue
-			}
+			v.stack[v.sp] = v.alloc.NewBool(operand.IsFalse())
 			v.sp++
 
 		case parser.OpBComplement:
@@ -194,7 +189,7 @@ func (v *VM) run() {
 
 			switch x := operand.(type) {
 			case *value.Int:
-				var res core.Object = value.NewInt(^x.Value())
+				var res core.Object = v.alloc.NewInt(^x.Value())
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -203,8 +198,7 @@ func (v *VM) run() {
 				v.stack[v.sp] = res
 				v.sp++
 			default:
-				v.err = fmt.Errorf("invalid operation: ^%s",
-					operand.TypeName())
+				v.err = fmt.Errorf("invalid operation: ^%s", operand.TypeName())
 				return
 			}
 
@@ -214,7 +208,7 @@ func (v *VM) run() {
 
 			switch x := operand.(type) {
 			case *value.Int:
-				var res core.Object = value.NewInt(-x.Value())
+				var res core.Object = v.alloc.NewInt(-x.Value())
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -223,7 +217,7 @@ func (v *VM) run() {
 				v.stack[v.sp] = res
 				v.sp++
 			case *value.Float:
-				var res core.Object = value.NewFloat(-x.Value())
+				var res core.Object = v.alloc.NewFloat(-x.Value())
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -232,22 +226,21 @@ func (v *VM) run() {
 				v.stack[v.sp] = res
 				v.sp++
 			default:
-				v.err = fmt.Errorf("invalid operation: -%s",
-					operand.TypeName())
+				v.err = fmt.Errorf("invalid operation: -%s", operand.TypeName())
 				return
 			}
 
 		case parser.OpJumpFalsy:
 			v.ip += 4
 			v.sp--
-			if v.stack[v.sp].IsFalsy() {
+			if v.stack[v.sp].IsFalse() {
 				pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
 				v.ip = pos - 1
 			}
 
 		case parser.OpAndJump:
 			v.ip += 4
-			if v.stack[v.sp-1].IsFalsy() {
+			if v.stack[v.sp-1].IsFalse() {
 				pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
 				v.ip = pos - 1
 			} else {
@@ -256,7 +249,7 @@ func (v *VM) run() {
 
 		case parser.OpOrJump:
 			v.ip += 4
-			if v.stack[v.sp-1].IsFalsy() {
+			if v.stack[v.sp-1].IsFalse() {
 				v.sp--
 			} else {
 				pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
@@ -285,7 +278,7 @@ func (v *VM) run() {
 			}
 			val := v.stack[v.sp-numSelectors-1]
 			v.sp -= numSelectors + 1
-			e := indexAssign(v.globals[globalIndex], val, selectors)
+			e := indexAssign(v.alloc, v.globals[globalIndex], val, selectors)
 			if e != nil {
 				v.err = e
 				return
@@ -308,7 +301,7 @@ func (v *VM) run() {
 			}
 			v.sp -= numElements
 
-			var arr core.Object = value.NewArray(elements, false)
+			var arr core.Object = v.alloc.NewArray(elements, false)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = core.ErrObjectAllocLimit
@@ -329,7 +322,7 @@ func (v *VM) run() {
 			}
 			v.sp -= numElements
 
-			var m core.Object = value.NewRecord(kv, false)
+			var m core.Object = v.alloc.NewRecord(kv, false)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = core.ErrObjectAllocLimit
@@ -340,7 +333,7 @@ func (v *VM) run() {
 
 		case parser.OpError:
 			val := v.stack[v.sp-1]
-			var e core.Object = value.NewError(val)
+			var e core.Object = v.alloc.NewError(val)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = core.ErrObjectAllocLimit
@@ -352,7 +345,7 @@ func (v *VM) run() {
 			val := v.stack[v.sp-1]
 			switch val := val.(type) {
 			case *value.Array:
-				var t core.Object = value.NewArray(val.Value(), true)
+				var t core.Object = v.alloc.NewArray(val.Value(), true)
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -360,7 +353,7 @@ func (v *VM) run() {
 				}
 				v.stack[v.sp-1] = t
 			case *value.Record:
-				var t core.Object = value.NewRecord(val.Value(), true)
+				var t core.Object = v.alloc.NewRecord(val.Value(), true)
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -368,7 +361,7 @@ func (v *VM) run() {
 				}
 				v.stack[v.sp-1] = t
 			case *value.Map:
-				var t core.Object = value.NewMap(val.Value(), true)
+				var t core.Object = v.alloc.NewMap(val.Value(), true)
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -382,13 +375,13 @@ func (v *VM) run() {
 			left := v.stack[v.sp-2]
 			v.sp -= 2
 
-			val, err := left.Access(index, code)
+			val, err := left.Access(v.alloc, index, code)
 			if err != nil {
 				v.err = err
 				return
 			}
 			if val == nil {
-				val = value.UndefinedValue
+				val = v.alloc.NewUndefined()
 			}
 			v.stack[v.sp] = val
 			v.sp++
@@ -400,12 +393,11 @@ func (v *VM) run() {
 			v.sp -= 3
 
 			var lowIdx int64
-			if low != value.UndefinedValue {
+			if !low.IsUndefined() {
 				if lowInt, ok := low.(*value.Int); ok {
 					lowIdx = lowInt.Value()
 				} else {
-					v.err = fmt.Errorf("invalid slice index type: %s",
-						low.TypeName())
+					v.err = fmt.Errorf("invalid slice index type: %s", low.TypeName())
 					return
 				}
 			}
@@ -414,7 +406,7 @@ func (v *VM) run() {
 			case *value.Array:
 				numElements := int64(left.Len())
 				var highIdx int64
-				if high == value.UndefinedValue {
+				if high.IsUndefined() {
 					highIdx = numElements
 				} else if highInt, ok := high.(*value.Int); ok {
 					highIdx = highInt.Value()
@@ -436,7 +428,7 @@ func (v *VM) run() {
 				} else if highIdx > numElements {
 					highIdx = numElements
 				}
-				var val core.Object = value.NewArray(left.Slice(int(lowIdx), int(highIdx)), false)
+				var val core.Object = v.alloc.NewArray(left.Slice(int(lowIdx), int(highIdx)), false)
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -447,7 +439,7 @@ func (v *VM) run() {
 			case *value.String:
 				numElements := int64(left.Len())
 				var highIdx int64
-				if high == value.UndefinedValue {
+				if high.IsUndefined() {
 					highIdx = numElements
 				} else if highInt, ok := high.(*value.Int); ok {
 					highIdx = highInt.Value()
@@ -469,7 +461,7 @@ func (v *VM) run() {
 				} else if highIdx > numElements {
 					highIdx = numElements
 				}
-				var val core.Object = value.NewString(left.Substring(int(lowIdx), int(highIdx)))
+				var val core.Object = v.alloc.NewString(left.Substring(int(lowIdx), int(highIdx)))
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -480,7 +472,7 @@ func (v *VM) run() {
 			case *value.Bytes:
 				numElements := int64(left.Len())
 				var highIdx int64
-				if high == value.UndefinedValue {
+				if high.IsUndefined() {
 					highIdx = numElements
 				} else if highInt, ok := high.(*value.Int); ok {
 					highIdx = highInt.Value()
@@ -502,7 +494,7 @@ func (v *VM) run() {
 				} else if highIdx > numElements {
 					highIdx = numElements
 				}
-				var val core.Object = value.NewBytes(left.Slice(int(lowIdx), int(highIdx)))
+				var val core.Object = v.alloc.NewBytes(left.Slice(int(lowIdx), int(highIdx)))
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -553,7 +545,7 @@ func (v *VM) run() {
 						for i := spStart; i < v.sp; i++ {
 							args[i-spStart] = v.stack[i]
 						}
-						v.stack[spStart] = value.NewArray(args, false)
+						v.stack[spStart] = v.alloc.NewArray(args, false)
 						v.sp = spStart + 1
 					}
 				}
@@ -610,7 +602,7 @@ func (v *VM) run() {
 
 				// nil return -> undefined
 				if ret == nil {
-					ret = value.UndefinedValue
+					ret = v.alloc.NewUndefined()
 				}
 				v.allocs--
 				if v.allocs == 0 {
@@ -627,7 +619,7 @@ func (v *VM) run() {
 			if int(v.curInsts[v.ip]) == 1 {
 				retVal = v.stack[v.sp-1]
 			} else {
-				retVal = value.UndefinedValue
+				retVal = v.alloc.NewUndefined()
 			}
 			//v.sp--
 			v.framesIndex--
@@ -682,7 +674,7 @@ func (v *VM) run() {
 			if obj, ok := dst.(*value.ObjectPtr); ok {
 				dst = *obj.Value
 			}
-			if e := indexAssign(dst, val, selectors); e != nil {
+			if e := indexAssign(v.alloc, dst, val, selectors); e != nil {
 				v.err = e
 				return
 			}
@@ -785,7 +777,7 @@ func (v *VM) run() {
 			}
 			val := v.stack[v.sp-numSelectors-1]
 			v.sp -= numSelectors + 1
-			e := indexAssign(*v.curFrame.freeVars[freeIndex].Value, val, selectors)
+			e := indexAssign(v.alloc, *v.curFrame.freeVars[freeIndex].Value, val, selectors)
 			if e != nil {
 				v.err = e
 				return
@@ -799,7 +791,7 @@ func (v *VM) run() {
 				v.err = fmt.Errorf("not iterable: %s", dst.TypeName())
 				return
 			}
-			iterator = dst.Iterate()
+			iterator = dst.Iterate(v.alloc)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = core.ErrObjectAllocLimit
@@ -812,24 +804,20 @@ func (v *VM) run() {
 			iterator := v.stack[v.sp-1]
 			v.sp--
 			hasMore := iterator.(core.Iterator).Next()
-			if hasMore {
-				v.stack[v.sp] = value.TrueValue
-			} else {
-				v.stack[v.sp] = value.FalseValue
-			}
+			v.stack[v.sp] = v.alloc.NewBool(hasMore)
 			v.sp++
 
 		case parser.OpIteratorKey:
 			iterator := v.stack[v.sp-1]
 			v.sp--
-			val := iterator.(core.Iterator).Key()
+			val := iterator.(core.Iterator).Key(v.alloc)
 			v.stack[v.sp] = val
 			v.sp++
 
 		case parser.OpIteratorValue:
 			iterator := v.stack[v.sp-1]
 			v.sp--
-			val := iterator.(core.Iterator).Value()
+			val := iterator.(core.Iterator).Value(v.alloc)
 			v.stack[v.sp] = val
 			v.sp++
 
@@ -843,10 +831,10 @@ func (v *VM) run() {
 	}
 }
 
-func indexAssign(dst, src core.Object, selectors []core.Object) error {
+func indexAssign(alloc core.Allocator, dst, src core.Object, selectors []core.Object) error {
 	numSel := len(selectors)
 	for sidx := numSel - 1; sidx > 0; sidx-- {
-		next, err := dst.Access(selectors[sidx], parser.OpIndex)
+		next, err := dst.Access(alloc, selectors[sidx], parser.OpIndex)
 		if err != nil {
 			return err
 		}
@@ -867,7 +855,7 @@ func (v *VM) call(fn *value.CompiledFunction, args ...core.Object) (core.Object,
 		if varArgs >= 0 {
 			varArgsArray := make([]core.Object, varArgs)
 			copy(varArgsArray, args[realArgs:])
-			args = append(args[:realArgs], value.NewArray(varArgsArray, false))
+			args = append(args[:realArgs], v.alloc.NewArray(varArgsArray, false))
 			numArgs = realArgs + 1
 		}
 	} else if numArgs != fn.NumParameters {
@@ -949,7 +937,7 @@ func (v *VM) call(fn *value.CompiledFunction, args ...core.Object) (core.Object,
 		// The return value is at savedSp (the callee slot position)
 		result = v.stack[savedSp]
 		if result == nil {
-			result = value.UndefinedValue
+			result = v.alloc.NewUndefined()
 		}
 	}
 

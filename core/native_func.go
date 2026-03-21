@@ -1,3 +1,3 @@
 package core
 
-type NativeFunc = func(args ...Object) (ret Object, err error)
+type NativeFunc = func(Allocator, ...Object) (Object, error)

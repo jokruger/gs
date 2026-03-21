@@ -7,29 +7,29 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-func makeOSFile(file *os.File) *value.Record {
-	fileChdir := func(args ...core.Object) (ret core.Object, err error) {
+func makeOSFile(alloc core.Allocator, file *os.File) *value.Record {
+	fileChdir := func(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, core.NewWrongNumArgumentsError("os.file.chdir", "0", len(args))
 		}
-		return wrapError(file.Chdir()), nil
+		return wrapError(alloc, file.Chdir()), nil
 	}
 
-	fileClose := func(args ...core.Object) (ret core.Object, err error) {
+	fileClose := func(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, core.NewWrongNumArgumentsError("os.file.close", "0", len(args))
 		}
-		return wrapError(file.Close()), nil
+		return wrapError(alloc, file.Close()), nil
 	}
 
-	fileSync := func(args ...core.Object) (ret core.Object, err error) {
+	fileSync := func(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, core.NewWrongNumArgumentsError("os.file.sync", "0", len(args))
 		}
-		return wrapError(file.Sync()), nil
+		return wrapError(alloc, file.Sync()), nil
 	}
 
-	fileName := func(args ...core.Object) (ret core.Object, err error) {
+	fileName := func(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 0 {
 			return nil, core.NewWrongNumArgumentsError("os.file.name", "0", len(args))
 		}
@@ -37,10 +37,10 @@ func makeOSFile(file *os.File) *value.Record {
 		if len(s) > core.MaxStringLen {
 			return nil, core.NewStringLimitError("os.file.name")
 		}
-		return value.NewString(s), nil
+		return alloc.NewString(s), nil
 	}
 
-	fileChown := func(args ...core.Object) (ret core.Object, err error) {
+	fileChown := func(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 2 {
 			return nil, core.NewWrongNumArgumentsError("os.file.chown", "2", len(args))
 		}
@@ -52,10 +52,10 @@ func makeOSFile(file *os.File) *value.Record {
 		if !ok {
 			return nil, core.NewInvalidArgumentTypeError("os.file.chown", "second", "int(compatible)", args[1])
 		}
-		return wrapError(file.Chown(int(i1), int(i2))), nil
+		return wrapError(alloc, file.Chown(int(i1), int(i2))), nil
 	}
 
-	fileWrite := func(args ...core.Object) (ret core.Object, err error) {
+	fileWrite := func(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, core.NewWrongNumArgumentsError("os.file.write", "1", len(args))
 		}
@@ -65,12 +65,12 @@ func makeOSFile(file *os.File) *value.Record {
 		}
 		res, err := file.Write(y1)
 		if err != nil {
-			return wrapError(err), nil
+			return wrapError(alloc, err), nil
 		}
-		return value.NewInt(int64(res)), nil
+		return alloc.NewInt(int64(res)), nil
 	}
 
-	fileRead := func(args ...core.Object) (ret core.Object, err error) {
+	fileRead := func(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, core.NewWrongNumArgumentsError("os.file.read", "1", len(args))
 		}
@@ -80,12 +80,12 @@ func makeOSFile(file *os.File) *value.Record {
 		}
 		res, err := file.Read(y1)
 		if err != nil {
-			return wrapError(err), nil
+			return wrapError(alloc, err), nil
 		}
-		return value.NewInt(int64(res)), nil
+		return alloc.NewInt(int64(res)), nil
 	}
 
-	fileWriteString := func(args ...core.Object) (ret core.Object, err error) {
+	fileWriteString := func(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, core.NewWrongNumArgumentsError("os.file.write_string", "1", len(args))
 		}
@@ -95,12 +95,12 @@ func makeOSFile(file *os.File) *value.Record {
 		}
 		res, err := file.WriteString(s1)
 		if err != nil {
-			return wrapError(err), nil
+			return wrapError(alloc, err), nil
 		}
-		return value.NewInt(int64(res)), nil
+		return alloc.NewInt(int64(res)), nil
 	}
 
-	fileReaddirnames := func(args ...core.Object) (ret core.Object, err error) {
+	fileReaddirnames := func(alloc core.Allocator, args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
 			return nil, core.NewWrongNumArgumentsError("os.file.readdirnames", "1", len(args))
 		}
@@ -110,19 +110,19 @@ func makeOSFile(file *os.File) *value.Record {
 		}
 		res, err := file.Readdirnames(int(i1))
 		if err != nil {
-			return wrapError(err), nil
+			return wrapError(alloc, err), nil
 		}
 		arr := make([]core.Object, 0, len(res))
 		for _, r := range res {
 			if len(r) > core.MaxStringLen {
 				return nil, core.NewStringLimitError("os.file.readdirnames")
 			}
-			arr = append(arr, value.NewString(r))
+			arr = append(arr, alloc.NewString(r))
 		}
-		return value.NewArray(arr, false), nil
+		return alloc.NewArray(arr, false), nil
 	}
 
-	fileChmod := func(args ...core.Object) (core.Object, error) {
+	fileChmod := func(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 		if len(args) != 1 {
 			return nil, core.NewWrongNumArgumentsError("os.file.chmod", "1", len(args))
 		}
@@ -130,10 +130,10 @@ func makeOSFile(file *os.File) *value.Record {
 		if !ok {
 			return nil, core.NewInvalidArgumentTypeError("os.file.chmod", "first", "int(compatible)", args[0])
 		}
-		return wrapError(file.Chmod(os.FileMode(i1))), nil
+		return wrapError(alloc, file.Chmod(os.FileMode(i1))), nil
 	}
 
-	fileSeek := func(args ...core.Object) (core.Object, error) {
+	fileSeek := func(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 		if len(args) != 2 {
 			return nil, core.NewWrongNumArgumentsError("os.file.seek", "2", len(args))
 		}
@@ -147,30 +147,30 @@ func makeOSFile(file *os.File) *value.Record {
 		}
 		res, err := file.Seek(i1, int(i2))
 		if err != nil {
-			return wrapError(err), nil
+			return wrapError(alloc, err), nil
 		}
-		return value.NewInt(res), nil
+		return alloc.NewInt(res), nil
 	}
 
-	fileStat := func(args ...core.Object) (core.Object, error) {
+	fileStat := func(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 		if len(args) != 0 {
 			return nil, core.NewWrongNumArgumentsError("os.file.stat", "0", len(args))
 		}
-		return osStat(value.NewString(file.Name()))
+		return osStat(alloc, alloc.NewString(file.Name()))
 	}
 
-	return value.NewRecord(map[string]core.Object{
-		"chdir":        value.NewBuiltinFunction("chdir", fileChdir, 0, false),               // chdir() => true/error
-		"chown":        value.NewBuiltinFunction("chown", fileChown, 2, false),               // chown(uid int, gid int) => true/error
-		"close":        value.NewBuiltinFunction("close", fileClose, 0, false),               // close() => error
-		"name":         value.NewBuiltinFunction("name", fileName, 0, false),                 // name() => string
-		"readdirnames": value.NewBuiltinFunction("readdirnames", fileReaddirnames, 1, false), // readdirnames(n int) => array(string)/error
-		"sync":         value.NewBuiltinFunction("sync", fileSync, 0, false),                 // sync() => error
-		"write":        value.NewBuiltinFunction("write", fileWrite, 1, false),               // write(bytes) => int/error
-		"write_string": value.NewBuiltinFunction("write_string", fileWriteString, 1, false),  // write(string) => int/error
-		"read":         value.NewBuiltinFunction("read", fileRead, 1, false),                 // read(bytes) => int/error
-		"chmod":        value.NewBuiltinFunction("chmod", fileChmod, 1, false),               // chmod(mode int) => error
-		"seek":         value.NewBuiltinFunction("seek", fileSeek, 2, false),                 // seek(offset int, whence int) => int/error
-		"stat":         value.NewBuiltinFunction("stat", fileStat, 0, false),                 // stat() => imap(fileinfo)/error
-	}, true)
+	return alloc.NewRecord(map[string]core.Object{
+		"chdir":        alloc.NewBuiltinFunction("chdir", fileChdir, 0, false),               // chdir() => true/error
+		"chown":        alloc.NewBuiltinFunction("chown", fileChown, 2, false),               // chown(uid int, gid int) => true/error
+		"close":        alloc.NewBuiltinFunction("close", fileClose, 0, false),               // close() => error
+		"name":         alloc.NewBuiltinFunction("name", fileName, 0, false),                 // name() => string
+		"readdirnames": alloc.NewBuiltinFunction("readdirnames", fileReaddirnames, 1, false), // readdirnames(n int) => array(string)/error
+		"sync":         alloc.NewBuiltinFunction("sync", fileSync, 0, false),                 // sync() => error
+		"write":        alloc.NewBuiltinFunction("write", fileWrite, 1, false),               // write(bytes) => int/error
+		"write_string": alloc.NewBuiltinFunction("write_string", fileWriteString, 1, false),  // write(string) => int/error
+		"read":         alloc.NewBuiltinFunction("read", fileRead, 1, false),                 // read(bytes) => int/error
+		"chmod":        alloc.NewBuiltinFunction("chmod", fileChmod, 1, false),               // chmod(mode int) => error
+		"seek":         alloc.NewBuiltinFunction("seek", fileSeek, 2, false),                 // seek(offset int, whence int) => int/error
+		"stat":         alloc.NewBuiltinFunction("stat", fileStat, 0, false),                 // stat() => imap(fileinfo)/error
+	}, true).(*value.Record)
 }

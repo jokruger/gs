@@ -17,12 +17,6 @@ type Map struct {
 	immutable bool
 }
 
-func NewMap(val map[string]core.Object, immutable bool) *Map {
-	o := &Map{}
-	o.Set(val, immutable)
-	return o
-}
-
 func (o *Map) GobDecode(b []byte) error {
 	buf := bytes.NewBuffer(b)
 	dec := gob.NewDecoder(buf)
@@ -125,7 +119,7 @@ func (o *Map) Interface() any {
 	return res
 }
 
-func (o *Map) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Map) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
 }
 
@@ -160,16 +154,16 @@ func (o *Map) Equals(x core.Object) bool {
 	}
 }
 
-func (o *Map) Copy() core.Object {
+func (o *Map) Copy(alloc core.Allocator) core.Object {
 	// perform a deep copy of the map even if it is immutable (since the values may be mutable)
 	c := make(map[string]core.Object, len(o.value))
 	for k, v := range o.value {
-		c[k] = v.Copy()
+		c[k] = v.Copy(alloc)
 	}
-	return NewMap(c, false) // copy always returns a mutable map
+	return alloc.NewMap(c, false) // copy always returns a mutable map
 }
 
-func (o *Map) Access(index core.Object, mode core.Opcode) (core.Object, error) {
+func (o *Map) Access(alloc core.Allocator, index core.Object, mode core.Opcode) (core.Object, error) {
 	k, ok := index.AsString()
 	if !ok {
 		return nil, core.NewInvalidIndexTypeError("map access", "string", index)
@@ -178,31 +172,31 @@ func (o *Map) Access(index core.Object, mode core.Opcode) (core.Object, error) {
 	if mode == parser.OpIndex {
 		r, ok := o.value[k]
 		if !ok {
-			return UndefinedValue, nil
+			return alloc.NewUndefined(), nil
 		}
 		return r, nil
 	}
 
 	switch k {
 	case "empty":
-		return NewBool(len(o.value) == 0), nil
+		return alloc.NewBool(len(o.value) == 0), nil
 
 	case "len":
-		return NewInt(int64(len(o.value))), nil
+		return alloc.NewInt(int64(len(o.value))), nil
 
 	case "keys":
 		keys := make([]core.Object, 0, len(o.value))
 		for k := range o.value {
-			keys = append(keys, NewString(k))
+			keys = append(keys, alloc.NewString(k))
 		}
-		return NewArray(keys, false), nil
+		return alloc.NewArray(keys, false), nil
 
 	case "values":
 		values := make([]core.Object, 0, len(o.value))
 		for _, v := range o.value {
 			values = append(values, v)
 		}
-		return NewArray(values, false), nil
+		return alloc.NewArray(values, false), nil
 
 	default:
 		return nil, core.NewInvalidSelectorError(o, k)
@@ -223,11 +217,15 @@ func (o *Map) Assign(index, value core.Object) error {
 	return nil
 }
 
-func (o *Map) Iterate() core.Iterator {
-	return NewMapIterator(o.value)
+func (o *Map) Iterate(alloc core.Allocator) core.Iterator {
+	return alloc.NewMapIterator(o.value)
 }
 
-func (o *Map) IsFalsy() bool {
+func (o *Map) IsTrue() bool {
+	return len(o.value) > 0
+}
+
+func (o *Map) IsFalse() bool {
 	return len(o.value) == 0
 }
 
@@ -244,5 +242,5 @@ func (o *Map) AsString() (string, bool) {
 }
 
 func (o *Map) AsBool() (bool, bool) {
-	return !o.IsFalsy(), true
+	return o.IsTrue(), true
 }

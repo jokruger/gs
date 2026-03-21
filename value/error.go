@@ -15,12 +15,6 @@ type Error struct {
 	value core.Object
 }
 
-func NewError(value core.Object) *Error {
-	o := &Error{}
-	o.Set(value)
-	return o
-}
-
 func (o *Error) GobDecode(b []byte) error {
 	buf := bytes.NewBuffer(b)
 	dec := gob.NewDecoder(buf)
@@ -60,9 +54,6 @@ func (o *Error) GobEncode() ([]byte, error) {
 
 func (o *Error) Set(value core.Object) {
 	o.value = value
-	if o.value == nil {
-		o.value = UndefinedValue
-	}
 }
 
 func (o *Error) Value() core.Object {
@@ -74,6 +65,9 @@ func (o *Error) TypeName() string {
 }
 
 func (o *Error) String() string {
+	if o.value == nil {
+		return "error(undefined)"
+	}
 	return fmt.Sprintf("error(%s)", o.value.String())
 }
 
@@ -81,7 +75,7 @@ func (o *Error) Interface() any {
 	return errors.New(o.String())
 }
 
-func (o *Error) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Error) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
 }
 
@@ -97,11 +91,14 @@ func (o *Error) Equals(x core.Object) bool {
 	return false
 }
 
-func (o *Error) Copy() core.Object {
-	return NewError(o.value.Copy())
+func (o *Error) Copy(alloc core.Allocator) core.Object {
+	if o.value == nil {
+		return alloc.NewError(nil)
+	}
+	return alloc.NewError(o.value.Copy(alloc))
 }
 
-func (o *Error) Access(index core.Object, mode core.Opcode) (core.Object, error) {
+func (o *Error) Access(alloc core.Allocator, index core.Object, mode core.Opcode) (core.Object, error) {
 	k, ok := index.AsString()
 	if !ok {
 		return nil, core.NewInvalidIndexTypeError("error access", "string", index)
@@ -109,7 +106,10 @@ func (o *Error) Access(index core.Object, mode core.Opcode) (core.Object, error)
 
 	switch k {
 	case "value":
-		return o.value, nil
+		if o.value == nil {
+			return alloc.NewUndefined(), nil
+		}
+		return o.value.Copy(alloc), nil
 	default:
 		return nil, core.NewInvalidSelectorError(o, k)
 	}
@@ -119,7 +119,11 @@ func (o *Error) Assign(core.Object, core.Object) error {
 	return core.NewNotAssignableError(o)
 }
 
-func (o *Error) IsFalsy() bool {
+func (o *Error) IsTrue() bool {
+	return false // error is always false.
+}
+
+func (o *Error) IsFalse() bool {
 	return true // error is always false.
 }
 
@@ -136,5 +140,5 @@ func (o *Error) AsString() (string, bool) {
 }
 
 func (o *Error) AsBool() (bool, bool) {
-	return !o.IsFalsy(), true
+	return o.IsTrue(), true
 }

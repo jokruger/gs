@@ -1,4 +1,4 @@
-package stdlib_test
+package stdlib
 
 import (
 	"testing"
@@ -14,7 +14,7 @@ func TestTimes(t *testing.T) {
 	location, _ := time.LoadLocation("Pacific/Auckland")
 	time3 := time.Date(1982, 9, 28, 19, 21, 44, 999, location)
 
-	module(t, "times").call("sleep", 1).expect(value.UndefinedValue)
+	module(t, "times").call("sleep", 1).expect(alloc.NewUndefined())
 
 	require.True(t, module(t, "times").call("since", time.Now().Add(-time.Hour)).o.(*value.Int).Value() > 3600000000000)
 	require.True(t, module(t, "times").call("until", time.Now().Add(time.Hour)).o.(*value.Int).Value() < 3600000000000)

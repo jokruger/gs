@@ -1,11 +1,10 @@
-package stdlib_test
+package stdlib
 
 import (
 	"regexp"
 	"testing"
 
 	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/value"
 )
 
 func TestTextRE(t *testing.T) {
@@ -32,7 +31,7 @@ func TestTextRE(t *testing.T) {
 		text     string
 		expected any
 	}{
-		{"a(b)", "", value.UndefinedValue},
+		{"a(b)", "", alloc.NewUndefined()},
 		{"a(b)", "ab", ARR{
 			ARR{
 				IMAP{"text": "ab", "begin": 0, "end": 2},
@@ -66,7 +65,7 @@ func TestTextRE(t *testing.T) {
 		count    int
 		expected any
 	}{
-		{"a(b)", "", -1, value.UndefinedValue},
+		{"a(b)", "", -1, alloc.NewUndefined()},
 		{"a(b)", "ab", -1, ARR{
 			ARR{
 				IMAP{"text": "ab", "begin": 0, "end": 2},
@@ -95,7 +94,7 @@ func TestTextRE(t *testing.T) {
 				IMAP{"text": "c", "begin": 9, "end": 10},
 			},
 		}},
-		{"(a)b(c)d", "abcdefgabcd", 0, value.UndefinedValue},
+		{"(a)b(c)d", "abcdefgabcd", 0, alloc.NewUndefined()},
 		{"(a)b(c)d", "abcdefgabcd", 1, ARR{
 			ARR{
 				IMAP{"text": "abcd", "begin": 0, "end": 4},

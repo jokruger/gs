@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/alloc"
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/stdlib"
@@ -48,11 +49,12 @@ func main() {
 		return
 	}
 
+	a := alloc.NewHeapAllocator()
 	modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
 	inputFile := flag.Arg(0)
 	if inputFile == "" {
 		// REPL
-		RunREPL(modules, os.Stdin, os.Stdout)
+		RunREPL(a, modules, os.Stdin, os.Stdout)
 		return
 	}
 
@@ -73,20 +75,19 @@ func main() {
 	}
 
 	if compileOutput != "" {
-		err := CompileOnly(modules, inputData, inputFile,
-			compileOutput)
+		err := CompileOnly(a, modules, inputData, inputFile, compileOutput)
 		if err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
 	} else if filepath.Ext(inputFile) == sourceFileExt {
-		err := CompileAndRun(modules, inputData, inputFile)
+		err := CompileAndRun(a, modules, inputData, inputFile)
 		if err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
 	} else {
-		if err := RunCompiled(modules, inputData); err != nil {
+		if err := RunCompiled(a, modules, inputData); err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
@@ -94,8 +95,8 @@ func main() {
 }
 
 // CompileOnly compiles the source code and writes the compiled binary into outputFile.
-func CompileOnly(modules *vm.ModuleMap, data []byte, inputFile, outputFile string) (err error) {
-	bytecode, err := compileSrc(modules, data, inputFile)
+func CompileOnly(a core.Allocator, modules *vm.ModuleMap, data []byte, inputFile, outputFile string) (err error) {
+	bytecode, err := compileSrc(a, modules, data, inputFile)
 	if err != nil {
 		return
 	}
@@ -125,32 +126,32 @@ func CompileOnly(modules *vm.ModuleMap, data []byte, inputFile, outputFile strin
 }
 
 // CompileAndRun compiles the source code and executes it.
-func CompileAndRun(modules *vm.ModuleMap, data []byte, inputFile string) (err error) {
-	bytecode, err := compileSrc(modules, data, inputFile)
+func CompileAndRun(a core.Allocator, modules *vm.ModuleMap, data []byte, inputFile string) (err error) {
+	bytecode, err := compileSrc(a, modules, data, inputFile)
 	if err != nil {
 		return
 	}
 
-	machine := vm.NewVM(bytecode, nil, -1)
+	machine := vm.NewVM(a, bytecode, nil, -1)
 	err = machine.Run()
 	return
 }
 
 // RunCompiled reads the compiled binary from file and executes it.
-func RunCompiled(modules *vm.ModuleMap, data []byte) (err error) {
+func RunCompiled(a core.Allocator, modules *vm.ModuleMap, data []byte) (err error) {
 	bytecode := &vm.Bytecode{}
-	err = bytecode.Decode(bytes.NewReader(data), modules)
+	err = bytecode.Decode(a, bytes.NewReader(data), modules)
 	if err != nil {
 		return
 	}
 
-	machine := vm.NewVM(bytecode, nil, -1)
+	machine := vm.NewVM(a, bytecode, nil, -1)
 	err = machine.Run()
 	return
 }
 
 // RunREPL starts REPL.
-func RunREPL(modules *vm.ModuleMap, in io.Reader, out io.Writer) {
+func RunREPL(a core.Allocator, modules *vm.ModuleMap, in io.Reader, out io.Writer) {
 	stdin := bufio.NewScanner(in)
 	fileSet := parser.NewFileSet()
 	globals := make([]core.Object, vm.GlobalsSize)
@@ -161,9 +162,9 @@ func RunREPL(modules *vm.ModuleMap, in io.Reader, out io.Writer) {
 
 	// embed println function
 	symbol := symbolTable.Define("__repl_println__")
-	globals[symbol.Index] = value.NewBuiltinFunction(
+	globals[symbol.Index] = a.NewBuiltinFunction(
 		"println",
-		func(args ...core.Object) (ret core.Object, err error) {
+		func(a core.Allocator, args ...core.Object) (ret core.Object, err error) {
 			var printArgs []any
 			for _, arg := range args {
 				if _, isUndefined := arg.(*value.Undefined); isUndefined {
@@ -199,14 +200,14 @@ func RunREPL(modules *vm.ModuleMap, in io.Reader, out io.Writer) {
 		}
 
 		file = addPrints(file)
-		c := gs.NewCompiler(srcFile, symbolTable, constants, modules, nil)
+		c := gs.NewCompiler(a, srcFile, symbolTable, constants, modules, nil)
 		if err := c.Compile(file); err != nil {
 			_, _ = fmt.Fprintln(out, err.Error())
 			continue
 		}
 
 		bytecode := c.Bytecode()
-		machine := vm.NewVM(bytecode, globals, -1)
+		machine := vm.NewVM(a, bytecode, globals, -1)
 		if err := machine.Run(); err != nil {
 			_, _ = fmt.Fprintln(out, err.Error())
 			continue
@@ -215,7 +216,7 @@ func RunREPL(modules *vm.ModuleMap, in io.Reader, out io.Writer) {
 	}
 }
 
-func compileSrc(modules *vm.ModuleMap, src []byte, inputFile string) (*vm.Bytecode, error) {
+func compileSrc(a core.Allocator, modules *vm.ModuleMap, src []byte, inputFile string) (*vm.Bytecode, error) {
 	fileSet := parser.NewFileSet()
 	srcFile := fileSet.AddFile(filepath.Base(inputFile), -1, len(src))
 
@@ -225,7 +226,7 @@ func compileSrc(modules *vm.ModuleMap, src []byte, inputFile string) (*vm.Byteco
 		return nil, err
 	}
 
-	c := gs.NewCompiler(srcFile, nil, nil, modules, nil)
+	c := gs.NewCompiler(a, srcFile, nil, nil, modules, nil)
 	c.EnableFileImport(true)
 	if resolvePath {
 		c.SetImportDir(filepath.Dir(inputFile))

@@ -9,12 +9,6 @@ type BytesIterator struct {
 	l int
 }
 
-func NewBytesIterator(v []byte) *BytesIterator {
-	o := &BytesIterator{}
-	o.Set(v)
-	return o
-}
-
 func (o *BytesIterator) Set(v []byte) {
 	o.v = v
 	o.i = 0
@@ -26,12 +20,12 @@ func (o *BytesIterator) Next() bool {
 	return o.i <= o.l
 }
 
-func (o *BytesIterator) Key() core.Object {
-	return NewInt(int64(o.i - 1))
+func (o *BytesIterator) Key(alloc core.Allocator) core.Object {
+	return alloc.NewInt(int64(o.i - 1))
 }
 
-func (o *BytesIterator) Value() core.Object {
-	return NewInt(int64(o.v[o.i-1]))
+func (o *BytesIterator) Value(alloc core.Allocator) core.Object {
+	return alloc.NewInt(int64(o.v[o.i-1]))
 }
 
 func (o *BytesIterator) TypeName() string {
@@ -42,12 +36,20 @@ func (o *BytesIterator) String() string {
 	return "<bytes-iterator>"
 }
 
-func (o *BytesIterator) Copy() core.Object {
-	t := NewBytesIterator(o.v)
+func (o *BytesIterator) Copy(alloc core.Allocator) core.Object {
+	t := alloc.NewBytesIterator(o.v).(*BytesIterator)
 	t.i = o.i
 	return t
 }
 
-func (o *BytesIterator) IsFalsy() bool {
-	return o.v == nil || o.i > o.l
+func (o *BytesIterator) IsTrue() bool {
+	return o.v != nil && o.i <= o.l
+}
+
+func (o *BytesIterator) IsFalse() bool {
+	return !o.IsTrue()
+}
+
+func (o *BytesIterator) AsBool() (bool, bool) {
+	return o.IsTrue(), true
 }

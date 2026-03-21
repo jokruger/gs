@@ -1,4 +1,4 @@
-package benchmark_test
+package benchmark
 
 import (
 	"os"

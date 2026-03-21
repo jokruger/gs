@@ -1,4 +1,4 @@
-package stdlib_test
+package stdlib
 
 import (
 	"fmt"
@@ -12,6 +12,15 @@ import (
 	"github.com/jokruger/gs/value"
 	"github.com/jokruger/gs/vm"
 )
+
+type DummyVM struct{}
+
+func NewDummyVM() core.VM                                                { return &DummyVM{} }
+func (v *DummyVM) Allocator() core.Allocator                             { return alloc }
+func (v *DummyVM) Abort()                                                {}
+func (v *DummyVM) IsStackEmpty() bool                                    { return false }
+func (v *DummyVM) Call(core.Object, ...core.Object) (core.Object, error) { return nil, nil }
+func (v *DummyVM) Run() error                                            { return nil }
 
 type ARR = []any
 type MAP = map[string]any
@@ -113,25 +122,24 @@ func (c callres) call(funcName string, args ...any) callres {
 		oargs = append(oargs, object(v))
 	}
 
+	v := NewDummyVM()
 	switch o := c.o.(type) {
 	case *vm.Module:
 		m, ok := o.Attrs[funcName]
 		if !ok {
-			return callres{t: c.t, e: fmt.Errorf(
-				"function not found: %s", funcName)}
+			return callres{t: c.t, e: fmt.Errorf("function not found: %s", funcName)}
 		}
 
 		f, ok := m.(*value.BuiltinFunction)
 		if !ok {
-			return callres{t: c.t, e: fmt.Errorf(
-				"non-callable: %s", funcName)}
+			return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
 		}
 
-		res, err := f.Call(nil, oargs...)
+		res, err := f.Call(v, oargs...)
 		return callres{t: c.t, o: res, e: err}
 
 	case *value.BuiltinFunction:
-		res, err := o.Call(nil, oargs...)
+		res, err := o.Call(v, oargs...)
 		return callres{t: c.t, o: res, e: err}
 
 	case *value.Record:
@@ -145,7 +153,7 @@ func (c callres) call(funcName string, args ...any) callres {
 			return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
 		}
 
-		res, err := f.Call(nil, oargs...)
+		res, err := f.Call(v, oargs...)
 		return callres{t: c.t, o: res, e: err}
 	default:
 		panic(fmt.Errorf("unexpected object: %v (%T)", o, o))
@@ -175,65 +183,62 @@ func object(v any) core.Object {
 	case core.Object:
 		return v
 	case string:
-		return value.NewString(v)
+		return alloc.NewString(v)
 	case int64:
-		return value.NewInt(v)
+		return alloc.NewInt(v)
 	case int: // for convenience
-		return value.NewInt(int64(v))
+		return alloc.NewInt(int64(v))
 	case bool:
-		if v {
-			return value.TrueValue
-		}
-		return value.FalseValue
+		return alloc.NewBool(v)
 	case rune:
-		return value.NewChar(v)
+		return alloc.NewChar(v)
 	case byte: // for convenience
-		return value.NewChar(rune(v))
+		return alloc.NewChar(rune(v))
 	case float64:
-		return value.NewFloat(v)
+		return alloc.NewFloat(v)
 	case []byte:
-		return value.NewBytes(v)
+		return alloc.NewBytes(v)
 	case MAP:
 		objs := make(map[string]core.Object)
 		for k, v := range v {
 			objs[k] = object(v)
 		}
-		return value.NewRecord(objs, false)
+		return alloc.NewRecord(objs, false)
 	case ARR:
 		var objs []core.Object
 		for _, e := range v {
 			objs = append(objs, object(e))
 		}
-		return value.NewArray(objs, false)
+		return alloc.NewArray(objs, false)
 	case IMAP:
 		objs := make(map[string]core.Object)
 		for k, v := range v {
 			objs[k] = object(v)
 		}
-		return value.NewRecord(objs, true)
+		return alloc.NewRecord(objs, true)
 	case IARR:
 		var objs []core.Object
 		for _, e := range v {
 			objs = append(objs, object(e))
 		}
-		return value.NewArray(objs, true)
+		return alloc.NewArray(objs, true)
 	case time.Time:
-		return value.NewTime(v)
+		return alloc.NewTime(v)
 	case []int:
 		var objs []core.Object
 		for _, e := range v {
-			objs = append(objs, value.NewInt(int64(e)))
+			objs = append(objs, alloc.NewInt(int64(e)))
 		}
-		return value.NewArray(objs, false)
+		return alloc.NewArray(objs, false)
 	}
 
 	panic(fmt.Errorf("unknown type: %T", v))
 }
 
 func expect(t *testing.T, input string, expected any) {
-	e, err := require.FromInterface(expected)
+	e, err := require.FromInterface(alloc, expected)
 	require.NoError(t, err)
-	s := gs.NewScript([]byte(input))
+	s := gs.NewScript(alloc, []byte(input))
 	s.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
 	c, err := s.Run()
 	require.NoError(t, err)

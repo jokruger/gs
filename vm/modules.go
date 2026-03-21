@@ -7,7 +7,7 @@ import (
 // Importable interface represents importable module instance.
 type Importable interface {
 	// Import should return either an Object or module source code ([]byte).
-	Import(moduleName string) (any, error)
+	Import(alloc core.Allocator, moduleName string) (any, error)
 }
 
 // ModuleGetter enables implementing dynamic module loading.
@@ -97,6 +97,6 @@ type SourceModule struct {
 }
 
 // Import returns a module source code.
-func (m *SourceModule) Import(string) (any, error) {
+func (m *SourceModule) Import(core.Allocator, string) (any, error) {
 	return m.Src, nil
 }

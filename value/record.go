@@ -16,12 +16,6 @@ type Record struct {
 	immutable bool
 }
 
-func NewRecord(val map[string]core.Object, immutable bool) *Record {
-	o := &Record{}
-	o.Set(val, immutable)
-	return o
-}
-
 func (o *Record) GobDecode(b []byte) error {
 	buf := bytes.NewBuffer(b)
 	dec := gob.NewDecoder(buf)
@@ -124,7 +118,7 @@ func (o *Record) Interface() any {
 	return res
 }
 
-func (o *Record) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Record) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
 }
 
@@ -159,23 +153,23 @@ func (o *Record) Equals(x core.Object) bool {
 	}
 }
 
-func (o *Record) Copy() core.Object {
+func (o *Record) Copy(alloc core.Allocator) core.Object {
 	// perform a deep copy of the record even if it is immutable (since the values may be mutable)
 	c := make(map[string]core.Object, len(o.value))
 	for k, v := range o.value {
-		c[k] = v.Copy()
+		c[k] = v.Copy(alloc)
 	}
-	return NewRecord(c, false) // copy always returns a mutable record
+	return alloc.NewRecord(c, false) // copy always returns a mutable record
 }
 
-func (o *Record) Access(index core.Object, mode core.Opcode) (core.Object, error) {
+func (o *Record) Access(alloc core.Allocator, index core.Object, mode core.Opcode) (core.Object, error) {
 	k, ok := index.AsString()
 	if !ok {
 		return nil, core.NewInvalidIndexTypeError("record access", "string", index)
 	}
 	r, ok := o.value[k]
 	if !ok {
-		return UndefinedValue, nil
+		return alloc.NewUndefined(), nil
 	}
 	return r, nil
 }
@@ -194,11 +188,15 @@ func (o *Record) Assign(index, value core.Object) error {
 	return nil
 }
 
-func (o *Record) Iterate() core.Iterator {
-	return NewMapIterator(o.value)
+func (o *Record) Iterate(alloc core.Allocator) core.Iterator {
+	return alloc.NewMapIterator(o.value)
 }
 
-func (o *Record) IsFalsy() bool {
+func (o *Record) IsTrue() bool {
+	return len(o.value) > 0
+}
+
+func (o *Record) IsFalse() bool {
 	return len(o.value) == 0
 }
 
@@ -215,5 +213,5 @@ func (o *Record) AsString() (string, bool) {
 }
 
 func (o *Record) AsBool() (bool, bool) {
-	return !o.IsFalsy(), true
+	return o.IsTrue(), true
 }

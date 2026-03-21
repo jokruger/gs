@@ -133,5 +133,5 @@ func (v *Variable) Object() core.Object {
 
 // IsUndefined returns true if the underlying value is undefined.
 func (v *Variable) IsUndefined() bool {
-	return v.value == value.UndefinedValue
+	return v.value.IsUndefined()
 }

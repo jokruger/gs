@@ -1,11 +1,10 @@
-package gs_test
+package unit
 
 import (
 	"context"
 	"fmt"
 
 	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/value"
 )
 
 func Example() {
@@ -22,13 +21,13 @@ each([a, b, c, d], func(x) {
 })`
 
 	// create a new Script instance
-	script := gs.NewScript([]byte(src))
+	script := gs.NewScript(alloc, []byte(src))
 
 	// set values
-	script.Add("a", value.NewInt(1))
-	script.Add("b", value.NewInt(9))
-	script.Add("c", value.NewInt(8))
-	script.Add("d", value.NewInt(4))
+	script.Add("a", alloc.NewInt(1))
+	script.Add("b", alloc.NewInt(9))
+	script.Add("c", alloc.NewInt(8))
+	script.Add("d", alloc.NewInt(4))
 
 	// run the script
 	compiled, err := script.RunContext(context.Background())

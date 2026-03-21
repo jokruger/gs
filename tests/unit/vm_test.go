@@ -1,4 +1,4 @@
-package gs_test
+package unit
 
 import (
 	"errors"
@@ -109,11 +109,11 @@ func (c *customError) Unwrap() error {
 }
 
 func TestUndefined(t *testing.T) {
-	expectRun(t, `out = undefined`, nil, value.UndefinedValue)
-	expectRun(t, `out = undefined.a`, nil, value.UndefinedValue)
-	expectRun(t, `out = undefined[1]`, nil, value.UndefinedValue)
-	expectRun(t, `out = undefined.a.b`, nil, value.UndefinedValue)
-	expectRun(t, `out = undefined[1][2]`, nil, value.UndefinedValue)
+	expectRun(t, `out = undefined`, nil, alloc.NewUndefined())
+	expectRun(t, `out = undefined.a`, nil, alloc.NewUndefined())
+	expectRun(t, `out = undefined[1]`, nil, alloc.NewUndefined())
+	expectRun(t, `out = undefined.a.b`, nil, alloc.NewUndefined())
+	expectRun(t, `out = undefined[1][2]`, nil, alloc.NewUndefined())
 	expectRun(t, `out = undefined ? 1 : 2`, nil, 2)
 	expectRun(t, `out = undefined == undefined`, nil, true)
 	expectRun(t, `out = undefined == 1`, nil, false)
@@ -121,11 +121,11 @@ func TestUndefined(t *testing.T) {
 	expectRun(t, `out = undefined == float([])`, nil, true)
 	expectRun(t, `out = float([]) == undefined`, nil, true)
 
-	s, _ := value.UndefinedValue.AsString()
+	s, _ := alloc.NewUndefined().AsString()
 	require.Equal(t, "", s)
-	require.Equal(t, "undefined", value.UndefinedValue.String())
+	require.Equal(t, "undefined", alloc.NewUndefined().String())
 
-	expectRun(t, fmt.Sprintf(`out = undefined == %s`, value.UndefinedValue.String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = undefined == %s`, alloc.NewUndefined().String()), nil, true)
 }
 
 func TestBoolean(t *testing.T) {
@@ -183,12 +183,12 @@ func() {
 	expectError(t, `(true + false) + 20`, nil, "invalid binary operator: bool + bool")
 	expectError(t, `!(true + false)`, nil, "invalid binary operator: bool + bool")
 
-	s, _ := value.TrueValue.AsString()
+	s, _ := alloc.NewBool(true).AsString()
 	require.Equal(t, "true", s)
-	require.Equal(t, "true", value.TrueValue.String())
+	require.Equal(t, "true", alloc.NewBool(true).String())
 
-	expectRun(t, fmt.Sprintf(`out = true == %s`, value.TrueValue.String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = false == %s`, value.FalseValue.String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = true == %s`, alloc.NewBool(true).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = false == %s`, alloc.NewBool(false).String()), nil, true)
 }
 
 func TestInteger(t *testing.T) {
@@ -212,12 +212,12 @@ func TestInteger(t *testing.T) {
 	expectRun(t, `out = +5`, nil, 5)
 	expectRun(t, `out = +5 + -5`, nil, 0)
 
-	expectRun(t, `out = 9 + '0'`, nil, '9')
-	expectRun(t, `out = '9' - 5`, nil, '4')
+	expectRun(t, `out = 9 + '0'`, nil, 57) // '0' is 48 in ASCII
+	expectRun(t, `out = '9' - 5`, nil, 52) // '9' is 57 in ASCII
 
-	expectRun(t, fmt.Sprintf(`out = 0 == %s`, value.NewInt(0).String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = 1 == %s`, value.NewInt(1).String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = 1234567890 == %s`, value.NewInt(1234567890).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = 0 == %s`, alloc.NewInt(0).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = 1 == %s`, alloc.NewInt(1).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = 1234567890 == %s`, alloc.NewInt(1234567890).String()), nil, true)
 }
 
 func TestFloat(t *testing.T) {
@@ -229,9 +229,9 @@ func TestFloat(t *testing.T) {
 	expectRun(t, `out = +5.0`, nil, 5.0)
 	expectRun(t, `out = -5.0 + +5.0`, nil, 0.0)
 
-	expectRun(t, fmt.Sprintf(`out = 0.0 == %s`, value.NewFloat(0.0).String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = 1.0 == %s`, value.NewFloat(1.0).String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = 12345.6789 == %s`, value.NewFloat(12345.6789).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = 0.0 == %s`, alloc.NewFloat(0.0).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = 1.0 == %s`, alloc.NewFloat(1.0).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = 12345.6789 == %s`, alloc.NewFloat(12345.6789).String()), nil, true)
 }
 
 func TestChar(t *testing.T) {
@@ -240,8 +240,8 @@ func TestChar(t *testing.T) {
 	expectRun(t, `out = 'Æ'`, nil, rune(198))
 
 	expectRun(t, `out = '0' + '9'`, nil, rune(105))
-	expectRun(t, `out = '0' + 9`, nil, '9')
-	expectRun(t, `out = '9' - 4`, nil, '5')
+	expectRun(t, `out = '0' + 9`, nil, 57) // '0' is 48 in ASCII
+	expectRun(t, `out = '9' - 4`, nil, 53) // '9' is 57 in ASCII
 	expectRun(t, `out = '0' == '0'`, nil, true)
 	expectRun(t, `out = '0' != '0'`, nil, false)
 	expectRun(t, `out = '2' < '4'`, nil, true)
@@ -253,14 +253,14 @@ func TestChar(t *testing.T) {
 	expectRun(t, `out = '4' <= '4'`, nil, true)
 	expectRun(t, `out = '4' >= '4'`, nil, true)
 
-	s, _ := value.NewChar('A').AsString()
+	s, _ := alloc.NewChar('A').AsString()
 	require.Equal(t, "A", s)
-	require.Equal(t, "'A'", value.NewChar('A').String())
+	require.Equal(t, "'A'", alloc.NewChar('A').String())
 
-	expectRun(t, fmt.Sprintf(`out = '0' == %s`, value.NewChar('0').String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = 'A' == %s`, value.NewChar('A').String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = '₴' == %s`, value.NewChar('₴').String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = '\'' == %s`, value.NewChar('\'').String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = '0' == %s`, alloc.NewChar('0').String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = 'A' == %s`, alloc.NewChar('A').String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = '₴' == %s`, alloc.NewChar('₴').String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = '\'' == %s`, alloc.NewChar('\'').String()), nil, true)
 }
 
 func TestString(t *testing.T) {
@@ -292,8 +292,8 @@ func TestString(t *testing.T) {
 		expectRun(t, fmt.Sprintf("idx := %d; out = %s[idx]", idx, strStr), nil, str[idx])
 	}
 
-	expectRun(t, fmt.Sprintf("%s[%d]", strStr, -1), nil, value.UndefinedValue)
-	expectRun(t, fmt.Sprintf("%s[%d]", strStr, strLen), nil, value.UndefinedValue)
+	expectRun(t, fmt.Sprintf("%s[%d]", strStr, -1), nil, alloc.NewUndefined())
+	expectRun(t, fmt.Sprintf("%s[%d]", strStr, strLen), nil, alloc.NewUndefined())
 
 	// slice operator
 	for low := 0; low <= strLen; low++ {
@@ -339,14 +339,14 @@ func TestString(t *testing.T) {
 	// undefined cannot be added to string
 	expectError(t, `"foo" + undefined`, nil, "invalid binary operator: string + undefined")
 
-	s, _ := value.NewString("abc").AsString()
+	s, _ := alloc.NewString("abc").AsString()
 	require.Equal(t, "abc", s)
-	require.Equal(t, `"abc"`, value.NewString("abc").String())
+	require.Equal(t, `"abc"`, alloc.NewString("abc").String())
 
-	expectRun(t, fmt.Sprintf(`out = "" == %s`, value.NewString("").String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = "hello" == %s`, value.NewString("hello").String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = "hello \"world\"" == %s`, value.NewString("hello \"world\"").String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = "123₴" == %s`, value.NewString("123₴").String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = "" == %s`, alloc.NewString("").String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = "hello" == %s`, alloc.NewString("hello").String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = "hello \"world\"" == %s`, alloc.NewString("hello \"world\"").String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = "123₴" == %s`, alloc.NewString("123₴").String()), nil, true)
 }
 
 func TestError(t *testing.T) {
@@ -364,12 +364,12 @@ func TestError(t *testing.T) {
 	expectError(t, `error("error").value_`, nil, "invalid selector: type error has no property or method value_")
 	expectError(t, `error([1,2,3])[1]`, nil, "invalid selector: type error has no property or method 1")
 
-	s, _ := value.NewError(value.NewString("abc")).AsString()
+	s, _ := alloc.NewError(alloc.NewString("abc")).AsString()
 	require.Equal(t, "abc", s)
-	require.Equal(t, `error("abc")`, value.NewError(value.NewString("abc")).String())
+	require.Equal(t, `error("abc")`, alloc.NewError(alloc.NewString("abc")).String())
 
-	expectRun(t, fmt.Sprintf(`out = error(undefined) == %s`, value.NewError(nil).String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = error("some error") == %s`, value.NewError(value.NewString("some error")).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = error(undefined) == %s`, alloc.NewError(nil).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = error("some error") == %s`, alloc.NewError(alloc.NewString("some error")).String()), nil, true)
 }
 
 func TestArray(t *testing.T) {
@@ -393,8 +393,8 @@ func TestArray(t *testing.T) {
 		expectRun(t, fmt.Sprintf("idx := %d; out = %s[idx]", idx, arrStr), nil, arr[idx])
 	}
 
-	expectRun(t, fmt.Sprintf("%s[%d]", arrStr, -1), nil, value.UndefinedValue)
-	expectRun(t, fmt.Sprintf("%s[%d]", arrStr, arrLen), nil, value.UndefinedValue)
+	expectRun(t, fmt.Sprintf("%s[%d]", arrStr, -1), nil, alloc.NewUndefined())
+	expectRun(t, fmt.Sprintf("%s[%d]", arrStr, arrLen), nil, alloc.NewUndefined())
 
 	// slice operator
 	for low := 0; low < arrLen; low++ {
@@ -418,13 +418,13 @@ func TestArray(t *testing.T) {
 	expectError(t, fmt.Sprintf("%s[%d:%d]", arrStr, 0, -1), nil, "invalid slice index")
 	expectError(t, fmt.Sprintf("%s[%d:%d]", arrStr, 2, 1), nil, "invalid slice index")
 
-	expectRun(t, fmt.Sprintf(`out = [] == %s`, value.NewArray(nil, false).String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = [] == %s`, value.NewArray(nil, true).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = [] == %s`, alloc.NewArray(nil, false).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = [] == %s`, alloc.NewArray(nil, true).String()), nil, true)
 
-	expectRun(t, fmt.Sprintf(`out = [1, undefined, "3"] == %s`, value.NewArray([]core.Object{
-		value.NewInt(1),
-		value.UndefinedValue,
-		value.NewString("3"),
+	expectRun(t, fmt.Sprintf(`out = [1, undefined, "3"] == %s`, alloc.NewArray([]core.Object{
+		alloc.NewInt(1),
+		alloc.NewUndefined(),
+		alloc.NewString("3"),
 	}, false).String()), nil, true)
 
 	expectError(t, `[1, 2, 3].q`, nil, "Runtime Error: invalid selector: type array has no property or method q\n\tat test:1:11")
@@ -451,9 +451,9 @@ out = {
 }`, nil, MAP{"one": 1, "two": 2, "three": 3})
 
 	expectRun(t, `out = {foo: 5}["foo"]`, nil, 5)
-	expectRun(t, `out = {foo: 5}["bar"]`, nil, value.UndefinedValue)
+	expectRun(t, `out = {foo: 5}["bar"]`, nil, alloc.NewUndefined())
 	expectRun(t, `key := "foo"; out = {foo: 5}[key]`, nil, 5)
-	expectRun(t, `out = {}["foo"]`, nil, value.UndefinedValue)
+	expectRun(t, `out = {}["foo"]`, nil, alloc.NewUndefined())
 
 	expectRun(t, `
 m := {
@@ -469,35 +469,35 @@ out = m["foo"](2) + m["foo"](3)
 	expectRun(t, `func() { m1 := {k1: 1, k2: "foo"}; m2 := m1; m1.k1 = 5; out = m2.k1 }()`, nil, 5)
 	expectRun(t, `func() { m1 := {k1: 1, k2: "foo"}; m2 := m1; m2.k1 = 3; out = m1.k1 }()`, nil, 3)
 
-	expectRun(t, fmt.Sprintf(`out = {} == %s`, value.NewRecord(nil, false).String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = {} == %s`, value.NewRecord(nil, true).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = {} == %s`, alloc.NewRecord(nil, false).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = {} == %s`, alloc.NewRecord(nil, true).String()), nil, true)
 
-	expectRun(t, fmt.Sprintf(`out = {a: 1, b: undefined, c: "3"} == %s`, value.NewRecord(map[string]core.Object{
-		"a": value.NewInt(1),
-		"b": value.UndefinedValue,
-		"c": value.NewString("3"),
+	expectRun(t, fmt.Sprintf(`out = {a: 1, b: undefined, c: "3"} == %s`, alloc.NewRecord(map[string]core.Object{
+		"a": alloc.NewInt(1),
+		"b": alloc.NewUndefined(),
+		"c": alloc.NewString("3"),
 	}, false).String()), nil, true)
 
 	expectRun(t, `out = {a: 1, b: 2}["b"]`, nil, 2)
-	expectRun(t, `out = {a: 1, b: 2}["q"]`, nil, value.UndefinedValue)
+	expectRun(t, `out = {a: 1, b: 2}["q"]`, nil, alloc.NewUndefined())
 	expectRun(t, `out = {a: 1, b: 2}.b`, nil, 2)
-	expectRun(t, `out = {a: 1, b: 2}.q`, nil, value.UndefinedValue)
+	expectRun(t, `out = {a: 1, b: 2}.q`, nil, alloc.NewUndefined())
 	expectRun(t, `t := {a: 1, b: 2}; t["a"] = 3; out = t.a`, nil, 3)
 	expectRun(t, `t := {a: 1, b: 2}; t.a = 3; out = t["a"]`, nil, 3)
 }
 
 func TestMap(t *testing.T) {
-	expectRun(t, fmt.Sprintf(`out = map() == %s`, value.NewMap(nil, false).String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = map() == %s`, value.NewMap(nil, true).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = map() == %s`, alloc.NewMap(nil, false).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = map() == %s`, alloc.NewMap(nil, true).String()), nil, true)
 
-	expectRun(t, fmt.Sprintf(`out = map({a: 1, b: undefined, c: "3"}) == %s`, value.NewMap(map[string]core.Object{
-		"a": value.NewInt(1),
-		"b": value.UndefinedValue,
-		"c": value.NewString("3"),
+	expectRun(t, fmt.Sprintf(`out = map({a: 1, b: undefined, c: "3"}) == %s`, alloc.NewMap(map[string]core.Object{
+		"a": alloc.NewInt(1),
+		"b": alloc.NewUndefined(),
+		"c": alloc.NewString("3"),
 	}, false).String()), nil, true)
 
 	expectRun(t, `out = map({a: 1, b: 2})["b"]`, nil, 2)
-	expectRun(t, `out = map({a: 1, b: 2})["q"]`, nil, value.UndefinedValue)
+	expectRun(t, `out = map({a: 1, b: 2})["q"]`, nil, alloc.NewUndefined())
 	expectRun(t, `t := map({a: 1, b: 2}); t["a"] = 3; out = t["a"]`, nil, 3)
 	expectError(t, `map({a: 1, b: 2}).q`, nil, "Runtime Error: invalid selector: type map has no property or method q\n\tat test:1:19")
 	expectRun(t, `t := map({a: 1, b: 2}); out = t.empty`, nil, false)
@@ -509,7 +509,7 @@ func TestMap(t *testing.T) {
 }
 
 func TestTime(t *testing.T) {
-	o := value.NewTime(time.Date(2020, 6, 20, 1, 2, 3, 4, time.UTC))
+	o := alloc.NewTime(time.Date(2020, 6, 20, 1, 2, 3, 4, time.UTC))
 	s, _ := o.AsString()
 	require.Equal(t, "2020-06-20 01:02:03.000000004 +0000 UTC", s)
 	require.Equal(t, `time("2020-06-20 01:02:03.000000004 +0000 UTC")`, o.String())
@@ -525,15 +525,15 @@ func TestBytes(t *testing.T) {
 	expectRun(t, `out = bytes("abcde")[0]`, nil, 97)
 	expectRun(t, `out = bytes("abcde")[1]`, nil, 98)
 	expectRun(t, `out = bytes("abcde")[4]`, nil, 101)
-	expectRun(t, `out = bytes("abcde")[10]`, nil, value.UndefinedValue)
+	expectRun(t, `out = bytes("abcde")[10]`, nil, alloc.NewUndefined())
 
-	o := value.NewBytes([]byte("Hello World!"))
+	o := alloc.NewBytes([]byte("Hello World!"))
 	s, _ := o.AsString()
 	require.Equal(t, "Hello World!", s)
 	require.Equal(t, "bytes([72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 33])", o.String())
 
 	expectRun(t, fmt.Sprintf(`out = bytes([72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 33]) == %s`, o.String()), nil, true)
-	expectRun(t, fmt.Sprintf(`out = bytes("hello") == %s`, value.NewBytes([]byte("hello")).String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = bytes("hello") == %s`, alloc.NewBytes([]byte("hello")).String()), nil, true)
 }
 
 func TestAssignment(t *testing.T) {
@@ -885,14 +885,14 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = int(true)`, nil, 1)
 	expectRun(t, `out = int(false)`, nil, 0)
 	expectRun(t, `out = int('8')`, nil, 56)
-	expectRun(t, `out = int([1])`, nil, value.UndefinedValue)
-	expectRun(t, `out = int({a: 1})`, nil, value.UndefinedValue)
-	expectRun(t, `out = int(undefined)`, nil, value.UndefinedValue)
+	expectRun(t, `out = int([1])`, nil, alloc.NewUndefined())
+	expectRun(t, `out = int({a: 1})`, nil, alloc.NewUndefined())
+	expectRun(t, `out = int(undefined)`, nil, alloc.NewUndefined())
 	expectRun(t, `out = int("-522", 1)`, nil, -522)
 	expectRun(t, `out = int(undefined, 1)`, nil, 1)
 	expectRun(t, `out = int(undefined, 1.8)`, nil, 1.8)
 	expectRun(t, `out = int(undefined, string(1))`, nil, "1")
-	expectRun(t, `out = int(undefined, undefined)`, nil, value.UndefinedValue)
+	expectRun(t, `out = int(undefined, undefined)`, nil, alloc.NewUndefined())
 
 	expectRun(t, `out = string(1)`, nil, "1")
 	expectRun(t, `out = string(1.8)`, nil, "1.8")
@@ -902,40 +902,40 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = string('8')`, nil, "8")
 	expectRun(t, `out = string([1,8.1,true,3])`, nil, "[1, 8.1, true, 3]")
 	expectRun(t, `out = string({b: "foo"})`, nil, `{"b": "foo"}`)
-	expectRun(t, `out = string(undefined)`, nil, value.UndefinedValue) // not "undefined"
+	expectRun(t, `out = string(undefined)`, nil, alloc.NewUndefined()) // not "undefined"
 	expectRun(t, `out = string(1, "-522")`, nil, "1")
 	expectRun(t, `out = string(undefined, "-522")`, nil, "-522") // not "undefined"
 
 	expectRun(t, `out = float(1)`, nil, 1.0)
 	expectRun(t, `out = float(1.8)`, nil, 1.8)
 	expectRun(t, `out = float("-52.2")`, nil, -52.2)
-	expectRun(t, `out = float(true)`, nil, value.UndefinedValue)
-	expectRun(t, `out = float(false)`, nil, value.UndefinedValue)
-	expectRun(t, `out = float('8')`, nil, value.UndefinedValue)
-	expectRun(t, `out = float([1,8.1,true,3])`, nil, value.UndefinedValue)
-	expectRun(t, `out = float({a: 1, b: "foo"})`, nil, value.UndefinedValue)
-	expectRun(t, `out = float(undefined)`, nil, value.UndefinedValue)
+	expectRun(t, `out = float(true)`, nil, alloc.NewUndefined())
+	expectRun(t, `out = float(false)`, nil, alloc.NewUndefined())
+	expectRun(t, `out = float('8')`, nil, alloc.NewUndefined())
+	expectRun(t, `out = float([1,8.1,true,3])`, nil, alloc.NewUndefined())
+	expectRun(t, `out = float({a: 1, b: "foo"})`, nil, alloc.NewUndefined())
+	expectRun(t, `out = float(undefined)`, nil, alloc.NewUndefined())
 	expectRun(t, `out = float("-52.2", 1.8)`, nil, -52.2)
 	expectRun(t, `out = float(undefined, 1)`, nil, 1)
 	expectRun(t, `out = float(undefined, 1.8)`, nil, 1.8)
 	expectRun(t, `out = float(undefined, "-52.2")`, nil, "-52.2")
 	expectRun(t, `out = float(undefined, char(56))`, nil, '8')
-	expectRun(t, `out = float(undefined, undefined)`, nil, value.UndefinedValue)
+	expectRun(t, `out = float(undefined, undefined)`, nil, alloc.NewUndefined())
 
 	expectRun(t, `out = char(56)`, nil, '8')
-	expectRun(t, `out = char(1.8)`, nil, value.UndefinedValue)
-	expectRun(t, `out = char("-52.2")`, nil, value.UndefinedValue)
-	expectRun(t, `out = char(true)`, nil, value.UndefinedValue)
-	expectRun(t, `out = char(false)`, nil, value.UndefinedValue)
+	expectRun(t, `out = char(1.8)`, nil, alloc.NewUndefined())
+	expectRun(t, `out = char("-52.2")`, nil, alloc.NewUndefined())
+	expectRun(t, `out = char(true)`, nil, alloc.NewUndefined())
+	expectRun(t, `out = char(false)`, nil, alloc.NewUndefined())
 	expectRun(t, `out = char('8')`, nil, '8')
-	expectRun(t, `out = char([1,8.1,true,3])`, nil, value.UndefinedValue)
-	expectRun(t, `out = char({a: 1, b: "foo"})`, nil, value.UndefinedValue)
-	expectRun(t, `out = char(undefined)`, nil, value.UndefinedValue)
+	expectRun(t, `out = char([1,8.1,true,3])`, nil, alloc.NewUndefined())
+	expectRun(t, `out = char({a: 1, b: "foo"})`, nil, alloc.NewUndefined())
+	expectRun(t, `out = char(undefined)`, nil, alloc.NewUndefined())
 	expectRun(t, `out = char(56, 'a')`, nil, '8')
 	expectRun(t, `out = char(undefined, '8')`, nil, '8')
 	expectRun(t, `out = char(undefined, 56)`, nil, 56)
 	expectRun(t, `out = char(undefined, "-52.2")`, nil, "-52.2")
-	expectRun(t, `out = char(undefined, undefined)`, nil, value.UndefinedValue)
+	expectRun(t, `out = char(undefined, undefined)`, nil, alloc.NewUndefined())
 
 	expectRun(t, `out = bool(1)`, nil, true)          // non-zero integer: true
 	expectRun(t, `out = bool(0)`, nil, false)         // zero: true
@@ -954,20 +954,20 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = bool(undefined)`, nil, false) // undefined: false
 
 	expectRun(t, `out = bytes(1)`, nil, []byte{0})
-	expectRun(t, `out = bytes(1.8)`, nil, value.UndefinedValue)
+	expectRun(t, `out = bytes(1.8)`, nil, alloc.NewUndefined())
 	expectRun(t, `out = bytes("-522")`, nil, []byte{'-', '5', '2', '2'})
-	expectRun(t, `out = bytes(true)`, nil, value.UndefinedValue)
-	expectRun(t, `out = bytes(false)`, nil, value.UndefinedValue)
-	expectRun(t, `out = bytes('8')`, nil, value.UndefinedValue)
-	expectRun(t, `out = bytes([1])`, nil, value.NewBytes([]byte{1}))
-	expectRun(t, `out = bytes({a: 1})`, nil, value.UndefinedValue)
-	expectRun(t, `out = bytes(undefined)`, nil, value.UndefinedValue)
+	expectRun(t, `out = bytes(true)`, nil, alloc.NewUndefined())
+	expectRun(t, `out = bytes(false)`, nil, alloc.NewUndefined())
+	expectRun(t, `out = bytes('8')`, nil, alloc.NewUndefined())
+	expectRun(t, `out = bytes([1])`, nil, alloc.NewBytes([]byte{1}))
+	expectRun(t, `out = bytes({a: 1})`, nil, alloc.NewUndefined())
+	expectRun(t, `out = bytes(undefined)`, nil, alloc.NewUndefined())
 	expectRun(t, `out = bytes("-522", ['8'])`, nil, []byte{'-', '5', '2', '2'})
 	expectRun(t, `out = bytes(undefined, "-522")`, nil, "-522")
 	expectRun(t, `out = bytes(undefined, 1)`, nil, 1)
 	expectRun(t, `out = bytes(undefined, 1.8)`, nil, 1.8)
 	expectRun(t, `out = bytes(undefined, int("-522"))`, nil, -522)
-	expectRun(t, `out = bytes(undefined, undefined)`, nil, value.UndefinedValue)
+	expectRun(t, `out = bytes(undefined, undefined)`, nil, alloc.NewUndefined())
 
 	expectRun(t, `out = is_error(error(1))`, nil, true)
 	expectRun(t, `out = is_error(1)`, nil, false)
@@ -1049,7 +1049,7 @@ func TestBuiltinFunction(t *testing.T) {
 	expectError(t, `delete([], "")`, nil, `invalid argument type: (delete) argument first expects type record, got array`)
 	expectError(t, `delete({}, undefined)`, nil, `invalid argument type: (delete) argument second expects type string, got undefined`)
 
-	expectRun(t, `out = delete({}, "")`, nil, value.UndefinedValue)
+	expectRun(t, `out = delete({}, "")`, nil, alloc.NewUndefined())
 	expectRun(t, `out = {key1: 1}; delete(out, "key1")`, nil, MAP{})
 	expectRun(t, `out = {key1: 1, key2: "2"}; delete(out, "key1")`, nil, MAP{"key2": "2"})
 	expectRun(t, `out = map({key1: 1}); delete(out, "key1")`, nil, MAP{})
@@ -1329,21 +1329,21 @@ export func() {
 func TestVMErrorUnwrap(t *testing.T) {
 	userErr := errors.New("user runtime error")
 	userFunc := func(err error) *value.BuiltinFunction {
-		return value.NewBuiltinFunction(
+		return alloc.NewBuiltinFunction(
 			"user_func",
-			func(args ...core.Object) (core.Object, error) {
+			func(alloc core.Allocator, args ...core.Object) (core.Object, error) {
 				return nil, err
 			},
 			0,
 			false,
-		)
+		).(*value.BuiltinFunction)
 	}
 	userModule := func(err error) *vm.Module {
 		return &vm.Module{
 			Attrs: map[string]core.Object{
-				"afunction": value.NewBuiltinFunction(
+				"afunction": alloc.NewBuiltinFunction(
 					"afunction",
-					func(a ...core.Object) (core.Object, error) {
+					func(alloc core.Allocator, a ...core.Object) (core.Object, error) {
 						return nil, err
 					},
 					0,
@@ -1665,11 +1665,11 @@ func TestFor(t *testing.T) {
 func TestFunction(t *testing.T) {
 	// function with no "return" statement returns "invalid" value.
 	expectRun(t, `f1 := func() {}; out = f1();`,
-		nil, value.UndefinedValue)
+		nil, alloc.NewUndefined())
 	expectRun(t, `f1 := func() {}; f2 := func() { return f1(); }; f1(); out = f2();`,
-		nil, value.UndefinedValue)
+		nil, alloc.NewUndefined())
 	expectRun(t, `f := func(x) { x; }; out = f(5);`,
-		nil, value.UndefinedValue)
+		nil, alloc.NewUndefined())
 
 	expectRun(t, `f := func(...x) { return x; }; out = f(1,2,3);`,
 		nil, ARR{1, 2, 3})
@@ -1681,7 +1681,7 @@ func TestFunction(t *testing.T) {
 		nil, ARR{"a", ARR{"b"}, 7})
 
 	expectRun(t, `f := func(...x) { return x; }; out = f();`,
-		nil, value.NewArray([]core.Object{}, false))
+		nil, alloc.NewArray([]core.Object{}, false))
 
 	expectRun(t, `f := func(a, b, ...x) { return [a, b, x]; }; out = f(8, 9);`,
 		nil, ARR{8, 9, ARR{}})
@@ -1978,23 +1978,23 @@ func() {
 
 	// function skipping return
 	expectRun(t, `out = func() {}()`,
-		nil, value.UndefinedValue)
+		nil, alloc.NewUndefined())
 	expectRun(t, `out = func(v) { if v { return true } }(1)`,
 		nil, true)
 	expectRun(t, `out = func(v) { if v { return true } }(0)`,
-		nil, value.UndefinedValue)
+		nil, alloc.NewUndefined())
 	expectRun(t, `out = func(v) { if v { } else { return true } }(1)`,
-		nil, value.UndefinedValue)
+		nil, alloc.NewUndefined())
 	expectRun(t, `out = func(v) { if v { return } }(1)`,
-		nil, value.UndefinedValue)
+		nil, alloc.NewUndefined())
 	expectRun(t, `out = func(v) { if v { return } }(0)`,
-		nil, value.UndefinedValue)
+		nil, alloc.NewUndefined())
 	expectRun(t, `out = func(v) { if v { } else { return } }(1)`,
-		nil, value.UndefinedValue)
+		nil, alloc.NewUndefined())
 	expectRun(t, `out = func(v) { for ;;v++ { if v == 3 { return true } } }(1)`,
 		nil, true)
 	expectRun(t, `out = func(v) { for ;;v++ { if v == 3 { break } } }(1)`,
-		nil, value.UndefinedValue)
+		nil, alloc.NewUndefined())
 
 	// 'f' in RHS at line 4 must reference global variable 'f'
 	expectRun(t, `
@@ -2094,12 +2094,12 @@ for x in [1, 2, 3] {
 func TestIf(t *testing.T) {
 
 	expectRun(t, `if (true) { out = 10 }`, nil, 10)
-	expectRun(t, `if (false) { out = 10 }`, nil, value.UndefinedValue)
+	expectRun(t, `if (false) { out = 10 }`, nil, alloc.NewUndefined())
 	expectRun(t, `if (false) { out = 10 } else { out = 20 }`, nil, 20)
 	expectRun(t, `if (1) { out = 10 }`, nil, 10)
 	expectRun(t, `if (0) { out = 10 } else { out = 20 }`, nil, 20)
 	expectRun(t, `if (1 < 2) { out = 10 }`, nil, 10)
-	expectRun(t, `if (1 > 2) { out = 10 }`, nil, value.UndefinedValue)
+	expectRun(t, `if (1 > 2) { out = 10 }`, nil, alloc.NewUndefined())
 	expectRun(t, `if (1 < 2) { out = 10 } else { out = 20 }`, nil, 10)
 	expectRun(t, `if (1 > 2) { out = 10 } else { out = 20 }`, nil, 20)
 
@@ -2222,7 +2222,7 @@ func TestImmutable(t *testing.T) {
 	expectRun(t, `out = immutable([1, 2, 3, 4])[1]`, nil, 2)
 	expectRun(t, `out = immutable([1, 2, 3, 4])[1:3]`, nil, ARR{2, 3})
 	expectRun(t, `a := immutable([1,2,3]); a = 5; out = a`, nil, 5)
-	expectRun(t, `a := immutable([1, 2, 3]); out = a[5]`, nil, value.UndefinedValue)
+	expectRun(t, `a := immutable([1, 2, 3]); out = a[5]`, nil, alloc.NewUndefined())
 
 	// map
 	expectError(t, `a := immutable({b: 1, c: 2}); a.b = 5`, nil, "object is not assignable: type immutable-record does not support assignment via indexing or field access")
@@ -2239,7 +2239,7 @@ func TestImmutable(t *testing.T) {
 	expectRun(t, `out = immutable({a:1,b:2}).b`, nil, 2)
 	expectRun(t, `out = immutable({a:1,b:2})["b"]`, nil, 2)
 	expectRun(t, `a := immutable({a:1,b:2}); a = 5; out = 5`, nil, 5)
-	expectRun(t, `a := immutable({a:1,b:2}); out = a.c`, nil, value.UndefinedValue)
+	expectRun(t, `a := immutable({a:1,b:2}); out = a.c`, nil, alloc.NewUndefined())
 
 	expectRun(t, `a := immutable({b: 5, c: "foo"}); out = a.b`, nil, 5)
 	expectError(t, `a := immutable({b: 5, c: "foo"}); a.b = 10`, nil, "object is not assignable: type immutable-record does not support assignment via indexing or field access")
@@ -2272,7 +2272,7 @@ func (o *StringDict) TypeName() string {
 	return "string-dict"
 }
 
-func (o *StringDict) Access(index core.Object, mode core.Opcode) (core.Object, error) {
+func (o *StringDict) Access(alloc core.Allocator, index core.Object, mode core.Opcode) (core.Object, error) {
 	strIdx, ok := index.(*value.String)
 	if !ok {
 		return nil, core.NewInvalidIndexTypeError("StringDict access", "string", index)
@@ -2280,11 +2280,11 @@ func (o *StringDict) Access(index core.Object, mode core.Opcode) (core.Object, e
 
 	for k, v := range o.Value {
 		if strings.EqualFold(strIdx.Value(), k) {
-			return value.NewString(v), nil
+			return alloc.NewString(v), nil
 		}
 	}
 
-	return value.UndefinedValue, nil
+	return alloc.NewUndefined(), nil
 }
 
 func (o *StringDict) Assign(i, v core.Object) error {
@@ -2316,7 +2316,7 @@ func (o *StringCircle) String() string {
 	return ""
 }
 
-func (o *StringCircle) Access(index core.Object, mode core.Opcode) (core.Object, error) {
+func (o *StringCircle) Access(alloc core.Allocator, index core.Object, mode core.Opcode) (core.Object, error) {
 	intIdx, ok := index.(*value.Int)
 	if !ok {
 		return nil, core.NewInvalidIndexTypeError("StringCircle access", "int", index)
@@ -2327,7 +2327,7 @@ func (o *StringCircle) Access(index core.Object, mode core.Opcode) (core.Object,
 		r = len(o.Value) + r
 	}
 
-	return value.NewString(o.Value[r]), nil
+	return alloc.NewString(o.Value[r]), nil
 }
 
 func (o *StringCircle) Assign(i, v core.Object) error {
@@ -2360,7 +2360,7 @@ func (o *StringArray) String() string {
 	return strings.Join(o.Value, ", ")
 }
 
-func (o *StringArray) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *StringArray) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	if rhs, ok := rhs.(*StringArray); ok {
 		switch op {
 		case token.Add:
@@ -2374,7 +2374,7 @@ func (o *StringArray) BinaryOp(op token.Token, rhs core.Object) (core.Object, er
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
 }
 
-func (o *StringArray) IsFalsy() bool {
+func (o *StringArray) IsFalse() bool {
 	return len(o.Value) == 0
 }
 
@@ -2396,7 +2396,7 @@ func (o *StringArray) Equals(x core.Object) bool {
 	return false
 }
 
-func (o *StringArray) Copy() core.Object {
+func (o *StringArray) Copy(alloc core.Allocator) core.Object {
 	return &StringArray{
 		Value: append([]string{}, o.Value...),
 	}
@@ -2406,11 +2406,11 @@ func (o *StringArray) TypeName() string {
 	return "string-array"
 }
 
-func (o *StringArray) Access(index core.Object, mode core.Opcode) (core.Object, error) {
+func (o *StringArray) Access(alloc core.Allocator, index core.Object, mode core.Opcode) (core.Object, error) {
 	intIdx, ok := index.(*value.Int)
 	if ok {
 		if intIdx.Value() >= 0 && intIdx.Value() < int64(len(o.Value)) {
-			return value.NewString(o.Value[intIdx.Value()]), nil
+			return alloc.NewString(o.Value[intIdx.Value()]), nil
 		}
 		return nil, core.NewIndexOutOfBoundsError("StringArray assignment", int(intIdx.Value()), len(o.Value))
 	}
@@ -2419,11 +2419,11 @@ func (o *StringArray) Access(index core.Object, mode core.Opcode) (core.Object, 
 	if ok {
 		for vidx, str := range o.Value {
 			if strIdx.Value() == str {
-				return value.NewInt(int64(vidx)), nil
+				return alloc.NewInt(int64(vidx)), nil
 			}
 		}
 
-		return value.UndefinedValue, nil
+		return alloc.NewUndefined(), nil
 	}
 
 	return nil, core.NewInvalidIndexTypeError("StringArray access", "int or string", index)
@@ -2459,11 +2459,11 @@ func (o *StringArray) Call(vm core.VM, args ...core.Object) (ret core.Object, er
 
 	for i, v := range o.Value {
 		if v == s1 {
-			return value.NewInt(int64(i)), nil
+			return alloc.NewInt(int64(i)), nil
 		}
 	}
 
-	return value.UndefinedValue, nil
+	return alloc.NewUndefined(), nil
 }
 
 func (o *StringArray) IsCallable() bool {
@@ -2479,7 +2479,7 @@ func TestIndexable(t *testing.T) {
 	expectRun(t, `out = dict["B"]`,
 		Opts().Symbol("dict", dict()).Skip2ndPass(), "bar")
 	expectRun(t, `out = dict["x"]`,
-		Opts().Symbol("dict", dict()).Skip2ndPass(), value.UndefinedValue)
+		Opts().Symbol("dict", dict()).Skip2ndPass(), alloc.NewUndefined())
 	expectError(t, `dict[0]`,
 		Opts().Symbol("dict", dict()).Skip2ndPass(), "invalid index type")
 
@@ -2507,7 +2507,7 @@ func TestIndexable(t *testing.T) {
 	expectRun(t, `out = arr["three"]`,
 		Opts().Symbol("arr", strArr()).Skip2ndPass(), 2)
 	expectRun(t, `out = arr["four"]`,
-		Opts().Symbol("arr", strArr()).Skip2ndPass(), value.UndefinedValue)
+		Opts().Symbol("arr", strArr()).Skip2ndPass(), alloc.NewUndefined())
 	expectRun(t, `out = arr[0]`,
 		Opts().Symbol("arr", strArr()).Skip2ndPass(), "one")
 	expectRun(t, `out = arr[1]`,
@@ -2561,15 +2561,15 @@ func (i *StringArrayIterator) Next() bool {
 	return i.idx <= len(i.strArr.Value)
 }
 
-func (i *StringArrayIterator) Key() core.Object {
-	return value.NewInt(int64(i.idx - 1))
+func (i *StringArrayIterator) Key(alloc core.Allocator) core.Object {
+	return alloc.NewInt(int64(i.idx - 1))
 }
 
-func (i *StringArrayIterator) Value() core.Object {
-	return value.NewString(i.strArr.Value[i.idx-1])
+func (i *StringArrayIterator) Value(alloc core.Allocator) core.Object {
+	return alloc.NewString(i.strArr.Value[i.idx-1])
 }
 
-func (o *StringArray) Iterate() core.Iterator {
+func (o *StringArray) Iterate(alloc core.Allocator) core.Iterator {
 	return &StringArrayIterator{
 		strArr: o,
 	}
@@ -2638,11 +2638,11 @@ func TestBuiltin(t *testing.T) {
 	m := Opts().Module("math",
 		&vm.Module{
 			Attrs: map[string]core.Object{
-				"abs": value.NewBuiltinFunction(
+				"abs": alloc.NewBuiltinFunction(
 					"abs",
-					func(a ...core.Object) (core.Object, error) {
+					func(alloc core.Allocator, a ...core.Object) (core.Object, error) {
 						v, _ := a[0].AsFloat()
-						return value.NewFloat(math.Abs(v)), nil
+						return alloc.NewFloat(math.Abs(v)), nil
 					},
 					1,
 					false,
@@ -2661,7 +2661,7 @@ func TestUserModules(t *testing.T) {
 	// export none
 	expectRun(t, `out = import("mod1")`,
 		Opts().Module("mod1", `fn := func() { return 5.0 }; a := 2`),
-		value.UndefinedValue)
+		alloc.NewUndefined())
 
 	// export values
 	expectRun(t, `out = import("mod1")`,
@@ -2804,21 +2804,21 @@ export func(a) {
 
 	// module skipping export
 	expectRun(t, `out = import("mod0")`,
-		Opts().Module("mod0", ``), value.UndefinedValue)
+		Opts().Module("mod0", ``), alloc.NewUndefined())
 	expectRun(t, `out = import("mod0")`,
 		Opts().Module("mod0", `if 1 { export true }`), true)
 	expectRun(t, `out = import("mod0")`,
 		Opts().Module("mod0", `if 0 { export true }`),
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	expectRun(t, `out = import("mod0")`,
 		Opts().Module("mod0", `if 1 { } else { export true }`),
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	expectRun(t, `out = import("mod0")`,
 		Opts().Module("mod0", `for v:=0;;v++ { if v == 3 { export true } }`),
 		true)
 	expectRun(t, `out = import("mod0")`,
 		Opts().Module("mod0", `for v:=0;;v++ { if v == 3 { break } }`),
-		value.UndefinedValue)
+		alloc.NewUndefined())
 
 	// duplicate compiled functions
 	// NOTE: module "mod" has a function with some local variable, and it's
@@ -2844,11 +2844,11 @@ func TestModuleBlockScopes(t *testing.T) {
 	m := Opts().Module("rand",
 		&vm.Module{
 			Attrs: map[string]core.Object{
-				"intn": value.NewBuiltinFunction(
+				"intn": alloc.NewBuiltinFunction(
 					"abs",
-					func(a ...core.Object) (core.Object, error) {
+					func(alloc core.Allocator, a ...core.Object) (core.Object, error) {
 						v, _ := a[0].AsInt()
-						return value.NewInt(rand.Int63n(v)), nil
+						return alloc.NewInt(rand.Int63n(v)), nil
 					},
 					1,
 					false,
@@ -2931,11 +2931,11 @@ f()
 
 func testAllocsLimit(t *testing.T, src string, limit int64) {
 	expectRun(t, src,
-		Opts().Skip2ndPass(), value.UndefinedValue) // no limit
+		Opts().Skip2ndPass(), alloc.NewUndefined()) // no limit
 	expectRun(t, src,
-		Opts().MaxAllocs(limit).Skip2ndPass(), value.UndefinedValue)
+		Opts().MaxAllocs(limit).Skip2ndPass(), alloc.NewUndefined())
 	expectRun(t, src,
-		Opts().MaxAllocs(limit+1).Skip2ndPass(), value.UndefinedValue)
+		Opts().MaxAllocs(limit+1).Skip2ndPass(), alloc.NewUndefined())
 	if limit > 1 {
 		expectError(t, src,
 			Opts().MaxAllocs(limit-1).Skip2ndPass(),
@@ -3073,7 +3073,7 @@ func TestSelector(t *testing.T) {
 	expectRun(t, `a := {k1: 5, k2: "foo"}; out = a.k2`,
 		nil, "foo")
 	expectRun(t, `a := {k1: 5, k2: "foo"}; out = a.k3`,
-		nil, value.UndefinedValue)
+		nil, alloc.NewUndefined())
 
 	expectRun(t, `
 a := {
@@ -3093,7 +3093,7 @@ a := {
 	},
 	c: "foo bar"
 }
-b := a.x.c`, nil, value.UndefinedValue)
+b := a.x.c`, nil, alloc.NewUndefined())
 
 	expectRun(t, `
 a := {
@@ -3103,7 +3103,7 @@ a := {
 	},
 	c: "foo bar"
 }
-b := a.x.y`, nil, value.UndefinedValue)
+b := a.x.y`, nil, alloc.NewUndefined())
 
 	expectRun(t, `a := {b: 1, c: "foo"}; a.b = 2; out = a.b`,
 		nil, 2)
@@ -3189,9 +3189,9 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.all({a:true, b:0}, enum.value)`, false)
 	testEnumModule(t, `out = enum.all({a:true, b:0, c:1}, enum.value)`, false)
 	testEnumModule(t, `out = enum.all(0, enum.value)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.all("123", enum.value)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 
 	testEnumModule(t, `out = enum.any([], enum.value)`, false)
 	testEnumModule(t, `out = enum.any([1], enum.value)`, true)
@@ -3212,9 +3212,9 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.any({a:false}, enum.value)`, false)
 	testEnumModule(t, `out = enum.any({a:false, b:0}, enum.value)`, false)
 	testEnumModule(t, `out = enum.any(0, enum.value)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.any("123", enum.value)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 
 	testEnumModule(t, `out = enum.chunk([], 1)`, ARR{})
 	testEnumModule(t, `out = enum.chunk([1], 1)`, ARR{ARR{1}})
@@ -3229,30 +3229,30 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.chunk([1,2,3,4], 3)`,
 		ARR{ARR{1, 2, 3}, ARR{4}})
 	testEnumModule(t, `out = enum.chunk([], 0)`,
-		value.UndefinedValue) // size=0: undefined
+		alloc.NewUndefined()) // size=0: undefined
 	testEnumModule(t, `out = enum.chunk([1], 0)`,
-		value.UndefinedValue) // size=0: undefined
+		alloc.NewUndefined()) // size=0: undefined
 	testEnumModule(t, `out = enum.chunk([1,2,3], 0)`,
-		value.UndefinedValue) // size=0: undefined
+		alloc.NewUndefined()) // size=0: undefined
 	testEnumModule(t, `out = enum.chunk({a:1,b:2,c:3}, 1)`,
-		value.UndefinedValue) // map: undefined
+		alloc.NewUndefined()) // map: undefined
 	testEnumModule(t, `out = enum.chunk(0, 1)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.chunk("123", 1)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 
 	testEnumModule(t, `out = enum.at([], 0)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.at([], 1)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.at([], -1)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.at(["one"], 0)`,
 		"one")
 	testEnumModule(t, `out = enum.at(["one"], 1)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.at(["one"], -1)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.at(["one","two","three"], 0)`,
 		"one")
 	testEnumModule(t, `out = enum.at(["one","two","three"], 1)`,
@@ -3260,17 +3260,17 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.at(["one","two","three"], 2)`,
 		"three")
 	testEnumModule(t, `out = enum.at(["one","two","three"], -1)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.at(["one","two","three"], 3)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.at(["one","two","three"], "1")`,
-		value.UndefinedValue) // non-int index: undefined
+		alloc.NewUndefined()) // non-int index: undefined
 	testEnumModule(t, `out = enum.at({}, "a")`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.at({a:"one"}, "a")`,
 		"one")
 	testEnumModule(t, `out = enum.at({a:"one"}, "b")`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.at({a:"one",b:"two",c:"three"}, "a")`,
 		"one")
 	testEnumModule(t, `out = enum.at({a:"one",b:"two",c:"three"}, "b")`,
@@ -3278,13 +3278,13 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.at({a:"one",b:"two",c:"three"}, "c")`,
 		"three")
 	testEnumModule(t, `out = enum.at({a:"one",b:"two",c:"three"}, "d")`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.at({a:"one",b:"two",c:"three"}, 'a')`,
-		value.UndefinedValue) // non-string index: undefined
+		alloc.NewUndefined()) // non-string index: undefined
 	testEnumModule(t, `out = enum.at(0, 1)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.at("abc", 1)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 
 	testEnumModule(t, `out=0; enum.each([],func(k,v){out+=v})`, 0)
 	testEnumModule(t, `out=0; enum.each([1,2,3],func(k,v){out+=v})`, 6)
@@ -3302,53 +3302,53 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.filter([false,1,0,2], enum.value)`,
 		ARR{1, 2})
 	testEnumModule(t, `out = enum.filter({}, enum.value)`,
-		value.UndefinedValue) // non-array: undefined
+		alloc.NewUndefined()) // non-array: undefined
 	testEnumModule(t, `out = enum.filter(0, enum.value)`,
-		value.UndefinedValue) // non-array: undefined
+		alloc.NewUndefined()) // non-array: undefined
 	testEnumModule(t, `out = enum.filter("123", enum.value)`,
-		value.UndefinedValue) // non-array: undefined
+		alloc.NewUndefined()) // non-array: undefined
 
 	testEnumModule(t, `out = enum.find([], enum.value)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.find([0], enum.value)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.find([1], enum.value)`, 1)
 	testEnumModule(t, `out = enum.find([false,0,undefined,1], enum.value)`, 1)
 	testEnumModule(t, `out = enum.find([1,2,3], enum.value)`, 1)
 	testEnumModule(t, `out = enum.find({}, enum.value)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.find({a:0}, enum.value)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.find({a:1}, enum.value)`, 1)
 	testEnumModule(t, `out = enum.find({a:false,b:0,c:undefined,d:1}, enum.value)`,
 		1)
 	//testEnumModule(t, `out = enum.find({a:1,b:2,c:3}, enum.value)`, 1)
 	testEnumModule(t, `out = enum.find(0, enum.value)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.find("123", enum.value)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 
 	testEnumModule(t, `out = enum.find_key([], enum.value)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.find_key([0], enum.value)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.find_key([1], enum.value)`, 0)
 	testEnumModule(t, `out = enum.find_key([false,0,undefined,1], enum.value)`,
 		3)
 	testEnumModule(t, `out = enum.find_key([1,2,3], enum.value)`, 0)
 	testEnumModule(t, `out = enum.find_key({}, enum.value)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.find_key({a:0}, enum.value)`,
-		value.UndefinedValue)
+		alloc.NewUndefined())
 	testEnumModule(t, `out = enum.find_key({a:1}, enum.value)`,
 		"a")
 	testEnumModule(t, `out = enum.find_key({a:false,b:0,c:undefined,d:1}, enum.value)`,
 		"d")
 	//testEnumModule(t, `out = enum.find_key({a:1,b:2,c:3}, enum.value)`, "a")
 	testEnumModule(t, `out = enum.find_key(0, enum.value)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.find_key("123", enum.value)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 
 	testEnumModule(t, `out = enum.map([], enum.value)`,
 		ARR{})
@@ -3363,9 +3363,9 @@ func TestSourceModules(t *testing.T) {
 	testEnumModule(t, `out = enum.map({a:1}, func(k,v) { return v*2 })`,
 		ARR{2})
 	testEnumModule(t, `out = enum.map(0, enum.value)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 	testEnumModule(t, `out = enum.map("123", enum.value)`,
-		value.UndefinedValue) // non-enumerable: undefined
+		alloc.NewUndefined()) // non-enumerable: undefined
 }
 
 func testEnumModule(t *testing.T, input string, expected any) {
@@ -3680,11 +3680,11 @@ func expectRun(t *testing.T, input string, opts *testopts, expected any) {
 		expectedObj := toObject(expected)
 		switch eo := expectedObj.(type) {
 		case *value.Array:
-			expectedObj = value.NewArray(eo.Value(), true)
+			expectedObj = alloc.NewArray(eo.Value(), true)
 		case *value.Record:
-			expectedObj = value.NewRecord(eo.Value(), true)
+			expectedObj = alloc.NewRecord(eo.Value(), true)
 		case *value.Map:
-			expectedObj = value.NewMap(eo.Value(), true)
+			expectedObj = alloc.NewMap(eo.Value(), true)
 		}
 
 		modules.AddSourceModule("__code__",
@@ -3833,7 +3833,7 @@ func traceCompileRun(
 	}
 
 	tr := &vmTracer{}
-	c := gs.NewCompiler(file.InputFile, symTable, nil, modules, tr)
+	c := gs.NewCompiler(alloc, file.InputFile, symTable, nil, modules, tr)
 	err = c.Compile(file)
 	trace = append(trace, fmt.Sprintf("\n[Compiler Trace]\n\n%s", strings.Join(tr.Out, "")))
 	if err != nil {
@@ -3845,7 +3845,7 @@ func traceCompileRun(
 	trace = append(trace, fmt.Sprintf("\n[Compiled Constants]\n\n%s", strings.Join(bytecode.FormatConstants(), "\n")))
 	trace = append(trace, fmt.Sprintf("\n[Compiled Instructions]\n\n%s\n", strings.Join(bytecode.FormatInstructions(), "\n")))
 
-	v = vm.NewVM(bytecode, globals, maxAllocs)
+	v = vm.NewVM(alloc, bytecode, globals, maxAllocs)
 
 	err = v.Run()
 	{
@@ -3891,7 +3891,7 @@ func parse(t *testing.T, input string) *parser.File {
 }
 
 func errorObject(v any) *value.Error {
-	return value.NewError(toObject(v))
+	return alloc.NewError(toObject(v)).(*value.Error)
 }
 
 func toObject(v any) core.Object {
@@ -3899,48 +3899,45 @@ func toObject(v any) core.Object {
 	case core.Object:
 		return v
 	case string:
-		return value.NewString(v)
+		return alloc.NewString(v)
 	case int64:
-		return value.NewInt(v)
+		return alloc.NewInt(v)
 	case int: // for convenience
-		return value.NewInt(int64(v))
+		return alloc.NewInt(int64(v))
 	case bool:
-		if v {
-			return value.TrueValue
-		}
-		return value.FalseValue
+		return alloc.NewBool(v)
 	case rune:
-		return value.NewChar(v)
+		return alloc.NewChar(v)
 	case byte: // for convenience
-		return value.NewChar(rune(v))
+		return alloc.NewChar(rune(v))
 	case float64:
-		return value.NewFloat(v)
+		return alloc.NewFloat(v)
 	case []byte:
-		return value.NewBytes(v)
+		return alloc.NewBytes(v)
 	case MAP:
 		objs := make(map[string]core.Object)
 		for k, v := range v {
 			objs[k] = toObject(v)
 		}
-		return value.NewRecord(objs, false)
+		return alloc.NewRecord(objs, false)
 	case ARR:
 		var objs []core.Object
 		for _, e := range v {
 			objs = append(objs, toObject(e))
 		}
-		return value.NewArray(objs, false)
+		return alloc.NewArray(objs, false)
 	case IMAP:
 		objs := make(map[string]core.Object)
 		for k, v := range v {
 			objs[k] = toObject(v)
 		}
-		return value.NewRecord(objs, true)
+		return alloc.NewRecord(objs, true)
 	case IARR:
 		var objs []core.Object
 		for _, e := range v {
 			objs = append(objs, toObject(e))
 		}
-		return value.NewArray(objs, true)
+		return alloc.NewArray(objs, true)
 	}
 
 	panic(fmt.Errorf("unknown type: %T", v))
@@ -3949,27 +3946,27 @@ func toObject(v any) core.Object {
 func objectZeroCopy(o core.Object) core.Object {
 	switch o.(type) {
 	case *value.Int:
-		return value.NewInt(0)
+		return alloc.NewInt(0)
 	case *value.Float:
-		return value.NewFloat(0)
+		return alloc.NewFloat(0)
 	case *value.Bool:
-		return value.NewBool(false)
+		return alloc.NewBool(false)
 	case *value.Char:
-		return value.NewChar(0)
+		return alloc.NewChar(0)
 	case *value.String:
-		return value.NewString("")
+		return alloc.NewString("")
 	case *value.Array:
-		return value.NewArray(nil, o.IsImmutable())
+		return alloc.NewArray(nil, o.IsImmutable())
 	case *value.Record:
-		return value.NewRecord(nil, o.IsImmutable())
+		return alloc.NewRecord(nil, o.IsImmutable())
 	case *value.Map:
-		return value.NewMap(nil, o.IsImmutable())
+		return alloc.NewMap(nil, o.IsImmutable())
 	case *value.Undefined:
-		return value.UndefinedValue
+		return alloc.NewUndefined()
 	case *value.Error:
-		return value.NewError(nil)
+		return alloc.NewError(nil)
 	case *value.Bytes:
-		return value.NewBytes(nil)
+		return alloc.NewBytes(nil)
 	case nil:
 		panic("nil")
 	default:

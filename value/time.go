@@ -13,12 +13,6 @@ type Time struct {
 	value time.Time
 }
 
-func NewTime(t time.Time) *Time {
-	o := &Time{}
-	o.Set(t)
-	return o
-}
-
 func (o *Time) GobDecode(b []byte) error {
 	var t time.Time
 	if err := t.GobDecode(b); err != nil {
@@ -52,45 +46,27 @@ func (o *Time) Interface() any {
 	return o.value
 }
 
-func (o *Time) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Time) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	switch rhs := rhs.(type) {
 	case *Int:
 		switch op {
 		case token.Add: // time + int => time
-			if rhs.value == 0 {
-				return o, nil
-			}
-			return NewTime(o.value.Add(time.Duration(rhs.value))), nil
+			return alloc.NewTime(o.value.Add(time.Duration(rhs.value))), nil
 		case token.Sub: // time - int => time
-			if rhs.value == 0 {
-				return o, nil
-			}
-			return NewTime(o.value.Add(time.Duration(-rhs.value))), nil
+			return alloc.NewTime(o.value.Add(time.Duration(-rhs.value))), nil
 		}
 	case *Time:
 		switch op {
 		case token.Sub: // time - time => int (duration)
-			return NewInt(int64(o.value.Sub(rhs.value))), nil
+			return alloc.NewInt(int64(o.value.Sub(rhs.value))), nil
 		case token.Less: // time < time => bool
-			if o.value.Before(rhs.value) {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value.Before(rhs.value)), nil
 		case token.Greater:
-			if o.value.After(rhs.value) {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value.After(rhs.value)), nil
 		case token.LessEq:
-			if o.value.Equal(rhs.value) || o.value.Before(rhs.value) {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value.Equal(rhs.value) || o.value.Before(rhs.value)), nil
 		case token.GreaterEq:
-			if o.value.Equal(rhs.value) || o.value.After(rhs.value) {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value.Equal(rhs.value) || o.value.After(rhs.value)), nil
 		}
 	}
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
@@ -108,11 +84,11 @@ func (o *Time) Equals(x core.Object) bool {
 	return o.value.Equal(t)
 }
 
-func (o *Time) Copy() core.Object {
-	return NewTime(o.value)
+func (o *Time) Copy(alloc core.Allocator) core.Object {
+	return alloc.NewTime(o.value)
 }
 
-func (o *Time) Access(core.Object, core.Opcode) (core.Object, error) {
+func (o *Time) Access(core.Allocator, core.Object, core.Opcode) (core.Object, error) {
 	return nil, core.NewNotAccessibleError(o)
 }
 
@@ -120,7 +96,11 @@ func (o *Time) Assign(core.Object, core.Object) error {
 	return core.NewNotAssignableError(o)
 }
 
-func (o *Time) IsFalsy() bool {
+func (o *Time) IsTrue() bool {
+	return !o.IsFalse()
+}
+
+func (o *Time) IsFalse() bool {
 	return o.value.IsZero()
 }
 
@@ -137,7 +117,7 @@ func (o *Time) AsInt() (int64, bool) {
 }
 
 func (o *Time) AsBool() (bool, bool) {
-	return !o.IsFalsy(), true
+	return !o.IsFalse(), true
 }
 
 func (o *Time) AsTime() (time.Time, bool) {

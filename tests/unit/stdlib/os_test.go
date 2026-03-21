@@ -1,4 +1,4 @@
-package stdlib_test
+package stdlib
 
 import (
 	"os"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/value"
 )
 
 func TestReadFile(t *testing.T) {
@@ -19,7 +18,7 @@ func TestReadFile(t *testing.T) {
 	require.NoError(t, err)
 	_ = tf.Close()
 
-	module(t, "os").call("read_file", tf.Name()).expect(value.NewBytes(content))
+	module(t, "os").call("read_file", tf.Name()).expect(alloc.NewBytes(content))
 }
 
 func TestReadFileArgs(t *testing.T) {
@@ -45,12 +44,12 @@ func TestFileStatFile(t *testing.T) {
 		return
 	}
 
-	module(t, "os").call("stat", tf.Name()).expect(value.NewRecord(map[string]core.Object{
-		"name":      value.NewString(stat.Name()),
-		"mtime":     value.NewTime(stat.ModTime()),
-		"size":      value.NewInt(stat.Size()),
-		"mode":      value.NewInt(int64(stat.Mode())),
-		"directory": value.FalseValue,
+	module(t, "os").call("stat", tf.Name()).expect(alloc.NewRecord(map[string]core.Object{
+		"name":      alloc.NewString(stat.Name()),
+		"mtime":     alloc.NewTime(stat.ModTime()),
+		"size":      alloc.NewInt(stat.Size()),
+		"mode":      alloc.NewInt(int64(stat.Mode())),
+		"directory": alloc.NewBool(false),
 	}, true))
 }
 
@@ -62,12 +61,12 @@ func TestFileStatDir(t *testing.T) {
 	stat, err := os.Stat(td)
 	require.NoError(t, err)
 
-	module(t, "os").call("stat", td).expect(value.NewRecord(map[string]core.Object{
-		"name":      value.NewString(stat.Name()),
-		"mtime":     value.NewTime(stat.ModTime()),
-		"size":      value.NewInt(stat.Size()),
-		"mode":      value.NewInt(int64(stat.Mode())),
-		"directory": value.TrueValue,
+	module(t, "os").call("stat", td).expect(alloc.NewRecord(map[string]core.Object{
+		"name":      alloc.NewString(stat.Name()),
+		"mtime":     alloc.NewTime(stat.ModTime()),
+		"size":      alloc.NewInt(stat.Size()),
+		"mode":      alloc.NewInt(int64(stat.Mode())),
+		"directory": alloc.NewBool(true),
 	}, true))
 }
 

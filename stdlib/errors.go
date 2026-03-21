@@ -2,12 +2,11 @@ package stdlib
 
 import (
 	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/value"
 )
 
-func wrapError(err error) core.Object {
+func wrapError(alloc core.Allocator, err error) core.Object {
 	if err == nil {
-		return value.TrueValue
+		return alloc.NewBool(true)
 	}
-	return value.NewError(value.NewString(err.Error()))
+	return alloc.NewError(alloc.NewString(err.Error()))
 }

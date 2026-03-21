@@ -13,12 +13,11 @@ import (
 	"unicode/utf8"
 
 	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/value"
 )
 
 // Decode parses the JSON-encoded data and returns the result object.
-func Decode(data []byte) (core.Object, error) {
-	var d decodeState
+func Decode(alloc core.Allocator, data []byte) (core.Object, error) {
+	d := decodeState{alloc: alloc}
 	err := checkValid(data, &d.scan)
 	if err != nil {
 		return nil, err
@@ -31,6 +30,7 @@ func Decode(data []byte) (core.Object, error) {
 
 // decodeState represents the state while decoding a JSON value.
 type decodeState struct {
+	alloc  core.Allocator
 	data   []byte
 	off    int // next read offset in data
 	opcode int // last read result
@@ -131,7 +131,7 @@ func (d *decodeState) array() (core.Object, error) {
 			panic(phasePanicMsg)
 		}
 	}
-	return value.NewArray(arr, false), nil
+	return d.alloc.NewArray(arr, false), nil
 }
 
 func (d *decodeState) object() (core.Object, error) {
@@ -184,7 +184,7 @@ func (d *decodeState) object() (core.Object, error) {
 			panic(phasePanicMsg)
 		}
 	}
-	return value.NewRecord(m, false), nil
+	return d.alloc.NewRecord(m, false), nil
 }
 
 func (d *decodeState) literal() (core.Object, error) {
@@ -196,20 +196,17 @@ func (d *decodeState) literal() (core.Object, error) {
 
 	switch c := item[0]; c {
 	case 'n': // null
-		return value.UndefinedValue, nil
+		return d.alloc.NewUndefined(), nil
 
 	case 't', 'f': // true, false
-		if c == 't' {
-			return value.TrueValue, nil
-		}
-		return value.FalseValue, nil
+		return d.alloc.NewBool(c == 't'), nil
 
 	case '"': // string
 		s, ok := unquote(item)
 		if !ok {
 			panic(phasePanicMsg)
 		}
-		return value.NewString(s), nil
+		return d.alloc.NewString(s), nil
 
 	default: // number
 		if c != '-' && (c < '0' || c > '9') {
@@ -217,10 +214,10 @@ func (d *decodeState) literal() (core.Object, error) {
 		}
 		if isFloat {
 			n, _ := strconv.ParseFloat(string(item), 10)
-			return value.NewFloat(n), nil
+			return d.alloc.NewFloat(n), nil
 		}
 		n, _ := strconv.ParseInt(string(item), 10, 64)
-		return value.NewInt(n), nil
+		return d.alloc.NewInt(n), nil
 	}
 }
 

@@ -13,7 +13,8 @@ type Char struct {
 	value rune
 }
 
-func NewChar(v rune) *Char {
+// Should be used only for static initialization. For dynamic creation of built-in functions, use Allocator.NewChar.
+func NewStaticChar(v rune) core.Object {
 	o := &Char{}
 	o.Set(v)
 	return o
@@ -53,77 +54,37 @@ func (o *Char) Interface() any {
 	return o.value
 }
 
-func (o *Char) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Char) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	switch rhs := rhs.(type) {
 	case *Char:
 		switch op {
 		case token.Add:
-			r := o.value + rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewChar(r), nil
+			return alloc.NewChar(o.value + rhs.value), nil
 		case token.Sub:
-			r := o.value - rhs.value
-			if r == o.value {
-				return o, nil
-			}
-			return NewChar(r), nil
+			return alloc.NewChar(o.value - rhs.value), nil
 		case token.Less:
-			if o.value < rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value < rhs.value), nil
 		case token.Greater:
-			if o.value > rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value > rhs.value), nil
 		case token.LessEq:
-			if o.value <= rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value <= rhs.value), nil
 		case token.GreaterEq:
-			if o.value >= rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(o.value >= rhs.value), nil
 		}
 	case *Int:
 		switch op {
 		case token.Add:
-			r := o.value + rune(rhs.value)
-			if r == o.value {
-				return o, nil
-			}
-			return NewChar(r), nil
+			return alloc.NewInt(int64(o.value) + rhs.value), nil
 		case token.Sub:
-			r := o.value - rune(rhs.value)
-			if r == o.value {
-				return o, nil
-			}
-			return NewChar(r), nil
+			return alloc.NewInt(int64(o.value) - rhs.value), nil
 		case token.Less:
-			if int64(o.value) < rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(int64(o.value) < rhs.value), nil
 		case token.Greater:
-			if int64(o.value) > rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(int64(o.value) > rhs.value), nil
 		case token.LessEq:
-			if int64(o.value) <= rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(int64(o.value) <= rhs.value), nil
 		case token.GreaterEq:
-			if int64(o.value) >= rhs.value {
-				return TrueValue, nil
-			}
-			return FalseValue, nil
+			return alloc.NewBool(int64(o.value) >= rhs.value), nil
 		}
 	}
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
@@ -137,11 +98,11 @@ func (o *Char) Equals(x core.Object) bool {
 	return o.value == t
 }
 
-func (o *Char) Copy() core.Object {
-	return NewChar(o.value)
+func (o *Char) Copy(alloc core.Allocator) core.Object {
+	return alloc.NewChar(o.value)
 }
 
-func (o *Char) Access(core.Object, core.Opcode) (core.Object, error) {
+func (o *Char) Access(core.Allocator, core.Object, core.Opcode) (core.Object, error) {
 	return nil, core.NewNotAccessibleError(o)
 }
 
@@ -149,7 +110,11 @@ func (o *Char) Assign(core.Object, core.Object) error {
 	return core.NewNotAssignableError(o)
 }
 
-func (o *Char) IsFalsy() bool {
+func (o *Char) IsTrue() bool {
+	return o.value != 0
+}
+
+func (o *Char) IsFalse() bool {
 	return o.value == 0
 }
 
@@ -166,7 +131,7 @@ func (o *Char) AsInt() (int64, bool) {
 }
 
 func (o *Char) AsBool() (bool, bool) {
-	return !o.IsFalsy(), true
+	return o.IsTrue(), true
 }
 
 func (o *Char) AsRune() (rune, bool) {

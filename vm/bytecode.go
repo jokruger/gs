@@ -70,7 +70,7 @@ func (b *Bytecode) FormatConstants() (output []string) {
 }
 
 // Decode reads Bytecode data from the reader.
-func (b *Bytecode) Decode(r io.Reader, modules *ModuleMap) error {
+func (b *Bytecode) Decode(alloc core.Allocator, r io.Reader, modules *ModuleMap) error {
 	if modules == nil {
 		modules = NewModuleMap()
 	}
@@ -89,7 +89,7 @@ func (b *Bytecode) Decode(r io.Reader, modules *ModuleMap) error {
 		return err
 	}
 	for i, v := range b.Constants {
-		fv, err := fixDecodedObject(v, modules)
+		fv, err := fixDecodedObject(alloc, v, modules)
 		if err != nil {
 			return err
 		}
@@ -198,20 +198,17 @@ func (b *Bytecode) RemoveDuplicates() {
 	}
 }
 
-func fixDecodedObject(o core.Object, modules *ModuleMap) (core.Object, error) {
+func fixDecodedObject(alloc core.Allocator, o core.Object, modules *ModuleMap) (core.Object, error) {
 	switch o := o.(type) {
 	case *value.Bool:
-		if o.IsFalsy() {
-			return value.FalseValue, nil
-		}
-		return value.TrueValue, nil
+		return alloc.NewBool(o.Value()), nil
 
 	case *value.Undefined:
-		return value.UndefinedValue, nil
+		return alloc.NewUndefined(), nil
 
 	case *value.Array:
 		for i, v := range o.Value() {
-			fv, err := fixDecodedObject(v, modules)
+			fv, err := fixDecodedObject(alloc, v, modules)
 			if err != nil {
 				return nil, err
 			}
@@ -222,7 +219,7 @@ func fixDecodedObject(o core.Object, modules *ModuleMap) (core.Object, error) {
 		if o.IsImmutable() {
 			modName := inferModuleName(o)
 			if mod := modules.GetBuiltinModule(modName); mod != nil {
-				return mod.AsImmutableRecord(modName), nil
+				return mod.AsImmutableRecord(alloc, modName), nil
 			}
 
 			for k, v := range o.Value() {
@@ -231,7 +228,7 @@ func fixDecodedObject(o core.Object, modules *ModuleMap) (core.Object, error) {
 					return nil, fmt.Errorf("user function not decodable")
 				}
 
-				fv, err := fixDecodedObject(v, modules)
+				fv, err := fixDecodedObject(alloc, v, modules)
 				if err != nil {
 					return nil, err
 				}
@@ -239,7 +236,7 @@ func fixDecodedObject(o core.Object, modules *ModuleMap) (core.Object, error) {
 			}
 		} else {
 			for k, v := range o.Value() {
-				fv, err := fixDecodedObject(v, modules)
+				fv, err := fixDecodedObject(alloc, v, modules)
 				if err != nil {
 					return nil, err
 				}
@@ -249,7 +246,7 @@ func fixDecodedObject(o core.Object, modules *ModuleMap) (core.Object, error) {
 
 	case *value.Map:
 		for k, v := range o.Value() {
-			fv, err := fixDecodedObject(v, modules)
+			fv, err := fixDecodedObject(alloc, v, modules)
 			if err != nil {
 				return nil, err
 			}

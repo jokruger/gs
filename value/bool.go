@@ -10,11 +10,9 @@ type Bool struct {
 	value bool
 }
 
-func NewBool(value bool) *Bool {
-	if value {
-		return TrueValue
-	}
-	return FalseValue
+// Should be used only for static initialization. For dynamic creation use Allocator.NewBool.
+func NewStaticBool(v bool) *Bool {
+	return &Bool{value: v}
 }
 
 func (o *Bool) GobDecode(b []byte) error {
@@ -51,7 +49,7 @@ func (o *Bool) Interface() any {
 	return o.value
 }
 
-func (o *Bool) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Bool) BinaryOp(alloc core.Allocator, op token.Token, rhs core.Object) (core.Object, error) {
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
 }
 
@@ -66,11 +64,11 @@ func (o *Bool) Equals(x core.Object) bool {
 	return o.value == t
 }
 
-func (o *Bool) Copy() core.Object {
-	return NewBool(o.value)
+func (o *Bool) Copy(alloc core.Allocator) core.Object {
+	return alloc.NewBool(o.value)
 }
 
-func (o *Bool) Access(core.Object, core.Opcode) (core.Object, error) {
+func (o *Bool) Access(core.Allocator, core.Object, core.Opcode) (core.Object, error) {
 	return nil, core.NewNotAccessibleError(o)
 }
 
@@ -78,7 +76,11 @@ func (o *Bool) Assign(core.Object, core.Object) error {
 	return core.NewNotAssignableError(o)
 }
 
-func (o *Bool) IsFalsy() bool {
+func (o *Bool) IsTrue() bool {
+	return o.value
+}
+
+func (o *Bool) IsFalse() bool {
 	return !o.value
 }
 

@@ -1,4 +1,4 @@
-package gs_test
+package unit
 
 import (
 	"reflect"
@@ -8,6 +8,15 @@ import (
 	"github.com/jokruger/gs/value"
 	"github.com/jokruger/gs/vm"
 )
+
+type DummyVM struct{}
+
+func NewDummyVM() core.VM                                                { return &DummyVM{} }
+func (v *DummyVM) Allocator() core.Allocator                             { return alloc }
+func (v *DummyVM) Abort()                                                {}
+func (v *DummyVM) IsStackEmpty() bool                                    { return false }
+func (v *DummyVM) Call(core.Object, ...core.Object) (core.Object, error) { return nil, nil }
+func (v *DummyVM) Run() error                                            { return nil }
 
 func Test_builtinDelete(t *testing.T) {
 	var builtinDelete core.Object
@@ -30,7 +39,7 @@ func Test_builtinDelete(t *testing.T) {
 		wantedErr string
 		target    any
 	}{
-		{name: "invalid-arg", args: args{[]core.Object{value.NewString(""), value.NewString("")}},
+		{name: "invalid-arg", args: args{[]core.Object{alloc.NewString(""), alloc.NewString("")}},
 			wantedErr: "invalid argument type: (delete) argument first expects type record, got string"},
 
 		{name: "no-args",
@@ -42,50 +51,51 @@ func Test_builtinDelete(t *testing.T) {
 		{name: "3-args", args: args{[]core.Object{(*value.Record)(nil), (*value.String)(nil), (*value.String)(nil)}},
 			wantedErr: "wrong number of arguments: (delete) expected 2 argument(s), got 3"},
 
-		{name: "nil-record-no-key", args: args{[]core.Object{value.NewRecord(nil, false)}},
+		{name: "nil-record-no-key", args: args{[]core.Object{alloc.NewRecord(nil, false)}},
 			wantedErr: "wrong number of arguments: (delete) expected 2 argument(s), got 1"},
 
 		{name: "record-missing-key",
 			args: args{
 				[]core.Object{
-					value.NewRecord(map[string]core.Object{
-						"key": value.NewString("value"),
+					alloc.NewRecord(map[string]core.Object{
+						"key": alloc.NewString("value"),
 					}, false),
-					value.NewString("key1")}},
-			want: value.UndefinedValue,
-			target: value.NewRecord(map[string]core.Object{
-				"key": value.NewString("value"),
+					alloc.NewString("key1")}},
+			want: alloc.NewUndefined(),
+			target: alloc.NewRecord(map[string]core.Object{
+				"key": alloc.NewString("value"),
 			}, false),
 		},
 
 		{name: "record-emptied",
 			args: args{
 				[]core.Object{
-					value.NewRecord(map[string]core.Object{
-						"key": value.NewString("value"),
+					alloc.NewRecord(map[string]core.Object{
+						"key": alloc.NewString("value"),
 					}, false),
-					value.NewString("key")}},
-			want:   value.UndefinedValue,
-			target: value.NewRecord(map[string]core.Object{}, false),
+					alloc.NewString("key")}},
+			want:   alloc.NewUndefined(),
+			target: alloc.NewRecord(map[string]core.Object{}, false),
 		},
 
 		{name: "record-multi-keys",
 			args: args{
 				[]core.Object{
-					value.NewRecord(map[string]core.Object{
-						"key1": value.NewString("value1"),
-						"key2": value.NewInt(10),
+					alloc.NewRecord(map[string]core.Object{
+						"key1": alloc.NewString("value1"),
+						"key2": alloc.NewInt(10),
 					}, false),
-					value.NewString("key1")}},
-			want: value.UndefinedValue,
-			target: value.NewRecord(map[string]core.Object{
-				"key2": value.NewInt(10)}, false),
+					alloc.NewString("key1")}},
+			want: alloc.NewUndefined(),
+			target: alloc.NewRecord(map[string]core.Object{
+				"key2": alloc.NewInt(10)}, false),
 		},
 	}
 
+	vm := NewDummyVM()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := builtinDelete.Call(nil, tt.args.args...)
+			got, err := builtinDelete.Call(vm, tt.args.args...)
 			if (err != nil) != (tt.wantedErr != "") {
 				t.Errorf("builtinDelete() error = %v, wantedErr %v", err, tt.wantedErr)
 				return
@@ -134,129 +144,130 @@ func Test_builtinSplice(t *testing.T) {
 		{name: "no args", args: []core.Object{},
 			wantedErr: "wrong number of arguments: (splice) expected at least 1 argument(s), got 0"},
 
-		{name: "invalid args", args: []core.Object{value.NewRecord(nil, false)},
+		{name: "invalid args", args: []core.Object{alloc.NewRecord(nil, false)},
 			wantedErr: "invalid argument type: (splice) argument first expects type mutable array, got record"},
 
-		{name: "invalid args", args: []core.Object{value.NewArray(nil, false), value.NewString("")},
+		{name: "invalid args", args: []core.Object{alloc.NewArray(nil, false), alloc.NewString("")},
 			wantedErr: "invalid argument type: (splice) argument second expects type int, got string"},
 
-		{name: "negative index", args: []core.Object{value.NewArray(nil, false), value.NewInt(-1)},
+		{name: "negative index", args: []core.Object{alloc.NewArray(nil, false), alloc.NewInt(-1)},
 			wantedErr: "index out of bounds: (splice, start index) -1 out of range [0, 0]"},
 
 		{name: "non int count",
 			args: []core.Object{
-				value.NewArray(nil, false),
-				value.NewInt(0),
-				value.NewString(""),
+				alloc.NewArray(nil, false),
+				alloc.NewInt(0),
+				alloc.NewString(""),
 			},
 			wantedErr: "invalid argument type: (splice) argument third expects type int, got string"},
 
 		{name: "negative count",
 			args: []core.Object{
-				value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
-				value.NewInt(0),
-				value.NewInt(-1),
+				alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false),
+				alloc.NewInt(0),
+				alloc.NewInt(-1),
 			},
 			wantedErr: "logic error: splice delete count must be non-negative"},
 
 		{name: "insert with zero count",
 			args: []core.Object{
-				value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
-				value.NewInt(0),
-				value.NewInt(0),
-				value.NewString("b"),
+				alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false),
+				alloc.NewInt(0),
+				alloc.NewInt(0),
+				alloc.NewString("b"),
 			},
-			deleted: value.NewArray([]core.Object{}, false),
-			Array:   value.NewArray([]core.Object{value.NewString("b"), value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
+			deleted: alloc.NewArray([]core.Object{}, false),
+			Array:   alloc.NewArray([]core.Object{alloc.NewString("b"), alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false).(*value.Array),
 		},
 
 		{name: "insert",
 			args: []core.Object{
-				value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
-				value.NewInt(1),
-				value.NewInt(0),
-				value.NewString("c"),
-				value.NewString("d"),
+				alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false),
+				alloc.NewInt(1),
+				alloc.NewInt(0),
+				alloc.NewString("c"),
+				alloc.NewString("d"),
 			},
-			deleted: value.NewArray([]core.Object{}, false),
-			Array:   value.NewArray([]core.Object{value.NewInt(0), value.NewString("c"), value.NewString("d"), value.NewInt(1), value.NewInt(2)}, false),
+			deleted: alloc.NewArray([]core.Object{}, false),
+			Array:   alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewString("c"), alloc.NewString("d"), alloc.NewInt(1), alloc.NewInt(2)}, false).(*value.Array),
 		},
 
 		{name: "insert with zero count",
 			args: []core.Object{
-				value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
-				value.NewInt(1),
-				value.NewInt(0),
-				value.NewString("c"),
-				value.NewString("d"),
+				alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false),
+				alloc.NewInt(1),
+				alloc.NewInt(0),
+				alloc.NewString("c"),
+				alloc.NewString("d"),
 			},
-			deleted: value.NewArray([]core.Object{}, false),
-			Array:   value.NewArray([]core.Object{value.NewInt(0), value.NewString("c"), value.NewString("d"), value.NewInt(1), value.NewInt(2)}, false),
+			deleted: alloc.NewArray([]core.Object{}, false),
+			Array:   alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewString("c"), alloc.NewString("d"), alloc.NewInt(1), alloc.NewInt(2)}, false).(*value.Array),
 		},
 
 		{name: "insert with delete",
 			args: []core.Object{
-				value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
-				value.NewInt(1),
-				value.NewInt(1),
-				value.NewString("c"),
-				value.NewString("d"),
+				alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false),
+				alloc.NewInt(1),
+				alloc.NewInt(1),
+				alloc.NewString("c"),
+				alloc.NewString("d"),
 			},
-			deleted: value.NewArray([]core.Object{value.NewInt(1)}, false),
-			Array:   value.NewArray([]core.Object{value.NewInt(0), value.NewString("c"), value.NewString("d"), value.NewInt(2)}, false),
+			deleted: alloc.NewArray([]core.Object{alloc.NewInt(1)}, false),
+			Array:   alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewString("c"), alloc.NewString("d"), alloc.NewInt(2)}, false).(*value.Array),
 		},
 
 		{name: "insert with delete multi",
 			args: []core.Object{
-				value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
-				value.NewInt(1),
-				value.NewInt(2),
-				value.NewString("c"),
-				value.NewString("d"),
+				alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false),
+				alloc.NewInt(1),
+				alloc.NewInt(2),
+				alloc.NewString("c"),
+				alloc.NewString("d"),
 			},
-			deleted: value.NewArray([]core.Object{value.NewInt(1), value.NewInt(2)}, false),
-			Array:   value.NewArray([]core.Object{value.NewInt(0), value.NewString("c"), value.NewString("d")}, false),
+			deleted: alloc.NewArray([]core.Object{alloc.NewInt(1), alloc.NewInt(2)}, false),
+			Array:   alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewString("c"), alloc.NewString("d")}, false).(*value.Array),
 		},
 
 		{name: "delete all with positive count",
 			args: []core.Object{
-				value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
-				value.NewInt(0),
-				value.NewInt(3),
+				alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false),
+				alloc.NewInt(0),
+				alloc.NewInt(3),
 			},
-			deleted: value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
-			Array:   value.NewArray([]core.Object{}, false),
+			deleted: alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false),
+			Array:   alloc.NewArray([]core.Object{}, false).(*value.Array),
 		},
 
 		{name: "delete all with big count",
 			args: []core.Object{
-				value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
-				value.NewInt(0),
-				value.NewInt(5),
+				alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false),
+				alloc.NewInt(0),
+				alloc.NewInt(5),
 			},
-			deleted: value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
-			Array:   value.NewArray([]core.Object{}, false),
+			deleted: alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false),
+			Array:   alloc.NewArray([]core.Object{}, false).(*value.Array),
 		},
 
 		{name: "nothing2",
-			args:    []core.Object{value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false)},
-			Array:   value.NewArray([]core.Object{}, false),
-			deleted: value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
+			args:    []core.Object{alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false)},
+			Array:   alloc.NewArray([]core.Object{}, false).(*value.Array),
+			deleted: alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false),
 		},
 
 		{name: "pop without count",
 			args: []core.Object{
-				value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1), value.NewInt(2)}, false),
-				value.NewInt(2),
+				alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1), alloc.NewInt(2)}, false),
+				alloc.NewInt(2),
 			},
-			deleted: value.NewArray([]core.Object{value.NewInt(2)}, false),
-			Array:   value.NewArray([]core.Object{value.NewInt(0), value.NewInt(1)}, false),
+			deleted: alloc.NewArray([]core.Object{alloc.NewInt(2)}, false),
+			Array:   alloc.NewArray([]core.Object{alloc.NewInt(0), alloc.NewInt(1)}, false).(*value.Array),
 		},
 	}
 
+	vm := NewDummyVM()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := builtinSplice.Call(nil, tt.args...)
+			got, err := builtinSplice.Call(vm, tt.args...)
 			if (err != nil) != (tt.wantedErr != "") {
 				t.Errorf("builtinSplice() error = %v, wantErr %v", err, tt.wantedErr)
 				return
@@ -294,71 +305,71 @@ func Test_builtinRange(t *testing.T) {
 		{name: "no args", args: []core.Object{},
 			wantedErr: "wrong number of arguments: (range) expected 2 or 3 argument(s), got 0"},
 
-		{name: "single args", args: []core.Object{value.NewRecord(nil, false)},
+		{name: "single args", args: []core.Object{alloc.NewRecord(nil, false)},
 			wantedErr: "wrong number of arguments: (range) expected 2 or 3 argument(s), got 1"},
 
-		{name: "4 args", args: []core.Object{value.NewRecord(nil, false), value.NewString(""), value.NewString(""), value.NewString("")},
+		{name: "4 args", args: []core.Object{alloc.NewRecord(nil, false), alloc.NewString(""), alloc.NewString(""), alloc.NewString("")},
 			wantedErr: "wrong number of arguments: (range) expected 2 or 3 argument(s), got 4"},
 
-		{name: "invalid start", args: []core.Object{value.NewString(""), value.NewString("")},
+		{name: "invalid start", args: []core.Object{alloc.NewString(""), alloc.NewString("")},
 			wantedErr: "invalid argument type: (range) argument start expects type int, got string"},
 
-		{name: "invalid stop", args: []core.Object{value.NewInt(0), value.NewString("")},
+		{name: "invalid stop", args: []core.Object{alloc.NewInt(0), alloc.NewString("")},
 			wantedErr: "invalid argument type: (range) argument stop expects type int, got string"},
 
-		{name: "invalid step", args: []core.Object{value.NewInt(0), value.NewInt(0), value.NewString("")},
+		{name: "invalid step", args: []core.Object{alloc.NewInt(0), alloc.NewInt(0), alloc.NewString("")},
 			wantedErr: "invalid argument type: (range) argument step expects type int, got string"},
 
-		{name: "zero step", args: []core.Object{value.NewInt(0), value.NewInt(0), value.NewInt(0)}, //must greate than 0
+		{name: "zero step", args: []core.Object{alloc.NewInt(0), alloc.NewInt(0), alloc.NewInt(0)}, //must greate than 0
 			wantedErr: "logic error: range step must be greater than 0, got 0"},
 
-		{name: "negative step", args: []core.Object{value.NewInt(0), value.NewInt(0), intObject(-2)}, //must greate than 0
+		{name: "negative step", args: []core.Object{alloc.NewInt(0), alloc.NewInt(0), intObject(-2)}, //must greate than 0
 			wantedErr: "logic error: range step must be greater than 0, got -2"},
 
-		{name: "same bound", args: []core.Object{value.NewInt(0), value.NewInt(0)},
-			result: value.NewArray(nil, false),
+		{name: "same bound", args: []core.Object{alloc.NewInt(0), alloc.NewInt(0)},
+			result: alloc.NewArray(nil, false).(*value.Array),
 		},
 
-		{name: "positive range", args: []core.Object{value.NewInt(0), value.NewInt(5)},
-			result: value.NewArray([]core.Object{
+		{name: "positive range", args: []core.Object{alloc.NewInt(0), alloc.NewInt(5)},
+			result: alloc.NewArray([]core.Object{
 				intObject(0),
 				intObject(1),
 				intObject(2),
 				intObject(3),
 				intObject(4),
-			}, false),
+			}, false).(*value.Array),
 		},
 
-		{name: "negative range", args: []core.Object{value.NewInt(0), value.NewInt(-5)},
-			result: value.NewArray([]core.Object{
+		{name: "negative range", args: []core.Object{alloc.NewInt(0), alloc.NewInt(-5)},
+			result: alloc.NewArray([]core.Object{
 				intObject(0),
 				intObject(-1),
 				intObject(-2),
 				intObject(-3),
 				intObject(-4),
-			}, false),
+			}, false).(*value.Array),
 		},
 
-		{name: "positive with step", args: []core.Object{value.NewInt(0), value.NewInt(5), value.NewInt(2)},
-			result: value.NewArray([]core.Object{
+		{name: "positive with step", args: []core.Object{alloc.NewInt(0), alloc.NewInt(5), alloc.NewInt(2)},
+			result: alloc.NewArray([]core.Object{
 				intObject(0),
 				intObject(2),
 				intObject(4),
-			}, false),
+			}, false).(*value.Array),
 		},
 
-		{name: "negative with step", args: []core.Object{value.NewInt(0), value.NewInt(-10), value.NewInt(2)},
-			result: value.NewArray([]core.Object{
+		{name: "negative with step", args: []core.Object{alloc.NewInt(0), alloc.NewInt(-10), alloc.NewInt(2)},
+			result: alloc.NewArray([]core.Object{
 				intObject(0),
 				intObject(-2),
 				intObject(-4),
 				intObject(-6),
 				intObject(-8),
-			}, false),
+			}, false).(*value.Array),
 		},
 
-		{name: "large range", args: []core.Object{intObject(-10), intObject(10), value.NewInt(3)},
-			result: value.NewArray([]core.Object{
+		{name: "large range", args: []core.Object{intObject(-10), intObject(10), alloc.NewInt(3)},
+			result: alloc.NewArray([]core.Object{
 				intObject(-10),
 				intObject(-7),
 				intObject(-4),
@@ -366,13 +377,14 @@ func Test_builtinRange(t *testing.T) {
 				intObject(2),
 				intObject(5),
 				intObject(8),
-			}, false),
+			}, false).(*value.Array),
 		},
 	}
 
+	vm := NewDummyVM()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := builtinRange.Call(nil, tt.args...)
+			got, err := builtinRange.Call(vm, tt.args...)
 			if (err != nil) != (tt.wantedErr != "") {
 				t.Errorf("builtinRange() error = %v, wantErr %v", err, tt.wantedErr)
 				return

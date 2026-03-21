@@ -1,4 +1,4 @@
-package gs_test
+package unit
 
 import (
 	"testing"

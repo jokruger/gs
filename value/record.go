@@ -5,13 +5,13 @@ import (
 	"encoding/gob"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/token"
 )
 
 type Record struct {
+	Object
 	value     map[string]core.Object
 	immutable bool
 }
@@ -124,10 +124,6 @@ func (o *Record) Interface() any {
 	return res
 }
 
-func (o *Record) Arity() int {
-	return 0
-}
-
 func (o *Record) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
 }
@@ -202,10 +198,6 @@ func (o *Record) Iterate() core.Iterator {
 	return NewMapIterator(o.value)
 }
 
-func (o *Record) Call(core.VM, ...core.Object) (core.Object, error) {
-	return nil, nil
-}
-
 func (o *Record) IsFalsy() bool {
 	return len(o.value) == 0
 }
@@ -214,42 +206,14 @@ func (o *Record) IsIterable() bool {
 	return true
 }
 
-func (o *Record) IsCallable() bool {
-	return false
-}
-
 func (o *Record) IsImmutable() bool {
 	return o.immutable
-}
-
-func (o *Record) IsVariadic() bool {
-	return false
 }
 
 func (o *Record) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Record) AsInt() (int64, bool) {
-	return 0, false
-}
-
-func (o *Record) AsFloat() (float64, bool) {
-	return 0, false
-}
-
 func (o *Record) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
-}
-
-func (o *Record) AsRune() (rune, bool) {
-	return 0, false
-}
-
-func (o *Record) AsByteSlice() ([]byte, bool) {
-	return nil, false
-}
-
-func (o *Record) AsTime() (time.Time, bool) {
-	return time.Time{}, false
 }

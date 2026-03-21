@@ -5,7 +5,6 @@ import (
 	"encoding/gob"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
@@ -13,6 +12,7 @@ import (
 )
 
 type Map struct {
+	Object
 	value     map[string]core.Object
 	immutable bool
 }
@@ -125,10 +125,6 @@ func (o *Map) Interface() any {
 	return res
 }
 
-func (o *Map) Arity() int {
-	return 0
-}
-
 func (o *Map) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
 }
@@ -231,10 +227,6 @@ func (o *Map) Iterate() core.Iterator {
 	return NewMapIterator(o.value)
 }
 
-func (o *Map) Call(core.VM, ...core.Object) (core.Object, error) {
-	return nil, nil
-}
-
 func (o *Map) IsFalsy() bool {
 	return len(o.value) == 0
 }
@@ -243,42 +235,14 @@ func (o *Map) IsIterable() bool {
 	return true
 }
 
-func (o *Map) IsCallable() bool {
-	return false
-}
-
 func (o *Map) IsImmutable() bool {
 	return o.immutable
-}
-
-func (o *Map) IsVariadic() bool {
-	return false
 }
 
 func (o *Map) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Map) AsInt() (int64, bool) {
-	return 0, false
-}
-
-func (o *Map) AsFloat() (float64, bool) {
-	return 0, false
-}
-
 func (o *Map) AsBool() (bool, bool) {
 	return !o.IsFalsy(), true
-}
-
-func (o *Map) AsRune() (rune, bool) {
-	return 0, false
-}
-
-func (o *Map) AsByteSlice() ([]byte, bool) {
-	return nil, false
-}
-
-func (o *Map) AsTime() (time.Time, bool) {
-	return time.Time{}, false
 }

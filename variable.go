@@ -1,9 +1,11 @@
-package value
+package gs
 
 import (
 	"errors"
+	"time"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/value"
 )
 
 // Variable is a user-defined variable for the script.
@@ -41,6 +43,12 @@ func (v *Variable) Int() int64 {
 	return c
 }
 
+// Time returns time.Time value of the variable value. It returns zero time if the value is not convertible to time.Time.
+func (v *Variable) Time() time.Time {
+	c, _ := v.value.AsTime()
+	return c
+}
+
 // Float returns float64 value of the variable value. It returns 0.0 if the
 // value is not convertible to float64.
 func (v *Variable) Float() float64 {
@@ -64,7 +72,7 @@ func (v *Variable) Bool() bool {
 // Array returns []interface value of the variable value. It returns 0 if the value is not convertible to []interface.
 func (v *Variable) Array() []any {
 	switch val := v.value.(type) {
-	case *Array:
+	case *value.Array:
 		var arr []any
 		for _, e := range val.Value() {
 			arr = append(arr, e.Interface())
@@ -77,13 +85,13 @@ func (v *Variable) Array() []any {
 // Map returns map[string]any value of the variable value. It returns 0 if the value is not convertible to map[string]any.
 func (v *Variable) Map() map[string]any {
 	switch val := v.value.(type) {
-	case *Record:
+	case *value.Record:
 		kv := make(map[string]any)
 		for mk, mv := range val.Value() {
 			kv[mk] = mv.Interface()
 		}
 		return kv
-	case *Map:
+	case *value.Map:
 		kv := make(map[string]any)
 		for mk, mv := range val.Value() {
 			kv[mk] = mv.Interface()
@@ -110,7 +118,7 @@ func (v *Variable) Bytes() []byte {
 // Error returns an error if the underlying value is error object. If not,
 // this returns nil.
 func (v *Variable) Error() error {
-	err, ok := v.value.(*Error)
+	err, ok := v.value.(*value.Error)
 	if ok {
 		return errors.New(err.String())
 	}
@@ -125,5 +133,5 @@ func (v *Variable) Object() core.Object {
 
 // IsUndefined returns true if the underlying value is undefined.
 func (v *Variable) IsUndefined() bool {
-	return v.value == UndefinedValue
+	return v.value == value.UndefinedValue
 }

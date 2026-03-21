@@ -3,6 +3,7 @@ package gs_test
 import (
 	"testing"
 
+	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/value"
@@ -66,7 +67,7 @@ func TestVariable(t *testing.T) {
 		o, err := require.FromInterface(tc.Value)
 		require.NoError(t, err)
 
-		v := value.NewVariable(tc.Name, o)
+		v := gs.NewVariable(tc.Name, o)
 		require.Equal(t, tc.Value, v.Value().Interface(), "Name: %s", tc.Name)
 		require.Equal(t, tc.ValueType, v.ValueType(), "Name: %s", tc.Name)
 		require.Equal(t, tc.IntValue, v.Int(), "Name: %s", tc.Name)

@@ -24,5 +24,4 @@ Error
 BuiltinFunction
 CompiledFunction
 ObjectPtr
-Variable
 */

@@ -9,9 +9,8 @@ import (
 	"github.com/jokruger/gs/token"
 )
 
-/* === String === */
-
 type String struct {
+	Object
 	value string
 	runes []rune
 }
@@ -86,10 +85,6 @@ func (o *String) String() string {
 
 func (o *String) Interface() any {
 	return o.value
-}
-
-func (o *String) Arity() int {
-	return 0
 }
 
 func (o *String) BinaryOp(op token.Token, rhs core.Object) (core.Object, error) {
@@ -185,10 +180,6 @@ func (o *String) Iterate() core.Iterator {
 	return NewStringIterator(o.runes)
 }
 
-func (o *String) Call(core.VM, ...core.Object) (core.Object, error) {
-	return nil, nil
-}
-
 func (o *String) IsFalsy() bool {
 	return len(o.value) == 0
 }
@@ -197,16 +188,8 @@ func (o *String) IsIterable() bool {
 	return true
 }
 
-func (o *String) IsCallable() bool {
-	return false
-}
-
 func (o *String) IsImmutable() bool {
 	return true
-}
-
-func (o *String) IsVariadic() bool {
-	return false
 }
 
 func (o *String) AsString() (string, bool) {
@@ -234,6 +217,9 @@ func (o *String) AsBool() (bool, bool) {
 }
 
 func (o *String) AsRune() (rune, bool) {
+	if len(o.runes) == 1 {
+		return o.runes[0], true
+	}
 	return 0, false
 }
 
@@ -242,5 +228,6 @@ func (o *String) AsByteSlice() ([]byte, bool) {
 }
 
 func (o *String) AsTime() (time.Time, bool) {
+	// TODO: implement time parsing
 	return time.Time{}, false
 }

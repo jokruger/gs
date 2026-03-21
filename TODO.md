@@ -27,3 +27,4 @@
 - Bool operators (logic and, or, not, etc)
 - Bytes/String - IndexSet
 - Review all stdlibs, check names for consistent style (snake-case, etc)
+- Implement time parsing (string as time, etc) - use github.com/araddon/dateparse

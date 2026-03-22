@@ -102,11 +102,11 @@ func makeOSFile(vm core.VM, file *os.File) *value.Record {
 
 	fileReaddirnames := func(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
-			return nil, core.NewWrongNumArgumentsError("os.file.readdirnames", "1", len(args))
+			return nil, core.NewWrongNumArgumentsError("os.file.read_dir_names", "1", len(args))
 		}
 		i1, ok := args[0].AsInt()
 		if !ok {
-			return nil, core.NewInvalidArgumentTypeError("os.file.readdirnames", "first", "int(compatible)", args[0])
+			return nil, core.NewInvalidArgumentTypeError("os.file.read_dir_names", "first", "int(compatible)", args[0])
 		}
 		res, err := file.Readdirnames(int(i1))
 		if err != nil {
@@ -116,7 +116,7 @@ func makeOSFile(vm core.VM, file *os.File) *value.Record {
 		alloc := vm.Allocator()
 		for _, r := range res {
 			if len(r) > core.MaxStringLen {
-				return nil, core.NewStringLimitError("os.file.readdirnames")
+				return nil, core.NewStringLimitError("os.file.read_dir_names")
 			}
 			arr = append(arr, alloc.NewString(r))
 		}
@@ -162,17 +162,17 @@ func makeOSFile(vm core.VM, file *os.File) *value.Record {
 
 	alloc := vm.Allocator()
 	return vm.Allocator().NewRecord(map[string]core.Object{
-		"chdir":        alloc.NewBuiltinFunction("chdir", fileChdir, 0, false),               // chdir() => true/error
-		"chown":        alloc.NewBuiltinFunction("chown", fileChown, 2, false),               // chown(uid int, gid int) => true/error
-		"close":        alloc.NewBuiltinFunction("close", fileClose, 0, false),               // close() => error
-		"name":         alloc.NewBuiltinFunction("name", fileName, 0, false),                 // name() => string
-		"readdirnames": alloc.NewBuiltinFunction("readdirnames", fileReaddirnames, 1, false), // readdirnames(n int) => array(string)/error
-		"sync":         alloc.NewBuiltinFunction("sync", fileSync, 0, false),                 // sync() => error
-		"write":        alloc.NewBuiltinFunction("write", fileWrite, 1, false),               // write(bytes) => int/error
-		"write_string": alloc.NewBuiltinFunction("write_string", fileWriteString, 1, false),  // write(string) => int/error
-		"read":         alloc.NewBuiltinFunction("read", fileRead, 1, false),                 // read(bytes) => int/error
-		"chmod":        alloc.NewBuiltinFunction("chmod", fileChmod, 1, false),               // chmod(mode int) => error
-		"seek":         alloc.NewBuiltinFunction("seek", fileSeek, 2, false),                 // seek(offset int, whence int) => int/error
-		"stat":         alloc.NewBuiltinFunction("stat", fileStat, 0, false),                 // stat() => imap(fileinfo)/error
+		"chdir":          alloc.NewBuiltinFunction("chdir", fileChdir, 0, false),                 // chdir() => true/error
+		"chown":          alloc.NewBuiltinFunction("chown", fileChown, 2, false),                 // chown(uid int, gid int) => true/error
+		"close":          alloc.NewBuiltinFunction("close", fileClose, 0, false),                 // close() => error
+		"name":           alloc.NewBuiltinFunction("name", fileName, 0, false),                   // name() => string
+		"read_dir_names": alloc.NewBuiltinFunction("read_dir_names", fileReaddirnames, 1, false), // read_dir_names(n int) => array(string)/error
+		"sync":           alloc.NewBuiltinFunction("sync", fileSync, 0, false),                   // sync() => error
+		"write":          alloc.NewBuiltinFunction("write", fileWrite, 1, false),                 // write(bytes) => int/error
+		"write_string":   alloc.NewBuiltinFunction("write_string", fileWriteString, 1, false),    // write(string) => int/error
+		"read":           alloc.NewBuiltinFunction("read", fileRead, 1, false),                   // read(bytes) => int/error
+		"chmod":          alloc.NewBuiltinFunction("chmod", fileChmod, 1, false),                 // chmod(mode int) => error
+		"seek":           alloc.NewBuiltinFunction("seek", fileSeek, 2, false),                   // seek(offset int, whence int) => int/error
+		"stat":           alloc.NewBuiltinFunction("stat", fileStat, 0, false),                   // stat() => imap(fileinfo)/error
 	}, true).(*value.Record)
 }

@@ -10,7 +10,7 @@ import (
 var randModule = map[string]core.Object{
 	"int":        value.NewStaticBuiltinFunction("int", randInt63, 0, false),
 	"float":      value.NewStaticBuiltinFunction("float", randFloat64, 0, false),
-	"intn":       value.NewStaticBuiltinFunction("intn", randInt63n, 1, false),
+	"int_n":      value.NewStaticBuiltinFunction("int_n", randInt63n, 1, false),
 	"exp_float":  value.NewStaticBuiltinFunction("exp_float", randExpFloat64, 0, false),
 	"norm_float": value.NewStaticBuiltinFunction("norm_float", randNormFloat64, 0, false),
 	"perm":       value.NewStaticBuiltinFunction("perm", randPerm, 1, false),
@@ -72,12 +72,12 @@ func randSeed(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 
 func randInt63n(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 1 {
-		return nil, core.NewWrongNumArgumentsError("rand.intn", "1", len(args))
+		return nil, core.NewWrongNumArgumentsError("rand.int_n", "1", len(args))
 	}
 
 	i1, ok := args[0].AsInt()
 	if !ok {
-		return nil, core.NewInvalidArgumentTypeError("rand.intn", "first", "int(compatible)", args[0])
+		return nil, core.NewInvalidArgumentTypeError("rand.int_n", "first", "int(compatible)", args[0])
 	}
 	return vm.Allocator().NewInt(rand.Int63n(i1)), nil
 }
@@ -143,12 +143,12 @@ func randRand(vm core.VM, r *rand.Rand) *value.Record {
 
 	rInt63n := func(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 		if len(args) != 1 {
-			return nil, core.NewWrongNumArgumentsError("rand.rand.intn", "1", len(args))
+			return nil, core.NewWrongNumArgumentsError("rand.rand.int_n", "1", len(args))
 		}
 
 		i1, ok := args[0].AsInt()
 		if !ok {
-			return nil, core.NewInvalidArgumentTypeError("rand.rand.intn", "first", "int(compatible)", args[0])
+			return nil, core.NewInvalidArgumentTypeError("rand.rand.int_n", "first", "int(compatible)", args[0])
 		}
 		return vm.Allocator().NewInt(r.Int63n(i1)), nil
 	}
@@ -208,7 +208,7 @@ func randRand(vm core.VM, r *rand.Rand) *value.Record {
 	return vm.Allocator().NewRecord(map[string]core.Object{
 		"int":        alloc.NewBuiltinFunction("int", rInt63, 0, false),
 		"float":      alloc.NewBuiltinFunction("float", rFloat64, 0, false),
-		"intn":       alloc.NewBuiltinFunction("intn", rInt63n, 1, false),
+		"int_n":      alloc.NewBuiltinFunction("int_n", rInt63n, 1, false),
 		"exp_float":  alloc.NewBuiltinFunction("exp_float", rExpFloat64, 0, false),
 		"norm_float": alloc.NewBuiltinFunction("norm_float", rNormFloat64, 0, false),
 		"perm":       alloc.NewBuiltinFunction("perm", rPerm, 1, false),

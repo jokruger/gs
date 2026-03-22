@@ -14,8 +14,8 @@ import (
 var osModule = map[string]core.Object{
 	"platform":            value.NewStaticString(runtime.GOOS),
 	"arch":                value.NewStaticString(runtime.GOARCH),
-	"o_rdonly":            value.NewStaticInt(int64(os.O_RDONLY)),
-	"o_wronly":            value.NewStaticInt(int64(os.O_WRONLY)),
+	"o_rd":                value.NewStaticInt(int64(os.O_RDONLY)),
+	"o_wr":                value.NewStaticInt(int64(os.O_WRONLY)),
 	"o_rdwr":              value.NewStaticInt(int64(os.O_RDWR)),
 	"o_append":            value.NewStaticInt(int64(os.O_APPEND)),
 	"o_create":            value.NewStaticInt(int64(os.O_CREATE)),
@@ -30,8 +30,8 @@ var osModule = map[string]core.Object{
 	"mode_device":         value.NewStaticInt(int64(os.ModeDevice)),
 	"mode_named_pipe":     value.NewStaticInt(int64(os.ModeNamedPipe)),
 	"mode_socket":         value.NewStaticInt(int64(os.ModeSocket)),
-	"mode_setuid":         value.NewStaticInt(int64(os.ModeSetuid)),
-	"mode_setgui":         value.NewStaticInt(int64(os.ModeSetgid)),
+	"mode_set_uid":        value.NewStaticInt(int64(os.ModeSetuid)),
+	"mode_set_gui":        value.NewStaticInt(int64(os.ModeSetgid)),
 	"mode_char_device":    value.NewStaticInt(int64(os.ModeCharDevice)),
 	"mode_sticky":         value.NewStaticInt(int64(os.ModeSticky)),
 	"mode_type":           value.NewStaticInt(int64(os.ModeType)),
@@ -47,35 +47,35 @@ var osModule = map[string]core.Object{
 	"chdir":          value.NewStaticBuiltinFunction("chdir", osChdir, 1, false),                // chdir(dir string) => error
 	"chmod":          value.NewStaticBuiltinFunction("chmod", osChmod, 2, false),                // chmod(name string, mode int) => error
 	"chown":          value.NewStaticBuiltinFunction("chown", osChown, 3, false),                // chown(name string, uid int, gid int) => error
-	"clearenv":       value.NewStaticBuiltinFunction("clearenv", osClearenv, 0, false),          // clearenv()
+	"clear_env":      value.NewStaticBuiltinFunction("clear_env", osClearenv, 0, false),         // clear_env()
 	"environ":        value.NewStaticBuiltinFunction("environ", osEnviron, 0, false),            // environ() => array(string)
 	"exit":           value.NewStaticBuiltinFunction("exit", osExit, 1, false),                  // exit(code int)
 	"expand_env":     value.NewStaticBuiltinFunction("expand_env", osExpandEnv, 1, false),       // expand_env(s string) => string
-	"getegid":        value.NewStaticBuiltinFunction("getegid", osGetegid, 0, false),            // getegid() => int
-	"getenv":         value.NewStaticBuiltinFunction("getenv", osGetenv, 1, false),              // getenv(s string) => string
-	"geteuid":        value.NewStaticBuiltinFunction("geteuid", osGeteuid, 0, false),            // geteuid() => int
-	"getgid":         value.NewStaticBuiltinFunction("getgid", osGetgid, 0, false),              // getgid() => int
-	"getgroups":      value.NewStaticBuiltinFunction("getgroups", osGetgroups, 0, false),        // getgroups() => array(string)/error
-	"getpagesize":    value.NewStaticBuiltinFunction("getpagesize", osGetpagesize, 0, false),    // getpagesize() => int
-	"getpid":         value.NewStaticBuiltinFunction("getpid", osGetpid, 0, false),              // getpid() => int
-	"getppid":        value.NewStaticBuiltinFunction("getppid", osGetppid, 0, false),            // getppid() => int
-	"getuid":         value.NewStaticBuiltinFunction("getuid", osGetuid, 0, false),              // getuid() => int
-	"getwd":          value.NewStaticBuiltinFunction("getwd", osGetwd, 0, false),                // getwd() => string/error
+	"get_egid":       value.NewStaticBuiltinFunction("get_egid", osGetegid, 0, false),           // get_egid() => int
+	"get_env":        value.NewStaticBuiltinFunction("get_env", osGetenv, 1, false),             // get_env(s string) => string
+	"get_euid":       value.NewStaticBuiltinFunction("get_euid", osGeteuid, 0, false),           // get_euid() => int
+	"get_gid":        value.NewStaticBuiltinFunction("get_gid", osGetgid, 0, false),             // get_gid() => int
+	"get_groups":     value.NewStaticBuiltinFunction("get_groups", osGetgroups, 0, false),       // get_groups() => array(string)/error
+	"get_page_size":  value.NewStaticBuiltinFunction("get_page_size", osGetpagesize, 0, false),  // get_page_size() => int
+	"get_pid":        value.NewStaticBuiltinFunction("get_pid", osGetpid, 0, false),             // get_pid() => int
+	"get_ppid":       value.NewStaticBuiltinFunction("get_ppid", osGetppid, 0, false),           // get_ppid() => int
+	"get_uid":        value.NewStaticBuiltinFunction("get_uid", osGetuid, 0, false),             // get_uid() => int
+	"get_wd":         value.NewStaticBuiltinFunction("get_wd", osGetwd, 0, false),               // get_wd() => string/error
 	"hostname":       value.NewStaticBuiltinFunction("hostname", osHostname, 0, false),          // hostname() => string/error
 	"lchown":         value.NewStaticBuiltinFunction("lchown", osLchown, 3, false),              // lchown(name string, uid int, gid int) => error
-	"link":           value.NewStaticBuiltinFunction("link", osLink, 2, false),                  // link(oldname string, newname string) => error
+	"link":           value.NewStaticBuiltinFunction("link", osLink, 2, false),                  // link(oldName string, newName string) => error
 	"lookup_env":     value.NewStaticBuiltinFunction("lookup_env", osLookupEnv, 1, false),       // lookup_env(key string) => string/false
 	"mkdir":          value.NewStaticBuiltinFunction("mkdir", osMkdir, 2, false),                // mkdir(name string, perm int) => error
 	"mkdir_all":      value.NewStaticBuiltinFunction("mkdir_all", osMkdirAll, 2, false),         // mkdir_all(name string, perm int) => error
-	"readlink":       value.NewStaticBuiltinFunction("readlink", osReadlink, 1, false),          // readlink(name string) => string/error
+	"read_link":      value.NewStaticBuiltinFunction("read_link", osReadlink, 1, false),         // read_link(name string) => string/error
 	"remove":         value.NewStaticBuiltinFunction("remove", osRemove, 1, false),              // remove(name string) => error
 	"remove_all":     value.NewStaticBuiltinFunction("remove_all", osRemoveAll, 1, false),       // remove_all(name string) => error
-	"rename":         value.NewStaticBuiltinFunction("rename", osRename, 2, false),              // rename(oldpath string, newpath string) => error
-	"setenv":         value.NewStaticBuiltinFunction("setenv", osSetenv, 2, false),              // setenv(key string, value string) => error
-	"symlink":        value.NewStaticBuiltinFunction("symlink", osSymlink, 2, false),            // symlink(oldname string newname string) => error
+	"rename":         value.NewStaticBuiltinFunction("rename", osRename, 2, false),              // rename(oldPath string, newPath string) => error
+	"set_env":        value.NewStaticBuiltinFunction("set_env", osSetenv, 2, false),             // set_env(key string, value string) => error
+	"symlink":        value.NewStaticBuiltinFunction("symlink", osSymlink, 2, false),            // symlink(oldName string newName string) => error
 	"temp_dir":       value.NewStaticBuiltinFunction("temp_dir", osTempDir, 0, false),           // temp_dir() => string
 	"truncate":       value.NewStaticBuiltinFunction("truncate", osTruncate, 2, false),          // truncate(name string, size int) => error
-	"unsetenv":       value.NewStaticBuiltinFunction("unsetenv", osUnsetenv, 1, false),          // unsetenv(key string) => error
+	"unset_env":      value.NewStaticBuiltinFunction("unset_env", osUnsetenv, 1, false),         // unset_env(key string) => error
 	"create":         value.NewStaticBuiltinFunction("create", osCreate, 1, false),              // create(name string) => imap(file)/error
 	"open":           value.NewStaticBuiltinFunction("open", osOpen, 1, false),                  // open(name string) => imap(file)/error
 	"open_file":      value.NewStaticBuiltinFunction("open_file", osOpenFile, 3, false),         // open_file(name string, flag int, perm int) => imap(file)/error
@@ -202,15 +202,15 @@ func osSymlink(vm core.VM, args ...core.Object) (core.Object, error) {
 
 func osSetenv(vm core.VM, args ...core.Object) (core.Object, error) {
 	if len(args) != 2 {
-		return nil, core.NewWrongNumArgumentsError("os.setenv", "2", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.set_env", "2", len(args))
 	}
 	s1, ok := args[0].AsString()
 	if !ok {
-		return nil, core.NewInvalidArgumentTypeError("os.setenv", "first", "string(compatible)", args[0])
+		return nil, core.NewInvalidArgumentTypeError("os.set_env", "first", "string(compatible)", args[0])
 	}
 	s2, ok := args[1].AsString()
 	if !ok {
-		return nil, core.NewInvalidArgumentTypeError("os.setenv", "second", "string(compatible)", args[1])
+		return nil, core.NewInvalidArgumentTypeError("os.set_env", "second", "string(compatible)", args[1])
 	}
 	return wrapError(vm, os.Setenv(s1, s2)), nil
 }
@@ -247,11 +247,11 @@ func osLink(vm core.VM, args ...core.Object) (core.Object, error) {
 
 func osUnsetenv(vm core.VM, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
-		return nil, core.NewWrongNumArgumentsError("os.unsetenv", "1", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.unset_env", "1", len(args))
 	}
 	s1, ok := args[0].AsString()
 	if !ok {
-		return nil, core.NewInvalidArgumentTypeError("os.unsetenv", "first", "string(compatible)", args[0])
+		return nil, core.NewInvalidArgumentTypeError("os.unset_env", "first", "string(compatible)", args[0])
 	}
 	return wrapError(vm, os.Unsetenv(s1)), nil
 }
@@ -309,33 +309,33 @@ func execLookPath(vm core.VM, args ...core.Object) (core.Object, error) {
 
 func osReadlink(vm core.VM, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
-		return nil, core.NewWrongNumArgumentsError("os.readlink", "1", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.read_link", "1", len(args))
 	}
 	s1, ok := args[0].AsString()
 	if !ok {
-		return nil, core.NewInvalidArgumentTypeError("os.readlink", "first", "string(compatible)", args[0])
+		return nil, core.NewInvalidArgumentTypeError("os.read_link", "first", "string(compatible)", args[0])
 	}
 	res, err := os.Readlink(s1)
 	if err != nil {
 		return wrapError(vm, err), nil
 	}
 	if len(res) > core.MaxStringLen {
-		return nil, core.NewStringLimitError("os.readlink")
+		return nil, core.NewStringLimitError("os.read_link")
 	}
 	return vm.Allocator().NewString(res), nil
 }
 
 func osGetenv(vm core.VM, args ...core.Object) (core.Object, error) {
 	if len(args) != 1 {
-		return nil, core.NewWrongNumArgumentsError("os.getenv", "1", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.get_env", "1", len(args))
 	}
 	s1, ok := args[0].AsString()
 	if !ok {
-		return nil, core.NewInvalidArgumentTypeError("os.getenv", "first", "string(compatible)", args[0])
+		return nil, core.NewInvalidArgumentTypeError("os.get_env", "first", "string(compatible)", args[0])
 	}
 	s := os.Getenv(s1)
 	if len(s) > core.MaxStringLen {
-		return nil, core.NewStringLimitError("os.getenv")
+		return nil, core.NewStringLimitError("os.get_env")
 	}
 	return vm.Allocator().NewString(s), nil
 }
@@ -354,7 +354,7 @@ func osExit(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 
 func osGetgroups(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
-		return nil, core.NewWrongNumArgumentsError("os.getgroups", "0", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.get_groups", "0", len(args))
 	}
 	res, err := os.Getgroups()
 	if err != nil {
@@ -400,14 +400,14 @@ func osHostname(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 
 func osGetwd(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
-		return nil, core.NewWrongNumArgumentsError("os.getwd", "0", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.get_wd", "0", len(args))
 	}
 	res, err := os.Getwd()
 	if err != nil {
 		return wrapError(vm, err), nil
 	}
 	if len(res) > core.MaxStringLen {
-		return nil, core.NewStringLimitError("os.getwd")
+		return nil, core.NewStringLimitError("os.get_wd")
 	}
 	return vm.Allocator().NewString(res), nil
 }
@@ -425,56 +425,56 @@ func osTempDir(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 
 func osGetuid(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
-		return nil, core.NewWrongNumArgumentsError("os.getuid", "0", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.get_uid", "0", len(args))
 	}
 	return vm.Allocator().NewInt(int64(os.Getuid())), nil
 }
 
 func osGetppid(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
-		return nil, core.NewWrongNumArgumentsError("os.getppid", "0", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.get_ppid", "0", len(args))
 	}
 	return vm.Allocator().NewInt(int64(os.Getppid())), nil
 }
 
 func osGetpid(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
-		return nil, core.NewWrongNumArgumentsError("os.getpid", "0", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.get_pid", "0", len(args))
 	}
 	return vm.Allocator().NewInt(int64(os.Getpid())), nil
 }
 
 func osGetpagesize(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
-		return nil, core.NewWrongNumArgumentsError("os.getpagesize", "0", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.get_page_size", "0", len(args))
 	}
 	return vm.Allocator().NewInt(int64(os.Getpagesize())), nil
 }
 
 func osGetgid(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
-		return nil, core.NewWrongNumArgumentsError("os.getgid", "0", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.get_gid", "0", len(args))
 	}
 	return vm.Allocator().NewInt(int64(os.Getgid())), nil
 }
 
 func osGeteuid(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
-		return nil, core.NewWrongNumArgumentsError("os.geteuid", "0", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.get_euid", "0", len(args))
 	}
 	return vm.Allocator().NewInt(int64(os.Geteuid())), nil
 }
 
 func osGetegid(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
-		return nil, core.NewWrongNumArgumentsError("os.getegid", "0", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.get_egid", "0", len(args))
 	}
 	return vm.Allocator().NewInt(int64(os.Getegid())), nil
 }
 
 func osClearenv(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 0 {
-		return nil, core.NewWrongNumArgumentsError("os.clearenv", "0", len(args))
+		return nil, core.NewWrongNumArgumentsError("os.clear_env", "0", len(args))
 	}
 	os.Clearenv()
 	return vm.Allocator().NewUndefined(), nil
@@ -623,8 +623,7 @@ func osExpandEnv(vm core.VM, args ...core.Object) (core.Object, error) {
 		}
 		v := os.Getenv(k)
 
-		// this does not count the other texts that are not being replaced
-		// but the code checks the final length at the end
+		// this does not count the other texts that are not being replaced but the code checks the final length at the end
 		vlen += len(v)
 		if vlen > core.MaxStringLen {
 			failed = true

@@ -8,85 +8,85 @@ import (
 )
 
 var mathModule = map[string]core.Object{
-	"e":                      value.NewStaticFloat(math.E),
-	"pi":                     value.NewStaticFloat(math.Pi),
-	"phi":                    value.NewStaticFloat(math.Phi),
-	"sqrt2":                  value.NewStaticFloat(math.Sqrt2),
-	"sqrtE":                  value.NewStaticFloat(math.SqrtE),
-	"sqrtPi":                 value.NewStaticFloat(math.SqrtPi),
-	"sqrtPhi":                value.NewStaticFloat(math.SqrtPhi),
-	"ln2":                    value.NewStaticFloat(math.Ln2),
-	"log2E":                  value.NewStaticFloat(math.Log2E),
-	"ln10":                   value.NewStaticFloat(math.Ln10),
-	"log10E":                 value.NewStaticFloat(math.Log10E),
-	"maxFloat32":             value.NewStaticFloat(math.MaxFloat32),
-	"smallestNonzeroFloat32": value.NewStaticFloat(math.SmallestNonzeroFloat32),
-	"maxFloat64":             value.NewStaticFloat(math.MaxFloat64),
-	"smallestNonzeroFloat64": value.NewStaticFloat(math.SmallestNonzeroFloat64),
-	"maxInt":                 value.NewStaticInt(math.MaxInt),
-	"minInt":                 value.NewStaticInt(math.MinInt),
-	"maxInt8":                value.NewStaticInt(math.MaxInt8),
-	"minInt8":                value.NewStaticInt(math.MinInt8),
-	"maxInt16":               value.NewStaticInt(math.MaxInt16),
-	"minInt16":               value.NewStaticInt(math.MinInt16),
-	"maxInt32":               value.NewStaticInt(math.MaxInt32),
-	"minInt32":               value.NewStaticInt(math.MinInt32),
-	"maxInt64":               value.NewStaticInt(math.MaxInt64),
-	"minInt64":               value.NewStaticInt(math.MinInt64),
+	"e":                        value.NewStaticFloat(math.E),
+	"pi":                       value.NewStaticFloat(math.Pi),
+	"phi":                      value.NewStaticFloat(math.Phi),
+	"sqrt2":                    value.NewStaticFloat(math.Sqrt2),
+	"sqrt_e":                   value.NewStaticFloat(math.SqrtE),
+	"sqrt_pi":                  value.NewStaticFloat(math.SqrtPi),
+	"sqrt_phi":                 value.NewStaticFloat(math.SqrtPhi),
+	"ln2":                      value.NewStaticFloat(math.Ln2),
+	"log2e":                    value.NewStaticFloat(math.Log2E),
+	"ln10":                     value.NewStaticFloat(math.Ln10),
+	"log10e":                   value.NewStaticFloat(math.Log10E),
+	"max_float32":              value.NewStaticFloat(math.MaxFloat32),
+	"smallest_nonzero_float32": value.NewStaticFloat(math.SmallestNonzeroFloat32),
+	"max_float64":              value.NewStaticFloat(math.MaxFloat64),
+	"smallest_nonzero_float64": value.NewStaticFloat(math.SmallestNonzeroFloat64),
+	"max_int":                  value.NewStaticInt(math.MaxInt),
+	"min_int":                  value.NewStaticInt(math.MinInt),
+	"max_int8":                 value.NewStaticInt(math.MaxInt8),
+	"min_int8":                 value.NewStaticInt(math.MinInt8),
+	"max_int16":                value.NewStaticInt(math.MaxInt16),
+	"min_int16":                value.NewStaticInt(math.MinInt16),
+	"max_int32":                value.NewStaticInt(math.MaxInt32),
+	"min_int32":                value.NewStaticInt(math.MinInt32),
+	"max_int64":                value.NewStaticInt(math.MaxInt64),
+	"min_int64":                value.NewStaticInt(math.MinInt64),
 
-	"abs":       value.NewStaticBuiltinFunction("abs", mathAbs, 1, false),
-	"acos":      value.NewStaticBuiltinFunction("acos", mathAcos, 1, false),
-	"acosh":     value.NewStaticBuiltinFunction("acosh", mathAcosh, 1, false),
-	"asin":      value.NewStaticBuiltinFunction("asin", mathAsin, 1, false),
-	"asinh":     value.NewStaticBuiltinFunction("asinh", mathAsinh, 1, false),
-	"atan":      value.NewStaticBuiltinFunction("atan", mathAtan, 1, false),
-	"atan2":     value.NewStaticBuiltinFunction("atan2", mathAtan2, 2, false),
-	"atanh":     value.NewStaticBuiltinFunction("atanh", mathAtanh, 1, false),
-	"cbrt":      value.NewStaticBuiltinFunction("cbrt", mathCbrt, 1, false),
-	"ceil":      value.NewStaticBuiltinFunction("ceil", mathCeil, 1, false),
-	"copysign":  value.NewStaticBuiltinFunction("copysign", mathCopysign, 2, false),
-	"cos":       value.NewStaticBuiltinFunction("cos", mathCos, 1, false),
-	"cosh":      value.NewStaticBuiltinFunction("cosh", mathCosh, 1, false),
-	"dim":       value.NewStaticBuiltinFunction("dim", mathDim, 2, false),
-	"erf":       value.NewStaticBuiltinFunction("erf", mathErf, 1, false),
-	"erfc":      value.NewStaticBuiltinFunction("erfc", mathErfc, 1, false),
-	"exp":       value.NewStaticBuiltinFunction("exp", mathExp, 1, false),
-	"exp2":      value.NewStaticBuiltinFunction("exp2", mathExp2, 1, false),
-	"expm1":     value.NewStaticBuiltinFunction("expm1", mathExpm1, 1, false),
-	"floor":     value.NewStaticBuiltinFunction("floor", mathFloor, 1, false),
-	"gamma":     value.NewStaticBuiltinFunction("gamma", mathGamma, 1, false),
-	"hypot":     value.NewStaticBuiltinFunction("hypot", mathHypot, 2, false),
-	"ilogb":     value.NewStaticBuiltinFunction("ilogb", mathIlogb, 1, false),
-	"inf":       value.NewStaticBuiltinFunction("inf", mathInf, 1, false),
-	"is_inf":    value.NewStaticBuiltinFunction("is_inf", mathIsInf, 2, false),
-	"is_nan":    value.NewStaticBuiltinFunction("is_nan", mathIsNaN, 1, false),
-	"j0":        value.NewStaticBuiltinFunction("j0", mathJ0, 1, false),
-	"j1":        value.NewStaticBuiltinFunction("j1", mathJ1, 1, false),
-	"jn":        value.NewStaticBuiltinFunction("jn", mathJn, 2, false),
-	"ldexp":     value.NewStaticBuiltinFunction("ldexp", mathLdexp, 2, false),
-	"log":       value.NewStaticBuiltinFunction("log", mathLog, 1, false),
-	"log10":     value.NewStaticBuiltinFunction("log10", mathLog10, 1, false),
-	"log1p":     value.NewStaticBuiltinFunction("log1p", mathLog1p, 1, false),
-	"log2":      value.NewStaticBuiltinFunction("log2", mathLog2, 1, false),
-	"logb":      value.NewStaticBuiltinFunction("logb", mathLogb, 1, false),
-	"max":       value.NewStaticBuiltinFunction("max", mathMax, 2, false),
-	"min":       value.NewStaticBuiltinFunction("min", mathMin, 2, false),
-	"mod":       value.NewStaticBuiltinFunction("mod", mathMod, 2, false),
-	"nan":       value.NewStaticBuiltinFunction("nan", mathNaN, 0, false),
-	"nextafter": value.NewStaticBuiltinFunction("nextafter", mathNextafter, 2, false),
-	"pow":       value.NewStaticBuiltinFunction("pow", mathPow, 2, false),
-	"pow10":     value.NewStaticBuiltinFunction("pow10", mathPow10, 1, false),
-	"remainder": value.NewStaticBuiltinFunction("remainder", mathRemainder, 2, false),
-	"signbit":   value.NewStaticBuiltinFunction("signbit", mathSignbit, 1, false),
-	"sin":       value.NewStaticBuiltinFunction("sin", mathSin, 1, false),
-	"sinh":      value.NewStaticBuiltinFunction("sinh", mathSinh, 1, false),
-	"sqrt":      value.NewStaticBuiltinFunction("sqrt", mathSqrt, 1, false),
-	"tan":       value.NewStaticBuiltinFunction("tan", mathTan, 1, false),
-	"tanh":      value.NewStaticBuiltinFunction("tanh", mathTanh, 1, false),
-	"trunc":     value.NewStaticBuiltinFunction("trunc", mathTrunc, 1, false),
-	"y0":        value.NewStaticBuiltinFunction("y0", mathY0, 1, false),
-	"y1":        value.NewStaticBuiltinFunction("y1", mathY1, 1, false),
-	"yn":        value.NewStaticBuiltinFunction("yn", mathYn, 2, false),
+	"abs":        value.NewStaticBuiltinFunction("abs", mathAbs, 1, false),
+	"acos":       value.NewStaticBuiltinFunction("acos", mathAcos, 1, false),
+	"acosh":      value.NewStaticBuiltinFunction("acosh", mathAcosh, 1, false),
+	"asin":       value.NewStaticBuiltinFunction("asin", mathAsin, 1, false),
+	"asinh":      value.NewStaticBuiltinFunction("asinh", mathAsinh, 1, false),
+	"atan":       value.NewStaticBuiltinFunction("atan", mathAtan, 1, false),
+	"atan2":      value.NewStaticBuiltinFunction("atan2", mathAtan2, 2, false),
+	"atanh":      value.NewStaticBuiltinFunction("atanh", mathAtanh, 1, false),
+	"cbrt":       value.NewStaticBuiltinFunction("cbrt", mathCbrt, 1, false),
+	"ceil":       value.NewStaticBuiltinFunction("ceil", mathCeil, 1, false),
+	"copy_sign":  value.NewStaticBuiltinFunction("copy_sign", mathCopysign, 2, false),
+	"cos":        value.NewStaticBuiltinFunction("cos", mathCos, 1, false),
+	"cosh":       value.NewStaticBuiltinFunction("cosh", mathCosh, 1, false),
+	"dim":        value.NewStaticBuiltinFunction("dim", mathDim, 2, false),
+	"erf":        value.NewStaticBuiltinFunction("erf", mathErf, 1, false),
+	"erfc":       value.NewStaticBuiltinFunction("erfc", mathErfc, 1, false),
+	"exp":        value.NewStaticBuiltinFunction("exp", mathExp, 1, false),
+	"exp2":       value.NewStaticBuiltinFunction("exp2", mathExp2, 1, false),
+	"expm1":      value.NewStaticBuiltinFunction("expm1", mathExpm1, 1, false),
+	"floor":      value.NewStaticBuiltinFunction("floor", mathFloor, 1, false),
+	"gamma":      value.NewStaticBuiltinFunction("gamma", mathGamma, 1, false),
+	"hypot":      value.NewStaticBuiltinFunction("hypot", mathHypot, 2, false),
+	"ilogb":      value.NewStaticBuiltinFunction("ilogb", mathIlogb, 1, false),
+	"inf":        value.NewStaticBuiltinFunction("inf", mathInf, 1, false),
+	"is_inf":     value.NewStaticBuiltinFunction("is_inf", mathIsInf, 2, false),
+	"is_nan":     value.NewStaticBuiltinFunction("is_nan", mathIsNaN, 1, false),
+	"j0":         value.NewStaticBuiltinFunction("j0", mathJ0, 1, false),
+	"j1":         value.NewStaticBuiltinFunction("j1", mathJ1, 1, false),
+	"jn":         value.NewStaticBuiltinFunction("jn", mathJn, 2, false),
+	"ldexp":      value.NewStaticBuiltinFunction("ldexp", mathLdexp, 2, false),
+	"log":        value.NewStaticBuiltinFunction("log", mathLog, 1, false),
+	"log10":      value.NewStaticBuiltinFunction("log10", mathLog10, 1, false),
+	"log1p":      value.NewStaticBuiltinFunction("log1p", mathLog1p, 1, false),
+	"log2":       value.NewStaticBuiltinFunction("log2", mathLog2, 1, false),
+	"logb":       value.NewStaticBuiltinFunction("logb", mathLogb, 1, false),
+	"max":        value.NewStaticBuiltinFunction("max", mathMax, 2, false),
+	"min":        value.NewStaticBuiltinFunction("min", mathMin, 2, false),
+	"mod":        value.NewStaticBuiltinFunction("mod", mathMod, 2, false),
+	"nan":        value.NewStaticBuiltinFunction("nan", mathNaN, 0, false),
+	"next_after": value.NewStaticBuiltinFunction("next_after", mathNextafter, 2, false),
+	"pow":        value.NewStaticBuiltinFunction("pow", mathPow, 2, false),
+	"pow10":      value.NewStaticBuiltinFunction("pow10", mathPow10, 1, false),
+	"remainder":  value.NewStaticBuiltinFunction("remainder", mathRemainder, 2, false),
+	"signbit":    value.NewStaticBuiltinFunction("signbit", mathSignbit, 1, false),
+	"sin":        value.NewStaticBuiltinFunction("sin", mathSin, 1, false),
+	"sinh":       value.NewStaticBuiltinFunction("sinh", mathSinh, 1, false),
+	"sqrt":       value.NewStaticBuiltinFunction("sqrt", mathSqrt, 1, false),
+	"tan":        value.NewStaticBuiltinFunction("tan", mathTan, 1, false),
+	"tanh":       value.NewStaticBuiltinFunction("tanh", mathTanh, 1, false),
+	"trunc":      value.NewStaticBuiltinFunction("trunc", mathTrunc, 1, false),
+	"y0":         value.NewStaticBuiltinFunction("y0", mathY0, 1, false),
+	"y1":         value.NewStaticBuiltinFunction("y1", mathY1, 1, false),
+	"yn":         value.NewStaticBuiltinFunction("yn", mathYn, 2, false),
 }
 
 func mathSignbit(vm core.VM, args ...core.Object) (ret core.Object, err error) {
@@ -584,15 +584,15 @@ func mathAtan2(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 
 func mathCopysign(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
-		return nil, core.NewWrongNumArgumentsError("math.copysign", "2", len(args))
+		return nil, core.NewWrongNumArgumentsError("math.copy_sign", "2", len(args))
 	}
 	f1, ok := args[0].AsFloat()
 	if !ok {
-		return nil, core.NewInvalidArgumentTypeError("math.copysign", "first", "float(compatible)", args[0])
+		return nil, core.NewInvalidArgumentTypeError("math.copy_sign", "first", "float(compatible)", args[0])
 	}
 	f2, ok := args[1].AsFloat()
 	if !ok {
-		return nil, core.NewInvalidArgumentTypeError("math.copysign", "second", "float(compatible)", args[1])
+		return nil, core.NewInvalidArgumentTypeError("math.copy_sign", "second", "float(compatible)", args[1])
 	}
 	return vm.Allocator().NewFloat(math.Copysign(f1, f2)), nil
 }
@@ -674,15 +674,15 @@ func mathMod(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 
 func mathNextafter(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if len(args) != 2 {
-		return nil, core.NewWrongNumArgumentsError("math.nextafter", "2", len(args))
+		return nil, core.NewWrongNumArgumentsError("math.next_after", "2", len(args))
 	}
 	f1, ok := args[0].AsFloat()
 	if !ok {
-		return nil, core.NewInvalidArgumentTypeError("math.nextafter", "first", "float(compatible)", args[0])
+		return nil, core.NewInvalidArgumentTypeError("math.next_after", "first", "float(compatible)", args[0])
 	}
 	f2, ok := args[1].AsFloat()
 	if !ok {
-		return nil, core.NewInvalidArgumentTypeError("math.nextafter", "second", "float(compatible)", args[1])
+		return nil, core.NewInvalidArgumentTypeError("math.next_after", "second", "float(compatible)", args[1])
 	}
 	return vm.Allocator().NewFloat(math.Nextafter(f1, f2)), nil
 }

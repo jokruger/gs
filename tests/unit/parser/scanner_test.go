@@ -189,9 +189,9 @@ func TestScanner_Scan(t *testing.T) {
 	}
 
 	scanExpect(t, strings.Join(lines, "\n"),
-		parser.ScanComments|parser.DontInsertSemis, expected...)
+		parser.ScanComments|parser.DoNotInsertSemis, expected...)
 	scanExpect(t, strings.Join(lines, "\n"),
-		parser.DontInsertSemis, expectedSkipComments...)
+		parser.DoNotInsertSemis, expectedSkipComments...)
 }
 
 func TestStripCR(t *testing.T) {

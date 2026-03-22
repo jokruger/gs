@@ -103,7 +103,7 @@ func (s *SourceFileSet) File(p core.Pos) (f *SourceFile) {
 	return
 }
 
-// Position converts a SourcePos p in the fileset into a SourceFilePos value.
+// Position converts a SourcePos p in the file-set into a SourceFilePos value.
 func (s *SourceFileSet) Position(p core.Pos) (pos SourceFilePos) {
 	if p != core.NoPos {
 		if f := s.file(p); f != nil {

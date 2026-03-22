@@ -18,7 +18,7 @@ type ScanMode int
 // List of scanner modes.
 const (
 	ScanComments ScanMode = 1 << iota
-	DontInsertSemis
+	DoNotInsertSemis
 )
 
 // ScannerErrorHandler is an error handler for the scanner.
@@ -255,7 +255,7 @@ func (s *Scanner) Scan() (tok token.Token, literal string, pos core.Pos) {
 			literal = string(ch)
 		}
 	}
-	if s.mode&DontInsertSemis == 0 {
+	if s.mode&DoNotInsertSemis == 0 {
 		s.insertSemi = insertSemi
 	}
 	return

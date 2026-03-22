@@ -130,30 +130,34 @@ fib := func(x, a, b) {
 }
 
 func fib(n int) int {
-	if n == 0 {
+	switch n {
+	case 0:
 		return 0
-	} else if n == 1 {
+	case 1:
 		return 1
-	} else {
+	default:
 		return fib(n-1) + fib(n-2)
 	}
 }
 
 func fibTC1(n, s int) int {
-	if n == 0 {
+	switch n {
+	case 0:
 		return 0 + s
-	} else if n == 1 {
+	case 1:
 		return 1 + s
+	default:
+		return fibTC1(n-1, fibTC1(n-2, s))
 	}
-	return fibTC1(n-1, fibTC1(n-2, s))
 }
 
 func fibTC2(n, a, b int) int {
-	if n == 0 {
+	switch n {
+	case 0:
 		return a
-	} else if n == 1 {
+	case 1:
 		return b
-	} else {
+	default:
 		return fibTC2(n-1, b, a+b)
 	}
 }

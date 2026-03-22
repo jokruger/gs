@@ -63,8 +63,8 @@ type formatter struct {
 	wid  int // width
 	prec int // precision
 
-	// intbuf is large enough to store %b of an int64 with a sign and avoids padding at the end of the struct on 32 bit architectures.
-	intbuf [68]byte
+	// intBuf is large enough to store %b of an int64 with a sign and avoids padding at the end of the struct on 32 bit architectures.
+	intBuf [68]byte
 }
 
 func (f *formatter) clearFlags() {
@@ -154,11 +154,11 @@ func (f *formatter) fmtBoolean(v bool) {
 
 // fmtUnicode formats a uint64 as "U+0078" or with f.sharp set as "U+0078 'x'".
 func (f *formatter) fmtUnicode(u uint64) {
-	buf := f.intbuf[0:]
+	buf := f.intBuf[0:]
 
 	// With default precision set the maximum needed buf length is 18
 	// for formatting -1 with %#U ("U+FFFFFFFFFFFFFFFF") which fits
-	// into the already allocated intbuf with a capacity of 68 bytes.
+	// into the already allocated intBuf with a capacity of 68 bytes.
 	prec := 4
 	if f.precPresent && f.prec > 4 {
 		prec = f.prec
@@ -226,8 +226,8 @@ func (f *formatter) fmtInteger(
 		u = -u
 	}
 
-	buf := f.intbuf[0:]
-	// The already allocated f.intbuf with a capacity of 68 bytes
+	buf := f.intBuf[0:]
+	// The already allocated f.intBuf with a capacity of 68 bytes
 	// is large enough for integer formatting when no precision or width is set.
 	if f.widPresent || f.precPresent {
 		// Account 3 extra bytes for possible addition of a sign and "0x".
@@ -475,7 +475,7 @@ func (f *formatter) fmtBx(b []byte, digits string) {
 }
 
 // fmtQ formats a string as a double-quoted, escaped Go string constant.
-// If f.sharp is set a raw (backquoted) string may be returned instead
+// If f.sharp is set a raw (back-quoted) string may be returned instead
 // if the string does not contain any control characters other than tab.
 func (f *formatter) fmtQ(s string) {
 	s = f.truncateString(s)
@@ -483,7 +483,7 @@ func (f *formatter) fmtQ(s string) {
 		f.padString("`" + s + "`")
 		return
 	}
-	buf := f.intbuf[:0]
+	buf := f.intBuf[:0]
 	if f.plus {
 		f.pad(strconv.AppendQuoteToASCII(buf, s))
 	} else {
@@ -498,7 +498,7 @@ func (f *formatter) fmtC(c uint64) {
 	if c > utf8.MaxRune {
 		r = utf8.RuneError
 	}
-	buf := f.intbuf[:0]
+	buf := f.intBuf[:0]
 	w := utf8.EncodeRune(buf[:utf8.UTFMax], r)
 	f.pad(buf[:w])
 }
@@ -510,7 +510,7 @@ func (f *formatter) fmtQc(c uint64) {
 	if c > utf8.MaxRune {
 		r = utf8.RuneError
 	}
-	buf := f.intbuf[:0]
+	buf := f.intBuf[:0]
 	if f.plus {
 		f.pad(strconv.AppendQuoteRuneToASCII(buf, r))
 	} else {
@@ -526,7 +526,7 @@ func (f *formatter) fmtFloat(v float64, size int, verb rune, prec int) {
 		prec = f.prec
 	}
 	// Format number, reserving space for leading + sign if needed.
-	num := strconv.AppendFloat(f.intbuf[:1], v, byte(verb), prec, size)
+	num := strconv.AppendFloat(f.intBuf[:1], v, byte(verb), prec, size)
 	if num[1] == '-' || num[1] == '+' {
 		num = num[1:]
 	} else {
@@ -769,18 +769,18 @@ func tooLarge(x int) bool {
 	return x > max || x < -max
 }
 
-// parsenum converts ASCII to integer.  num is 0 (and isnum is false) if no
+// parseNum converts ASCII to integer.  num is 0 (and isNum is false) if no
 // number present.
-func parsenum(s string, start, end int) (num int, isnum bool, newi int) {
+func parseNum(s string, start, end int) (num int, isNum bool, ni int) {
 	if start >= end {
 		return 0, false, end
 	}
-	for newi = start; newi < end && '0' <= s[newi] && s[newi] <= '9'; newi++ {
+	for ni = start; ni < end && '0' <= s[ni] && s[ni] <= '9'; ni++ {
 		if tooLarge(num) {
 			return 0, false, end // Overflow; crazy long number most likely.
 		}
-		num = num*10 + int(s[newi]-'0')
-		isnum = true
+		num = num*10 + int(s[ni]-'0')
+		isNum = true
 	}
 	return
 }
@@ -964,7 +964,7 @@ func (p *pp) printArg(arg core.Object, verb rune) {
 	}
 }
 
-// intFromArg gets the argNumth element of a. On return, isInt reports whether the argument has integer type.
+// intFromArg gets the argNum-th element of a. On return, isInt reports whether the argument has integer type.
 func intFromArg(a []core.Object, argNum int) (num int, isInt bool, newArgNum int) {
 	newArgNum = argNum
 	if argNum < len(a) {
@@ -995,11 +995,11 @@ func parseArgNumber(format string) (index int, wid int, ok bool) {
 	// Find closing bracket.
 	for i := 1; i < len(format); i++ {
 		if format[i] == ']' {
-			width, ok, newi := parsenum(format, 1, i)
-			if !ok || newi != i {
+			width, ok, ni := parseNum(format, 1, i)
+			if !ok || ni != i {
 				return 0, i + 1, false
 			}
-			// arg numbers are one-indexed andskip paren.
+			// arg numbers are one-indexed and skip paren.
 			return width - 1, i + 1, true
 		}
 	}
@@ -1010,12 +1010,7 @@ func parseArgNumber(format string) (index int, wid int, ok bool) {
 // of the passed-in argNum or the value of the bracketed integer that begins
 // format[i:]. It also returns the new value of i, that is, the index of the
 // next byte of the format to process.
-func (p *pp) argNumber(
-	argNum int,
-	format string,
-	i int,
-	numArgs int,
-) (newArgNum, newi int, found bool) {
+func (p *pp) argNumber(argNum int, format string, i int, numArgs int) (newArgNum, ni int, found bool) {
 	if len(format) <= i || format[i] != '[' {
 		return argNum, i, false
 	}
@@ -1058,12 +1053,12 @@ func (p *pp) doFormat(format string, a []core.Object) (err error) {
 formatLoop:
 	for i := 0; i < end; {
 		p.goodArgNum = true
-		lasti := i
+		last := i
 		for i < end && format[i] != '%' {
 			i++
 		}
-		if i > lasti {
-			_, _ = p.WriteString(format[lasti:i])
+		if i > last {
+			_, _ = p.WriteString(format[last:i])
 		}
 		if i >= end {
 			// done processing format string
@@ -1135,7 +1130,7 @@ formatLoop:
 			}
 			afterIndex = false
 		} else {
-			p.fmt.wid, p.fmt.widPresent, i = parsenum(format, i, end)
+			p.fmt.wid, p.fmt.widPresent, i = parseNum(format, i, end)
 			if afterIndex && p.fmt.widPresent { // "%[3]2d"
 				p.goodArgNum = false
 			}
@@ -1161,7 +1156,7 @@ formatLoop:
 				}
 				afterIndex = false
 			} else {
-				p.fmt.prec, p.fmt.precPresent, i = parsenum(format, i, end)
+				p.fmt.prec, p.fmt.precPresent, i = parseNum(format, i, end)
 				if !p.fmt.precPresent {
 					p.fmt.prec = 0
 					p.fmt.precPresent = true

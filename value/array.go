@@ -198,6 +198,9 @@ func (o *Array) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Ob
 	case "max":
 		return o.max(vm)
 
+	case "sum":
+		return o.sum(vm)
+
 	case "sort":
 		return o.fnSort(vm, "array.sort")
 
@@ -298,6 +301,23 @@ func (o *Array) max(vm core.VM) (core.Object, error) {
 		}
 		if greater.IsTrue() {
 			v = o.value[i]
+		}
+	}
+
+	return v, nil
+}
+
+func (o *Array) sum(vm core.VM) (core.Object, error) {
+	if len(o.value) == 0 {
+		return vm.Allocator().NewUndefined(), nil
+	}
+
+	var err error
+	v := o.value[0]
+	for i := 1; i < len(o.value); i++ {
+		v, err = v.BinaryOp(vm, token.Add, o.value[i])
+		if err != nil {
+			return nil, err
 		}
 	}
 

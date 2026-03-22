@@ -443,8 +443,14 @@ func TestArray(t *testing.T) {
 	expectRun(t, `out = [].last`, nil, alloc.NewUndefined())
 	expectRun(t, `out = [1, 2, 3].last`, nil, 3)
 
+	expectRun(t, `out = [].min`, nil, alloc.NewUndefined())
 	expectRun(t, `out = [1, 2, 3].min`, nil, 1)
+
+	expectRun(t, `out = [].max`, nil, alloc.NewUndefined())
 	expectRun(t, `out = [1, 2, 3].max`, nil, 3)
+
+	expectRun(t, `out = [].sum`, nil, alloc.NewUndefined())
+	expectRun(t, `out = [1, 2, 3].sum`, nil, 6)
 
 	expectRun(t, `out = string([1, 2, 3].filter(x => x == 2))`, nil, "[2]")
 	expectRun(t, `out = string([1, 2, 3].filter(x => x != 2))`, nil, "[1, 3]")

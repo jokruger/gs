@@ -210,6 +210,9 @@ func (o *Array) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Ob
 	case "filter":
 		return o.fnFilter(vm, "array.filter")
 
+	case "count":
+		return o.fnCount(vm, "array.count")
+
 	default:
 		return nil, core.NewInvalidSelectorError(o, k)
 	}
@@ -414,5 +417,48 @@ func (o *Array) fnFilter(vm core.VM, name string) (core.Object, error) {
 		default:
 			return nil, core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn)
 		}
+	}, 1, false), nil
+}
+
+func (o *Array) fnCount(vm core.VM, name string) (core.Object, error) {
+	return vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Object) (core.Object, error) {
+		if len(args) != 1 {
+			return nil, core.NewWrongNumArgumentsError(name, "1", len(args))
+		}
+
+		fn := args[0]
+		if !fn.IsCallable() || fn.IsVariadic() {
+			return nil, core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn)
+		}
+
+		var count int64
+		switch fn.Arity() {
+		case 1:
+			for _, v := range o.value {
+				res, err := fn.Call(vm, v)
+				if err != nil {
+					return nil, err
+				}
+				if res.IsTrue() {
+					count++
+				}
+			}
+
+		case 2:
+			for i, v := range o.value {
+				res, err := fn.Call(vm, vm.Allocator().NewInt(int64(i)), v)
+				if err != nil {
+					return nil, err
+				}
+				if res.IsTrue() {
+					count++
+				}
+			}
+
+		default:
+			return nil, core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn)
+		}
+
+		return vm.Allocator().NewInt(count), nil
 	}, 1, false), nil
 }

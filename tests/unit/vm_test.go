@@ -500,16 +500,26 @@ func TestMap(t *testing.T) {
 	expectRun(t, `out = map({a: 1, b: 2})["q"]`, nil, alloc.NewUndefined())
 	expectRun(t, `t := map({a: 1, b: 2}); t["a"] = 3; out = t["a"]`, nil, 3)
 	expectError(t, `map({a: 1, b: 2}).q`, nil, "Runtime Error: invalid selector: type map has no property or method q\n\tat test:1:19")
+
 	expectRun(t, `t := map({a: 1, b: 2}); out = t.empty`, nil, false)
 	expectRun(t, `t := map(); out = t.empty`, nil, true)
+
 	expectRun(t, `t := map({a: 1, b: 2}); out = t.len`, nil, 2)
 	expectRun(t, `t := map(); out = t.len`, nil, 0)
+
 	expectRun(t, `t := map({a: 1, b: 2}); out = string(t.keys.sort())`, nil, `["a", "b"]`)
 	expectRun(t, `t := map({a: 1, b: 2}); out = string(t.values.sort())`, nil, `[1, 2]`)
+
 	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = string(t.filter(k => k != "b").keys.sort())`, nil, `["a", "c"]`)
 	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = string(t.filter((k, v) => v > 1).keys.sort())`, nil, `["b", "c"]`)
+
 	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = t.count(k => k != "b")`, nil, 2)
 	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = t.count((k, v) => v > 1)`, nil, 2)
+
+	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = t.all(k => k != "b")`, nil, false)
+	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = t.all(k => k != "q")`, nil, true)
+	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = t.all((k, v) => v > 1)`, nil, false)
+	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = t.all((k, v) => v > 0)`, nil, true)
 }
 
 func TestTime(t *testing.T) {

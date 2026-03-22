@@ -207,7 +207,7 @@ func (o *Map) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Obje
 			}
 			fn := args[0]
 			if !fn.IsCallable() || fn.IsVariadic() {
-				return nil, core.NewInvalidArgumentTypeError("map.filter", "first", "f/1 or f/2", fn)
+				return nil, core.NewInvalidArgumentTypeError("map.filter", "first", "non-variadic function", fn)
 			}
 			alloc := vm.Allocator()
 			switch fn.Arity() {
@@ -236,7 +236,47 @@ func (o *Map) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Obje
 				}
 				return alloc.NewMap(filtered, false), nil
 			default:
-				return nil, core.NewInvalidArgumentTypeError("map.filter", "first", "f/2 or f/2", fn)
+				return nil, core.NewInvalidArgumentTypeError("map.filter", "first", "f/1 or f/2", fn)
+			}
+		}, 1, false), nil
+
+	case "count":
+		return alloc.NewBuiltinFunction("map.count", func(vm core.VM, args ...core.Object) (core.Object, error) {
+			if len(args) != 1 {
+				return nil, core.NewWrongNumArgumentsError("map.count", "1", len(args))
+			}
+			fn := args[0]
+			if !fn.IsCallable() || fn.IsVariadic() {
+				return nil, core.NewInvalidArgumentTypeError("map.count", "first", "non-variadic function", fn)
+			}
+			alloc := vm.Allocator()
+			switch fn.Arity() {
+			case 1:
+				var count int64
+				for k := range o.value {
+					res, err := fn.Call(vm, alloc.NewString(k))
+					if err != nil {
+						return nil, err
+					}
+					if res.IsTrue() {
+						count++
+					}
+				}
+				return alloc.NewInt(count), nil
+			case 2:
+				var count int64
+				for k, v := range o.value {
+					res, err := fn.Call(vm, alloc.NewString(k), v)
+					if err != nil {
+						return nil, err
+					}
+					if res.IsTrue() {
+						count++
+					}
+				}
+				return alloc.NewInt(count), nil
+			default:
+				return nil, core.NewInvalidArgumentTypeError("map.count", "first", "f/1 or f/2", fn)
 			}
 		}, 1, false), nil
 

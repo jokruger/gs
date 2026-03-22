@@ -180,20 +180,28 @@ func (o *Map) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Obje
 	switch k {
 	case "empty":
 		return vm.Allocator().NewBool(len(o.value) == 0), nil
+
 	case "len":
 		return vm.Allocator().NewInt(int64(len(o.value))), nil
+
 	case "keys":
 		return o.keys(vm)
+
 	case "values":
 		return o.values(vm)
+
 	case "filter":
 		return o.fnFilter(vm, "map.filter")
+
 	case "count":
 		return o.fnCount(vm, "map.count")
+
 	case "all":
 		return o.fnAll(vm, "map.all")
+
 	case "any":
 		return o.fnAny(vm, "map.any")
+
 	default:
 		return nil, core.NewInvalidSelectorError(o, k)
 	}

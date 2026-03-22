@@ -428,10 +428,13 @@ func TestArray(t *testing.T) {
 	}, false).String()), nil, true)
 
 	expectError(t, `[1, 2, 3].q`, nil, "Runtime Error: invalid selector: type array has no property or method q\n\tat test:1:11")
+
 	expectRun(t, `t := []; out = t.empty`, nil, true)
 	expectRun(t, `t := [1, 2, 3]; out = t.empty`, nil, false)
+
 	expectRun(t, `t := []; out = t.len`, nil, 0)
 	expectRun(t, `t := [1, 2, 3]; out = t.len`, nil, 3)
+
 	expectRun(t, `t := [3, 1, 2]; out = string(t.sort())`, nil, "[1, 2, 3]")
 }
 

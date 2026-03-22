@@ -155,8 +155,6 @@ func (o *Array) Copy(alloc core.Allocator) core.Object {
 }
 
 func (o *Array) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Object, error) {
-	alloc := vm.Allocator()
-
 	if mode == parser.OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
@@ -164,7 +162,7 @@ func (o *Array) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Ob
 		}
 
 		if i < 0 || i >= int64(len(o.value)) {
-			return alloc.NewUndefined(), nil
+			return vm.Allocator().NewUndefined(), nil
 		}
 
 		return o.value[i], nil
@@ -177,34 +175,13 @@ func (o *Array) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Ob
 
 	switch k {
 	case "empty":
-		return alloc.NewBool(len(o.value) == 0), nil
+		return vm.Allocator().NewBool(len(o.value) == 0), nil
 
 	case "len":
-		return alloc.NewInt(int64(len(o.value))), nil
+		return vm.Allocator().NewInt(int64(len(o.value))), nil
 
 	case "sort":
-		return alloc.NewBuiltinFunction("array.sort", func(vm core.VM, args ...core.Object) (core.Object, error) {
-			if len(args) != 0 {
-				return nil, core.NewWrongNumArgumentsError("array.sort", "0", len(args))
-			}
-			r := o.Copy(alloc).(*Array)
-			var err error
-			slices.SortFunc(r.value, func(a, b core.Object) int {
-				less, e := a.BinaryOp(vm, token.Less, b)
-				if e != nil {
-					err = e
-					return 0
-				}
-				if less.IsFalse() {
-					if a.Equals(b) {
-						return 0
-					}
-					return 1
-				}
-				return -1
-			})
-			return r, err
-		}, 0, false), nil
+		return o.fnSort(vm, "array.sort")
 
 	default:
 		return nil, core.NewInvalidSelectorError(o, k)
@@ -266,4 +243,30 @@ func (o *Array) AsBytes() ([]byte, bool) {
 		bs[i] = byte(b)
 	}
 	return bs, true
+}
+
+func (o *Array) fnSort(vm core.VM, name string) (core.Object, error) {
+	return vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Object) (core.Object, error) {
+		if len(args) != 0 {
+			return nil, core.NewWrongNumArgumentsError(name, "0", len(args))
+		}
+
+		r := o.Copy(vm.Allocator()).(*Array)
+		var err error
+		slices.SortFunc(r.value, func(a, b core.Object) int {
+			less, e := a.BinaryOp(vm, token.Less, b)
+			if e != nil {
+				err = e
+				return 0
+			}
+			if less.IsFalse() {
+				if a.Equals(b) {
+					return 0
+				}
+				return 1
+			}
+			return -1
+		})
+		return r, err
+	}, 0, false), nil
 }

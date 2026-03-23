@@ -476,6 +476,10 @@ func TestArray(t *testing.T) {
 
 	expectRun(t, `out = string([].map(x => x * x))`, nil, "[]")
 	expectRun(t, `out = string([1, 2, 3].map(x => x * x))`, nil, "[1, 4, 9]")
+
+	expectRun(t, `out = [].reduce(0, (a, v) => a + v)`, nil, 0)
+	expectRun(t, `out = [1, 2, 3].reduce(0, (a, v) => a + v)`, nil, 6)
+	expectRun(t, `out = [1, 2, 3].reduce(0, (a, i, v) => a + i)`, nil, 3)
 }
 
 func TestRecord(t *testing.T) {

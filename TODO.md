@@ -34,4 +34,29 @@
 - Review all stdlibs, check names for consistent style (snake-case, etc)
 - Implement time parsing (string as time, etc) - use github.com/araddon/dateparse
 - typed vectors, J core operators
-- 
+- add Set data type
+- add "x in y" syntax
+- string -> array -> string
+- bytes -> array -> bytes
+- map -> array of (k, v) -> map, new type tuple? (.items)
+- map.has / .contains
+- merge(r1, r2) → new record, map.merge
+- optimization for "modify and assign" pattern (reuse variable, pass argument to inform type logic)
+- array.append (array) => new array
+- array.extend (array) => inplace
+- array.unique
+- array.join
+- reduce(f, init?) → value
+- fold(f, init) → value (same as reduce-with-init; pick one name)
+- find(pred) → value? (or null if not found)
+- flatten() → array
+- array.sort(lambda(a, b) => bool)
+- chunk(n) → array[array]
+- window(n, step=1) → array[array]
+- zip(other) → array[tuple] (or array[array] of len 2)
+- enumerate() → array[(index, value)] (or map-like pairs)
+- string.split(sep) → array[string]
+- array.join
+- string trim(), lower(), upper(), replace(old, new), contains(sub), startsWith, endsWith
+- bytes.hex()
+- bytes.base64()

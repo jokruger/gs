@@ -222,6 +222,9 @@ func (o *Array) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Ob
 	case "map":
 		return o.fnMap(vm, "array.map")
 
+	case "reduce":
+		return o.fnReduce(vm, "array.reduce")
+
 	default:
 		return nil, core.NewInvalidSelectorError(o, k)
 	}
@@ -595,4 +598,44 @@ func (o *Array) fnMap(vm core.VM, name string) (core.Object, error) {
 			return nil, core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn)
 		}
 	}, 1, false), nil
+}
+
+func (o *Array) fnReduce(vm core.VM, name string) (core.Object, error) {
+	return vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Object) (core.Object, error) {
+		if len(args) != 2 {
+			return nil, core.NewWrongNumArgumentsError(name, "2", len(args))
+		}
+
+		acc := args[0]
+		fn := args[1]
+		if !fn.IsCallable() || fn.IsVariadic() {
+			return nil, core.NewInvalidArgumentTypeError(name, "second", "non-variadic function", fn)
+		}
+
+		alloc := vm.Allocator()
+		switch fn.Arity() {
+		case 2:
+			for _, v := range o.value {
+				res, err := fn.Call(vm, acc, v)
+				if err != nil {
+					return nil, err
+				}
+				acc = res
+			}
+			return acc, nil
+
+		case 3:
+			for i, v := range o.value {
+				res, err := fn.Call(vm, acc, alloc.NewInt(int64(i)), v)
+				if err != nil {
+					return nil, err
+				}
+				acc = res
+			}
+			return acc, nil
+
+		default:
+			return nil, core.NewInvalidArgumentTypeError(name, "second", "f/2 or f/3", fn)
+		}
+	}, 2, false), nil
 }

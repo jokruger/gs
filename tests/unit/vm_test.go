@@ -357,6 +357,16 @@ func TestString(t *testing.T) {
 	expectRun(t, fmt.Sprintf(`out = "hello" == %s`, alloc.NewString("hello").String()), nil, true)
 	expectRun(t, fmt.Sprintf(`out = "hello \"world\"" == %s`, alloc.NewString("hello \"world\"").String()), nil, true)
 	expectRun(t, fmt.Sprintf(`out = "123₴" == %s`, alloc.NewString("123₴").String()), nil, true)
+
+	expectRun(t, `out = "".empty`, nil, true)
+	expectRun(t, `out = "abcd".empty`, nil, false)
+	expectRun(t, `out = "abcd".len`, nil, 4)
+	expectRun(t, `out = "abcd".first`, nil, 'a')
+	expectRun(t, `out = "abcd".last`, nil, 'd')
+	expectRun(t, `out = "Abcd".lower`, nil, "abcd")
+	expectRun(t, `out = "Abcd".upper`, nil, "ABCD")
+	expectRun(t, `out = "abcd ".trim()`, nil, "abcd")
+	expectRun(t, `out = "abcd".trim("ad")`, nil, "bc")
 }
 
 func TestError(t *testing.T) {

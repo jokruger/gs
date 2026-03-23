@@ -151,7 +151,6 @@ func (o *Bytes) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Ob
 	default:
 		return nil, core.NewInvalidSelectorError(o, k)
 	}
-
 }
 
 func (o *Bytes) Assign(core.Object, core.Object) error {

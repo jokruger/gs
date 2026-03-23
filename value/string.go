@@ -2,6 +2,7 @@ package value
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/araddon/dateparse"
@@ -128,18 +129,53 @@ func (o *String) Copy(alloc core.Allocator) core.Object {
 func (o *String) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Object, error) {
 	alloc := vm.Allocator()
 
-	if mode == parser.OpSelect {
-		return nil, core.NewInvalidAccessModeError("string", "select")
+	if mode == parser.OpIndex {
+		i, ok := index.AsInt()
+		if !ok {
+			return nil, core.NewInvalidIndexTypeError("string access", "int", index)
+		}
+		if i < 0 || i >= int64(len(o.runes)) {
+			return alloc.NewUndefined(), nil
+		}
+		return alloc.NewChar(o.runes[i]), nil
 	}
 
-	i, ok := index.AsInt()
+	k, ok := index.AsString()
 	if !ok {
-		return nil, core.NewInvalidIndexTypeError("string access", "int", index)
+		return nil, core.NewInvalidSelectorError(o, k)
 	}
-	if i < 0 || i >= int64(len(o.runes)) {
-		return alloc.NewUndefined(), nil
+
+	switch k {
+	case "empty":
+		return alloc.NewBool(len(o.runes) == 0), nil
+
+	case "len":
+		return alloc.NewInt(int64(len(o.runes))), nil
+
+	case "first":
+		if len(o.runes) == 0 {
+			return alloc.NewUndefined(), nil
+		}
+		return alloc.NewChar(o.runes[0]), nil
+
+	case "last":
+		if len(o.runes) == 0 {
+			return alloc.NewUndefined(), nil
+		}
+		return alloc.NewChar(o.runes[len(o.runes)-1]), nil
+
+	case "lower":
+		return alloc.NewString(strings.ToLower(o.value)), nil
+
+	case "upper":
+		return alloc.NewString(strings.ToUpper(o.value)), nil
+
+	case "trim":
+		return o.fnTrim(vm, "string.trim")
+
+	default:
+		return nil, core.NewInvalidSelectorError(o, k)
 	}
-	return alloc.NewChar(o.runes[i]), nil
 }
 
 func (o *String) Assign(core.Object, core.Object) error {
@@ -207,4 +243,23 @@ func (o *String) AsTime() (time.Time, bool) {
 		return time.Time{}, false
 	}
 	return val, true
+}
+
+func (o *String) fnTrim(vm core.VM, name string) (core.Object, error) {
+	return vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Object) (core.Object, error) {
+		if len(args) > 1 {
+			return nil, core.NewWrongNumArgumentsError(name, "0 or 1", len(args))
+		}
+
+		if len(args) == 0 {
+			return vm.Allocator().NewString(strings.Trim(o.value, " \t\n")), nil
+		}
+
+		s, ok := args[0].AsString()
+		if !ok {
+			return nil, core.NewInvalidArgumentTypeError(name, "first", "string", args[0])
+		}
+
+		return vm.Allocator().NewString(strings.Trim(o.value, s)), nil
+	}, 0, true), nil
 }

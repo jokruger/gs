@@ -213,6 +213,12 @@ func (o *Array) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Ob
 	case "count":
 		return o.fnCount(vm, "array.count")
 
+	case "all":
+		return o.fnAll(vm, "array.all")
+
+	case "any":
+		return o.fnAny(vm, "array.any")
+
 	default:
 		return nil, core.NewInvalidSelectorError(o, k)
 	}
@@ -460,5 +466,89 @@ func (o *Array) fnCount(vm core.VM, name string) (core.Object, error) {
 		}
 
 		return vm.Allocator().NewInt(count), nil
+	}, 1, false), nil
+}
+
+func (o *Array) fnAll(vm core.VM, name string) (core.Object, error) {
+	return vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Object) (core.Object, error) {
+		if len(args) != 1 {
+			return nil, core.NewWrongNumArgumentsError(name, "1", len(args))
+		}
+
+		fn := args[0]
+		if !fn.IsCallable() || fn.IsVariadic() {
+			return nil, core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn)
+		}
+
+		switch fn.Arity() {
+		case 1:
+			for _, v := range o.value {
+				res, err := fn.Call(vm, v)
+				if err != nil {
+					return nil, err
+				}
+				if res.IsFalse() {
+					return vm.Allocator().NewBool(false), nil
+				}
+			}
+			return vm.Allocator().NewBool(true), nil
+
+		case 2:
+			for i, v := range o.value {
+				res, err := fn.Call(vm, vm.Allocator().NewInt(int64(i)), v)
+				if err != nil {
+					return nil, err
+				}
+				if res.IsFalse() {
+					return vm.Allocator().NewBool(false), nil
+				}
+			}
+			return vm.Allocator().NewBool(true), nil
+
+		default:
+			return nil, core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn)
+		}
+	}, 1, false), nil
+}
+
+func (o *Array) fnAny(vm core.VM, name string) (core.Object, error) {
+	return vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Object) (core.Object, error) {
+		if len(args) != 1 {
+			return nil, core.NewWrongNumArgumentsError(name, "1", len(args))
+		}
+
+		fn := args[0]
+		if !fn.IsCallable() || fn.IsVariadic() {
+			return nil, core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn)
+		}
+
+		switch fn.Arity() {
+		case 1:
+			for _, v := range o.value {
+				res, err := fn.Call(vm, v)
+				if err != nil {
+					return nil, err
+				}
+				if res.IsTrue() {
+					return vm.Allocator().NewBool(true), nil
+				}
+			}
+			return vm.Allocator().NewBool(false), nil
+
+		case 2:
+			for i, v := range o.value {
+				res, err := fn.Call(vm, vm.Allocator().NewInt(int64(i)), v)
+				if err != nil {
+					return nil, err
+				}
+				if res.IsTrue() {
+					return vm.Allocator().NewBool(true), nil
+				}
+			}
+			return vm.Allocator().NewBool(false), nil
+
+		default:
+			return nil, core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn)
+		}
 	}, 1, false), nil
 }

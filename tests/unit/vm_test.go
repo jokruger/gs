@@ -457,9 +457,22 @@ func TestArray(t *testing.T) {
 
 	expectRun(t, `out = [].count(x => x > 0)`, nil, 0)
 	expectRun(t, `out = [1, 2, 3, -10].count(x => x > 0)`, nil, 3)
+	expectRun(t, `out = [1, 2, 3, -10].count((i, x) => x == i+1)`, nil, 3)
 
 	expectRun(t, `out = string([1, 2, 3].filter(x => x == 2))`, nil, "[2]")
 	expectRun(t, `out = string([1, 2, 3].filter(x => x != 2))`, nil, "[1, 3]")
+
+	expectRun(t, `out = [].all(x => x > 0)`, nil, true)
+	expectRun(t, `out = [1, 2, 3, -10].all(x => x > 0)`, nil, false)
+	expectRun(t, `out = [1, 2, 3, -10].all(x => x > -100)`, nil, true)
+	expectRun(t, `out = [1, 2, 3, -10].all((i, x) => x == i+1)`, nil, false)
+	expectRun(t, `out = [1, 2, 3, 4].all((i, x) => x == i+1)`, nil, true)
+
+	expectRun(t, `out = [].any(x => x > 0)`, nil, false)
+	expectRun(t, `out = [1, 2, 3, -10].any(x => x < 0)`, nil, true)
+	expectRun(t, `out = [1, 2, 3, -10].any(x => x < -100)`, nil, false)
+	expectRun(t, `out = [1, 2, 3, -10].any((i, x) => x != i+1)`, nil, true)
+	expectRun(t, `out = [1, 2, 3, 4].any((i, x) => x != i+1)`, nil, false)
 }
 
 func TestRecord(t *testing.T) {

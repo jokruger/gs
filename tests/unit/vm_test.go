@@ -630,6 +630,12 @@ func TestBytes(t *testing.T) {
 
 	expectRun(t, fmt.Sprintf(`out = bytes([72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 33]) == %s`, o.String()), nil, true)
 	expectRun(t, fmt.Sprintf(`out = bytes("hello") == %s`, alloc.NewBytes([]byte("hello")).String()), nil, true)
+
+	expectRun(t, `out = bytes("abcde").len`, nil, 5)
+	expectRun(t, `out = bytes("abcde").empty`, nil, false)
+	expectRun(t, `out = bytes().empty`, nil, true)
+	expectRun(t, `out = bytes("abcde").first`, nil, 97)
+	expectRun(t, `out = bytes("abcde").last`, nil, 101)
 }
 
 func TestAssignment(t *testing.T) {

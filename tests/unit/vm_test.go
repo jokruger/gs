@@ -580,7 +580,7 @@ func TestTime(t *testing.T) {
 	require.Equal(t, "2020-06-20 01:02:03.000000004 +0000 UTC", s)
 	require.Equal(t, `time("2020-06-20 01:02:03.000000004 +0000 UTC")`, o.String())
 
-	//expectRun(t, fmt.Sprintf(`out = time("2020-06-20 01:02:03.000000004 +0000 UTC") == %s`, o.String()), nil, true)
+	expectRun(t, fmt.Sprintf(`out = time("2020-06-20 01:02:03.000000004 +0000 UTC") == %s`, o.String()), nil, true)
 }
 
 func TestBytes(t *testing.T) {
@@ -1008,7 +1008,7 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = bool(1.8)`, nil, true)        // all floats (except for NaN): true
 	expectRun(t, `out = bool(0.0)`, nil, true)        // all floats (except for NaN): true
 	expectRun(t, `out = bool("false")`, nil, false)   // parsed boolean string: false
-	expectRun(t, `out = bool("true")`, nil, true)   // parsed boolean string: true
+	expectRun(t, `out = bool("true")`, nil, true)     // parsed boolean string: true
 	expectRun(t, `out = bool("")`, nil, false)        // empty string: false
 	expectRun(t, `out = bool(true)`, nil, true)       // true: true
 	expectRun(t, `out = bool(false)`, nil, false)     // false: false
@@ -1170,10 +1170,13 @@ func TestBuiltinFunction(t *testing.T) {
 	expectRun(t, `out = [1, 2, 3]; splice(out, 1, 0, "a", "b")`, nil, ARR{1, "a", "b", 2, 3})
 	expectRun(t, `out = [1, 2, 3]; splice(out, 2, 0, "a", "b")`, nil, ARR{1, 2, "a", "b", 3})
 	expectRun(t, `out = [1, 2, 3]; splice(out, 3, 0, "a", "b")`, nil, ARR{1, 2, 3, "a", "b"})
+
 	expectRun(t, `array := [1, 2, 3]; deleted := splice(array, 1, 1, "a", "b");
 				out = [deleted, array]`, nil, ARR{ARR{2}, ARR{1, "a", "b", 3}})
+
 	expectRun(t, `array := [1, 2, 3]; deleted := splice(array, 1); 
 		out = [deleted, array]`, nil, ARR{ARR{2, 3}, ARR{1}})
+
 	expectRun(t, `out = []; splice(out, 0, 0, "a", "b")`, nil, ARR{"a", "b"})
 	expectRun(t, `out = []; splice(out, 0, 1, "a", "b")`, nil, ARR{"a", "b"})
 	expectRun(t, `out = []; out = splice(out, 0, 0, "a", "b")`, nil, ARR{})
@@ -1181,16 +1184,22 @@ func TestBuiltinFunction(t *testing.T) {
 	// splice doc examples
 	expectRun(t, `v := [1, 2, 3]; deleted := splice(v, 0);
 		out = [deleted, v]`, nil, ARR{ARR{1, 2, 3}, ARR{}})
+
 	expectRun(t, `v := [1, 2, 3]; deleted := splice(v, 1);
 		out = [deleted, v]`, nil, ARR{ARR{2, 3}, ARR{1}})
+
 	expectRun(t, `v := [1, 2, 3]; deleted := splice(v, 0, 1);
 		out = [deleted, v]`, nil, ARR{ARR{1}, ARR{2, 3}})
+
 	expectRun(t, `v := ["a", "b", "c"]; deleted := splice(v, 1, 2);
 		out = [deleted, v]`, nil, ARR{ARR{"b", "c"}, ARR{"a"}})
+
 	expectRun(t, `v := ["a", "b", "c"]; deleted := splice(v, 2, 1, "d");
 		out = [deleted, v]`, nil, ARR{ARR{"c"}, ARR{"a", "b", "d"}})
+
 	expectRun(t, `v := ["a", "b", "c"]; deleted := splice(v, 0, 0, "d", "e");
 		out = [deleted, v]`, nil, ARR{ARR{}, ARR{"d", "e", "a", "b", "c"}})
+
 	expectRun(t, `v := ["a", "b", "c"]; deleted := splice(v, 1, 1, "d", "e");
 		out = [deleted, v]`, nil, ARR{ARR{"b"}, ARR{"a", "d", "e", "c"}})
 }
@@ -1210,12 +1219,9 @@ func TestBytesN(t *testing.T) {
 }
 
 func TestCall(t *testing.T) {
-	expectRun(t, `a := { b: func(x) { return x + 2 } }; out = a.b(5)`,
-		nil, 7)
-	expectRun(t, `a := { b: { c: func(x) { return x + 2 } } }; out = a.b.c(5)`,
-		nil, 7)
-	expectRun(t, `a := { b: { c: func(x) { return x + 2 } } }; out = a["b"].c(5)`,
-		nil, 7)
+	expectRun(t, `a := { b: func(x) { return x + 2 } }; out = a.b(5)`, nil, 7)
+	expectRun(t, `a := { b: { c: func(x) { return x + 2 } } }; out = a.b.c(5)`, nil, 7)
+	expectRun(t, `a := { b: { c: func(x) { return x + 2 } } }; out = a["b"].c(5)`, nil, 7)
 	expectError(t, `a := 1
 b := func(a, c) {
    c(a)

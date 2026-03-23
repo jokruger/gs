@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/araddon/dateparse"
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/internal/conv"
 	"github.com/jokruger/gs/parser"
@@ -222,6 +223,9 @@ func (o *String) AsBytes() ([]byte, bool) {
 }
 
 func (o *String) AsTime() (time.Time, bool) {
-	// TODO: implement time parsing
-	return time.Time{}, false
+	val, err := dateparse.ParseAny(o.value)
+	if err != nil {
+		return time.Time{}, false
+	}
+	return val, true
 }

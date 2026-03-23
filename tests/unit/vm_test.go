@@ -235,6 +235,9 @@ func TestFloat(t *testing.T) {
 	expectRun(t, fmt.Sprintf(`out = 0.0 == %s`, alloc.NewFloat(0.0).String()), nil, true)
 	expectRun(t, fmt.Sprintf(`out = 1.0 == %s`, alloc.NewFloat(1.0).String()), nil, true)
 	expectRun(t, fmt.Sprintf(`out = 12345.6789 == %s`, alloc.NewFloat(12345.6789).String()), nil, true)
+
+	expectRun(t, `out = 5.0 + "-5.0"`, nil, 0.0)
+	expectRun(t, `out = 5.0 + "5.0"`, nil, 10.0)
 }
 
 func TestChar(t *testing.T) {

@@ -57,75 +57,69 @@ func (o *Int) Interface() any {
 
 func (o *Int) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Object, error) {
 	alloc := vm.Allocator()
-	switch rhs := rhs.(type) {
-	case *Int:
+
+	// int op float => float
+	if rhs, ok := rhs.(*Float); ok {
+		v := float64(o.value)
 		switch op {
 		case token.Add:
-			return alloc.NewInt(o.value + rhs.value), nil
+			return alloc.NewFloat(v + rhs.value), nil
 		case token.Sub:
-			return alloc.NewInt(o.value - rhs.value), nil
+			return alloc.NewFloat(v - rhs.value), nil
 		case token.Mul:
-			return alloc.NewInt(o.value * rhs.value), nil
+			return alloc.NewFloat(v * rhs.value), nil
 		case token.Quo:
-			return alloc.NewInt(o.value / rhs.value), nil
-		case token.Rem:
-			return alloc.NewInt(o.value % rhs.value), nil
-		case token.And:
-			return alloc.NewInt(o.value & rhs.value), nil
-		case token.Or:
-			return alloc.NewInt(o.value | rhs.value), nil
-		case token.Xor:
-			return alloc.NewInt(o.value ^ rhs.value), nil
-		case token.AndNot:
-			return alloc.NewInt(o.value &^ rhs.value), nil
-		case token.Shl:
-			return alloc.NewInt(o.value << uint64(rhs.value)), nil
-		case token.Shr:
-			return alloc.NewInt(o.value >> uint64(rhs.value)), nil
+			return alloc.NewFloat(v / rhs.value), nil
 		case token.Less:
-			return alloc.NewBool(o.value < rhs.value), nil
+			return alloc.NewBool(v < rhs.value), nil
 		case token.Greater:
-			return alloc.NewBool(o.value > rhs.value), nil
+			return alloc.NewBool(v > rhs.value), nil
 		case token.LessEq:
-			return alloc.NewBool(o.value <= rhs.value), nil
+			return alloc.NewBool(v <= rhs.value), nil
 		case token.GreaterEq:
-			return alloc.NewBool(o.value >= rhs.value), nil
-		}
-	case *Float:
-		switch op {
-		case token.Add:
-			return alloc.NewFloat(float64(o.value) + rhs.value), nil
-		case token.Sub:
-			return alloc.NewFloat(float64(o.value) - rhs.value), nil
-		case token.Mul:
-			return alloc.NewFloat(float64(o.value) * rhs.value), nil
-		case token.Quo:
-			return alloc.NewFloat(float64(o.value) / rhs.value), nil
-		case token.Less:
-			return alloc.NewBool(float64(o.value) < rhs.value), nil
-		case token.Greater:
-			return alloc.NewBool(float64(o.value) > rhs.value), nil
-		case token.LessEq:
-			return alloc.NewBool(float64(o.value) <= rhs.value), nil
-		case token.GreaterEq:
-			return alloc.NewBool(float64(o.value) >= rhs.value), nil
-		}
-	case *Char:
-		switch op {
-		case token.Add:
-			return alloc.NewInt(o.value + int64(rhs.value)), nil
-		case token.Sub:
-			return alloc.NewInt(o.value - int64(rhs.value)), nil
-		case token.Less:
-			return alloc.NewBool(o.value < int64(rhs.value)), nil
-		case token.Greater:
-			return alloc.NewBool(o.value > int64(rhs.value)), nil
-		case token.LessEq:
-			return alloc.NewBool(o.value <= int64(rhs.value)), nil
-		case token.GreaterEq:
-			return alloc.NewBool(o.value >= int64(rhs.value)), nil
+			return alloc.NewBool(v >= rhs.value), nil
 		}
 	}
+
+	// int op any => int
+	v, ok := rhs.AsInt()
+	if !ok {
+		return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
+	}
+
+	switch op {
+	case token.Add:
+		return alloc.NewInt(o.value + v), nil
+	case token.Sub:
+		return alloc.NewInt(o.value - v), nil
+	case token.Mul:
+		return alloc.NewInt(o.value * v), nil
+	case token.Quo:
+		return alloc.NewInt(o.value / v), nil
+	case token.Rem:
+		return alloc.NewInt(o.value % v), nil
+	case token.And:
+		return alloc.NewInt(o.value & v), nil
+	case token.Or:
+		return alloc.NewInt(o.value | v), nil
+	case token.Xor:
+		return alloc.NewInt(o.value ^ v), nil
+	case token.AndNot:
+		return alloc.NewInt(o.value &^ v), nil
+	case token.Shl:
+		return alloc.NewInt(o.value << uint64(v)), nil
+	case token.Shr:
+		return alloc.NewInt(o.value >> uint64(v)), nil
+	case token.Less:
+		return alloc.NewBool(o.value < v), nil
+	case token.Greater:
+		return alloc.NewBool(o.value > v), nil
+	case token.LessEq:
+		return alloc.NewBool(o.value <= v), nil
+	case token.GreaterEq:
+		return alloc.NewBool(o.value >= v), nil
+	}
+
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
 }
 

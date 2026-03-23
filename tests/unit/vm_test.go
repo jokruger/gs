@@ -158,9 +158,9 @@ func TestBoolean(t *testing.T) {
 	expectRun(t, `out = (1 < 2) == false`, nil, false)
 	expectRun(t, `out = (1 > 2) == true`, nil, false)
 	expectRun(t, `out = (1 > 2) == false`, nil, true)
+	expectRun(t, `out = 5 + true`, nil, 6)
+	expectRun(t, `out = 5 + true; 5`, nil, 6)
 
-	expectError(t, `5 + true`, nil, "invalid binary operator: int + bool")
-	expectError(t, `5 + true; 5`, nil, "invalid binary operator: int + bool")
 	expectError(t, `-true`, nil, "invalid operation")
 	expectError(t, `true + false`, nil, "invalid binary operator: bool + bool")
 	expectError(t, `5; true + false; 5`, nil, "invalid binary operator: bool + bool")
@@ -218,6 +218,9 @@ func TestInteger(t *testing.T) {
 	expectRun(t, fmt.Sprintf(`out = 0 == %s`, alloc.NewInt(0).String()), nil, true)
 	expectRun(t, fmt.Sprintf(`out = 1 == %s`, alloc.NewInt(1).String()), nil, true)
 	expectRun(t, fmt.Sprintf(`out = 1234567890 == %s`, alloc.NewInt(1234567890).String()), nil, true)
+
+	expectRun(t, `out = 5 + "-5"`, nil, 0)
+	expectRun(t, `out = 5 + "5"`, nil, 10)
 }
 
 func TestFloat(t *testing.T) {

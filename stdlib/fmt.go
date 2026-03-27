@@ -52,8 +52,7 @@ func fmtPrintln(vm core.VM, args ...core.Object) (ret core.Object, err error) {
 	if err != nil {
 		return nil, err
 	}
-	printArgs = append(printArgs, "\n")
-	_, _ = fmt.Print(printArgs...)
+	_, _ = fmt.Println(printArgs...)
 	return nil, nil
 }
 

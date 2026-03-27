@@ -41,6 +41,14 @@ fmt := import("fmt")
 fmt.println("Hello", "GS")
 ```
 
+## Contributing
+
+1. Fork the repository and clone your fork locally.
+2. Make your changes in a focused branch.
+3. Run tests.
+4. Add or update tests in `tests/unit` for any change that affects language or runtime behavior.
+5. Open a pull request describing the motivation for the change and any new or changed semantics.
+
 ## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.

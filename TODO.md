@@ -18,7 +18,11 @@
 
 - replace "x := y" with "var x" and "var x = y" syntax
 
+- add "decimal" type
+
 - check if we still need enums package - move missing functions to type properties
+
+- function property "arity" and "variadic"
 
 - add .Json() method to produce JSON representation of the value
 - migrate to crypto/rand

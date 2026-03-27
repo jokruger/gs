@@ -41,11 +41,21 @@ fmt := import("fmt")
 fmt.println("Hello", "GS")
 ```
 
+## Project Layout
+
+The project keeps most tests under `tests/unit` instead of co-locating every `_test.go` file with the production code.
+
+This is a deliberate choice. GS has a fairly broad runtime surface, and keeping tests in a dedicated tree makes larger behavior-oriented test cases easier to read, organize, and maintain. In practice, many tests exercise language and VM semantics across package boundaries, so grouping them by scenario is often clearer than scattering them throughout the source tree.
+
+This is not the most idiomatic Go layout, and that tradeoff is intentional: for this project, readability and manageability take priority over strict colocation.
+
+When adding or changing behavior, please add or update the relevant tests in `tests/unit`.
+
 ## Contributing
 
 1. Fork the repository and clone your fork locally.
 2. Make your changes in a focused branch.
-3. Run tests.
+3. Run the test suite.
 4. Add or update tests in `tests/unit` for any change that affects language or runtime behavior.
 5. Open a pull request describing the motivation for the change and any new or changed semantics.
 

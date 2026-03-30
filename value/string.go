@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 
 	"github.com/araddon/dateparse"
 	"github.com/jokruger/gs/core"
@@ -14,8 +15,7 @@ import (
 
 type String struct {
 	Object
-	value string
-	runes []rune
+	value []rune
 }
 
 // Should be used only for static initialization. For dynamic creation of built-in functions, use Allocator.NewString.
@@ -31,20 +31,19 @@ func (o *String) GobDecode(b []byte) error {
 }
 
 func (o *String) GobEncode() ([]byte, error) {
-	return []byte(o.value), nil
+	return []byte(string(o.value)), nil
 }
 
 func (o *String) Set(s string) {
-	o.value = s
-	o.runes = []rune(o.value)
+	o.value = []rune(s)
 }
 
 func (o *String) Value() string {
-	return o.value
+	return string(o.value)
 }
 
 func (o *String) Runes() []rune {
-	return o.runes
+	return o.value
 }
 
 func (o *String) IsEmpty() bool {
@@ -52,31 +51,26 @@ func (o *String) IsEmpty() bool {
 }
 
 func (o *String) Len() int {
-	return len(o.runes)
+	return len(o.value)
 }
 
 func (o *String) At(i int) rune {
-	return o.runes[i]
+	return o.value[i]
 }
 
 func (o *String) Get(i int) (rune, bool) {
-	if i < 0 || i >= len(o.runes) {
+	if i < 0 || i >= len(o.value) {
 		return 0, false
 	}
-	return o.runes[i], true
-}
-
-func (o *String) Slice(start, end int) string {
-	return o.value[start:end]
+	return o.value[i], true
 }
 
 func (o *String) Substring(start, end int) string {
-	return string(o.runes[start:end])
+	return string(o.value[start:end])
 }
 
 func (o *String) Append(s string) {
-	o.value += s
-	o.runes = []rune(o.value)
+	o.value = append(o.value, []rune(s)...)
 }
 
 func (o *String) TypeName() string {
@@ -84,11 +78,11 @@ func (o *String) TypeName() string {
 }
 
 func (o *String) String() string {
-	return strconv.Quote(o.value)
+	return strconv.Quote(string(o.value))
 }
 
 func (o *String) Interface() any {
-	return o.value
+	return string(o.value)
 }
 
 func (o *String) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Object, error) {
@@ -100,15 +94,15 @@ func (o *String) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Obj
 
 	switch op {
 	case token.Add:
-		return alloc.NewString(o.value + v), nil
+		return alloc.NewString(string(o.value) + v), nil
 	case token.Less:
-		return alloc.NewBool(o.value < v), nil
+		return alloc.NewBool(string(o.value) < v), nil
 	case token.LessEq:
-		return alloc.NewBool(o.value <= v), nil
+		return alloc.NewBool(string(o.value) <= v), nil
 	case token.Greater:
-		return alloc.NewBool(o.value > v), nil
+		return alloc.NewBool(string(o.value) > v), nil
 	case token.GreaterEq:
-		return alloc.NewBool(o.value >= v), nil
+		return alloc.NewBool(string(o.value) >= v), nil
 	}
 
 	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
@@ -119,11 +113,11 @@ func (o *String) Equals(x core.Object) bool {
 	if !ok {
 		return false
 	}
-	return o.value == t
+	return string(o.value) == t
 }
 
 func (o *String) Copy(alloc core.Allocator) core.Object {
-	return alloc.NewString(o.value)
+	return alloc.NewString(string(o.value))
 }
 
 func (o *String) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Object, error) {
@@ -134,10 +128,10 @@ func (o *String) Access(vm core.VM, index core.Object, mode core.Opcode) (core.O
 		if !ok {
 			return nil, core.NewInvalidIndexTypeError("string access", "int", index)
 		}
-		if i < 0 || i >= int64(len(o.runes)) {
+		if i < 0 || i >= int64(len(o.value)) {
 			return alloc.NewUndefined(), nil
 		}
-		return alloc.NewChar(o.runes[i]), nil
+		return alloc.NewChar(o.value[i]), nil
 	}
 
 	k, ok := index.AsString()
@@ -150,8 +144,8 @@ func (o *String) Access(vm core.VM, index core.Object, mode core.Opcode) (core.O
 		return o, nil
 
 	case "array":
-		arr := make([]core.Object, len(o.runes))
-		for i, r := range o.runes {
+		arr := make([]core.Object, len(o.value))
+		for i, r := range o.value {
 			arr[i] = alloc.NewChar(r)
 		}
 		return alloc.NewArray(arr, false), nil
@@ -161,11 +155,11 @@ func (o *String) Access(vm core.VM, index core.Object, mode core.Opcode) (core.O
 		return alloc.NewBool(b), nil
 
 	case "bytes":
-		return alloc.NewBytes([]byte(o.value)), nil
+		return alloc.NewBytes([]byte(string(o.value))), nil
 
 	case "char":
-		if len(o.runes) == 1 {
-			return alloc.NewChar(o.runes[0]), nil
+		if len(o.value) == 1 {
+			return alloc.NewChar(o.value[0]), nil
 		}
 		return alloc.NewChar(0), nil
 
@@ -182,35 +176,43 @@ func (o *String) Access(vm core.VM, index core.Object, mode core.Opcode) (core.O
 		return alloc.NewTime(t), nil
 
 	case "record":
-		m := make(map[string]core.Object, len(o.runes))
-		for i, r := range o.runes {
+		m := make(map[string]core.Object, len(o.value))
+		for i, r := range o.value {
 			m[strconv.Itoa(i)] = alloc.NewChar(r)
 		}
 		return alloc.NewRecord(m, false), nil
 
 	case "empty":
-		return alloc.NewBool(len(o.runes) == 0), nil
+		return alloc.NewBool(len(o.value) == 0), nil
 
 	case "len":
-		return alloc.NewInt(int64(len(o.runes))), nil
+		return alloc.NewInt(int64(len(o.value))), nil
 
 	case "first":
-		if len(o.runes) == 0 {
+		if len(o.value) == 0 {
 			return alloc.NewUndefined(), nil
 		}
-		return alloc.NewChar(o.runes[0]), nil
+		return alloc.NewChar(o.value[0]), nil
 
 	case "last":
-		if len(o.runes) == 0 {
+		if len(o.value) == 0 {
 			return alloc.NewUndefined(), nil
 		}
-		return alloc.NewChar(o.runes[len(o.runes)-1]), nil
+		return alloc.NewChar(o.value[len(o.value)-1]), nil
 
 	case "lower":
-		return alloc.NewString(strings.ToLower(o.value)), nil
+		t := make([]rune, len(o.value))
+		for i, r := range o.value {
+			t[i] = unicode.ToLower(r)
+		}
+		return alloc.NewString(string(t)), nil
 
 	case "upper":
-		return alloc.NewString(strings.ToUpper(o.value)), nil
+		t := make([]rune, len(o.value))
+		for i, r := range o.value {
+			t[i] = unicode.ToUpper(r)
+		}
+		return alloc.NewString(string(t)), nil
 
 	case "trim":
 		return o.fnTrim(vm, "string.trim")
@@ -225,7 +227,7 @@ func (o *String) Assign(core.Object, core.Object) error {
 }
 
 func (o *String) Iterate(alloc core.Allocator) core.Iterator {
-	return alloc.NewStringIterator(o.runes)
+	return alloc.NewStringIterator(o.value)
 }
 
 func (o *String) IsTrue() bool {
@@ -245,11 +247,11 @@ func (o *String) IsImmutable() bool {
 }
 
 func (o *String) AsString() (string, bool) {
-	return o.value, true
+	return string(o.value), true
 }
 
 func (o *String) AsInt() (int64, bool) {
-	i, err := strconv.ParseInt(o.value, 10, 64)
+	i, err := strconv.ParseInt(string(o.value), 10, 64)
 	if err == nil {
 		return i, true
 	}
@@ -257,7 +259,7 @@ func (o *String) AsInt() (int64, bool) {
 }
 
 func (o *String) AsFloat() (float64, bool) {
-	f, err := strconv.ParseFloat(o.value, 64)
+	f, err := strconv.ParseFloat(string(o.value), 64)
 	if err == nil {
 		return f, true
 	}
@@ -265,22 +267,22 @@ func (o *String) AsFloat() (float64, bool) {
 }
 
 func (o *String) AsBool() (bool, bool) {
-	return conv.ParseBool(o.value)
+	return conv.ParseBool(string(o.value))
 }
 
 func (o *String) AsRune() (rune, bool) {
-	if len(o.runes) == 1 {
-		return o.runes[0], true
+	if len(o.value) == 1 {
+		return o.value[0], true
 	}
 	return 0, false
 }
 
 func (o *String) AsBytes() ([]byte, bool) {
-	return []byte(o.value), true
+	return []byte(string(o.value)), true
 }
 
 func (o *String) AsTime() (time.Time, bool) {
-	val, err := dateparse.ParseAny(o.value)
+	val, err := dateparse.ParseAny(string(o.value))
 	if err != nil {
 		return time.Time{}, false
 	}
@@ -294,7 +296,7 @@ func (o *String) fnTrim(vm core.VM, name string) (core.Object, error) {
 		}
 
 		if len(args) == 0 {
-			return vm.Allocator().NewString(strings.Trim(o.value, " \t\n")), nil
+			return vm.Allocator().NewString(strings.Trim(string(o.value), " \t\n")), nil
 		}
 
 		s, ok := args[0].AsString()
@@ -302,6 +304,6 @@ func (o *String) fnTrim(vm core.VM, name string) (core.Object, error) {
 			return nil, core.NewInvalidArgumentTypeError(name, "first", "string", args[0])
 		}
 
-		return vm.Allocator().NewString(strings.Trim(o.value, s)), nil
+		return vm.Allocator().NewString(strings.Trim(string(o.value), s)), nil
 	}, 0, true), nil
 }

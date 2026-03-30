@@ -1,3 +1,9 @@
+- bytes and string should be similar to array (immutable flag, assign by index, etc) - ensure constructors from other copies create new bytes/string!
+- Bytes/String - IndexSet
+
+- array, string, bytes - multi-index get: array[1, 3, 5], or array[x] where x is array of ints
+- ... and multi-index set: array[1, 3, 5] = [10, 30, 50]
+
 - analyze VM, design allocator.Release use strategy - is it even possible (or worth it) to know when object can be released?
     - Maybe it is better to minimize creation of new objects and just use arena allocator?
 - implement arenas (no release object, just pre-allocated pool) for small number of objects
@@ -8,9 +14,6 @@
         - this allow re-use same object in loops, iterators, etc
 
 - vector types: bytes, ints, floats
-
-- bytes and string should be similar to array (immutable flag, assign by index, etc) - ensure constructors from other copies create new bytes/string!
-- Bytes/String - IndexSet
 
 - new type Tuple.
     - map/record to array of tuples

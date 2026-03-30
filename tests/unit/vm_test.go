@@ -409,6 +409,13 @@ func TestString(t *testing.T) {
 	expectRun(t, `out = "12".float.string`, nil, "12")
 	expectRun(t, `out = "abc".int`, nil, 0)
 	expectRun(t, `out = "abc".record`, nil, MAP{"0": 'a', "1": 'b', "2": 'c'})
+
+	expectRun(t, `out = " їЇґҐ ".trim()`, nil, "їЇґҐ")
+	expectRun(t, `out = "їЇґҐ".upper`, nil, "ЇЇҐҐ")
+	expectRun(t, `out = "їЇґҐ".lower`, nil, "їїґґ")
+	expectRun(t, `out = "їЇґҐ"[1]`, nil, 'Ї')
+	expectRun(t, `out = "їЇґҐ"[1:2]`, nil, "Ї")
+	expectRun(t, `out = "їЇґҐ"[1:3]`, nil, "Їґ")
 }
 
 func TestError(t *testing.T) {

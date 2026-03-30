@@ -78,7 +78,7 @@ func (o *Char) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Objec
 	case *String: // char op string => string
 		switch op {
 		case token.Add:
-			return alloc.NewString(string(o.value) + rhs.value), nil
+			return alloc.NewString(string(o.value) + string(rhs.value)), nil
 		}
 	}
 

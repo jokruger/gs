@@ -49,7 +49,7 @@ func main() {
 		return
 	}
 
-	a := alloc.NewHeapAllocator()
+	a := alloc.New()
 	modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
 	inputFile := flag.Arg(0)
 	if inputFile == "" {

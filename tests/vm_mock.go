@@ -5,7 +5,7 @@ import (
 	"github.com/jokruger/gs/core"
 )
 
-var Alloc = al.NewHeapAllocator()
+var Alloc = al.New()
 var Vm = &VM{}
 
 type VM struct{}

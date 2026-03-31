@@ -1,5 +1,12 @@
-1) write benchmark tests for most common scenarios (loops, recursion, arithmetics, etc)
-2) replace *Object type system with boxed scalars:
+benchmarks:
+
+fib1        fib2        fib3        powSum1     powSum2     powSum3     powSum4     powSum5     str
+----        ----        ----        -------     -------     -------     -------     -------     ---
+2.625206    2.767111    0.032647    0.135226    0.464145    0.224656    0.317883    0.198257    0.063175
+
+===
+
+1) replace *Object type system with boxed scalars:
     - value is a struct containing type info, flags (immutable, temporal, etc) and 64-bit data - pointer to heap object (for maps, strings, arrays) or int/bool/float/etc packed in the 64-bit data field
 
 ===

@@ -47,14 +47,15 @@ func (o *CompiledFunction) Size() int64 {
 	return int64(len(o.Instructions) + len(o.SourceMap) + len(o.Free))
 }
 
-func (o *CompiledFunction) Copy(core.Allocator) core.Object {
-	return &CompiledFunction{
+func (o *CompiledFunction) Copy(core.Allocator) core.Value {
+	t := &CompiledFunction{
 		Instructions:  append([]byte{}, o.Instructions...),
 		NumLocals:     o.NumLocals,
 		NumParameters: o.NumParameters,
 		VarArgs:       o.VarArgs,
 		Free:          append([]*ObjectPtr{}, o.Free...), // DO NOT Copy() of elements; these are variable pointers
 	}
+	return core.NewObject(t, false)
 }
 
 func (o *CompiledFunction) SourcePos(ip int) core.Pos {
@@ -71,6 +72,10 @@ func (o *CompiledFunction) IsCallable() bool {
 	return true
 }
 
-func (o *CompiledFunction) Call(vm core.VM, args ...core.Object) (core.Object, error) {
+func (o *CompiledFunction) IsCompiledFunction() bool {
+	return true
+}
+
+func (o *CompiledFunction) Call(vm core.VM, args ...core.Value) (core.Value, error) {
 	return vm.Call(o, args...)
 }

@@ -16,16 +16,14 @@ import (
 	"github.com/jokruger/gs/vm"
 )
 
-// compilationScope represents a compiled instructions and the last two
-// instructions that were emitted.
+// compilationScope represents a compiled instructions and the last two instructions that were emitted.
 type compilationScope struct {
 	Instructions []byte
 	SymbolInit   map[string]bool
 	SourceMap    map[int]core.Pos
 }
 
-// loop represents a loop construct that the compiler uses to track the current
-// loop.
+// loop represents a loop construct that the compiler uses to track the current loop.
 type loop struct {
 	Continues []int
 	Breaks    []int
@@ -51,7 +49,7 @@ type Compiler struct {
 	modulePath      string
 	importDir       string
 	importFileExt   []string
-	constants       []core.Object
+	constants       []core.Value
 	symbolTable     *vm.SymbolTable
 	scopes          []compilationScope
 	scopeIndex      int
@@ -69,7 +67,7 @@ func NewCompiler(
 	alloc core.Allocator,
 	file *parser.SourceFile,
 	symbolTable *vm.SymbolTable,
-	constants []core.Object,
+	constants []core.Value,
 	modules vm.ModuleGetter,
 	trace io.Writer,
 ) *Compiler {
@@ -85,7 +83,8 @@ func NewCompiler(
 
 	// add builtin functions to the symbol table
 	for idx, fn := range vm.BuiltinFuncs {
-		symbolTable.DefineBuiltin(idx, fn.Name())
+		// it is safe to cast type because we know that all builtin functions are *value.BuiltinFunction objects
+		symbolTable.DefineBuiltin(idx, fn.Object().(*value.BuiltinFunction).Name())
 	}
 
 	// builtin modules
@@ -199,10 +198,10 @@ func (c *Compiler) Compile(node parser.Node) error {
 		}
 
 	case *parser.IntLit:
-		c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewInt(node.Value)))
+		c.emit(node, parser.OpConstant, c.addConstant(core.NewInt(node.Value)))
 
 	case *parser.FloatLit:
-		c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewFloat(node.Value)))
+		c.emit(node, parser.OpConstant, c.addConstant(core.NewFloat(node.Value)))
 
 	case *parser.BoolLit:
 		if node.Value {
@@ -215,10 +214,10 @@ func (c *Compiler) Compile(node parser.Node) error {
 		if len(node.Value) > core.MaxStringLen {
 			return c.error(node, core.NewStringLimitError("string literal compiler"))
 		}
-		c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewString(node.Value)))
+		c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewStringValue(node.Value)))
 
 	case *parser.CharLit:
-		c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewChar(node.Value)))
+		c.emit(node, parser.OpConstant, c.addConstant(core.NewChar(node.Value)))
 
 	case *parser.UndefinedLit:
 		c.emit(node, parser.OpNull)
@@ -238,8 +237,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		case token.Add:
 			// do nothing?
 		default:
-			return c.errorf(node,
-				"invalid unary operator: %s", node.Token.String())
+			return c.errorf(node, "invalid unary operator: %s", node.Token.String())
 		}
 
 	case *parser.IfStmt:
@@ -362,8 +360,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			if len(elt.Key) > core.MaxStringLen {
 				return c.error(node, core.NewStringLimitError("map literal key compiler"))
 			}
-			c.emit(node, parser.OpConstant,
-				c.addConstant(c.alloc.NewString(elt.Key)))
+			c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewStringValue(elt.Key)))
 
 			// value
 			if err := c.Compile(elt.Value); err != nil {
@@ -492,10 +489,9 @@ func (c *Compiler) Compile(node parser.Node) error {
 			SourceMap:     sourceMap,
 		}
 		if len(freeSymbols) > 0 {
-			c.emit(node, parser.OpClosure,
-				c.addConstant(compiledFunction), len(freeSymbols))
+			c.emit(node, parser.OpClosure, c.addConstant(core.NewObject(compiledFunction, false)), len(freeSymbols))
 		} else {
-			c.emit(node, parser.OpConstant, c.addConstant(compiledFunction))
+			c.emit(node, parser.OpConstant, c.addConstant(core.NewObject(compiledFunction, false)))
 		}
 
 	case *parser.ReturnStmt:
@@ -541,14 +537,13 @@ func (c *Compiler) Compile(node parser.Node) error {
 
 			switch v := v.(type) {
 			case []byte: // module written in Gs
-				compiled, err := c.compileModule(node,
-					node.ModuleName, v, false)
+				compiled, err := c.compileModule(node, node.ModuleName, v, false)
 				if err != nil {
 					return err
 				}
-				c.emit(node, parser.OpConstant, c.addConstant(compiled))
+				c.emit(node, parser.OpConstant, c.addConstant(core.NewObject(compiled, false)))
 				c.emit(node, parser.OpCall, 0, 0)
-			case core.Object: // builtin module
+			case core.Value: // builtin module
 				c.emit(node, parser.OpConstant, c.addConstant(v))
 			default:
 				panic(fmt.Errorf("invalid import value type: %T", v))
@@ -572,7 +567,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			if err != nil {
 				return err
 			}
-			c.emit(node, parser.OpConstant, c.addConstant(compiled))
+			c.emit(node, parser.OpConstant, c.addConstant(core.NewObject(compiled, false)))
 			c.emit(node, parser.OpCall, 0, 0)
 		} else {
 			return c.errorf(node, "module '%s' not found", node.ModuleName)
@@ -1149,14 +1144,14 @@ func (c *Compiler) errorf(node parser.Node, format string, args ...any) error {
 	}
 }
 
-func (c *Compiler) addConstant(o core.Object) int {
+func (c *Compiler) addConstant(o core.Value) int {
 	if c.parent != nil {
 		// module compilers will use their parent's constants array
 		return c.parent.addConstant(o)
 	}
 	c.constants = append(c.constants, o)
 	if c.trace != nil {
-		c.printTrace(fmt.Sprintf("CONST %04d %s", len(c.constants)-1, o))
+		c.printTrace(fmt.Sprintf("CONST %04d %s", len(c.constants)-1, o.String()))
 	}
 	return len(c.constants) - 1
 }

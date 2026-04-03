@@ -19,10 +19,12 @@ var (
 	ErrInvalidAccessMode     = errors.New("invalid access mode")
 	ErrNotAccessible         = errors.New("object is not accessible")
 	ErrNotAssignable         = errors.New("object is not assignable")
+	ErrNotCallable           = errors.New("object is not callable")
 	ErrInvalidIndexType      = errors.New("invalid index type")
 	ErrInvalidSelector       = errors.New("invalid selector")
 	ErrNotImplemented        = errors.New("not implemented")
 	ErrInvalidBinaryOperator = errors.New("invalid binary operator")
+	ErrInvalidValueKind      = errors.New("invalid value kind")
 )
 
 func NewLogicError(context string) error {
@@ -45,16 +47,16 @@ func NewStringLimitError(context string) error {
 	return fmt.Errorf("%w: %s", ErrStringLimit, context)
 }
 
-func NewDecodeBinarySizeError(obj Object, expected int, got int) error {
-	return fmt.Errorf("%w: type %s expects %d bytes, got %d", ErrDecodeBinarySize, obj.TypeName(), expected, got)
+func NewDecodeBinarySizeError(valType string, expected int, got int) error {
+	return fmt.Errorf("%w: type %s expects %d bytes, got %d", ErrDecodeBinarySize, valType, expected, got)
 }
 
-func NewBinaryNotSupportedError(obj Object) error {
-	return fmt.Errorf("%w: type %s", ErrBinaryNotSupported, obj.TypeName())
+func NewBinaryNotSupportedError(valType string) error {
+	return fmt.Errorf("%w: type %s", ErrBinaryNotSupported, valType)
 }
 
-func NewInvalidArgumentTypeError(context string, name string, expected string, got Object) error {
-	return fmt.Errorf("%w: (%s) argument %s expects type %s, got %s", ErrInvalidArgumentType, context, name, expected, got.TypeName())
+func NewInvalidArgumentTypeError(context string, name string, expected string, got string) error {
+	return fmt.Errorf("%w: (%s) argument %s expects type %s, got %s", ErrInvalidArgumentType, context, name, expected, got)
 }
 
 func NewIndexOutOfBoundsError(context string, idx int, size int) error {
@@ -69,26 +71,34 @@ func NewInvalidAccessModeError(dt string, mode string) error {
 	return fmt.Errorf("%w: type %s does not support %s access", ErrInvalidAccessMode, dt, mode)
 }
 
-func NewNotAccessibleError(obj Object) error {
-	return fmt.Errorf("%w: type %s does not support indexing or field access", ErrNotAccessible, obj.TypeName())
+func NewNotAccessibleError(valType string) error {
+	return fmt.Errorf("%w: type %s does not support indexing or field access", ErrNotAccessible, valType)
 }
 
-func NewNotAssignableError(obj Object) error {
-	return fmt.Errorf("%w: type %s does not support assignment via indexing or field access", ErrNotAssignable, obj.TypeName())
+func NewNotAssignableError(valType string) error {
+	return fmt.Errorf("%w: type %s does not support assignment via indexing or field access", ErrNotAssignable, valType)
 }
 
-func NewInvalidIndexTypeError(context string, expected string, got Object) error {
-	return fmt.Errorf("%w: (%s) expected %s, got %s", ErrInvalidIndexType, context, expected, got.TypeName())
+func NewNotCallableError(valType string) error {
+	return fmt.Errorf("%w: type %s does not support function call", ErrNotCallable, valType)
 }
 
-func NewInvalidSelectorError(obj Object, sel string) error {
-	return fmt.Errorf("%w: type %s has no property or method %s", ErrInvalidSelector, obj.TypeName(), sel)
+func NewInvalidIndexTypeError(context string, expected string, got string) error {
+	return fmt.Errorf("%w: (%s) expected %s, got %s", ErrInvalidIndexType, context, expected, got)
+}
+
+func NewInvalidSelectorError(valType string, sel string) error {
+	return fmt.Errorf("%w: type %s has no property or method %s", ErrInvalidSelector, valType, sel)
 }
 
 func NewNotImplementedError(feature string) error {
 	return fmt.Errorf("%w: %s", ErrNotImplemented, feature)
 }
 
-func NewInvalidBinaryOperatorError(op string, left Object, right Object) error {
-	return fmt.Errorf("%w: %s %s %s", ErrInvalidBinaryOperator, left.TypeName(), op, right.TypeName())
+func NewInvalidBinaryOperatorError(op string, left string, right string) error {
+	return fmt.Errorf("%w: %s %s %s", ErrInvalidBinaryOperator, left, op, right)
+}
+
+func NewInvalidValueKindError(kind ValueKind) error {
+	return fmt.Errorf("%w: %d", ErrInvalidValueKind, kind)
 }

@@ -2,6 +2,8 @@ package stdlib
 
 import (
 	"testing"
+
+	"github.com/jokruger/gs/core"
 )
 
 func TestTextREAlternation(t *testing.T) {
@@ -19,9 +21,9 @@ func TestTextREAlternation(t *testing.T) {
 		},
 	}, "alternation with number")
 
-	module(t, "text").call("re_find", "([a-zA-Z])|([0-9])", "").expect(alloc.NewUndefined(), "empty input")
+	module(t, "text").call("re_find", "([a-zA-Z])|([0-9])", "").expect(core.NewUndefined(), "empty input")
 
-	module(t, "text").call("re_find", "([a-zA-Z])|([0-9])", "!").expect(alloc.NewUndefined(), "non-matching input")
+	module(t, "text").call("re_find", "([a-zA-Z])|([0-9])", "!").expect(core.NewUndefined(), "non-matching input")
 
 	module(t, "text").call("re_find", "(?:([a-zA-Z])|([0-9]))+", "a5b").expect(ARR{
 		ARR{

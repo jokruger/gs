@@ -31,7 +31,7 @@ func TestTextRE(t *testing.T) {
 		text     string
 		expected any
 	}{
-		{"a(b)", "", alloc.NewUndefined()},
+		{"a(b)", "", core.NewUndefined()},
 		{"a(b)", "ab", ARR{
 			ARR{
 				IMAP{"text": "ab", "begin": 0, "end": 2},
@@ -65,7 +65,7 @@ func TestTextRE(t *testing.T) {
 		count    int
 		expected any
 	}{
-		{"a(b)", "", -1, alloc.NewUndefined()},
+		{"a(b)", "", -1, core.NewUndefined()},
 		{"a(b)", "ab", -1, ARR{
 			ARR{
 				IMAP{"text": "ab", "begin": 0, "end": 2},
@@ -94,7 +94,7 @@ func TestTextRE(t *testing.T) {
 				IMAP{"text": "c", "begin": 9, "end": 10},
 			},
 		}},
-		{"(a)b(c)d", "abcdefgabcd", 0, alloc.NewUndefined()},
+		{"(a)b(c)d", "abcdefgabcd", 0, core.NewUndefined()},
 		{"(a)b(c)d", "abcdefgabcd", 1, ARR{
 			ARR{
 				IMAP{"text": "abcd", "begin": 0, "end": 4},

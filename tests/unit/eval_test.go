@@ -14,7 +14,7 @@ func TestEval(t *testing.T) {
 		e, err := require.FromInterface(alloc, expected)
 		require.NoError(t, err)
 		ctx := context.Background()
-		ps := make(map[string]core.Object)
+		ps := make(map[string]core.Value)
 		for k, v := range params {
 			o, err := require.FromInterface(alloc, v)
 			require.NoError(t, err)

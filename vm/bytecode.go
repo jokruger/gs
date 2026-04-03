@@ -4,7 +4,6 @@ import (
 	"encoding/gob"
 	"fmt"
 	"io"
-	"reflect"
 
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
@@ -15,7 +14,7 @@ import (
 type Bytecode struct {
 	FileSet      *parser.SourceFileSet
 	MainFunction *value.CompiledFunction
-	Constants    []core.Object
+	Constants    []core.Value
 }
 
 // Size of the bytecode in bytes
@@ -55,16 +54,16 @@ func (b *Bytecode) FormatInstructions() []string {
 // compiled constants.
 func (b *Bytecode) FormatConstants() (output []string) {
 	for cidx, cn := range b.Constants {
-		switch cn := cn.(type) {
-		case *value.CompiledFunction:
-			output = append(output, fmt.Sprintf("[% 3d] (Compiled Function|%p)", cidx, &cn))
-			for _, l := range FormatInstructions(cn.Instructions, 0) {
-				output = append(output, fmt.Sprintf("     %s", l))
+		if cn.IsObject() {
+			if cn, ok := cn.Object().(*value.CompiledFunction); ok {
+				output = append(output, fmt.Sprintf("[% 3d] (Compiled Function|%p)", cidx, &cn))
+				for _, l := range FormatInstructions(cn.Instructions, 0) {
+					output = append(output, fmt.Sprintf("     %s", l))
+				}
+				continue
 			}
-		default:
-			output = append(output, fmt.Sprintf("[% 3d] %s (%s|%p)",
-				cidx, cn, reflect.TypeOf(cn).Elem().Name(), &cn))
 		}
+		output = append(output, fmt.Sprintf("[% 3d] %s (%s|%v)", cidx, cn.String(), cn.TypeName(), cn))
 	}
 	return
 }
@@ -101,7 +100,7 @@ func (b *Bytecode) Decode(alloc core.Allocator, r io.Reader, modules *ModuleMap)
 // RemoveDuplicates finds and remove the duplicate values in Constants.
 // Note this function mutates Bytecode.
 func (b *Bytecode) RemoveDuplicates() {
-	var deduped []core.Object
+	var deduped []core.Value
 
 	indexMap := make(map[int]int) // mapping from old constant index to new index
 	fns := make(map[*value.CompiledFunction]int)
@@ -109,25 +108,68 @@ func (b *Bytecode) RemoveDuplicates() {
 	strings := make(map[string]int)
 	floats := make(map[float64]int)
 	chars := make(map[rune]int)
+	bools := make(map[bool]int)
 	immutableRecords := make(map[string]int) // for modules
 
 	for curIdx, c := range b.Constants {
-		switch c := c.(type) {
-		case *value.CompiledFunction:
-			if newIdx, ok := fns[c]; ok {
+		switch {
+		case c.IsInt():
+			if newIdx, ok := ints[c.Int()]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
 				newIdx = len(deduped)
-				fns[c] = newIdx
+				ints[c.Int()] = newIdx
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
 
-		case *value.Record:
-			if !c.IsImmutable() {
+		case c.IsFloat():
+			if newIdx, ok := floats[c.Float()]; ok {
+				indexMap[curIdx] = newIdx
+			} else {
+				newIdx = len(deduped)
+				floats[c.Float()] = newIdx
+				indexMap[curIdx] = newIdx
+				deduped = append(deduped, c)
+			}
+
+		case c.IsChar():
+			if newIdx, ok := chars[c.Char()]; ok {
+				indexMap[curIdx] = newIdx
+			} else {
+				newIdx = len(deduped)
+				chars[c.Char()] = newIdx
+				indexMap[curIdx] = newIdx
+				deduped = append(deduped, c)
+			}
+
+		case c.IsBool():
+			if newIdx, ok := bools[c.Bool()]; ok {
+				indexMap[curIdx] = newIdx
+			} else {
+				newIdx = len(deduped)
+				bools[c.Bool()] = newIdx
+				indexMap[curIdx] = newIdx
+				deduped = append(deduped, c)
+			}
+
+		case c.IsCompiledFunction():
+			cf := c.Object().(*value.CompiledFunction)
+			if newIdx, ok := fns[cf]; ok {
+				indexMap[curIdx] = newIdx
+			} else {
+				newIdx = len(deduped)
+				fns[cf] = newIdx
+				indexMap[curIdx] = newIdx
+				deduped = append(deduped, c)
+			}
+
+		case c.IsRecord():
+			cr := c.Object().(*value.Record)
+			if !cr.IsImmutable() {
 				panic(fmt.Errorf("unsupported top-level constant type: %s", c.TypeName()))
 			}
-			modName := inferModuleName(c)
+			modName := inferModuleName(cr)
 			newIdx, ok := immutableRecords[modName]
 			if modName != "" && ok {
 				indexMap[curIdx] = newIdx
@@ -138,42 +180,13 @@ func (b *Bytecode) RemoveDuplicates() {
 				deduped = append(deduped, c)
 			}
 
-		case *value.Int:
-			if newIdx, ok := ints[c.Value()]; ok {
+		case c.IsString():
+			cs := c.Object().(*value.String).Value()
+			if newIdx, ok := strings[cs]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
 				newIdx = len(deduped)
-				ints[c.Value()] = newIdx
-				indexMap[curIdx] = newIdx
-				deduped = append(deduped, c)
-			}
-
-		case *value.String:
-			if newIdx, ok := strings[c.Value()]; ok {
-				indexMap[curIdx] = newIdx
-			} else {
-				newIdx = len(deduped)
-				strings[c.Value()] = newIdx
-				indexMap[curIdx] = newIdx
-				deduped = append(deduped, c)
-			}
-
-		case *value.Float:
-			if newIdx, ok := floats[c.Value()]; ok {
-				indexMap[curIdx] = newIdx
-			} else {
-				newIdx = len(deduped)
-				floats[c.Value()] = newIdx
-				indexMap[curIdx] = newIdx
-				deduped = append(deduped, c)
-			}
-
-		case *value.Char:
-			if newIdx, ok := chars[c.Value()]; ok {
-				indexMap[curIdx] = newIdx
-			} else {
-				newIdx = len(deduped)
-				chars[c.Value()] = newIdx
+				strings[cs] = newIdx
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
@@ -191,26 +204,23 @@ func (b *Bytecode) RemoveDuplicates() {
 	updateConstIndexes(b.MainFunction.Instructions, indexMap)
 	// other compiled functions in constants
 	for _, c := range b.Constants {
-		switch c := c.(type) {
-		case *value.CompiledFunction:
-			updateConstIndexes(c.Instructions, indexMap)
+		if c.IsCompiledFunction() {
+			updateConstIndexes(c.Object().(*value.CompiledFunction).Instructions, indexMap)
 		}
 	}
 }
 
-func fixDecodedObject(alloc core.Allocator, o core.Object, modules *ModuleMap) (core.Object, error) {
-	switch o := o.(type) {
-	case *value.Bool:
-		return alloc.NewBool(o.Value()), nil
+func fixDecodedObject(alloc core.Allocator, v core.Value, modules *ModuleMap) (core.Value, error) {
+	if !v.IsObject() {
+		return v, nil
+	}
 
-	case *value.Undefined:
-		return alloc.NewUndefined(), nil
-
+	switch o := v.Object().(type) {
 	case *value.Array:
 		for i, v := range o.Value() {
 			fv, err := fixDecodedObject(alloc, v, modules)
 			if err != nil {
-				return nil, err
+				return core.NewUndefined(), err
 			}
 			o.SetAt(i, fv)
 		}
@@ -224,13 +234,13 @@ func fixDecodedObject(alloc core.Allocator, o core.Object, modules *ModuleMap) (
 
 			for k, v := range o.Value() {
 				// encoding of user function not supported
-				if _, isBuiltinFunction := v.(*value.BuiltinFunction); isBuiltinFunction {
-					return nil, fmt.Errorf("user function not decodable")
+				if v.IsBuiltinFunction() {
+					return core.NewUndefined(), fmt.Errorf("user function not decodable")
 				}
 
 				fv, err := fixDecodedObject(alloc, v, modules)
 				if err != nil {
-					return nil, err
+					return core.NewUndefined(), err
 				}
 				o.SetKey(k, fv)
 			}
@@ -238,7 +248,7 @@ func fixDecodedObject(alloc core.Allocator, o core.Object, modules *ModuleMap) (
 			for k, v := range o.Value() {
 				fv, err := fixDecodedObject(alloc, v, modules)
 				if err != nil {
-					return nil, err
+					return core.NewUndefined(), err
 				}
 				o.SetKey(k, fv)
 			}
@@ -248,12 +258,13 @@ func fixDecodedObject(alloc core.Allocator, o core.Object, modules *ModuleMap) (
 		for k, v := range o.Value() {
 			fv, err := fixDecodedObject(alloc, v, modules)
 			if err != nil {
-				return nil, err
+				return core.NewUndefined(), err
 			}
 			o.SetKey(k, fv)
 		}
 	}
-	return o, nil
+
+	return v, nil
 }
 
 func updateConstIndexes(insts []byte, indexMap map[int]int) {
@@ -297,16 +308,14 @@ func inferModuleName(mod *value.Record) string {
 }
 
 func init() {
+	gob.Register(&core.Value{})
+
 	gob.Register(&parser.SourceFileSet{})
 	gob.Register(&parser.SourceFile{})
 
 	gob.Register(&value.CompiledFunction{})
 	gob.Register(&value.BuiltinFunction{})
 
-	gob.Register(&value.Bool{})
-	gob.Register(&value.Char{})
-	gob.Register(&value.Int{})
-	gob.Register(&value.Float{})
 	gob.Register(&value.Bytes{})
 	gob.Register(&value.String{})
 	gob.Register(&value.Time{})
@@ -314,5 +323,4 @@ func init() {
 	gob.Register(&value.Record{})
 	gob.Register(&value.Map{})
 	gob.Register(&value.Error{})
-	gob.Register(&value.Undefined{})
 }

@@ -46,40 +46,41 @@ func (o *Time) Interface() any {
 	return o.value
 }
 
-func (o *Time) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Time) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
 	alloc := vm.Allocator()
 
-	if rhs, ok := rhs.(*Int); ok {
+	if rhs.IsInt() {
+		r := rhs.Int()
 		switch op {
 		case token.Add: // time + int => time
-			return alloc.NewTime(o.value.Add(time.Duration(rhs.value))), nil
+			return alloc.NewTimeValue(o.value.Add(time.Duration(r))), nil
 		case token.Sub: // time - int => time
-			return alloc.NewTime(o.value.Add(time.Duration(-rhs.value))), nil
+			return alloc.NewTimeValue(o.value.Add(time.Duration(-r))), nil
 		}
 	}
 
 	v, ok := rhs.AsTime()
 	if !ok {
-		return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
+		return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 	}
 
 	switch op {
 	case token.Sub: // time - time => int (duration)
-		return alloc.NewInt(int64(o.value.Sub(v))), nil
+		return core.NewInt(int64(o.value.Sub(v))), nil
 	case token.Less: // time < time => bool
-		return alloc.NewBool(o.value.Before(v)), nil
+		return core.NewBool(o.value.Before(v)), nil
 	case token.Greater:
-		return alloc.NewBool(o.value.After(v)), nil
+		return core.NewBool(o.value.After(v)), nil
 	case token.LessEq:
-		return alloc.NewBool(o.value.Equal(v) || o.value.Before(v)), nil
+		return core.NewBool(o.value.Equal(v) || o.value.Before(v)), nil
 	case token.GreaterEq:
-		return alloc.NewBool(o.value.Equal(v) || o.value.After(v)), nil
+		return core.NewBool(o.value.Equal(v) || o.value.After(v)), nil
 	}
 
-	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
+	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
-func (o *Time) Equals(x core.Object) bool {
+func (o *Time) Equals(x core.Value) bool {
 	t, ok := x.AsTime()
 	if !ok {
 		return false
@@ -87,100 +88,103 @@ func (o *Time) Equals(x core.Object) bool {
 	return o.value.Equal(t)
 }
 
-func (o *Time) Copy(alloc core.Allocator) core.Object {
-	return alloc.NewTime(o.value)
+func (o *Time) Copy(alloc core.Allocator) core.Value {
+	return alloc.NewTimeValue(o.value)
 }
 
-func (o *Time) Access(vm core.VM, index core.Object, op core.Opcode) (core.Object, error) {
+func (o *Time) Access(vm core.VM, index core.Value, op core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return nil, core.NewInvalidIndexTypeError("map access", "string", index)
+		return core.NewUndefined(), core.NewInvalidIndexTypeError("map access", "string", index.TypeName())
 	}
 
 	alloc := vm.Allocator()
 	switch k {
 	case "time":
-		return o, nil
+		return core.NewObject(o, false), nil
 
 	case "bool":
-		return alloc.NewBool(o.IsTrue()), nil
+		return core.NewBool(o.IsTrue()), nil
 
 	case "int":
-		return alloc.NewInt(o.value.Unix()), nil
+		return core.NewInt(o.value.Unix()), nil
 
 	case "string":
-		return alloc.NewString(o.value.String()), nil
+		return alloc.NewStringValue(o.value.String()), nil
 
 	case "year":
-		return alloc.NewInt(int64(o.value.Year())), nil
+		return core.NewInt(int64(o.value.Year())), nil
 
 	case "month":
-		return alloc.NewInt(int64(o.value.Month())), nil
+		return core.NewInt(int64(o.value.Month())), nil
 
 	case "day":
-		return alloc.NewInt(int64(o.value.Day())), nil
+		return core.NewInt(int64(o.value.Day())), nil
 
 	case "hour":
-		return alloc.NewInt(int64(o.value.Hour())), nil
+		return core.NewInt(int64(o.value.Hour())), nil
 
 	case "minute":
-		return alloc.NewInt(int64(o.value.Minute())), nil
+		return core.NewInt(int64(o.value.Minute())), nil
 
 	case "second":
-		return alloc.NewInt(int64(o.value.Second())), nil
+		return core.NewInt(int64(o.value.Second())), nil
 
 	case "nanosecond":
-		return alloc.NewInt(int64(o.value.Nanosecond())), nil
+		return core.NewInt(int64(o.value.Nanosecond())), nil
 
 	case "unix":
-		return alloc.NewInt(o.value.Unix()), nil
+		return core.NewInt(o.value.Unix()), nil
 
 	case "unix_nano":
-		return alloc.NewInt(o.value.UnixNano()), nil
+		return core.NewInt(o.value.UnixNano()), nil
 
 	case "week_day":
-		return alloc.NewInt(int64(o.value.Weekday())), nil
+		return core.NewInt(int64(o.value.Weekday())), nil
 
 	case "year_day":
-		return alloc.NewInt(int64(o.value.YearDay())), nil
+		return core.NewInt(int64(o.value.YearDay())), nil
 
 	case "month_name":
-		return alloc.NewString(o.value.Month().String()), nil
+		return alloc.NewStringValue(o.value.Month().String()), nil
 
 	case "week_day_name":
-		return alloc.NewString(o.value.Weekday().String()), nil
+		return alloc.NewStringValue(o.value.Weekday().String()), nil
 
 	case "utc":
-		return alloc.NewTime(o.value.UTC()), nil
+		return alloc.NewTimeValue(o.value.UTC()), nil
 
 	case "local":
-		return alloc.NewTime(o.value.Local()), nil
+		return alloc.NewTimeValue(o.value.Local()), nil
 
 	case "date_str":
-		return alloc.NewString(o.value.Format(time.DateOnly)), nil
+		return alloc.NewStringValue(o.value.Format(time.DateOnly)), nil
 
 	case "time_str":
-		return alloc.NewString(o.value.Format(time.TimeOnly)), nil
+		return alloc.NewStringValue(o.value.Format(time.TimeOnly)), nil
 
 	case "date_time_str":
-		return alloc.NewString(o.value.Format(time.DateTime)), nil
+		return alloc.NewStringValue(o.value.Format(time.DateTime)), nil
 
 	case "zone_offset":
 		_, offset := o.value.Zone()
-		return alloc.NewInt(int64(offset)), nil
+		return core.NewInt(int64(offset)), nil
 
 	case "zone_name":
 		name, _ := o.value.Zone()
-		return alloc.NewString(name), nil
+		return alloc.NewStringValue(name), nil
 
 	default:
-		return nil, core.NewInvalidSelectorError(o, k)
+		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 	}
-
 }
 
-func (o *Time) Assign(core.Object, core.Object) error {
-	return core.NewNotAssignableError(o)
+func (o *Time) Assign(core.Value, core.Value) error {
+	return core.NewNotAssignableError(o.TypeName())
+}
+
+func (o *Time) IsTime() bool {
+	return true
 }
 
 func (o *Time) IsTrue() bool {
@@ -191,16 +195,12 @@ func (o *Time) IsFalse() bool {
 	return o.value.IsZero()
 }
 
-func (o *Time) IsImmutable() bool {
-	return true
-}
-
 func (o *Time) AsString() (string, bool) {
 	return o.value.String(), true
 }
 
 func (o *Time) AsInt() (int64, bool) {
-	return o.value.Unix(), false
+	return o.value.Unix(), true
 }
 
 func (o *Time) AsBool() (bool, bool) {

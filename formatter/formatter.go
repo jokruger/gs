@@ -7,7 +7,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/value"
 )
 
 // Strings for use with fmtbuf.WriteString. This is less overhead than using fmtbuf.Write with byte arrays.
@@ -668,7 +667,7 @@ type pp struct {
 	buf fmtbuf
 
 	// arg holds the current item.
-	arg core.Object
+	arg core.Value
 
 	// fmt is used to format basic items such as integers or strings.
 	fmt formatter
@@ -710,7 +709,7 @@ func (p *pp) free() {
 	}
 
 	p.buf = p.buf[:0]
-	p.arg = nil
+	p.arg = core.NewUndefined()
 	ppFree.Put(p)
 }
 
@@ -790,14 +789,15 @@ func (p *pp) badVerb(verb rune) {
 	_, _ = p.WriteString(percentBangString)
 	_, _ = p.WriteRune(verb)
 	_, _ = p.WriteSingleByte('(')
-	switch {
-	case p.arg != nil:
+
+	if !p.arg.IsUndefined() {
 		_, _ = p.WriteString(p.arg.String())
 		_, _ = p.WriteSingleByte('=')
 		p.printArg(p.arg, 'v')
-	default:
+	} else {
 		_, _ = p.WriteString("undefined")
 	}
+
 	_, _ = p.WriteSingleByte(')')
 	p.erroring = false
 }
@@ -930,9 +930,9 @@ func (p *pp) fmtBytes(v []byte, verb rune, typeString string) {
 	}
 }
 
-func (p *pp) printArg(arg core.Object, verb rune) {
+func (p *pp) printArg(arg core.Value, verb rune) {
 	p.arg = arg
-	if arg == nil {
+	if arg.IsUndefined() {
 		p.fmt.fmtS("undefined")
 	}
 
@@ -948,24 +948,26 @@ func (p *pp) printArg(arg core.Object, verb rune) {
 	}
 
 	// Some types can be done without reflection.
-	switch f := arg.(type) {
-	case *value.Bool:
-		p.fmtBool(f.IsTrue(), verb)
-	case *value.Float:
-		p.fmtFloat(f.Value(), 64, verb)
-	case *value.Int:
-		p.fmtInteger(uint64(f.Value()), signed, verb)
-	case *value.String:
-		p.fmtString(f.Value(), verb)
-	case *value.Bytes:
-		p.fmtBytes(f.Value(), verb, "[]byte")
+	switch {
+	case arg.IsBool():
+		p.fmtBool(arg.Bool(), verb)
+	case arg.IsFloat():
+		p.fmtFloat(arg.Float(), 64, verb)
+	case arg.IsInt():
+		p.fmtInteger(uint64(arg.Int()), signed, verb)
+	case arg.IsString():
+		s, _ := arg.AsString()
+		p.fmtString(s, verb)
+	case arg.IsBytes():
+		b, _ := arg.AsBytes()
+		p.fmtBytes(b, verb, "[]byte")
 	default:
-		p.fmtString(f.String(), verb)
+		p.fmtString(arg.String(), verb)
 	}
 }
 
 // intFromArg gets the argNum-th element of a. On return, isInt reports whether the argument has integer type.
-func intFromArg(a []core.Object, argNum int) (num int, isInt bool, newArgNum int) {
+func intFromArg(a []core.Value, argNum int) (num int, isInt bool, newArgNum int) {
 	newArgNum = argNum
 	if argNum < len(a) {
 		var num64 int64
@@ -1035,7 +1037,7 @@ func (p *pp) missingArg(verb rune) {
 	_, _ = p.WriteString(missingString)
 }
 
-func (p *pp) doFormat(format string, a []core.Object) (err error) {
+func (p *pp) doFormat(format string, a []core.Value) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			if e, ok := r.(error); ok && errors.Is(e, core.ErrStringLimit) {
@@ -1212,7 +1214,7 @@ formatLoop:
 			if i > 0 {
 				_, _ = p.WriteString(commaSpaceString)
 			}
-			if arg == nil {
+			if arg.IsUndefined() {
 				_, _ = p.WriteString("undefined")
 			} else {
 				_, _ = p.WriteString(arg.TypeName())
@@ -1227,7 +1229,7 @@ formatLoop:
 }
 
 // Format is like fmt.Sprintf but using Objects.
-func Format(format string, a ...core.Object) (string, error) {
+func Format(format string, a ...core.Value) (string, error) {
 	p := newPrinter()
 	err := p.doFormat(format, a)
 	s := string(p.buf)

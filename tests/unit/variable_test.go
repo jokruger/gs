@@ -17,7 +17,7 @@ type VariableTest struct {
 	CharValue   rune
 	BoolValue   bool
 	StringValue string
-	Object      core.Object
+	Object      core.Value
 	IsUndefined bool
 }
 
@@ -32,7 +32,7 @@ func TestVariable(t *testing.T) {
 			CharValue:   rune(1),
 			BoolValue:   true,
 			StringValue: "1",
-			Object:      alloc.NewInt(1),
+			Object:      core.NewInt(1),
 		},
 		{
 			Name:        "b",
@@ -41,7 +41,7 @@ func TestVariable(t *testing.T) {
 			FloatValue:  52.11,
 			StringValue: "52.11",
 			BoolValue:   false, // cannot be parsed as a boolean, default to false
-			Object:      alloc.NewString("52.11"),
+			Object:      alloc.NewStringValue("52.11"),
 		},
 		{
 			Name:        "c",
@@ -51,13 +51,13 @@ func TestVariable(t *testing.T) {
 			FloatValue:  0,
 			BoolValue:   true,
 			StringValue: "true",
-			Object:      alloc.NewBool(true),
+			Object:      core.NewBool(true),
 		},
 		{
 			Name:        "d",
 			Value:       nil,
 			ValueType:   "undefined",
-			Object:      alloc.NewUndefined(),
+			Object:      core.NewUndefined(),
 			IsUndefined: true,
 		},
 	}
@@ -67,7 +67,8 @@ func TestVariable(t *testing.T) {
 		require.NoError(t, err)
 
 		v := gs.NewVariable(tc.Name, o)
-		require.Equal(t, tc.Value, v.Value().Interface(), "Name: %s", tc.Name)
+		val := v.Value()
+		require.Equal(t, tc.Value, val.Interface(), "Name: %s", tc.Name)
 		require.Equal(t, tc.ValueType, v.ValueType(), "Name: %s", tc.Name)
 		require.Equal(t, tc.IntValue, v.Int(), "Name: %s", tc.Name)
 		require.Equal(t, tc.FloatValue, v.Float(), "Name: %s", tc.Name)

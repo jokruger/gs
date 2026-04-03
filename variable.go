@@ -11,11 +11,11 @@ import (
 // Variable is a user-defined variable for the script.
 type Variable struct {
 	name  string
-	value core.Object
+	value core.Value
 }
 
 // NewVariable creates a Variable.
-func NewVariable(name string, val core.Object) *Variable {
+func NewVariable(name string, val core.Value) *Variable {
 	return &Variable{
 		name:  name,
 		value: val,
@@ -28,7 +28,7 @@ func (v *Variable) Name() string {
 }
 
 // Value returns the value of the variable.
-func (v *Variable) Value() core.Object {
+func (v *Variable) Value() core.Value {
 	return v.value
 }
 
@@ -59,7 +59,7 @@ func (v *Variable) Float() float64 {
 // Char returns rune value of the variable value. It returns 0 if the value is
 // not convertible to rune.
 func (v *Variable) Char() rune {
-	c, _ := v.value.AsRune()
+	c, _ := v.value.AsChar()
 	return c
 }
 
@@ -71,10 +71,9 @@ func (v *Variable) Bool() bool {
 
 // Array returns []interface value of the variable value. It returns 0 if the value is not convertible to []interface.
 func (v *Variable) Array() []any {
-	switch val := v.value.(type) {
-	case *value.Array:
+	if v.value.IsArray() {
 		var arr []any
-		for _, e := range val.Value() {
+		for _, e := range v.value.Object().(*value.Array).Value() {
 			arr = append(arr, e.Interface())
 		}
 		return arr
@@ -84,20 +83,22 @@ func (v *Variable) Array() []any {
 
 // Map returns map[string]any value of the variable value. It returns 0 if the value is not convertible to map[string]any.
 func (v *Variable) Map() map[string]any {
-	switch val := v.value.(type) {
-	case *value.Record:
+	if v.value.IsMap() {
 		kv := make(map[string]any)
-		for mk, mv := range val.Value() {
-			kv[mk] = mv.Interface()
-		}
-		return kv
-	case *value.Map:
-		kv := make(map[string]any)
-		for mk, mv := range val.Value() {
+		for mk, mv := range v.value.Object().(*value.Map).Value() {
 			kv[mk] = mv.Interface()
 		}
 		return kv
 	}
+
+	if v.value.IsRecord() {
+		kv := make(map[string]any)
+		for mk, mv := range v.value.Object().(*value.Record).Value() {
+			kv[mk] = mv.Interface()
+		}
+		return kv
+	}
+
 	return nil
 }
 
@@ -115,19 +116,17 @@ func (v *Variable) Bytes() []byte {
 	return c
 }
 
-// Error returns an error if the underlying value is error object. If not,
-// this returns nil.
+// Error returns an error if the underlying value is error object. If not, this returns nil.
 func (v *Variable) Error() error {
-	err, ok := v.value.(*value.Error)
-	if ok {
-		return errors.New(err.String())
+	if v.value.IsError() {
+		return errors.New(v.value.Object().(*value.Error).String())
 	}
 	return nil
 }
 
 // Object returns an underlying Object of the variable value. Note that
 // returned Object is a copy of an actual Object used in the script.
-func (v *Variable) Object() core.Object {
+func (v *Variable) Object() core.Value {
 	return v.value
 }
 

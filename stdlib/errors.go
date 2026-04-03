@@ -4,10 +4,13 @@ import (
 	"github.com/jokruger/gs/core"
 )
 
-func wrapError(vm core.VM, err error) core.Object {
-	alloc := vm.Allocator()
+// wrapError converts a Go error into a GS error value.
+// If the error is nil, it returns a boolean true value (many stdlib functions expected to return True if no errors occurred).
+func wrapError(vm core.VM, err error) core.Value {
 	if err == nil {
-		return alloc.NewBool(true)
+		return core.NewBool(true)
 	}
-	return alloc.NewError(alloc.NewString(err.Error()))
+	alloc := vm.Allocator()
+	payload := alloc.NewStringValue(err.Error())
+	return alloc.NewErrorValue(payload)
 }

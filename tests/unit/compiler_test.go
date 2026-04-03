@@ -1338,7 +1338,7 @@ func concatInsts(instructions ...[]byte) []byte {
 	return concat
 }
 
-func bytecode(instructions []byte, constants []core.Object) *vm.Bytecode {
+func bytecode(instructions []byte, constants []core.Value) *vm.Bytecode {
 	return &vm.Bytecode{
 		FileSet:      parser.NewFileSet(),
 		MainFunction: &value.CompiledFunction{Instructions: instructions},
@@ -1386,7 +1386,7 @@ func equalBytecode(t *testing.T, expected, actual *vm.Bytecode) {
 	equalConstants(t, expected.Constants, actual.Constants)
 }
 
-func equalConstants(t *testing.T, expected, actual []core.Object) {
+func equalConstants(t *testing.T, expected, actual []core.Value) {
 	require.Equal(t, len(expected), len(actual))
 	for i := 0; i < len(expected); i++ {
 		require.Equal(t, expected[i], actual[i])
@@ -1402,7 +1402,7 @@ func (o *compileTracer) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func traceCompile(input string, symbols map[string]core.Object) (res *vm.Bytecode, trace []string, err error) {
+func traceCompile(input string, symbols map[string]core.Value) (res *vm.Bytecode, trace []string, err error) {
 	fileSet := parser.NewFileSet()
 	file := fileSet.AddFile("test", -1, len(input))
 
@@ -1413,7 +1413,7 @@ func traceCompile(input string, symbols map[string]core.Object) (res *vm.Bytecod
 		symTable.Define(name)
 	}
 	for idx, fn := range vm.BuiltinFuncs {
-		symTable.DefineBuiltin(idx, fn.Name())
+		symTable.DefineBuiltin(idx, fn.Object().(*value.BuiltinFunction).Name())
 	}
 
 	tr := &compileTracer{}
@@ -1440,22 +1440,23 @@ func traceCompile(input string, symbols map[string]core.Object) (res *vm.Bytecod
 	return
 }
 
-func objectsArray(o ...core.Object) []core.Object {
+func objectsArray(o ...core.Value) []core.Value {
 	return o
 }
 
-func intObject(v int64) *value.Int {
-	return alloc.NewInt(v).(*value.Int)
+func intObject(v int64) core.Value {
+	return core.NewInt(v)
 }
 
-func stringObject(v string) *value.String {
-	return alloc.NewString(v).(*value.String)
+func stringObject(v string) core.Value {
+	return alloc.NewStringValue(v)
 }
 
-func compiledFunction(numLocals, numParams int, insts ...[]byte) *value.CompiledFunction {
-	return &value.CompiledFunction{
+func compiledFunction(numLocals, numParams int, insts ...[]byte) core.Value {
+	t := &value.CompiledFunction{
 		Instructions:  concatInsts(insts...),
 		NumLocals:     numLocals,
 		NumParameters: numParams,
 	}
+	return core.NewObject(t, false)
 }

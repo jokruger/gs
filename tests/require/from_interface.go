@@ -7,58 +7,75 @@ import (
 	"github.com/jokruger/gs/core"
 )
 
-func FromInterface(alloc core.Allocator, v any) (core.Object, error) {
+func FromInterface(alloc core.Allocator, v any) (core.Value, error) {
 	switch v := v.(type) {
 	case nil:
-		return alloc.NewUndefined(), nil
+		return core.NewUndefined(), nil
+
 	case string:
-		return alloc.NewString(v), nil
+		return alloc.NewStringValue(v), nil
+
 	case int64:
-		return alloc.NewInt(v), nil
+		return core.NewInt(v), nil
+
 	case int:
-		return alloc.NewInt(int64(v)), nil
+		return core.NewInt(int64(v)), nil
+
 	case bool:
-		return alloc.NewBool(v), nil
+		return core.NewBool(v), nil
+
 	case rune:
-		return alloc.NewChar(v), nil
+		return core.NewChar(v), nil
+
 	case byte:
-		return alloc.NewChar(rune(v)), nil
+		return core.NewChar(rune(v)), nil
+
 	case float64:
-		return alloc.NewFloat(v), nil
+		return core.NewFloat(v), nil
+
 	case []byte:
-		return alloc.NewBytes(v), nil
+		return alloc.NewBytesValue(v), nil
+
 	case error:
-		return alloc.NewError(alloc.NewString(v.Error())), nil
-	case map[string]core.Object:
-		return alloc.NewRecord(v, false), nil
+		return alloc.NewErrorValue(alloc.NewStringValue(v.Error())), nil
+
+	case map[string]core.Value:
+		return alloc.NewRecordValue(v, false), nil
+
 	case map[string]any:
-		kv := make(map[string]core.Object)
+		kv := make(map[string]core.Value)
 		for vk, vv := range v {
 			vo, err := FromInterface(alloc, vv)
 			if err != nil {
-				return nil, err
+				return core.NewUndefined(), err
 			}
 			kv[vk] = vo
 		}
-		return alloc.NewRecord(kv, false), nil
-	case []core.Object:
-		return alloc.NewArray(v, false), nil
+		return alloc.NewRecordValue(kv, false), nil
+
+	case []core.Value:
+		return alloc.NewArrayValue(v, false), nil
+
 	case []any:
-		arr := make([]core.Object, len(v))
+		arr := make([]core.Value, len(v))
 		for i, e := range v {
 			vo, err := FromInterface(alloc, e)
 			if err != nil {
-				return nil, err
+				return core.NewUndefined(), err
 			}
 			arr[i] = vo
 		}
-		return alloc.NewArray(arr, false), nil
+		return alloc.NewArrayValue(arr, false), nil
+
 	case time.Time:
-		return alloc.NewTime(v), nil
-	case core.Object:
+		return alloc.NewTimeValue(v), nil
+
+	case core.Value:
 		return v, nil
+
 	case core.NativeFunc:
-		return alloc.NewBuiltinFunction("anonymous", v, 0, true), nil
+		return alloc.NewBuiltinFunctionValue("anonymous", v, 0, true), nil
 	}
-	return nil, fmt.Errorf("cannot convert to object: %T", v)
+
+	return core.NewUndefined(), fmt.Errorf("cannot convert to object: %T", v)
 }

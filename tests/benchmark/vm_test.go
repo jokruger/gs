@@ -1,0 +1,77 @@
+package benchmark
+
+import (
+	"testing"
+
+	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/alloc"
+	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/parser"
+	"github.com/jokruger/gs/vm"
+)
+
+func BenchmarkVM(b *testing.B) {
+	//src := []byte(`out = range(1, 10000, 1).reduce(0, (a, b) => a + b * b)`)
+	src := []byte(`
+	x := range(1, 10000, 1)
+	out = 0
+	for e in x {
+		out = out + e * e
+	}`)
+
+	a := alloc.New()
+	astFile, err := parse(src)
+	if err != nil {
+		b.Fatal(err)
+	}
+	bytecode, err := compileFile(a, astFile)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	b.Run("vmRun", func(b *testing.B) {
+		var res core.Value
+		var err error
+
+		for i := 0; i < b.N; i++ {
+			res, err = runVM(a, bytecode)
+		}
+
+		if err != nil {
+			b.Fatal(err)
+		}
+		if res.String() != "333283335000" {
+			b.Fatalf("unexpected result: %s", res.String())
+		}
+	})
+}
+
+func parse(input []byte) (*parser.File, error) {
+	fileSet := parser.NewFileSet()
+	inputFile := fileSet.AddFile("bench", -1, len(input))
+	p := parser.NewParser(inputFile, input, nil)
+	return p.ParseFile()
+}
+
+func compileFile(a core.Allocator, file *parser.File) (*vm.Bytecode, error) {
+	symTable := vm.NewSymbolTable()
+	symTable.Define("out")
+	c := gs.NewCompiler(a, file.InputFile, symTable, nil, nil, nil)
+	if err := c.Compile(file); err != nil {
+		return nil, err
+	}
+	bytecode := c.Bytecode()
+	bytecode.RemoveDuplicates()
+	return bytecode, nil
+}
+
+func runVM(a core.Allocator, bytecode *vm.Bytecode) (core.Value, error) {
+	globals := make([]core.Value, vm.GlobalsSize)
+
+	v := vm.NewVM(a, bytecode, globals, -1)
+	if err := v.Run(); err != nil {
+		return core.NewUndefined(), err
+	}
+
+	return globals[0], nil
+}

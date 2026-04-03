@@ -5,7 +5,7 @@ import (
 )
 
 type Module struct {
-	Attrs map[string]core.Object
+	Attrs map[string]core.Value
 }
 
 // Import returns an immutable record for the module.
@@ -14,11 +14,11 @@ func (m *Module) Import(alloc core.Allocator, moduleName string) (any, error) {
 }
 
 // AsImmutableRecord converts builtin module into an immutable record.
-func (m *Module) AsImmutableRecord(alloc core.Allocator, moduleName string) core.Object {
-	attrs := make(map[string]core.Object, len(m.Attrs))
+func (m *Module) AsImmutableRecord(alloc core.Allocator, moduleName string) core.Value {
+	attrs := make(map[string]core.Value, len(m.Attrs))
 	for k, v := range m.Attrs {
 		attrs[k] = v.Copy(alloc)
 	}
-	attrs["__module_name__"] = alloc.NewString(moduleName)
-	return alloc.NewRecord(attrs, true)
+	attrs["__module_name__"] = alloc.NewStringValue(moduleName)
+	return alloc.NewRecordValue(attrs, true)
 }

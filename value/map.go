@@ -13,7 +13,7 @@ import (
 
 type Map struct {
 	Object
-	value     map[string]core.Object
+	value     map[string]core.Value
 	immutable bool
 }
 
@@ -21,7 +21,7 @@ func (o *Map) GobDecode(b []byte) error {
 	buf := bytes.NewBuffer(b)
 	dec := gob.NewDecoder(buf)
 
-	var vals map[string]core.Object
+	var vals map[string]core.Value
 	if err := dec.Decode(&vals); err != nil {
 		return err
 	}
@@ -42,6 +42,7 @@ func (o *Map) GobEncode() ([]byte, error) {
 	if err := enc.Encode(o.value); err != nil {
 		return nil, err
 	}
+
 	if err := enc.Encode(o.immutable); err != nil {
 		return nil, err
 	}
@@ -49,16 +50,15 @@ func (o *Map) GobEncode() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (o *Map) Set(val map[string]core.Object, immutable bool) {
+func (o *Map) Set(val map[string]core.Value, immutable bool) {
 	o.value = val
 	if o.value == nil {
-		o.value = make(map[string]core.Object)
+		o.value = make(map[string]core.Value)
 	}
-
 	o.immutable = immutable
 }
 
-func (o *Map) Value() map[string]core.Object {
+func (o *Map) Value() map[string]core.Value {
 	return o.value
 }
 
@@ -79,7 +79,7 @@ func (o *Map) Has(key string) bool {
 	return ok
 }
 
-func (o *Map) Get(key string) (core.Object, bool) {
+func (o *Map) Get(key string) (core.Value, bool) {
 	v, ok := o.value[key]
 	return v, ok
 }
@@ -92,8 +92,8 @@ func (o *Map) Keys() []string {
 	return keys
 }
 
-func (o *Map) SetKey(key string, value core.Object) {
-	o.value[key] = value
+func (o *Map) SetKey(key string, val core.Value) {
+	o.value[key] = val
 }
 
 func (o *Map) TypeName() string {
@@ -119,12 +119,16 @@ func (o *Map) Interface() any {
 	return res
 }
 
-func (o *Map) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Object, error) {
-	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
+func (o *Map) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
+	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
-func (o *Map) Equals(x core.Object) bool {
-	switch x := x.(type) {
+func (o *Map) Equals(x core.Value) bool {
+	if !x.IsObject() {
+		return false
+	}
+
+	switch x := x.Object().(type) {
 	case *Map:
 		if len(o.value) != len(x.value) {
 			return false
@@ -150,38 +154,39 @@ func (o *Map) Equals(x core.Object) bool {
 	}
 }
 
-func (o *Map) Copy(alloc core.Allocator) core.Object {
+func (o *Map) Copy(alloc core.Allocator) core.Value {
 	// perform a deep copy of the map even if it is immutable (since the values may be mutable)
-	c := make(map[string]core.Object, len(o.value))
+	c := make(map[string]core.Value, len(o.value))
 	for k, v := range o.value {
 		c[k] = v.Copy(alloc)
 	}
-	return alloc.NewMap(c, false) // copy always returns a mutable map
+	return alloc.NewMapValue(c, false)
 }
 
-func (o *Map) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Object, error) {
+func (o *Map) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return nil, core.NewInvalidIndexTypeError("map access", "string", index)
+		return core.NewUndefined(), core.NewInvalidIndexTypeError("map access", "string", index.TypeName())
 	}
 
 	if mode == parser.OpIndex {
 		r, ok := o.value[k]
 		if !ok {
-			return vm.Allocator().NewUndefined(), nil
+			return core.NewUndefined(), nil
 		}
 		return r, nil
 	}
 
 	switch k {
 	case "record":
-		return vm.Allocator().NewRecord(o.value, o.immutable), nil
+		t := vm.Allocator().NewRecord(o.value, o.immutable)
+		return core.NewObject(t, false), nil
 
 	case "empty":
-		return vm.Allocator().NewBool(len(o.value) == 0), nil
+		return core.NewBool(len(o.value) == 0), nil
 
 	case "len":
-		return vm.Allocator().NewInt(int64(len(o.value))), nil
+		return core.NewInt(int64(len(o.value))), nil
 
 	case "keys":
 		return o.keys(vm)
@@ -202,18 +207,18 @@ func (o *Map) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Obje
 		return o.fnAny(vm, "map.any")
 
 	default:
-		return nil, core.NewInvalidSelectorError(o, k)
+		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 	}
 }
 
-func (o *Map) Assign(index, value core.Object) error {
+func (o *Map) Assign(index, value core.Value) error {
 	if o.immutable {
-		return core.NewNotAssignableError(o)
+		return core.NewNotAssignableError(o.TypeName())
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return core.NewInvalidIndexTypeError("map assignment", "string", index)
+		return core.NewInvalidIndexTypeError("map assignment", "string", index.TypeName())
 	}
 	o.value[k] = value
 
@@ -222,6 +227,14 @@ func (o *Map) Assign(index, value core.Object) error {
 
 func (o *Map) Iterate(alloc core.Allocator) core.Iterator {
 	return alloc.NewMapIterator(o.value)
+}
+
+func (o *Map) IsImmutable() bool {
+	return o.immutable
+}
+
+func (o *Map) IsMap() bool {
+	return true
 }
 
 func (o *Map) IsTrue() bool {
@@ -236,10 +249,6 @@ func (o *Map) IsIterable() bool {
 	return true
 }
 
-func (o *Map) IsImmutable() bool {
-	return o.immutable
-}
-
 func (o *Map) AsString() (string, bool) {
 	return o.String(), true
 }
@@ -248,78 +257,79 @@ func (o *Map) AsBool() (bool, bool) {
 	return o.IsTrue(), true
 }
 
-func (o *Map) keys(vm core.VM) (core.Object, error) {
+func (o *Map) keys(vm core.VM) (core.Value, error) {
 	alloc := vm.Allocator()
-	keys := make([]core.Object, 0, len(o.value))
+	keys := make([]core.Value, 0, len(o.value))
 	for k := range o.value {
-		keys = append(keys, alloc.NewString(k))
+		keys = append(keys, alloc.NewStringValue(k))
 	}
-	return alloc.NewArray(keys, false), nil
+	return alloc.NewArrayValue(keys, false), nil
 }
 
-func (o *Map) values(vm core.VM) (core.Object, error) {
+func (o *Map) values(vm core.VM) (core.Value, error) {
 	alloc := vm.Allocator()
-	values := make([]core.Object, 0, len(o.value))
+	values := make([]core.Value, 0, len(o.value))
 	for _, v := range o.value {
 		values = append(values, v)
 	}
-	return alloc.NewArray(values, false), nil
+	return alloc.NewArrayValue(values, false), nil
 }
 
-func (o *Map) fnFilter(vm core.VM, name string) (core.Object, error) {
-	return vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Object) (core.Object, error) {
+func (o *Map) fnFilter(vm core.VM, name string) (core.Value, error) {
+	obj := vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Value) (core.Value, error) {
 		if len(args) != 1 {
-			return nil, core.NewWrongNumArgumentsError(name, "1", len(args))
+			return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
 		}
 
 		fn := args[0]
 		if !fn.IsCallable() || fn.IsVariadic() {
-			return nil, core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn)
+			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 		}
 
 		alloc := vm.Allocator()
 		switch fn.Arity() {
 		case 1:
-			filtered := make(map[string]core.Object, len(o.value))
+			filtered := make(map[string]core.Value, len(o.value))
 			for k, v := range o.value {
-				res, err := fn.Call(vm, alloc.NewString(k))
+				res, err := fn.Call(vm, alloc.NewStringValue(k))
 				if err != nil {
-					return nil, err
+					return core.NewUndefined(), err
 				}
 				if res.IsTrue() {
 					filtered[k] = v
 				}
 			}
-			return alloc.NewMap(filtered, false), nil
+			return alloc.NewMapValue(filtered, false), nil
 
 		case 2:
-			filtered := make(map[string]core.Object, len(o.value))
+			filtered := make(map[string]core.Value, len(o.value))
 			for k, v := range o.value {
-				res, err := fn.Call(vm, alloc.NewString(k), v)
+				res, err := fn.Call(vm, alloc.NewStringValue(k), v)
 				if err != nil {
-					return nil, err
+					return core.NewUndefined(), err
 				}
 				if res.IsTrue() {
 					filtered[k] = v
 				}
 			}
-			return alloc.NewMap(filtered, false), nil
+			return alloc.NewMapValue(filtered, false), nil
 
 		default:
-			return nil, core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn)
+			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 		}
-	}, 1, false), nil
+	}, 1, false)
+	return core.NewObject(obj, false), nil
 }
 
-func (o *Map) fnCount(vm core.VM, name string) (core.Object, error) {
-	return vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Object) (core.Object, error) {
+func (o *Map) fnCount(vm core.VM, name string) (core.Value, error) {
+	obj := vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Value) (core.Value, error) {
 		if len(args) != 1 {
-			return nil, core.NewWrongNumArgumentsError(name, "1", len(args))
+			return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
 		}
 
 		fn := args[0]
 		if !fn.IsCallable() || fn.IsVariadic() {
-			return nil, core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn)
+			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 		}
 
 		alloc := vm.Allocator()
@@ -327,117 +337,120 @@ func (o *Map) fnCount(vm core.VM, name string) (core.Object, error) {
 		case 1:
 			var count int64
 			for k := range o.value {
-				res, err := fn.Call(vm, alloc.NewString(k))
+				res, err := fn.Call(vm, alloc.NewStringValue(k))
 				if err != nil {
-					return nil, err
+					return core.NewUndefined(), err
 				}
 				if res.IsTrue() {
 					count++
 				}
 			}
-			return alloc.NewInt(count), nil
+			return core.NewInt(count), nil
 
 		case 2:
 			var count int64
 			for k, v := range o.value {
-				res, err := fn.Call(vm, alloc.NewString(k), v)
+				res, err := fn.Call(vm, alloc.NewStringValue(k), v)
 				if err != nil {
-					return nil, err
+					return core.NewUndefined(), err
 				}
 				if res.IsTrue() {
 					count++
 				}
 			}
-			return alloc.NewInt(count), nil
+			return core.NewInt(count), nil
 
 		default:
-			return nil, core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn)
+			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 		}
-	}, 1, false), nil
+	}, 1, false)
+	return core.NewObject(obj, false), nil
 }
 
-func (o *Map) fnAll(vm core.VM, name string) (core.Object, error) {
-	return vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Object) (core.Object, error) {
+func (o *Map) fnAll(vm core.VM, name string) (core.Value, error) {
+	obj := vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Value) (core.Value, error) {
 		if len(args) != 1 {
-			return nil, core.NewWrongNumArgumentsError(name, "1", len(args))
+			return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
 		}
 
 		fn := args[0]
 		if !fn.IsCallable() || fn.IsVariadic() {
-			return nil, core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn)
+			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 		}
 
 		alloc := vm.Allocator()
 		switch fn.Arity() {
 		case 1:
 			for k := range o.value {
-				res, err := fn.Call(vm, alloc.NewString(k))
+				res, err := fn.Call(vm, alloc.NewStringValue(k))
 				if err != nil {
-					return nil, err
+					return core.NewUndefined(), err
 				}
 				if res.IsFalse() {
-					return alloc.NewBool(false), nil
+					return core.NewBool(false), nil
 				}
 			}
-			return alloc.NewBool(true), nil
+			return core.NewBool(true), nil
 
 		case 2:
 			for k, v := range o.value {
-				res, err := fn.Call(vm, alloc.NewString(k), v)
+				res, err := fn.Call(vm, alloc.NewStringValue(k), v)
 				if err != nil {
-					return nil, err
+					return core.NewUndefined(), err
 				}
 				if res.IsFalse() {
-					return alloc.NewBool(false), nil
+					return core.NewBool(false), nil
 				}
 			}
-			return alloc.NewBool(true), nil
+			return core.NewBool(true), nil
 
 		default:
-			return nil, core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn)
+			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 		}
-	}, 1, false), nil
+	}, 1, false)
+	return core.NewObject(obj, false), nil
 }
 
-func (o *Map) fnAny(vm core.VM, name string) (core.Object, error) {
-	return vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Object) (core.Object, error) {
+func (o *Map) fnAny(vm core.VM, name string) (core.Value, error) {
+	obj := vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Value) (core.Value, error) {
 		if len(args) != 1 {
-			return nil, core.NewWrongNumArgumentsError(name, "1", len(args))
+			return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
 		}
 
 		fn := args[0]
 		if !fn.IsCallable() || fn.IsVariadic() {
-			return nil, core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn)
+			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 		}
 
 		alloc := vm.Allocator()
 		switch fn.Arity() {
 		case 1:
 			for k := range o.value {
-				res, err := fn.Call(vm, alloc.NewString(k))
+				res, err := fn.Call(vm, alloc.NewStringValue(k))
 				if err != nil {
-					return nil, err
+					return core.NewUndefined(), err
 				}
 				if res.IsTrue() {
-					return alloc.NewBool(true), nil
+					return core.NewBool(true), nil
 				}
 			}
-			return alloc.NewBool(false), nil
+			return core.NewBool(false), nil
 
 		case 2:
 			for k, v := range o.value {
-				res, err := fn.Call(vm, alloc.NewString(k), v)
+				res, err := fn.Call(vm, alloc.NewStringValue(k), v)
 				if err != nil {
-					return nil, err
+					return core.NewUndefined(), err
 				}
 				if res.IsTrue() {
-					return alloc.NewBool(true), nil
+					return core.NewBool(true), nil
 				}
 			}
-			return alloc.NewBool(false), nil
+			return core.NewBool(false), nil
 
 		default:
-			return nil, core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn)
+			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 		}
-	}, 1, false), nil
+	}, 1, false)
+	return core.NewObject(obj, false), nil
 }

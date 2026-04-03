@@ -59,11 +59,34 @@ func NotNil(t *testing.T, v any, msg ...any) {
 	}
 }
 
+// Transforms core.Value.Object into core.Object
+func Unbox(v any) any {
+	if v, ok := v.(core.Value); ok {
+		if v.IsObject() {
+			return v.Object()
+		}
+	}
+	return v
+}
+
 // IsType asserts expected and actual are of the same type.
 func IsType(t *testing.T, expected, actual any, msg ...any) {
-	// treat Record and Map as the same type for testing purposes since they are both maps with string keys
-	switch expected.(type) {
+	e := Unbox(expected)
+	a := Unbox(actual)
+
+	switch e := e.(type) {
+	case core.Value:
+		if a, ok := a.(core.Value); ok {
+			if a.Kind() == e.Kind() {
+				return
+			}
+			failExpectedActual(t, e.TypeName(), a.TypeName(), msg...)
+		} else {
+			failExpectedActual(t, e.TypeName(), reflect.TypeOf(a), msg...)
+		}
+
 	case *value.Record, *value.Map:
+		// treat Record and Map as the same type for testing purposes since they are both maps with string keys
 		if _, ok := actual.(*value.Record); ok {
 			return
 		}
@@ -73,155 +96,155 @@ func IsType(t *testing.T, expected, actual any, msg ...any) {
 	}
 
 	// test other types as normal
-	if reflect.TypeOf(expected) != reflect.TypeOf(actual) {
-		failExpectedActual(t, reflect.TypeOf(expected), reflect.TypeOf(actual), msg...)
+	if reflect.TypeOf(e) != reflect.TypeOf(a) {
+		failExpectedActual(t, reflect.TypeOf(e), reflect.TypeOf(a), msg...)
 	}
 }
 
 // Equal asserts expected and actual are equal.
 func Equal(t *testing.T, expected, actual any, msg ...any) {
-	if isNil(expected) {
-		Nil(t, actual, "expected nil, but got not nil")
+	e := Unbox(expected)
+	a := Unbox(actual)
+
+	if isNil(e) {
+		Nil(t, a, "expected nil, but got not nil")
 		return
 	}
-	NotNil(t, actual, "expected not nil, but got nil")
-	IsType(t, expected, actual, msg...)
+	NotNil(t, a, "expected not nil, but got nil")
+	IsType(t, e, a, msg...)
 
-	switch expected := expected.(type) {
+	switch e := e.(type) {
+	case core.ValueKind:
+		if e != a.(core.ValueKind) {
+			failExpectedActual(t, e, a, msg...)
+		}
+
 	case int:
-		if expected != actual.(int) {
-			failExpectedActual(t, expected, actual, msg...)
+		if e != a.(int) {
+			failExpectedActual(t, e, a, msg...)
 		}
 
 	case int64:
-		if expected != actual.(int64) {
-			failExpectedActual(t, expected, actual, msg...)
+		if e != a.(int64) {
+			failExpectedActual(t, e, a, msg...)
 		}
 
 	case float64:
-		if expected != actual.(float64) {
-			failExpectedActual(t, expected, actual, msg...)
+		if e != a.(float64) {
+			failExpectedActual(t, e, a, msg...)
 		}
 
 	case string:
-		if expected != actual.(string) {
-			failExpectedActual(t, expected, actual, msg...)
+		if e != a.(string) {
+			failExpectedActual(t, e, a, msg...)
 		}
 
 	case []byte:
-		if !bytes.Equal(expected, actual.([]byte)) {
-			failExpectedActual(t, string(expected),
-				string(actual.([]byte)), msg...)
+		if !bytes.Equal(e, a.([]byte)) {
+			failExpectedActual(t, string(e), string(a.([]byte)), msg...)
 		}
 
 	case []string:
-		if !equalStringSlice(expected, actual.([]string)) {
-			failExpectedActual(t, expected, actual, msg...)
+		if !equalStringSlice(e, a.([]string)) {
+			failExpectedActual(t, e, a, msg...)
 		}
 
 	case []int:
-		if !equalIntSlice(expected, actual.([]int)) {
-			failExpectedActual(t, expected, actual, msg...)
+		if !equalIntSlice(e, a.([]int)) {
+			failExpectedActual(t, e, a, msg...)
 		}
 
 	case bool:
-		if expected != actual.(bool) {
-			failExpectedActual(t, expected, actual, msg...)
+		if e != a.(bool) {
+			failExpectedActual(t, e, a, msg...)
 		}
 
 	case rune:
-		if expected != actual.(rune) {
-			failExpectedActual(t, expected, actual, msg...)
+		if e != a.(rune) {
+			failExpectedActual(t, e, a, msg...)
 		}
 
 	case *vm.Symbol:
-		if !equalSymbol(expected, actual.(*vm.Symbol)) {
-			failExpectedActual(t, expected, actual, msg...)
+		if !equalSymbol(e, a.(*vm.Symbol)) {
+			failExpectedActual(t, e, a, msg...)
 		}
 
 	case core.Pos:
-		if expected != actual.(core.Pos) {
-			failExpectedActual(t, expected, actual, msg...)
+		if e != a.(core.Pos) {
+			failExpectedActual(t, e, a, msg...)
 		}
 
 	case token.Token:
-		if expected != actual.(token.Token) {
-			failExpectedActual(t, expected, actual, msg...)
+		if e != a.(token.Token) {
+			failExpectedActual(t, e, a, msg...)
 		}
 
-	case []core.Object:
-		equalObjectSlice(t, expected, actual.([]core.Object), msg...)
-
-	case *value.Int:
-		Equal(t, expected.Value(), actual.(*value.Int).Value(), msg...)
-
-	case *value.Float:
-		Equal(t, expected.Value(), actual.(*value.Float).Value(), msg...)
+	case []core.Value:
+		equalObjectSlice(t, e, a.([]core.Value), msg...)
 
 	case *value.String:
-		Equal(t, expected.Value(), actual.(*value.String).Value(), msg...)
+		if e.Value() != a.(*value.String).Value() {
+			failExpectedActual(t, e.Value(), a.(*value.String).Value(), msg...)
+		}
 
-	case *value.Char:
-		Equal(t, expected.Value(), actual.(*value.Char).Value(), msg...)
-
-	case *value.Bool:
-		if expected != actual {
-			failExpectedActual(t, expected, actual, msg...)
+	case *value.Time:
+		if !e.Value().Equal(a.(*value.Time).Value()) {
+			failExpectedActual(t, e.Value(), a.(*value.Time).Value(), msg...)
 		}
 
 	case *value.Array:
-		equalObjectSlice(t, expected.Value(), actual.(*value.Array).Value(), msg...)
+		equalObjectSlice(t, e.Value(), a.(*value.Array).Value(), msg...)
 
 	case *value.Bytes:
-		if !bytes.Equal(expected.Value(), actual.(*value.Bytes).Value()) {
-			failExpectedActual(t, string(expected.Value()), string(actual.(*value.Bytes).Value()), msg...)
+		if !bytes.Equal(e.Value(), a.(*value.Bytes).Value()) {
+			failExpectedActual(t, string(e.Value()), string(a.(*value.Bytes).Value()), msg...)
 		}
 
 	case *value.Record:
-		if a, ok := actual.(*value.Map); ok {
-			equalObjectMap(t, expected.Value(), a.Value(), msg...)
-		} else {
-			equalObjectMap(t, expected.Value(), actual.(*value.Record).Value(), msg...)
+		if a, ok := a.(*value.Map); ok {
+			equalObjectMap(t, e.Value(), a.Value(), msg...)
+		}
+		if a, ok := a.(*value.Record); ok {
+			equalObjectMap(t, e.Value(), a.Value(), msg...)
 		}
 
 	case *value.Map:
-		if a, ok := actual.(*value.Record); ok {
-			equalObjectMap(t, expected.Value(), a.Value(), msg...)
-		} else {
-			equalObjectMap(t, expected.Value(), actual.(*value.Map).Value(), msg...)
+		if a, ok := a.(*value.Record); ok {
+			equalObjectMap(t, e.Value(), a.Value(), msg...)
+		}
+		if a, ok := a.(*value.Map); ok {
+			equalObjectMap(t, e.Value(), a.Value(), msg...)
 		}
 
 	case *value.CompiledFunction:
-		equalCompiledFunction(t, expected, actual.(*value.CompiledFunction), msg...)
-
-	case *value.Undefined:
-		if expected != actual {
-			failExpectedActual(t, expected, actual, msg...)
-		}
+		equalCompiledFunction(t, e, a.(*value.CompiledFunction), msg...)
 
 	case *value.Error:
-		Equal(t, expected.Value(), actual.(*value.Error).Value(), msg...)
+		if e.String() != a.(*value.Error).String() {
+			failExpectedActual(t, e.String(), a.(*value.Error).String(), msg...)
+		}
 
-	case core.Object:
-		if !expected.Equals(actual.(core.Object)) {
-			failExpectedActual(t, expected, actual, msg...)
+	case core.Value:
+		if !e.Equals(a.(core.Value)) {
+			failExpectedActual(t, e, a, msg...)
 		}
 
 	case *parser.SourceFileSet:
-		equalFileSet(t, expected, actual.(*parser.SourceFileSet), msg...)
+		equalFileSet(t, e, a.(*parser.SourceFileSet), msg...)
 
 	case *parser.SourceFile:
-		Equal(t, expected.Name, actual.(*parser.SourceFile).Name, msg...)
-		Equal(t, expected.Base, actual.(*parser.SourceFile).Base, msg...)
-		Equal(t, expected.Size, actual.(*parser.SourceFile).Size, msg...)
-		True(t, equalIntSlice(expected.Lines, actual.(*parser.SourceFile).Lines), msg...)
+		Equal(t, e.Name, a.(*parser.SourceFile).Name, msg...)
+		Equal(t, e.Base, a.(*parser.SourceFile).Base, msg...)
+		Equal(t, e.Size, a.(*parser.SourceFile).Size, msg...)
+		True(t, equalIntSlice(e.Lines, a.(*parser.SourceFile).Lines), msg...)
 
 	case error:
-		if expected != actual.(error) {
-			failExpectedActual(t, expected, actual, msg...)
+		if e != a.(error) {
+			failExpectedActual(t, e, a, msg...)
 		}
+
 	default:
-		panic(fmt.Errorf("type not implemented: %T", expected))
+		panic(fmt.Errorf("type not implemented: %T", e))
 	}
 }
 
@@ -283,7 +306,7 @@ func equalSymbol(a, b *vm.Symbol) bool {
 		a.Scope == b.Scope
 }
 
-func equalObjectSlice(t *testing.T, expected, actual []core.Object, msg ...any) {
+func equalObjectSlice(t *testing.T, expected, actual []core.Value, msg ...any) {
 	Equal(t, len(expected), len(actual), msg...)
 	for i := 0; i < len(expected); i++ {
 		Equal(t, expected[i], actual[i], msg...)
@@ -299,7 +322,7 @@ func equalFileSet(t *testing.T, expected, actual *parser.SourceFileSet, msg ...a
 	Equal(t, expected.LastFile, actual.LastFile)
 }
 
-func equalObjectMap(t *testing.T, expected, actual map[string]core.Object, msg ...any) {
+func equalObjectMap(t *testing.T, expected, actual map[string]core.Value, msg ...any) {
 	Equal(t, len(expected), len(actual), msg...)
 	for key, expectedVal := range expected {
 		actualVal := actual[key]

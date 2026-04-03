@@ -80,22 +80,22 @@ func (o *Bytes) Interface() any {
 	return o.value
 }
 
-func (o *Bytes) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Object, error) {
+func (o *Bytes) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
 	alloc := vm.Allocator()
 	v, ok := rhs.AsBytes()
 	if !ok {
-		return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
+		return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 	}
 
 	switch op {
 	case token.Add:
-		return alloc.NewBytes(append(o.value, v...)), nil
+		return alloc.NewBytesValue(append(o.value, v...)), nil
 	}
 
-	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
+	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
-func (o *Bytes) Equals(x core.Object) bool {
+func (o *Bytes) Equals(x core.Value) bool {
 	t, ok := x.AsBytes()
 	if !ok {
 		return false
@@ -103,83 +103,85 @@ func (o *Bytes) Equals(x core.Object) bool {
 	return bytes.Equal(o.value, t)
 }
 
-func (o *Bytes) Copy(alloc core.Allocator) core.Object {
+func (o *Bytes) Copy(alloc core.Allocator) core.Value {
 	t := make([]byte, len(o.value))
 	copy(t, o.value)
-	return alloc.NewBytes(t)
+	return core.NewObject(alloc.NewBytes(t), false)
 }
 
-func (o *Bytes) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Object, error) {
+func (o *Bytes) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	alloc := vm.Allocator()
 
 	if mode == parser.OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
-			return nil, core.NewInvalidIndexTypeError("bytes index", "int", index)
+			return core.NewUndefined(), core.NewInvalidIndexTypeError("bytes index", "int", index.TypeName())
 		}
-
 		if i < 0 || i >= int64(len(o.value)) {
-			return alloc.NewUndefined(), nil
+			return core.NewUndefined(), nil
 		}
-
-		return alloc.NewInt(int64(o.value[i])), nil
+		return core.NewInt(int64(o.value[i])), nil
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return nil, core.NewInvalidSelectorError(o, k)
+		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 	}
 
 	switch k {
 	case "bytes":
-		return o, nil
+		return core.NewObject(o, false), nil
 
 	case "array":
-		arr := make([]core.Object, len(o.value))
+		arr := make([]core.Value, len(o.value))
 		for i, b := range o.value {
-			arr[i] = alloc.NewInt(int64(b))
+			arr[i] = core.NewInt(int64(b))
 		}
-		return alloc.NewArray(arr, false), nil
+		return alloc.NewArrayValue(arr, false), nil
 
 	case "record":
-		m := make(map[string]core.Object, len(o.value))
+		m := make(map[string]core.Value, len(o.value))
 		for i, b := range o.value {
-			m[strconv.Itoa(i)] = alloc.NewInt(int64(b))
+			m[strconv.Itoa(i)] = core.NewInt(int64(b))
 		}
-		return alloc.NewMap(m, false), nil
+		return alloc.NewMapValue(m, false), nil
 
 	case "string":
-		return alloc.NewString(string(o.value)), nil
+		return alloc.NewStringValue(string(o.value)), nil
 
 	case "empty":
-		return alloc.NewBool(o.IsEmpty()), nil
+		return core.NewBool(o.IsEmpty()), nil
 
 	case "len":
-		return alloc.NewInt(int64(o.Len())), nil
+		return core.NewInt(int64(o.Len())), nil
 
 	case "first":
 		if len(o.value) == 0 {
-			return alloc.NewUndefined(), nil
+			return core.NewUndefined(), nil
 		}
-		return alloc.NewInt(int64(o.value[0])), nil
+		return core.NewInt(int64(o.value[0])), nil
 
 	case "last":
 		if len(o.value) == 0 {
-			return alloc.NewUndefined(), nil
+			return core.NewUndefined(), nil
 		}
-		return alloc.NewInt(int64(o.value[len(o.value)-1])), nil
+		return core.NewInt(int64(o.value[len(o.value)-1])), nil
 
 	default:
-		return nil, core.NewInvalidSelectorError(o, k)
+		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 	}
 }
 
-func (o *Bytes) Assign(core.Object, core.Object) error {
-	return core.NewNotAssignableError(o)
+func (o *Bytes) Assign(core.Value, core.Value) error {
+	return core.NewNotAssignableError(o.TypeName())
 }
 
 func (o *Bytes) Iterate(alloc core.Allocator) core.Iterator {
 	return alloc.NewBytesIterator(o.value)
+}
+
+func (o *Bytes) IsBytes() bool {
+	return true
 }
 
 func (o *Bytes) IsTrue() bool {
@@ -191,10 +193,6 @@ func (o *Bytes) IsFalse() bool {
 }
 
 func (o *Bytes) IsIterable() bool {
-	return true
-}
-
-func (o *Bytes) IsImmutable() bool {
 	return true
 }
 

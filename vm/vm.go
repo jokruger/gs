@@ -21,10 +21,10 @@ type frame struct {
 // VM is a virtual machine that executes the bytecode compiled by Compiler.
 type VM struct {
 	alloc       core.Allocator
-	constants   []core.Object
-	stack       [StackSize]core.Object
+	constants   []core.Value
+	stack       [StackSize]core.Value
 	sp          int
-	globals     []core.Object
+	globals     []core.Value
 	fileSet     *parser.SourceFileSet
 	frames      [MaxFrames]frame
 	framesIndex int
@@ -38,9 +38,9 @@ type VM struct {
 }
 
 // NewVM creates a VM.
-func NewVM(alloc core.Allocator, bytecode *Bytecode, globals []core.Object, maxAllocs int64) *VM {
+func NewVM(alloc core.Allocator, bytecode *Bytecode, globals []core.Value, maxAllocs int64) *VM {
 	if globals == nil {
-		globals = make([]core.Object, GlobalsSize)
+		globals = make([]core.Value, GlobalsSize)
 	}
 	v := &VM{
 		alloc:       alloc,
@@ -75,14 +75,14 @@ func (v *VM) IsStackEmpty() bool {
 }
 
 // Call calls a compiled function with the given arguments and returns the result.
-func (v *VM) Call(fn core.Object, args ...core.Object) (core.Object, error) {
+func (v *VM) Call(fn core.Object, args ...core.Value) (core.Value, error) {
 	switch f := fn.(type) {
 	case *value.CompiledFunction:
 		return v.call(f, args...)
 	case *value.BuiltinFunction:
 		return f.Call(v, args...)
 	default:
-		return nil, core.NewInvalidArgumentTypeError("vm.Call", "fn", "callable", fn)
+		return core.NewUndefined(), core.NewInvalidArgumentTypeError("vm.Call", "fn", "callable", fn.TypeName())
 	}
 }
 
@@ -128,7 +128,7 @@ func (v *VM) run() {
 			v.sp++
 
 		case parser.OpNull:
-			v.stack[v.sp] = v.alloc.NewUndefined()
+			v.stack[v.sp] = core.NewUndefined()
 			v.sp++
 
 		case parser.OpBinaryOp:
@@ -156,40 +156,40 @@ func (v *VM) run() {
 			right := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
 			v.sp -= 2
-			v.stack[v.sp] = v.alloc.NewBool(left.Equals(right))
+			v.stack[v.sp] = core.NewBool(left.Equals(right))
 			v.sp++
 
 		case parser.OpNotEqual:
 			right := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
 			v.sp -= 2
-			v.stack[v.sp] = v.alloc.NewBool(!left.Equals(right))
+			v.stack[v.sp] = core.NewBool(!left.Equals(right))
 			v.sp++
 
 		case parser.OpPop:
 			v.sp--
 
 		case parser.OpTrue:
-			v.stack[v.sp] = v.alloc.NewBool(true)
+			v.stack[v.sp] = core.NewBool(true)
 			v.sp++
 
 		case parser.OpFalse:
-			v.stack[v.sp] = v.alloc.NewBool(false)
+			v.stack[v.sp] = core.NewBool(false)
 			v.sp++
 
 		case parser.OpLNot:
 			operand := v.stack[v.sp-1]
 			v.sp--
-			v.stack[v.sp] = v.alloc.NewBool(operand.IsFalse())
+			v.stack[v.sp] = core.NewBool(operand.IsFalse())
 			v.sp++
 
 		case parser.OpBComplement:
 			operand := v.stack[v.sp-1]
 			v.sp--
 
-			switch x := operand.(type) {
-			case *value.Int:
-				var res core.Object = v.alloc.NewInt(^x.Value())
+			switch {
+			case operand.IsInt():
+				res := core.NewInt(^operand.Int())
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -206,9 +206,9 @@ func (v *VM) run() {
 			operand := v.stack[v.sp-1]
 			v.sp--
 
-			switch x := operand.(type) {
-			case *value.Int:
-				var res core.Object = v.alloc.NewInt(-x.Value())
+			switch {
+			case operand.IsInt():
+				res := core.NewInt(-operand.Int())
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -216,8 +216,8 @@ func (v *VM) run() {
 				}
 				v.stack[v.sp] = res
 				v.sp++
-			case *value.Float:
-				var res core.Object = v.alloc.NewFloat(-x.Value())
+			case operand.IsFloat():
+				res := core.NewFloat(-operand.Float())
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -272,7 +272,7 @@ func (v *VM) run() {
 			numSelectors := int(v.curInsts[v.ip])
 
 			// selectors and RHS value
-			selectors := make([]core.Object, numSelectors)
+			selectors := make([]core.Value, numSelectors)
 			for i := 0; i < numSelectors; i++ {
 				selectors[i] = v.stack[v.sp-numSelectors+i]
 			}
@@ -295,79 +295,85 @@ func (v *VM) run() {
 			v.ip += 2
 			numElements := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
 
-			var elements []core.Object
+			var elements []core.Value
 			for i := v.sp - numElements; i < v.sp; i++ {
 				elements = append(elements, v.stack[i])
 			}
 			v.sp -= numElements
 
-			var arr core.Object = v.alloc.NewArray(elements, false)
+			arr := v.alloc.NewArray(elements, false)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
 
-			v.stack[v.sp] = arr
+			v.stack[v.sp] = core.NewObject(arr, false)
 			v.sp++
 
 		case parser.OpRecord:
 			v.ip += 2
 			numElements := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
-			kv := make(map[string]core.Object, numElements)
+			kv := make(map[string]core.Value, numElements)
 			for i := v.sp - numElements; i < v.sp; i += 2 {
-				key := v.stack[i]
+				key, ok := v.stack[i].AsString()
+				if !ok {
+					v.err = fmt.Errorf("record keys must be strings, got: %s", v.stack[i].TypeName())
+					return
+				}
 				val := v.stack[i+1]
-				kv[key.(*value.String).Value()] = val
+				kv[key] = val
 			}
 			v.sp -= numElements
 
-			var m core.Object = v.alloc.NewRecord(kv, false)
+			m := v.alloc.NewRecord(kv, false)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
-			v.stack[v.sp] = m
+			v.stack[v.sp] = core.NewObject(m, false)
 			v.sp++
 
 		case parser.OpError:
 			val := v.stack[v.sp-1]
-			var e core.Object = v.alloc.NewError(val)
+			e := v.alloc.NewError(val)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
-			v.stack[v.sp-1] = e
+			v.stack[v.sp-1] = core.NewObject(e, false)
 
 		case parser.OpImmutable:
 			val := v.stack[v.sp-1]
-			switch val := val.(type) {
-			case *value.Array:
-				var t core.Object = v.alloc.NewArray(val.Value(), true)
-				v.allocs--
-				if v.allocs == 0 {
-					v.err = core.ErrObjectAllocLimit
-					return
+			if val.Kind() == core.V_OBJECT {
+				switch val := val.Object().(type) {
+				case *value.Array:
+					t := v.alloc.NewArray(val.Value(), true)
+					v.allocs--
+					if v.allocs == 0 {
+						v.err = core.ErrObjectAllocLimit
+						return
+					}
+					v.stack[v.sp-1] = core.NewObject(t, false)
+				case *value.Record:
+					t := v.alloc.NewRecord(val.Value(), true)
+					v.allocs--
+					if v.allocs == 0 {
+						v.err = core.ErrObjectAllocLimit
+						return
+					}
+					v.stack[v.sp-1] = core.NewObject(t, false)
+				case *value.Map:
+					t := v.alloc.NewMap(val.Value(), true)
+					v.allocs--
+					if v.allocs == 0 {
+						v.err = core.ErrObjectAllocLimit
+						return
+					}
+					v.stack[v.sp-1] = core.NewObject(t, false)
 				}
-				v.stack[v.sp-1] = t
-			case *value.Record:
-				var t core.Object = v.alloc.NewRecord(val.Value(), true)
-				v.allocs--
-				if v.allocs == 0 {
-					v.err = core.ErrObjectAllocLimit
-					return
-				}
-				v.stack[v.sp-1] = t
-			case *value.Map:
-				var t core.Object = v.alloc.NewMap(val.Value(), true)
-				v.allocs--
-				if v.allocs == 0 {
-					v.err = core.ErrObjectAllocLimit
-					return
-				}
-				v.stack[v.sp-1] = t
 			}
 
 		case parser.OpIndex, parser.OpSelect:
@@ -380,9 +386,6 @@ func (v *VM) run() {
 				v.err = err
 				return
 			}
-			if val == nil {
-				val = v.alloc.NewUndefined()
-			}
 			v.stack[v.sp] = val
 			v.sp++
 
@@ -394,22 +397,27 @@ func (v *VM) run() {
 
 			var lowIdx int64
 			if !low.IsUndefined() {
-				if lowInt, ok := low.(*value.Int); ok {
-					lowIdx = lowInt.Value()
+				if lowInt, ok := low.AsInt(); ok {
+					lowIdx = lowInt
 				} else {
 					v.err = fmt.Errorf("invalid slice index type: %s", low.TypeName())
 					return
 				}
 			}
 
-			switch left := left.(type) {
+			if left.Kind() != core.V_OBJECT {
+				v.err = fmt.Errorf("not indexable: %s", left.TypeName())
+				return
+			}
+
+			switch left := left.Object().(type) {
 			case *value.Array:
 				numElements := int64(left.Len())
 				var highIdx int64
 				if high.IsUndefined() {
 					highIdx = numElements
-				} else if highInt, ok := high.(*value.Int); ok {
-					highIdx = highInt.Value()
+				} else if highInt, ok := high.AsInt(); ok {
+					highIdx = highInt
 				} else {
 					v.err = fmt.Errorf("invalid slice index type: %s", high.TypeName())
 					return
@@ -428,21 +436,21 @@ func (v *VM) run() {
 				} else if highIdx > numElements {
 					highIdx = numElements
 				}
-				var val core.Object = v.alloc.NewArray(left.Slice(int(lowIdx), int(highIdx)), false)
+				val := v.alloc.NewArray(left.Slice(int(lowIdx), int(highIdx)), false)
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
 					return
 				}
-				v.stack[v.sp] = val
+				v.stack[v.sp] = core.NewObject(val, false)
 				v.sp++
 			case *value.String:
 				numElements := int64(left.Len())
 				var highIdx int64
 				if high.IsUndefined() {
 					highIdx = numElements
-				} else if highInt, ok := high.(*value.Int); ok {
-					highIdx = highInt.Value()
+				} else if highInt, ok := high.AsInt(); ok {
+					highIdx = highInt
 				} else {
 					v.err = fmt.Errorf("invalid slice index type: %s", high.TypeName())
 					return
@@ -461,21 +469,21 @@ func (v *VM) run() {
 				} else if highIdx > numElements {
 					highIdx = numElements
 				}
-				var val core.Object = v.alloc.NewString(left.Substring(int(lowIdx), int(highIdx)))
+				val := v.alloc.NewString(left.Substring(int(lowIdx), int(highIdx)))
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
 					return
 				}
-				v.stack[v.sp] = val
+				v.stack[v.sp] = core.NewObject(val, false)
 				v.sp++
 			case *value.Bytes:
 				numElements := int64(left.Len())
 				var highIdx int64
 				if high.IsUndefined() {
 					highIdx = numElements
-				} else if highInt, ok := high.(*value.Int); ok {
-					highIdx = highInt.Value()
+				} else if highInt, ok := high.AsInt(); ok {
+					highIdx = highInt
 				} else {
 					v.err = fmt.Errorf("invalid slice index type: %s", high.TypeName())
 					return
@@ -494,13 +502,13 @@ func (v *VM) run() {
 				} else if highIdx > numElements {
 					highIdx = numElements
 				}
-				var val core.Object = v.alloc.NewBytes(left.Slice(int(lowIdx), int(highIdx)))
+				val := v.alloc.NewBytes(left.Slice(int(lowIdx), int(highIdx)))
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
 					return
 				}
-				v.stack[v.sp] = val
+				v.stack[v.sp] = core.NewObject(val, false)
 				v.sp++
 			default:
 				v.err = fmt.Errorf("not indexable: %s", left.TypeName())
@@ -520,7 +528,12 @@ func (v *VM) run() {
 
 			if spread == 1 {
 				v.sp--
-				switch arr := v.stack[v.sp].(type) {
+				arg := v.stack[v.sp]
+				if arg.Kind() != core.V_OBJECT {
+					v.err = fmt.Errorf("spread operator requires an array, got: %s", arg.TypeName())
+					return
+				}
+				switch arr := arg.Object().(type) {
 				case *value.Array:
 					for _, item := range arr.Value() {
 						v.stack[v.sp] = item
@@ -533,19 +546,24 @@ func (v *VM) run() {
 				}
 			}
 
-			if callee, ok := val.(*value.CompiledFunction); ok {
+			if !val.IsObject() {
+				v.err = fmt.Errorf("not callable: %s", val.TypeName())
+				return
+			}
+
+			if callee, ok := val.Object().(*value.CompiledFunction); ok {
 				if callee.VarArgs {
 					// if the closure is variadic, roll up all variadic parameters into an array
 					realArgs := callee.NumParameters - 1
 					varArgs := numArgs - realArgs
 					if varArgs >= 0 {
 						numArgs = realArgs + 1
-						args := make([]core.Object, varArgs)
+						args := make([]core.Value, varArgs)
 						spStart := v.sp - varArgs
 						for i := spStart; i < v.sp; i++ {
 							args[i-spStart] = v.stack[i]
 						}
-						v.stack[spStart] = v.alloc.NewArray(args, false)
+						v.stack[spStart] = core.NewObject(v.alloc.NewArray(args, true), false)
 						v.sp = spStart + 1
 					}
 				}
@@ -589,7 +607,7 @@ func (v *VM) run() {
 				v.framesIndex++
 				v.sp = v.sp - numArgs + callee.NumLocals
 			} else {
-				var args []core.Object
+				var args []core.Value
 				args = append(args, v.stack[v.sp-numArgs:v.sp]...)
 				ret, e := val.Call(v, args...)
 				v.sp -= numArgs + 1
@@ -600,10 +618,6 @@ func (v *VM) run() {
 					return
 				}
 
-				// nil return -> undefined
-				if ret == nil {
-					ret = v.alloc.NewUndefined()
-				}
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -615,11 +629,11 @@ func (v *VM) run() {
 
 		case parser.OpReturn:
 			v.ip++
-			var retVal core.Object
+			var retVal core.Value
 			if int(v.curInsts[v.ip]) == 1 {
 				retVal = v.stack[v.sp-1]
 			} else {
-				retVal = v.alloc.NewUndefined()
+				retVal = core.NewUndefined()
 			}
 			//v.sp--
 			v.framesIndex--
@@ -652,9 +666,11 @@ func (v *VM) run() {
 			// this is needed because there can be free variables referencing the same local variables.
 			val := v.stack[v.sp-1]
 			v.sp--
-			if obj, ok := v.stack[sp].(*value.ObjectPtr); ok {
-				*obj.Value = val
-				val = obj
+			if v.stack[sp].IsObject() {
+				if obj, ok := v.stack[sp].Object().(*value.ObjectPtr); ok {
+					*obj.Value = val
+					val = core.NewObject(obj, false)
+				}
 			}
 			v.stack[sp] = val // also use a copy of popped value
 
@@ -664,15 +680,17 @@ func (v *VM) run() {
 			v.ip += 2
 
 			// selectors and RHS value
-			selectors := make([]core.Object, numSelectors)
+			selectors := make([]core.Value, numSelectors)
 			for i := 0; i < numSelectors; i++ {
 				selectors[i] = v.stack[v.sp-numSelectors+i]
 			}
 			val := v.stack[v.sp-numSelectors-1]
 			v.sp -= numSelectors + 1
 			dst := v.stack[v.curFrame.basePointer+localIndex]
-			if obj, ok := dst.(*value.ObjectPtr); ok {
-				dst = *obj.Value
+			if dst.IsObject() {
+				if obj, ok := dst.Object().(*value.ObjectPtr); ok {
+					dst = *obj.Value
+				}
 			}
 			if e := v.indexAssign(dst, val, selectors); e != nil {
 				v.err = e
@@ -683,8 +701,10 @@ func (v *VM) run() {
 			v.ip++
 			localIndex := int(v.curInsts[v.ip])
 			val := v.stack[v.curFrame.basePointer+localIndex]
-			if obj, ok := val.(*value.ObjectPtr); ok {
-				val = *obj.Value
+			if val.IsObject() {
+				if obj, ok := val.Object().(*value.ObjectPtr); ok {
+					val = *obj.Value
+				}
 			}
 			v.stack[v.sp] = val
 			v.sp++
@@ -699,17 +719,24 @@ func (v *VM) run() {
 			v.ip += 3
 			constIndex := int(v.curInsts[v.ip-1]) | int(v.curInsts[v.ip-2])<<8
 			numFree := int(v.curInsts[v.ip])
-			fn, ok := v.constants[constIndex].(*value.CompiledFunction)
+			if !v.constants[constIndex].IsCompiledFunction() {
+				v.err = fmt.Errorf("not function: %s", v.constants[constIndex].TypeName())
+				return
+			}
+			fn, ok := v.constants[constIndex].Object().(*value.CompiledFunction)
 			if !ok {
 				v.err = fmt.Errorf("not function: %s", fn.TypeName())
 				return
 			}
 			free := make([]*value.ObjectPtr, numFree)
 			for i := 0; i < numFree; i++ {
-				switch freeVar := (v.stack[v.sp-numFree+i]).(type) {
-				case *value.ObjectPtr:
-					free[i] = freeVar
-				default:
+				if v.stack[v.sp-numFree+i].IsObject() {
+					if freeVar, ok := v.stack[v.sp-numFree+i].Object().(*value.ObjectPtr); ok {
+						free[i] = freeVar
+					} else {
+						free[i] = &value.ObjectPtr{Value: &v.stack[v.sp-numFree+i]}
+					}
+				} else {
 					free[i] = &value.ObjectPtr{Value: &v.stack[v.sp-numFree+i]}
 				}
 			}
@@ -727,14 +754,14 @@ func (v *VM) run() {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
-			v.stack[v.sp] = cl
+			v.stack[v.sp] = core.NewObject(cl, false)
 			v.sp++
 
 		case parser.OpGetFreePtr:
 			v.ip++
 			freeIndex := int(v.curInsts[v.ip])
 			val := v.curFrame.freeVars[freeIndex]
-			v.stack[v.sp] = val
+			v.stack[v.sp] = core.NewObject(val, false)
 			v.sp++
 
 		case parser.OpGetFree:
@@ -756,13 +783,18 @@ func (v *VM) run() {
 			sp := v.curFrame.basePointer + localIndex
 			val := v.stack[sp]
 			var freeVar *value.ObjectPtr
-			if obj, ok := val.(*value.ObjectPtr); ok {
-				freeVar = obj
+			if val.IsObject() {
+				if obj, ok := val.Object().(*value.ObjectPtr); ok {
+					freeVar = obj
+				} else {
+					freeVar = &value.ObjectPtr{Value: &val}
+					v.stack[sp] = core.NewObject(freeVar, false)
+				}
 			} else {
 				freeVar = &value.ObjectPtr{Value: &val}
-				v.stack[sp] = freeVar
+				v.stack[sp] = core.NewObject(freeVar, false)
 			}
-			v.stack[v.sp] = freeVar
+			v.stack[v.sp] = core.NewObject(freeVar, false)
 			v.sp++
 
 		case parser.OpSetSelFree:
@@ -771,7 +803,7 @@ func (v *VM) run() {
 			numSelectors := int(v.curInsts[v.ip])
 
 			// selectors and RHS value
-			selectors := make([]core.Object, numSelectors)
+			selectors := make([]core.Value, numSelectors)
 			for i := 0; i < numSelectors; i++ {
 				selectors[i] = v.stack[v.sp-numSelectors+i]
 			}
@@ -784,40 +816,66 @@ func (v *VM) run() {
 			}
 
 		case parser.OpIteratorInit:
-			var iterator core.Object
 			dst := v.stack[v.sp-1]
 			v.sp--
 			if !dst.IsIterable() {
 				v.err = fmt.Errorf("not iterable: %s", dst.TypeName())
 				return
 			}
-			iterator = dst.Iterate(v.alloc)
+			iterator := dst.Iterate(v.alloc)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
-			v.stack[v.sp] = iterator
+			v.stack[v.sp] = core.NewObject(iterator, false)
 			v.sp++
 
 		case parser.OpIteratorNext:
 			iterator := v.stack[v.sp-1]
 			v.sp--
-			hasMore := iterator.(core.Iterator).Next()
-			v.stack[v.sp] = v.alloc.NewBool(hasMore)
+			if iterator.Kind() != core.V_OBJECT {
+				v.err = fmt.Errorf("not an iterator: %s", iterator.TypeName())
+				return
+			}
+			it, ok := iterator.Object().(core.Iterator)
+			if !ok {
+				v.err = fmt.Errorf("not an iterator: %s", iterator.TypeName())
+				return
+			}
+			hasMore := it.Next()
+			v.stack[v.sp] = core.NewBool(hasMore)
 			v.sp++
 
 		case parser.OpIteratorKey:
 			iterator := v.stack[v.sp-1]
 			v.sp--
-			val := iterator.(core.Iterator).Key(v.alloc)
+			if iterator.Kind() != core.V_OBJECT {
+				v.err = fmt.Errorf("not an iterator: %s", iterator.TypeName())
+				return
+			}
+			it, ok := iterator.Object().(core.Iterator)
+			if !ok {
+				v.err = fmt.Errorf("not an iterator: %s", iterator.TypeName())
+				return
+			}
+			val := it.Key(v.alloc)
 			v.stack[v.sp] = val
 			v.sp++
 
 		case parser.OpIteratorValue:
 			iterator := v.stack[v.sp-1]
 			v.sp--
-			val := iterator.(core.Iterator).Value(v.alloc)
+			if iterator.Kind() != core.V_OBJECT {
+				v.err = fmt.Errorf("not an iterator: %s", iterator.TypeName())
+				return
+			}
+			it, ok := iterator.Object().(core.Iterator)
+			if !ok {
+				v.err = fmt.Errorf("not an iterator: %s", iterator.TypeName())
+				return
+			}
+			val := it.Value(v.alloc)
 			v.stack[v.sp] = val
 			v.sp++
 
@@ -831,7 +889,7 @@ func (v *VM) run() {
 	}
 }
 
-func (v *VM) indexAssign(dst, src core.Object, selectors []core.Object) error {
+func (v *VM) indexAssign(dst, src core.Value, selectors []core.Value) error {
 	numSel := len(selectors)
 	for si := numSel - 1; si > 0; si-- {
 		next, err := dst.Access(v, selectors[si], parser.OpIndex)
@@ -843,23 +901,23 @@ func (v *VM) indexAssign(dst, src core.Object, selectors []core.Object) error {
 	return dst.Assign(selectors[0], src)
 }
 
-func (v *VM) call(fn *value.CompiledFunction, args ...core.Object) (core.Object, error) {
+func (v *VM) call(fn *value.CompiledFunction, args ...core.Value) (core.Value, error) {
 	// Check argument count and roll up variadic args if needed
 	numArgs := len(args)
 	if fn.VarArgs {
 		if numArgs < fn.NumParameters-1 {
-			return nil, core.NewWrongNumArgumentsError("call", fmt.Sprintf("at least %d", fn.NumParameters-1), numArgs)
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("call", fmt.Sprintf("at least %d", fn.NumParameters-1), numArgs)
 		}
 		realArgs := fn.NumParameters - 1
 		varArgs := numArgs - realArgs
 		if varArgs >= 0 {
-			varArgsArray := make([]core.Object, varArgs)
+			varArgsArray := make([]core.Value, varArgs)
 			copy(varArgsArray, args[realArgs:])
-			args = append(args[:realArgs], v.alloc.NewArray(varArgsArray, false))
+			args = append(args[:realArgs], core.NewObject(v.alloc.NewArray(varArgsArray, true), false))
 			numArgs = realArgs + 1
 		}
 	} else if numArgs != fn.NumParameters {
-		return nil, core.NewWrongNumArgumentsError("call", fmt.Sprintf("%d", fn.NumParameters), numArgs)
+		return core.NewUndefined(), core.NewWrongNumArgumentsError("call", fmt.Sprintf("%d", fn.NumParameters), numArgs)
 	}
 
 	// Save current VM state
@@ -876,7 +934,7 @@ func (v *VM) call(fn *value.CompiledFunction, args ...core.Object) (core.Object,
 	// Check if we have room for frames
 	if v.framesIndex >= MaxFrames {
 		v.err = core.ErrStackOverflow
-		return nil, v.err
+		return core.NewUndefined(), v.err
 	}
 
 	// Create synthetic trampoline frame with just OpSuspend
@@ -899,15 +957,15 @@ func (v *VM) call(fn *value.CompiledFunction, args ...core.Object) (core.Object,
 	// This is where OpReturn will write the return value
 	if v.sp >= StackSize {
 		v.err = core.ErrStackOverflow
-		return nil, v.err
+		return core.NewUndefined(), v.err
 	}
-	v.stack[v.sp] = fn // Use the function itself as placeholder
+	v.stack[v.sp] = core.NewObject(fn, false) // Use the function itself as placeholder
 	v.sp++
 
 	// Push arguments onto stack
 	if v.sp+numArgs > StackSize {
 		v.err = core.ErrStackOverflow
-		return nil, v.err
+		return core.NewUndefined(), v.err
 	}
 	for _, arg := range args {
 		v.stack[v.sp] = arg
@@ -932,13 +990,10 @@ func (v *VM) call(fn *value.CompiledFunction, args ...core.Object) (core.Object,
 
 	// Extract result before restoring state
 	// OpReturn places the result at sp-1, which is the callee slot we reserved
-	var result core.Object
+	var result core.Value
 	if v.err == nil {
 		// The return value is at savedSp (the callee slot position)
 		result = v.stack[savedSp]
-		if result == nil {
-			result = v.alloc.NewUndefined()
-		}
 	}
 
 	// Restore VM state

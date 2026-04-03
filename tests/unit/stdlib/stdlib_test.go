@@ -109,47 +109,62 @@ func (c callres) call(funcName string, args ...any) callres {
 		return c
 	}
 
-	var oargs []core.Object
+	var oargs []core.Value
 	for _, v := range args {
 		oargs = append(oargs, object(v))
 	}
 
 	v := mock.Vm
-	switch o := c.o.(type) {
-	case *vm.Module:
+
+	if o, ok := c.o.(*vm.Module); ok {
 		m, ok := o.Attrs[funcName]
 		if !ok {
 			return callres{t: c.t, e: fmt.Errorf("function not found: %s", funcName)}
 		}
 
-		f, ok := m.(*value.BuiltinFunction)
+		if !m.IsBuiltinFunction() {
+			return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
+		}
+
+		f, ok := m.Object().(*value.BuiltinFunction)
 		if !ok {
 			return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
 		}
 
 		res, err := f.Call(v, oargs...)
 		return callres{t: c.t, o: res, e: err}
-
-	case *value.BuiltinFunction:
-		res, err := o.Call(v, oargs...)
-		return callres{t: c.t, o: res, e: err}
-
-	case *value.Record:
-		m, ok := o.Get(funcName)
-		if !ok {
-			return callres{t: c.t, e: fmt.Errorf("function not found: %s", funcName)}
-		}
-
-		f, ok := m.(*value.BuiltinFunction)
-		if !ok {
-			return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
-		}
-
-		res, err := f.Call(v, oargs...)
-		return callres{t: c.t, o: res, e: err}
-	default:
-		panic(fmt.Errorf("unexpected object: %v (%T)", o, o))
 	}
+
+	if o, ok := c.o.(core.Value); ok {
+		switch o := o.Object().(type) {
+		case *value.BuiltinFunction:
+			res, err := o.Call(v, oargs...)
+			return callres{t: c.t, o: res, e: err}
+
+		case *value.Record:
+			m, ok := o.Get(funcName)
+			if !ok {
+				return callres{t: c.t, e: fmt.Errorf("function not found: %s", funcName)}
+			}
+
+			if !m.IsBuiltinFunction() {
+				return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
+			}
+
+			f, ok := m.Object().(*value.BuiltinFunction)
+			if !ok {
+				return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
+			}
+
+			res, err := f.Call(v, oargs...)
+			return callres{t: c.t, o: res, e: err}
+
+		default:
+			panic(fmt.Errorf("unexpected object: %+v (%T)", o, o))
+		}
+	}
+
+	panic(fmt.Errorf("unexpected object: %+v (%T)", c.o, c.o))
 }
 
 func (c callres) expect(expected any, msgAndArgs ...any) {
@@ -170,58 +185,58 @@ func module(t *testing.T, moduleName string) callres {
 	return callres{t: t, o: mod}
 }
 
-func object(v any) core.Object {
+func object(v any) core.Value {
 	switch v := v.(type) {
-	case core.Object:
+	case core.Value:
 		return v
 	case string:
-		return alloc.NewString(v)
+		return alloc.NewStringValue(v)
 	case int64:
-		return alloc.NewInt(v)
+		return core.NewInt(v)
 	case int: // for convenience
-		return alloc.NewInt(int64(v))
+		return core.NewInt(int64(v))
 	case bool:
-		return alloc.NewBool(v)
+		return core.NewBool(v)
 	case rune:
-		return alloc.NewChar(v)
+		return core.NewChar(v)
 	case byte: // for convenience
-		return alloc.NewChar(rune(v))
+		return core.NewChar(rune(v))
 	case float64:
-		return alloc.NewFloat(v)
+		return core.NewFloat(v)
 	case []byte:
-		return alloc.NewBytes(v)
+		return alloc.NewBytesValue(v)
 	case MAP:
-		objs := make(map[string]core.Object)
+		objs := make(map[string]core.Value)
 		for k, v := range v {
 			objs[k] = object(v)
 		}
-		return alloc.NewRecord(objs, false)
+		return alloc.NewRecordValue(objs, false)
 	case ARR:
-		var objs []core.Object
+		var objs []core.Value
 		for _, e := range v {
 			objs = append(objs, object(e))
 		}
-		return alloc.NewArray(objs, false)
+		return alloc.NewArrayValue(objs, false)
 	case IMAP:
-		objs := make(map[string]core.Object)
+		objs := make(map[string]core.Value)
 		for k, v := range v {
 			objs[k] = object(v)
 		}
-		return alloc.NewRecord(objs, true)
+		return alloc.NewRecordValue(objs, true)
 	case IARR:
-		var objs []core.Object
+		var objs []core.Value
 		for _, e := range v {
 			objs = append(objs, object(e))
 		}
-		return alloc.NewArray(objs, true)
+		return alloc.NewArrayValue(objs, true)
 	case time.Time:
-		return alloc.NewTime(v)
+		return alloc.NewTimeValue(v)
 	case []int:
-		var objs []core.Object
+		var objs []core.Value
 		for _, e := range v {
-			objs = append(objs, alloc.NewInt(int64(e)))
+			objs = append(objs, core.NewInt(int64(e)))
 		}
-		return alloc.NewArray(objs, false)
+		return alloc.NewArrayValue(objs, false)
 	}
 
 	panic(fmt.Errorf("unknown type: %T", v))

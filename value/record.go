@@ -12,7 +12,7 @@ import (
 
 type Record struct {
 	Object
-	value     map[string]core.Object
+	value     map[string]core.Value
 	immutable bool
 }
 
@@ -20,7 +20,7 @@ func (o *Record) GobDecode(b []byte) error {
 	buf := bytes.NewBuffer(b)
 	dec := gob.NewDecoder(buf)
 
-	var vals map[string]core.Object
+	var vals map[string]core.Value
 	if err := dec.Decode(&vals); err != nil {
 		return err
 	}
@@ -41,6 +41,7 @@ func (o *Record) GobEncode() ([]byte, error) {
 	if err := enc.Encode(o.value); err != nil {
 		return nil, err
 	}
+
 	if err := enc.Encode(o.immutable); err != nil {
 		return nil, err
 	}
@@ -48,16 +49,15 @@ func (o *Record) GobEncode() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (o *Record) Set(val map[string]core.Object, immutable bool) {
+func (o *Record) Set(val map[string]core.Value, immutable bool) {
 	o.value = val
 	if o.value == nil {
-		o.value = make(map[string]core.Object)
+		o.value = make(map[string]core.Value)
 	}
-
 	o.immutable = immutable
 }
 
-func (o *Record) Value() map[string]core.Object {
+func (o *Record) Value() map[string]core.Value {
 	return o.value
 }
 
@@ -78,7 +78,7 @@ func (o *Record) Has(key string) bool {
 	return ok
 }
 
-func (o *Record) Get(key string) (core.Object, bool) {
+func (o *Record) Get(key string) (core.Value, bool) {
 	v, ok := o.value[key]
 	return v, ok
 }
@@ -91,8 +91,8 @@ func (o *Record) Keys() []string {
 	return keys
 }
 
-func (o *Record) SetKey(key string, value core.Object) {
-	o.value[key] = value
+func (o *Record) SetKey(key string, val core.Value) {
+	o.value[key] = val
 }
 
 func (o *Record) TypeName() string {
@@ -118,12 +118,16 @@ func (o *Record) Interface() any {
 	return res
 }
 
-func (o *Record) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Object, error) {
-	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
+func (o *Record) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
+	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
-func (o *Record) Equals(x core.Object) bool {
-	switch x := x.(type) {
+func (o *Record) Equals(x core.Value) bool {
+	if !x.IsObject() {
+		return false
+	}
+
+	switch x := x.Object().(type) {
 	case *Record:
 		if len(o.value) != len(x.value) {
 			return false
@@ -149,36 +153,35 @@ func (o *Record) Equals(x core.Object) bool {
 	}
 }
 
-func (o *Record) Copy(alloc core.Allocator) core.Object {
+func (o *Record) Copy(alloc core.Allocator) core.Value {
 	// perform a deep copy of the record even if it is immutable (since the values may be mutable)
-	c := make(map[string]core.Object, len(o.value))
+	c := make(map[string]core.Value, len(o.value))
 	for k, v := range o.value {
 		c[k] = v.Copy(alloc)
 	}
-	return alloc.NewRecord(c, false) // copy always returns a mutable record
+	return alloc.NewRecordValue(c, false)
 }
 
-func (o *Record) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Object, error) {
-	alloc := vm.Allocator()
+func (o *Record) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return nil, core.NewInvalidIndexTypeError("record access", "string", index)
+		return core.NewUndefined(), core.NewInvalidIndexTypeError("record access", "string", index.TypeName())
 	}
 	r, ok := o.value[k]
 	if !ok {
-		return alloc.NewUndefined(), nil
+		return core.NewUndefined(), nil
 	}
 	return r, nil
 }
 
-func (o *Record) Assign(index, value core.Object) error {
+func (o *Record) Assign(index, value core.Value) error {
 	if o.immutable {
-		return core.NewNotAssignableError(o)
+		return core.NewNotAssignableError(o.TypeName())
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return core.NewInvalidIndexTypeError("record assignment", "string", index)
+		return core.NewInvalidIndexTypeError("record assignment", "string", index.TypeName())
 	}
 	o.value[k] = value
 
@@ -187,6 +190,14 @@ func (o *Record) Assign(index, value core.Object) error {
 
 func (o *Record) Iterate(alloc core.Allocator) core.Iterator {
 	return alloc.NewMapIterator(o.value)
+}
+
+func (o *Record) IsImmutable() bool {
+	return o.immutable
+}
+
+func (o *Record) IsRecord() bool {
+	return true
 }
 
 func (o *Record) IsTrue() bool {
@@ -199,10 +210,6 @@ func (o *Record) IsFalse() bool {
 
 func (o *Record) IsIterable() bool {
 	return true
-}
-
-func (o *Record) IsImmutable() bool {
-	return o.immutable
 }
 
 func (o *Record) AsString() (string, bool) {

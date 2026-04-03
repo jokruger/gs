@@ -21,10 +21,22 @@ test: generate
     @go test -race ./tests/unit
     @go run ./cmd/gs -resolve ./tests/testdata/cli/test.gs
 
-benchmark: generate
+bench-tool: generate
     @go run ./cmd/bench
 
 clean:
     rm -rf ./build
     rm -rf ./*.prof
     rm -rf ./*.log
+
+bench-test: generate
+    @go test -test.fullpath=true -run ^$ -bench=^BenchmarkVM$ -benchmem -cpuprofile cpu.prof -memprofile mem.prof -trace trace.prof ./tests/benchmark
+
+#cpu:
+#       go tool pprof -http=:8080 cpu.prof
+
+#mem:
+#    go tool pprof -http=:8080 mem.prof
+
+#trace:
+#       go tool trace trace.prof

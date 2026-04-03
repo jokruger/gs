@@ -17,11 +17,10 @@ type BuiltinFunction struct {
 	variadic bool
 }
 
-// Should be used only for static initialization. For dynamic creation of built-in functions, use Allocator.NewBuiltinFunction.
-func NewStaticBuiltinFunction(name string, val core.NativeFunc, arity int, variadic bool) *BuiltinFunction {
+func NewStaticBuiltinFunction(name string, val core.NativeFunc, arity int, variadic bool) core.Value {
 	o := &BuiltinFunction{}
 	o.Set(name, val, arity, variadic)
-	return o
+	return core.NewObject(o, false)
 }
 
 func (o *BuiltinFunction) GobDecode(b []byte) error {
@@ -94,25 +93,25 @@ func (o *BuiltinFunction) Arity() int {
 	return o.arity
 }
 
-func (o *BuiltinFunction) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Object, error) {
-	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
+func (o *BuiltinFunction) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
+	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
-func (o *BuiltinFunction) Copy(alloc core.Allocator) core.Object {
-	return alloc.NewBuiltinFunction(o.name, o.value, o.arity, o.variadic)
+func (o *BuiltinFunction) Copy(alloc core.Allocator) core.Value {
+	return alloc.NewBuiltinFunctionValue(o.name, o.value, o.arity, o.variadic)
 }
 
-func (o *BuiltinFunction) Access(core.VM, core.Object, core.Opcode) (core.Object, error) {
-	return nil, core.NewNotAccessibleError(o)
+func (o *BuiltinFunction) Access(core.VM, core.Value, core.Opcode) (core.Value, error) {
+	return core.NewUndefined(), core.NewNotAccessibleError(o.TypeName())
 }
 
-func (o *BuiltinFunction) Assign(core.Object, core.Object) error {
-	return core.NewNotAssignableError(o)
+func (o *BuiltinFunction) Assign(core.Value, core.Value) error {
+	return core.NewNotAssignableError(o.TypeName())
 }
 
-func (o *BuiltinFunction) Call(vm core.VM, args ...core.Object) (core.Object, error) {
+func (o *BuiltinFunction) Call(vm core.VM, args ...core.Value) (core.Value, error) {
 	if o.value == nil {
-		return nil, core.NewLogicError(fmt.Sprintf("built-in function %s is referencing nil", o.name))
+		return core.NewUndefined(), core.NewLogicError(fmt.Sprintf("built-in function %s is referencing nil", o.name))
 	}
 	return o.value(vm, args...)
 }
@@ -127,4 +126,8 @@ func (o *BuiltinFunction) IsImmutable() bool {
 
 func (o *BuiltinFunction) IsVariadic() bool {
 	return o.variadic
+}
+
+func (o *BuiltinFunction) IsBuiltinFunction() bool {
+	return true
 }

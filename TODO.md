@@ -3,13 +3,52 @@ benchmarks:
 fib1        fib2        fib3        powSum1     powSum2     powSum3     powSum4     powSum5     str
 ----        ----        ----        -------     -------     -------     -------     -------     ---
 2.625206    2.767111    0.032647    0.135226    0.464145    0.224656    0.317883    0.198257    0.063175
+2.296862    2.277472    0.033685    0.108730    0.382285    0.162527    0.306401    0.180854    0.063610
 
 ===
 
 1) replace *Object type system with boxed scalars:
     - value is a struct containing type info, flags (immutable, temporal, etc) and 64-bit data - pointer to heap object (for maps, strings, arrays) or int/bool/float/etc packed in the 64-bit data field
 
+- add core.Value.IsObject() - true is V_OBJECT or V_OBJECT_PTR, false if scalar (int, bool, float, etc)
+- replace "if .Kind() ?? V_ " with .IsX() !
+
+- core.NewObject, .NewImmutableObject, .NewTemporalObject !!!!!!
+
+- .Copy, .Access - add "immutable" argument indicating the immutability of container/wrapper object
+
+- Instead of ObjectPtr, use V_OBJECT_PTR!!!
+
+- add IsBuiltinFunction, IsCompiledFunction, IsIterator - they are frequently used in VM
+
+- review how immutable flag is used:
+  - immutable value can be copied by reference
+  - mutable value can be modified inplace
+  - add "const" keyword to create immutable scalars/etc
+
+- make copy if object is "temporal"
+- use "temporal" flag for temp values to optimize iterators, lambda loops, etc
+  - array/map iterator .Value() can return "temporal" shallow copy
+  - lambda loops can use "temporal" shallow copies for keys/values
+  - string/bytes/etc lambda loops can use "temporal" variables for values
+
+- NewObject - flags must be bitset, will be easier to pass as args to constructor
+- map.record must sustain immutability of the record - if map is immutable, record must be immutable as well
+- record.record must sustain immutability of the record - if record is immutable, record must be immutable as well
+- array.array must sustain immutability of the array - if array is immutable, array must be immutable as well
+
+- review VM, in some places arrays are not pre-allocated!
+
+- VM: case parser.OpImmutable - instead of checking for array/map/record just set immutable flag inplace!
+- VM: case parser.OpSliceIndex - move slicing logic to value member function
+
+- search for "make(" - ensure pre-allocs are used
+
+- need separate mutable and immutable constructors for primitives - so mutable can be modified inplace, immutable can be copied by reference
+
 ===
+
+- variable.go - use AsX instead of type assertion
 
 - vm: analyze "switch by (.type)" and replace with value member functions (.Immutable(), .Slice(), etc)
 - replace all "switch by (.type)" - should use .IsX() functions instead

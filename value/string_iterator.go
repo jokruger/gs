@@ -20,12 +20,12 @@ func (o *StringIterator) Next() bool {
 	return o.i <= o.l
 }
 
-func (o *StringIterator) Key(alloc core.Allocator) core.Object {
-	return alloc.NewInt(int64(o.i - 1))
+func (o *StringIterator) Key(core.Allocator) core.Value {
+	return core.NewInt(int64(o.i - 1))
 }
 
-func (o *StringIterator) Value(alloc core.Allocator) core.Object {
-	return alloc.NewChar(o.v[o.i-1])
+func (o *StringIterator) Value(core.Allocator) core.Value {
+	return core.NewChar(o.v[o.i-1])
 }
 
 func (o *StringIterator) TypeName() string {
@@ -36,10 +36,10 @@ func (o *StringIterator) String() string {
 	return "<string-iterator>"
 }
 
-func (o *StringIterator) Copy(alloc core.Allocator) core.Object {
+func (o *StringIterator) Copy(alloc core.Allocator) core.Value {
 	t := alloc.NewStringIterator(o.v).(*StringIterator)
 	t.i = o.i
-	return t
+	return core.NewObject(t, false)
 }
 
 func (o *StringIterator) IsTrue() bool {

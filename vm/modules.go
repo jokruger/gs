@@ -34,7 +34,7 @@ func (m *ModuleMap) Add(name string, module Importable) {
 }
 
 // AddBuiltinModule adds a builtin module.
-func (m *ModuleMap) AddBuiltinModule(name string, attrs map[string]core.Object) {
+func (m *ModuleMap) AddBuiltinModule(name string, attrs map[string]core.Value) {
 	m.m[name] = &Module{Attrs: attrs}
 }
 

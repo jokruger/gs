@@ -18,7 +18,7 @@ func TestReadFile(t *testing.T) {
 	require.NoError(t, err)
 	_ = tf.Close()
 
-	module(t, "os").call("read_file", tf.Name()).expect(alloc.NewBytes(content))
+	module(t, "os").call("read_file", tf.Name()).expect(alloc.NewBytesValue(content))
 }
 
 func TestReadFileArgs(t *testing.T) {
@@ -44,12 +44,12 @@ func TestFileStatFile(t *testing.T) {
 		return
 	}
 
-	module(t, "os").call("stat", tf.Name()).expect(alloc.NewRecord(map[string]core.Object{
-		"name":      alloc.NewString(stat.Name()),
-		"mtime":     alloc.NewTime(stat.ModTime()),
-		"size":      alloc.NewInt(stat.Size()),
-		"mode":      alloc.NewInt(int64(stat.Mode())),
-		"directory": alloc.NewBool(false),
+	module(t, "os").call("stat", tf.Name()).expect(alloc.NewRecordValue(map[string]core.Value{
+		"name":      alloc.NewStringValue(stat.Name()),
+		"mtime":     alloc.NewTimeValue(stat.ModTime()),
+		"size":      core.NewInt(stat.Size()),
+		"mode":      core.NewInt(int64(stat.Mode())),
+		"directory": core.NewBool(false),
 	}, true))
 }
 
@@ -61,12 +61,12 @@ func TestFileStatDir(t *testing.T) {
 	stat, err := os.Stat(td)
 	require.NoError(t, err)
 
-	module(t, "os").call("stat", td).expect(alloc.NewRecord(map[string]core.Object{
-		"name":      alloc.NewString(stat.Name()),
-		"mtime":     alloc.NewTime(stat.ModTime()),
-		"size":      alloc.NewInt(stat.Size()),
-		"mode":      alloc.NewInt(int64(stat.Mode())),
-		"directory": alloc.NewBool(true),
+	module(t, "os").call("stat", td).expect(alloc.NewRecordValue(map[string]core.Value{
+		"name":      alloc.NewStringValue(stat.Name()),
+		"mtime":     alloc.NewTimeValue(stat.ModTime()),
+		"size":      core.NewInt(stat.Size()),
+		"mode":      core.NewInt(int64(stat.Mode())),
+		"directory": core.NewBool(true),
 	}, true))
 }
 

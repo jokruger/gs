@@ -8,75 +8,77 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
-var fmtModule = map[string]core.Object{
+var fmtModule = map[string]core.Value{
 	"print":   value.NewStaticBuiltinFunction("print", fmtPrint, 0, true),
 	"printf":  value.NewStaticBuiltinFunction("printf", fmtPrintf, 1, true),
 	"println": value.NewStaticBuiltinFunction("println", fmtPrintln, 0, true),
 	"sprintf": value.NewStaticBuiltinFunction("sprintf", fmtSprintf, 1, true),
 }
 
-func fmtPrint(vm core.VM, args ...core.Object) (ret core.Object, err error) {
+func fmtPrint(vm core.VM, args ...core.Value) (core.Value, error) {
 	printArgs, err := getPrintArgs(args...)
 	if err != nil {
-		return nil, err
+		return core.NewUndefined(), err
 	}
 	_, _ = fmt.Print(printArgs...)
-	return nil, nil
+	return core.NewUndefined(), nil
 }
 
-func fmtPrintf(vm core.VM, args ...core.Object) (ret core.Object, err error) {
+func fmtPrintf(vm core.VM, args ...core.Value) (core.Value, error) {
 	numArgs := len(args)
 	if numArgs == 0 {
-		return nil, core.NewWrongNumArgumentsError("fmt.printf", "at least 1", numArgs)
+		return core.NewUndefined(), core.NewWrongNumArgumentsError("fmt.printf", "at least 1", numArgs)
 	}
 
 	format, ok := args[0].AsString()
 	if !ok {
-		return nil, core.NewInvalidArgumentTypeError("fmt.printf", "format", "string", args[0])
+		return core.NewUndefined(), core.NewInvalidArgumentTypeError("fmt.printf", "format", "string", args[0].TypeName())
 	}
 	if numArgs == 1 {
 		fmt.Print(format)
-		return nil, nil
+		return core.NewUndefined(), nil
 	}
 
 	s, err := formatter.Format(format, args[1:]...)
 	if err != nil {
-		return nil, err
+		return core.NewUndefined(), err
 	}
 	fmt.Print(s)
-	return nil, nil
+	return core.NewUndefined(), nil
 }
 
-func fmtPrintln(vm core.VM, args ...core.Object) (ret core.Object, err error) {
+func fmtPrintln(vm core.VM, args ...core.Value) (core.Value, error) {
 	printArgs, err := getPrintArgs(args...)
 	if err != nil {
-		return nil, err
+		return core.NewUndefined(), err
 	}
 	_, _ = fmt.Println(printArgs...)
-	return nil, nil
+	return core.NewUndefined(), nil
 }
 
-func fmtSprintf(vm core.VM, args ...core.Object) (ret core.Object, err error) {
+func fmtSprintf(vm core.VM, args ...core.Value) (core.Value, error) {
 	numArgs := len(args)
 	if numArgs == 0 {
-		return nil, core.NewWrongNumArgumentsError("fmt.sprintf", "at least 1", numArgs)
+		return core.NewUndefined(), core.NewWrongNumArgumentsError("fmt.sprintf", "at least 1", numArgs)
 	}
 
 	format, ok := args[0].AsString()
 	if !ok {
-		return nil, core.NewInvalidArgumentTypeError("fmt.sprintf", "format", "string", args[0])
+		return core.NewUndefined(), core.NewInvalidArgumentTypeError("fmt.sprintf", "format", "string", args[0].TypeName())
 	}
 	if numArgs == 1 {
-		return vm.Allocator().NewString(format), nil
+		t := vm.Allocator().NewString(format)
+		return core.NewObject(t, false), nil
 	}
 	s, err := formatter.Format(format, args[1:]...)
 	if err != nil {
-		return nil, err
+		return core.NewUndefined(), err
 	}
-	return vm.Allocator().NewString(s), nil
+	t := vm.Allocator().NewString(s)
+	return core.NewObject(t, false), nil
 }
 
-func getPrintArgs(args ...core.Object) ([]any, error) {
+func getPrintArgs(args ...core.Value) ([]any, error) {
 	var printArgs []any
 	l := 0
 	for _, arg := range args {

@@ -18,11 +18,10 @@ type String struct {
 	value []rune
 }
 
-// Should be used only for static initialization. For dynamic creation of built-in functions, use Allocator.NewString.
-func NewStaticString(v string) core.Object {
+func NewStaticString(v string) core.Value {
 	o := &String{}
 	o.Set(v)
-	return o
+	return core.NewObject(o, false)
 }
 
 func (o *String) GobDecode(b []byte) error {
@@ -85,30 +84,30 @@ func (o *String) Interface() any {
 	return string(o.value)
 }
 
-func (o *String) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Object, error) {
+func (o *String) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
 	alloc := vm.Allocator()
 	v, ok := rhs.AsString()
 	if !ok {
-		return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
+		return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 	}
 
 	switch op {
 	case token.Add:
-		return alloc.NewString(string(o.value) + v), nil
+		return alloc.NewStringValue(string(o.value) + v), nil
 	case token.Less:
-		return alloc.NewBool(string(o.value) < v), nil
+		return core.NewBool(string(o.value) < v), nil
 	case token.LessEq:
-		return alloc.NewBool(string(o.value) <= v), nil
+		return core.NewBool(string(o.value) <= v), nil
 	case token.Greater:
-		return alloc.NewBool(string(o.value) > v), nil
+		return core.NewBool(string(o.value) > v), nil
 	case token.GreaterEq:
-		return alloc.NewBool(string(o.value) >= v), nil
+		return core.NewBool(string(o.value) >= v), nil
 	}
 
-	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
+	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
-func (o *String) Equals(x core.Object) bool {
+func (o *String) Equals(x core.Value) bool {
 	t, ok := x.AsString()
 	if !ok {
 		return false
@@ -116,118 +115,122 @@ func (o *String) Equals(x core.Object) bool {
 	return string(o.value) == t
 }
 
-func (o *String) Copy(alloc core.Allocator) core.Object {
-	return alloc.NewString(string(o.value))
+func (o *String) Copy(alloc core.Allocator) core.Value {
+	return alloc.NewStringValue(string(o.value))
 }
 
-func (o *String) Access(vm core.VM, index core.Object, mode core.Opcode) (core.Object, error) {
+func (o *String) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	alloc := vm.Allocator()
 
 	if mode == parser.OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
-			return nil, core.NewInvalidIndexTypeError("string access", "int", index)
+			return core.NewUndefined(), core.NewInvalidIndexTypeError("string access", "int", index.TypeName())
 		}
 		if i < 0 || i >= int64(len(o.value)) {
-			return alloc.NewUndefined(), nil
+			return core.NewUndefined(), nil
 		}
-		return alloc.NewChar(o.value[i]), nil
+		return core.NewChar(o.value[i]), nil
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return nil, core.NewInvalidSelectorError(o, k)
+		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 	}
 
 	switch k {
 	case "string":
-		return o, nil
+		return core.NewObject(o, false), nil
 
 	case "array":
-		arr := make([]core.Object, len(o.value))
+		arr := make([]core.Value, len(o.value))
 		for i, r := range o.value {
-			arr[i] = alloc.NewChar(r)
+			arr[i] = core.NewChar(r)
 		}
-		return alloc.NewArray(arr, false), nil
+		return alloc.NewArrayValue(arr, false), nil
 
 	case "bool":
 		b, _ := o.AsBool()
-		return alloc.NewBool(b), nil
+		return core.NewBool(b), nil
 
 	case "bytes":
-		return alloc.NewBytes([]byte(string(o.value))), nil
+		return alloc.NewBytesValue([]byte(string(o.value))), nil
 
 	case "char":
 		if len(o.value) == 1 {
-			return alloc.NewChar(o.value[0]), nil
+			return core.NewChar(o.value[0]), nil
 		}
-		return alloc.NewChar(0), nil
+		return core.NewChar(0), nil
 
 	case "float":
 		f, _ := o.AsFloat()
-		return alloc.NewFloat(f), nil
+		return core.NewFloat(f), nil
 
 	case "int":
 		i, _ := o.AsInt()
-		return alloc.NewInt(i), nil
+		return core.NewInt(i), nil
 
 	case "time":
 		t, _ := o.AsTime()
-		return alloc.NewTime(t), nil
+		return alloc.NewTimeValue(t), nil
 
 	case "record":
-		m := make(map[string]core.Object, len(o.value))
+		m := make(map[string]core.Value, len(o.value))
 		for i, r := range o.value {
-			m[strconv.Itoa(i)] = alloc.NewChar(r)
+			m[strconv.Itoa(i)] = core.NewChar(r)
 		}
-		return alloc.NewRecord(m, false), nil
+		return alloc.NewRecordValue(m, false), nil
 
 	case "empty":
-		return alloc.NewBool(len(o.value) == 0), nil
+		return core.NewBool(len(o.value) == 0), nil
 
 	case "len":
-		return alloc.NewInt(int64(len(o.value))), nil
+		return core.NewInt(int64(len(o.value))), nil
 
 	case "first":
 		if len(o.value) == 0 {
-			return alloc.NewUndefined(), nil
+			return core.NewUndefined(), nil
 		}
-		return alloc.NewChar(o.value[0]), nil
+		return core.NewChar(o.value[0]), nil
 
 	case "last":
 		if len(o.value) == 0 {
-			return alloc.NewUndefined(), nil
+			return core.NewUndefined(), nil
 		}
-		return alloc.NewChar(o.value[len(o.value)-1]), nil
+		return core.NewChar(o.value[len(o.value)-1]), nil
 
 	case "lower":
 		t := make([]rune, len(o.value))
 		for i, r := range o.value {
 			t[i] = unicode.ToLower(r)
 		}
-		return alloc.NewString(string(t)), nil
+		return alloc.NewStringValue(string(t)), nil
 
 	case "upper":
 		t := make([]rune, len(o.value))
 		for i, r := range o.value {
 			t[i] = unicode.ToUpper(r)
 		}
-		return alloc.NewString(string(t)), nil
+		return alloc.NewStringValue(string(t)), nil
 
 	case "trim":
 		return o.fnTrim(vm, "string.trim")
 
 	default:
-		return nil, core.NewInvalidSelectorError(o, k)
+		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 	}
 }
 
-func (o *String) Assign(core.Object, core.Object) error {
-	return core.NewNotAssignableError(o)
+func (o *String) Assign(core.Value, core.Value) error {
+	return core.NewNotAssignableError(o.TypeName())
 }
 
 func (o *String) Iterate(alloc core.Allocator) core.Iterator {
 	return alloc.NewStringIterator(o.value)
+}
+
+func (o *String) IsString() bool {
+	return true
 }
 
 func (o *String) IsTrue() bool {
@@ -239,10 +242,6 @@ func (o *String) IsFalse() bool {
 }
 
 func (o *String) IsIterable() bool {
-	return true
-}
-
-func (o *String) IsImmutable() bool {
 	return true
 }
 
@@ -270,7 +269,7 @@ func (o *String) AsBool() (bool, bool) {
 	return conv.ParseBool(string(o.value))
 }
 
-func (o *String) AsRune() (rune, bool) {
+func (o *String) AsChar() (rune, bool) {
 	if len(o.value) == 1 {
 		return o.value[0], true
 	}
@@ -289,21 +288,24 @@ func (o *String) AsTime() (time.Time, bool) {
 	return val, true
 }
 
-func (o *String) fnTrim(vm core.VM, name string) (core.Object, error) {
-	return vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Object) (core.Object, error) {
+func (o *String) fnTrim(vm core.VM, name string) (core.Value, error) {
+	obj := vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Value) (core.Value, error) {
 		if len(args) > 1 {
-			return nil, core.NewWrongNumArgumentsError(name, "0 or 1", len(args))
+			return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0 or 1", len(args))
 		}
 
 		if len(args) == 0 {
-			return vm.Allocator().NewString(strings.Trim(string(o.value), " \t\n")), nil
+			t := vm.Allocator().NewString(strings.Trim(string(o.value), " \t\n"))
+			return core.NewObject(t, false), nil
 		}
 
 		s, ok := args[0].AsString()
 		if !ok {
-			return nil, core.NewInvalidArgumentTypeError(name, "first", "string", args[0])
+			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "string", args[0].TypeName())
 		}
 
-		return vm.Allocator().NewString(strings.Trim(string(o.value), s)), nil
-	}, 0, true), nil
+		t := vm.Allocator().NewString(strings.Trim(string(o.value), s))
+		return core.NewObject(t, false), nil
+	}, 0, true)
+	return core.NewObject(obj, false), nil
 }

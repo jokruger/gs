@@ -153,7 +153,7 @@ func main() {
 	}
 }
 
-func runBench(a core.Allocator, input []byte) (parseTime time.Duration, compileTime time.Duration, runTime time.Duration, result core.Object, err error) {
+func runBench(a core.Allocator, input []byte) (parseTime time.Duration, compileTime time.Duration, runTime time.Duration, result core.Value, err error) {
 	var astFile *parser.File
 	parseTime, astFile, err = parse(input)
 	if err != nil {
@@ -203,14 +203,14 @@ func compileFile(a core.Allocator, file *parser.File) (time.Duration, *vm.Byteco
 	return time.Since(start), bytecode, nil
 }
 
-func runVM(a core.Allocator, bytecode *vm.Bytecode) (time.Duration, core.Object, error) {
-	globals := make([]core.Object, vm.GlobalsSize)
+func runVM(a core.Allocator, bytecode *vm.Bytecode) (time.Duration, core.Value, error) {
+	globals := make([]core.Value, vm.GlobalsSize)
 
 	start := time.Now()
 
 	v := vm.NewVM(a, bytecode, globals, -1)
 	if err := v.Run(); err != nil {
-		return time.Since(start), nil, err
+		return time.Since(start), core.NewUndefined(), err
 	}
 
 	return time.Since(start), globals[0], nil

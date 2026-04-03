@@ -10,7 +10,7 @@ import (
 
 type ObjectPtr struct {
 	Object
-	Value *core.Object
+	Value *core.Value
 }
 
 func (o *ObjectPtr) TypeName() string {

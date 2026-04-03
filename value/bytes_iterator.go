@@ -20,12 +20,12 @@ func (o *BytesIterator) Next() bool {
 	return o.i <= o.l
 }
 
-func (o *BytesIterator) Key(alloc core.Allocator) core.Object {
-	return alloc.NewInt(int64(o.i - 1))
+func (o *BytesIterator) Key(core.Allocator) core.Value {
+	return core.NewInt(int64(o.i - 1))
 }
 
-func (o *BytesIterator) Value(alloc core.Allocator) core.Object {
-	return alloc.NewInt(int64(o.v[o.i-1]))
+func (o *BytesIterator) Value(core.Allocator) core.Value {
+	return core.NewInt(int64(o.v[o.i-1]))
 }
 
 func (o *BytesIterator) TypeName() string {
@@ -36,10 +36,10 @@ func (o *BytesIterator) String() string {
 	return "<bytes-iterator>"
 }
 
-func (o *BytesIterator) Copy(alloc core.Allocator) core.Object {
+func (o *BytesIterator) Copy(alloc core.Allocator) core.Value {
 	t := alloc.NewBytesIterator(o.v).(*BytesIterator)
 	t.i = o.i
-	return t
+	return core.NewObject(t, false)
 }
 
 func (o *BytesIterator) IsTrue() bool {

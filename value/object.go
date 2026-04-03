@@ -26,35 +26,94 @@ func (o *Object) Arity() int {
 	return 0
 }
 
-func (o *Object) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Object, error) {
-	return nil, core.NewInvalidBinaryOperatorError(op.String(), o, rhs)
+func (o *Object) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
+	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
-func (o *Object) Equals(x core.Object) bool {
-	return o == x
+func (o *Object) Equals(x core.Value) bool {
+	if !x.IsObject() {
+		return false
+	}
+	return o == x.Object()
 }
 
-func (o *Object) Copy(core.Allocator) core.Object {
-	return o
+func (o *Object) Copy(core.Allocator) core.Value {
+	return core.NewUndefined()
 }
 
-func (o *Object) Access(core.VM, core.Object, core.Opcode) (core.Object, error) {
-	return nil, core.NewNotAccessibleError(o)
+func (o *Object) Access(core.VM, core.Value, core.Opcode) (core.Value, error) {
+	return core.NewUndefined(), core.NewNotAccessibleError(o.TypeName())
 }
 
-func (o *Object) Assign(core.Object, core.Object) error {
-	return core.NewNotAssignableError(o)
+func (o *Object) Assign(core.Value, core.Value) error {
+	return core.NewNotAssignableError(o.TypeName())
 }
 
 func (o *Object) Iterate(core.Allocator) core.Iterator {
 	return nil
 }
 
-func (o *Object) Call(core.VM, ...core.Object) (core.Object, error) {
-	return nil, nil
+func (o *Object) Call(core.VM, ...core.Value) (core.Value, error) {
+	return core.NewUndefined(), nil
 }
 
 func (o *Object) IsUndefined() bool {
+	return false
+}
+
+func (o *Object) IsString() bool {
+	return false
+}
+
+func (o *Object) IsInt() bool {
+	return false
+}
+
+func (o *Object) IsFloat() bool {
+	return false
+}
+
+func (o *Object) IsBool() bool {
+	return false
+}
+
+func (o *Object) IsChar() bool {
+	return false
+}
+
+func (o *Object) IsBytes() bool {
+	return false
+}
+
+func (o *Object) IsTime() bool {
+	return false
+}
+
+func (o *Object) IsArray() bool {
+	return false
+}
+
+func (o *Object) IsError() bool {
+	return false
+}
+
+func (o *Object) IsMap() bool {
+	return false
+}
+
+func (o *Object) IsRecord() bool {
+	return false
+}
+
+func (o *Object) IsCompiledFunction() bool {
+	return false
+}
+
+func (o *Object) IsBuiltinFunction() bool {
+	return false
+}
+
+func (o *Object) IsImmutable() bool {
 	return false
 }
 
@@ -71,10 +130,6 @@ func (o *Object) IsIterable() bool {
 }
 
 func (o *Object) IsCallable() bool {
-	return false
-}
-
-func (o *Object) IsImmutable() bool {
 	return false
 }
 
@@ -98,7 +153,7 @@ func (o *Object) AsBool() (bool, bool) {
 	return false, false
 }
 
-func (o *Object) AsRune() (rune, bool) {
+func (o *Object) AsChar() (rune, bool) {
 	return 0, false
 }
 

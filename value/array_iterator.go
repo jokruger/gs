@@ -4,12 +4,12 @@ import "github.com/jokruger/gs/core"
 
 type ArrayIterator struct {
 	Object
-	v []core.Object
+	v []core.Value
 	i int
 	l int
 }
 
-func (o *ArrayIterator) Set(v []core.Object) {
+func (o *ArrayIterator) Set(v []core.Value) {
 	o.v = v
 	o.i = 0
 	o.l = len(v)
@@ -20,11 +20,11 @@ func (o *ArrayIterator) Next() bool {
 	return o.i <= o.l
 }
 
-func (o *ArrayIterator) Key(alloc core.Allocator) core.Object {
-	return alloc.NewInt(int64(o.i - 1))
+func (o *ArrayIterator) Key(core.Allocator) core.Value {
+	return core.NewInt(int64(o.i - 1))
 }
 
-func (o *ArrayIterator) Value(alloc core.Allocator) core.Object {
+func (o *ArrayIterator) Value(alloc core.Allocator) core.Value {
 	return o.v[o.i-1].Copy(alloc)
 }
 
@@ -36,10 +36,10 @@ func (o *ArrayIterator) String() string {
 	return "<array-iterator>"
 }
 
-func (o *ArrayIterator) Copy(alloc core.Allocator) core.Object {
+func (o *ArrayIterator) Copy(alloc core.Allocator) core.Value {
 	t := alloc.NewArrayIterator(o.v).(*ArrayIterator)
 	t.i = o.i
-	return t
+	return core.NewObject(t, false)
 }
 
 func (o *ArrayIterator) IsTrue() bool {

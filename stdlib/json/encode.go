@@ -10,6 +10,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"math"
 	"strconv"
 	"unicode/utf8"
@@ -124,81 +125,23 @@ var safeSet = [utf8.RuneSelf]bool{
 var hex = "0123456789abcdef"
 
 // Encode returns the JSON encoding of the object.
-func Encode(o core.Object) ([]byte, error) {
+func Encode(o core.Value) ([]byte, error) {
 	var b []byte
 
-	switch o := o.(type) {
-	case *value.Array:
-		b = append(b, '[')
-		len1 := o.Len() - 1
-		for idx, elem := range o.Value() {
-			eb, err := Encode(elem)
-			if err != nil {
-				return nil, err
-			}
-			b = append(b, eb...)
-			if idx < len1 {
-				b = append(b, ',')
-			}
-		}
-		b = append(b, ']')
+	switch o.Kind() {
+	case core.V_UNDEFINED:
+		b = append(b, "null"...)
 
-	case *value.Record:
-		b = append(b, '{')
-		len1 := o.Len() - 1
-		idx := 0
-		for key, value := range o.Value() {
-			b = encodeString(b, key)
-			b = append(b, ':')
-			eb, err := Encode(value)
-			if err != nil {
-				return nil, err
-			}
-			b = append(b, eb...)
-			if idx < len1 {
-				b = append(b, ',')
-			}
-			idx++
-		}
-		b = append(b, '}')
+	case core.V_BOOL:
+		b = strconv.AppendBool(b, o.Bool())
 
-	case *value.Map:
-		b = append(b, '{')
-		len1 := o.Len() - 1
-		idx := 0
-		for key, value := range o.Value() {
-			b = encodeString(b, key)
-			b = append(b, ':')
-			eb, err := Encode(value)
-			if err != nil {
-				return nil, err
-			}
-			b = append(b, eb...)
-			if idx < len1 {
-				b = append(b, ',')
-			}
-			idx++
-		}
-		b = append(b, '}')
+	case core.V_CHAR:
+		b = strconv.AppendInt(b, int64(o.Char()), 10)
 
-	case *value.Bool:
-		b = strconv.AppendBool(b, o.Value())
-
-	case *value.Bytes:
-		b = append(b, '"')
-		encodedLen := base64.StdEncoding.EncodedLen(o.Len())
-		dst := make([]byte, encodedLen)
-		base64.StdEncoding.Encode(dst, o.Value())
-		b = append(b, dst...)
-		b = append(b, '"')
-
-	case *value.Char:
-		b = strconv.AppendInt(b, int64(o.Value()), 10)
-
-	case *value.Float:
+	case core.V_FLOAT:
 		var y []byte
 
-		f := o.Value()
+		f := o.Float()
 		if math.IsInf(f, 0) || math.IsNaN(f) {
 			return nil, errors.New("unsupported float value")
 		}
@@ -224,24 +167,90 @@ func Encode(o core.Object) ([]byte, error) {
 
 		b = append(b, y...)
 
-	case *value.Int:
-		b = strconv.AppendInt(b, o.Value(), 10)
+	case core.V_INT:
+		b = strconv.AppendInt(b, o.Int(), 10)
 
-	case *value.String:
-		b = encodeString(b, o.Value())
+	case core.V_OBJECT:
+		switch o := o.Object().(type) {
+		case *value.Time:
+			y, err := o.Value().MarshalJSON()
+			if err != nil {
+				return nil, err
+			}
+			b = append(b, y...)
 
-	case *value.Time:
-		y, err := o.Value().MarshalJSON()
-		if err != nil {
-			return nil, err
+		case *value.String:
+			b = encodeString(b, o.Value())
+
+		case *value.Bytes:
+			b = append(b, '"')
+			encodedLen := base64.StdEncoding.EncodedLen(o.Len())
+			dst := make([]byte, encodedLen)
+			base64.StdEncoding.Encode(dst, o.Value())
+			b = append(b, dst...)
+			b = append(b, '"')
+
+		case *value.Map:
+			b = append(b, '{')
+			len1 := o.Len() - 1
+			idx := 0
+			for key, value := range o.Value() {
+				b = encodeString(b, key)
+				b = append(b, ':')
+				eb, err := Encode(value)
+				if err != nil {
+					return nil, err
+				}
+				b = append(b, eb...)
+				if idx < len1 {
+					b = append(b, ',')
+				}
+				idx++
+			}
+			b = append(b, '}')
+
+		case *value.Record:
+			b = append(b, '{')
+			len1 := o.Len() - 1
+			idx := 0
+			for key, value := range o.Value() {
+				b = encodeString(b, key)
+				b = append(b, ':')
+				eb, err := Encode(value)
+				if err != nil {
+					return nil, err
+				}
+				b = append(b, eb...)
+				if idx < len1 {
+					b = append(b, ',')
+				}
+				idx++
+			}
+			b = append(b, '}')
+
+		case *value.Array:
+			b = append(b, '[')
+			len1 := o.Len() - 1
+			for idx, elem := range o.Value() {
+				eb, err := Encode(elem)
+				if err != nil {
+					return nil, err
+				}
+				b = append(b, eb...)
+				if idx < len1 {
+					b = append(b, ',')
+				}
+			}
+			b = append(b, ']')
+
+		default:
+			return nil, fmt.Errorf("json.Encode: unsupported type: %s", o.TypeName())
 		}
-		b = append(b, y...)
 
-	case *value.Undefined:
-		b = append(b, "null"...)
 	default:
-		// unknown type: ignore
+		return nil, fmt.Errorf("json.Encode: unsupported core.Value kind: %v", o.Kind())
 	}
+
 	return b, nil
 }
 

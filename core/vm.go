@@ -4,6 +4,6 @@ type VM interface {
 	Allocator() Allocator
 	Abort()
 	IsStackEmpty() bool
-	Call(Object, ...Object) (Object, error)
+	Call(Object, ...Value) (Value, error)
 	Run() error
 }

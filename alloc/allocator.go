@@ -8,50 +8,14 @@ import (
 )
 
 type Allocator struct {
-	trueValue      core.Object
-	falseValue     core.Object
-	undefinedValue core.Object
 }
 
 func New() core.Allocator {
-	return &Allocator{
-		trueValue:      value.NewStaticBool(true),
-		falseValue:     value.NewStaticBool(false),
-		undefinedValue: &value.Undefined{},
-	}
+	return &Allocator{}
 }
 
 func (a *Allocator) Release(o core.Object) {
 	// No-op, GC will take care of it
-}
-
-func (a *Allocator) NewUndefined() core.Object {
-	return a.undefinedValue
-}
-
-func (a *Allocator) NewBool(v bool) core.Object {
-	if v {
-		return a.trueValue
-	}
-	return a.falseValue
-}
-
-func (a *Allocator) NewInt(v int64) core.Object {
-	o := &value.Int{}
-	o.Set(v)
-	return o
-}
-
-func (a *Allocator) NewFloat(v float64) core.Object {
-	o := &value.Float{}
-	o.Set(v)
-	return o
-}
-
-func (a *Allocator) NewChar(v rune) core.Object {
-	o := &value.Char{}
-	o.Set(v)
-	return o
 }
 
 func (a *Allocator) NewString(v string) core.Object {
@@ -84,37 +48,37 @@ func (a *Allocator) NewBytesIterator(v []byte) core.Iterator {
 	return o
 }
 
-func (a *Allocator) NewMapIterator(v map[string]core.Object) core.Iterator {
+func (a *Allocator) NewMapIterator(v map[string]core.Value) core.Iterator {
 	o := &value.MapIterator{}
 	o.Set(v)
 	return o
 }
 
-func (a *Allocator) NewArrayIterator(v []core.Object) core.Iterator {
+func (a *Allocator) NewArrayIterator(v []core.Value) core.Iterator {
 	o := &value.ArrayIterator{}
 	o.Set(v)
 	return o
 }
 
-func (a *Allocator) NewError(v core.Object) core.Object {
+func (a *Allocator) NewError(v core.Value) core.Object {
 	o := &value.Error{}
 	o.Set(v)
 	return o
 }
 
-func (a *Allocator) NewMap(val map[string]core.Object, immutable bool) core.Object {
+func (a *Allocator) NewMap(val map[string]core.Value, immutable bool) core.Object {
 	o := &value.Map{}
 	o.Set(val, immutable)
 	return o
 }
 
-func (a *Allocator) NewRecord(val map[string]core.Object, immutable bool) core.Object {
+func (a *Allocator) NewRecord(val map[string]core.Value, immutable bool) core.Object {
 	o := &value.Record{}
 	o.Set(val, immutable)
 	return o
 }
 
-func (a *Allocator) NewArray(val []core.Object, immutable bool) core.Object {
+func (a *Allocator) NewArray(val []core.Value, immutable bool) core.Object {
 	o := &value.Array{}
 	o.Set(val, immutable)
 	return o
@@ -124,4 +88,36 @@ func (a *Allocator) NewBuiltinFunction(name string, val core.NativeFunc, arity i
 	o := &value.BuiltinFunction{}
 	o.Set(name, val, arity, variadic)
 	return o
+}
+
+func (a *Allocator) NewStringValue(v string) core.Value {
+	return core.NewObject(a.NewString(v), false)
+}
+
+func (a *Allocator) NewBytesValue(v []byte) core.Value {
+	return core.NewObject(a.NewBytes(v), false)
+}
+
+func (a *Allocator) NewTimeValue(v time.Time) core.Value {
+	return core.NewObject(a.NewTime(v), false)
+}
+
+func (a *Allocator) NewErrorValue(v core.Value) core.Value {
+	return core.NewObject(a.NewError(v), false)
+}
+
+func (a *Allocator) NewMapValue(v map[string]core.Value, immutable bool) core.Value {
+	return core.NewObject(a.NewMap(v, immutable), false)
+}
+
+func (a *Allocator) NewRecordValue(v map[string]core.Value, immutable bool) core.Value {
+	return core.NewObject(a.NewRecord(v, immutable), false)
+}
+
+func (a *Allocator) NewArrayValue(v []core.Value, immutable bool) core.Value {
+	return core.NewObject(a.NewArray(v, immutable), false)
+}
+
+func (a *Allocator) NewBuiltinFunctionValue(name string, val core.NativeFunc, arity int, variadic bool) core.Value {
+	return core.NewObject(a.NewBuiltinFunction(name, val, arity, variadic), false)
 }

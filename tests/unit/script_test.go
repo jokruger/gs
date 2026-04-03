@@ -42,22 +42,25 @@ func TestScript_Add(t *testing.T) {
 	require.NoError(t, add(s, "b", 5))     // b = 5
 	require.NoError(t, add(s, "b", "foo")) // b = "foo"  (re-define before compilation)
 	require.NoError(t, add(s, "test",
-		func(v core.VM, args ...core.Object) (ret core.Object, err error) {
+		func(v core.VM, args ...core.Value) (ret core.Value, err error) {
 			if len(args) > 0 {
-				switch arg := args[0].(type) {
-				case *value.Int:
-					return alloc.NewInt(arg.Value() + 1), nil
+				if args[0].IsInt() {
+					return core.NewInt(args[0].Int() + 1), nil
 				}
 			}
-			return alloc.NewInt(0), nil
+			return core.NewInt(0), nil
 		}))
 	c, err := s.Compile()
 	require.NoError(t, err)
 	require.NoError(t, c.Run())
-	require.Equal(t, "foo", c.Get("a").Value().Interface())
-	require.Equal(t, "foo", c.Get("b").Value().Interface())
-	require.Equal(t, int64(0), c.Get("c").Value().Interface())
-	require.Equal(t, int64(6), c.Get("d").Value().Interface())
+	r := c.Get("a").Value()
+	require.Equal(t, "foo", r.Interface())
+	r = c.Get("b").Value()
+	require.Equal(t, "foo", r.Interface())
+	r = c.Get("c").Value()
+	require.Equal(t, int64(0), r.Interface())
+	r = c.Get("d").Value()
+	require.Equal(t, int64(6), r.Interface())
 }
 
 func TestScript_Remove(t *testing.T) {
@@ -190,12 +193,12 @@ for i:=1; i<=d; i++ {
 
 e := mod1.double(s)
 `)
-	mod1 := map[string]core.Object{
-		"double": alloc.NewBuiltinFunction(
+	mod1 := map[string]core.Value{
+		"double": alloc.NewBuiltinFunctionValue(
 			"unknown",
-			func(v core.VM, args ...core.Object) (ret core.Object, err error) {
+			func(v core.VM, args ...core.Value) (ret core.Value, err error) {
 				arg0, _ := args[0].AsInt()
-				ret = alloc.NewInt(arg0 * 2)
+				ret = core.NewInt(arg0 * 2)
 				return
 			},
 			1,
@@ -270,45 +273,53 @@ func (o *Counter) AsString() (string, bool) {
 	return o.String(), true
 }
 
-func (o *Counter) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Object, error) {
-	switch rhs := rhs.(type) {
-	case *Counter:
+func (o *Counter) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
+	if rhs.IsInt() {
 		switch op {
 		case token.Add:
-			return &Counter{value: o.value + rhs.value}, nil
+			return core.NewObject(&Counter{value: o.value + rhs.Int()}, false), nil
 		case token.Sub:
-			return &Counter{value: o.value - rhs.value}, nil
-		}
-	case *value.Int:
-		switch op {
-		case token.Add:
-			return &Counter{value: o.value + rhs.Value()}, nil
-		case token.Sub:
-			return &Counter{value: o.value - rhs.Value()}, nil
+			return core.NewObject(&Counter{value: o.value - rhs.Int()}, false), nil
 		}
 	}
 
-	return nil, errors.New("invalid operator")
+	if rhs.IsObject() {
+		switch rhs := rhs.Object().(type) {
+		case *Counter:
+			switch op {
+			case token.Add:
+				return core.NewObject(&Counter{value: o.value + rhs.value}, false), nil
+			case token.Sub:
+				return core.NewObject(&Counter{value: o.value - rhs.value}, false), nil
+			}
+		}
+	}
+
+	return core.NewUndefined(), errors.New("invalid operator")
 }
 
 func (o *Counter) IsFalse() bool {
 	return o.value == 0
 }
 
-func (o *Counter) Equals(t core.Object) bool {
-	if tc, ok := t.(*Counter); ok {
+func (o *Counter) Equals(t core.Value) bool {
+	if !t.IsObject() {
+		return false
+	}
+
+	if tc, ok := t.Object().(*Counter); ok {
 		return o.value == tc.value
 	}
 
 	return false
 }
 
-func (o *Counter) Copy(alloc core.Allocator) core.Object {
-	return &Counter{value: o.value}
+func (o *Counter) Copy(alloc core.Allocator) core.Value {
+	return core.NewObject(&Counter{value: o.value}, false)
 }
 
-func (o *Counter) Call(core.VM, ...core.Object) (core.Object, error) {
-	return alloc.NewInt(o.value), nil
+func (o *Counter) Call(core.VM, ...core.Value) (core.Value, error) {
+	return core.NewInt(o.value), nil
 }
 
 func (o *Counter) IsCallable() bool {
@@ -316,7 +327,7 @@ func (o *Counter) IsCallable() bool {
 }
 
 func TestScript_CustomObjects(t *testing.T) {
-	c := compile(t, `a := c1(); s := string(c1); c2 := c1; c2++`, M{"c1": &Counter{value: 5}})
+	c := compile(t, `a := c1(); s := string(c1); c2 := c1; c2++`, M{"c1": core.NewObject(&Counter{value: 5}, false)})
 	compiledRun(t, c)
 	compiledGet(t, c, "a", int64(5))
 	compiledGet(t, c, "s", "Counter(5)")
@@ -329,22 +340,18 @@ for x in arr {
 }
 out := c1()
 `, M{
-		"c1": &Counter{value: 5},
+		"c1": core.NewObject(&Counter{value: 5}, false),
 	})
 	compiledRun(t, c)
 	compiledGet(t, c, "out", int64(15))
 }
 
-func compiledGetCounter(
-	t *testing.T,
-	c *gs.Compiled,
-	name string,
-	expected *Counter,
-) {
+func compiledGetCounter(t *testing.T, c *gs.Compiled, name string, expected *Counter) {
 	v := c.Get(name)
 	require.NotNil(t, v)
 
-	actual := v.Value().(*Counter)
+	val := v.Value()
+	actual := val.Object().(*Counter)
 	require.NotNil(t, actual)
 	require.Equal(t, expected.value, actual.value)
 }
@@ -357,7 +364,8 @@ func TestScriptSourceModule(t *testing.T) {
 	scr.SetImports(mods)
 	c, err := scr.Run()
 	require.NoError(t, err)
-	require.Equal(t, int64(5), c.Get("out").Value().Interface())
+	v := c.Get("out").Value()
+	require.Equal(t, int64(5), v.Interface())
 
 	// executing module function
 	scr = gs.NewScript(alloc, []byte(`fn := import("mod"); out := fn()`))
@@ -367,17 +375,18 @@ func TestScriptSourceModule(t *testing.T) {
 	scr.SetImports(mods)
 	c, err = scr.Run()
 	require.NoError(t, err)
-	require.Equal(t, int64(8), c.Get("out").Value().Interface())
+	v = c.Get("out").Value()
+	require.Equal(t, int64(8), v.Interface())
 
 	scr = gs.NewScript(alloc, []byte(`out := import("mod")`))
 	mods = vm.NewModuleMap()
 	mods.AddSourceModule("mod", []byte(`text := import("text"); export text.title("foo")`))
-	mods.AddBuiltinModule("text", map[string]core.Object{
-		"title": alloc.NewBuiltinFunction(
+	mods.AddBuiltinModule("text", map[string]core.Value{
+		"title": alloc.NewBuiltinFunctionValue(
 			"title",
-			func(v core.VM, args ...core.Object) (core.Object, error) {
+			func(v core.VM, args ...core.Value) (core.Value, error) {
 				s, _ := args[0].AsString()
-				return alloc.NewString(strings.Title(s)), nil
+				return alloc.NewStringValue(strings.Title(s)), nil
 			},
 			1,
 			false,
@@ -386,7 +395,8 @@ func TestScriptSourceModule(t *testing.T) {
 	scr.SetImports(mods)
 	c, err = scr.Run()
 	require.NoError(t, err)
-	require.Equal(t, "Foo", c.Get("out").Value().Interface())
+	v = c.Get("out").Value()
+	require.Equal(t, "Foo", v.Interface())
 	scr.SetImports(nil)
 	_, err = scr.Run()
 	require.Error(t, err)
@@ -507,11 +517,11 @@ func TestCompiled_RunContext(t *testing.T) {
 }
 
 func TestCompiled_CustomObject(t *testing.T) {
-	c := compile(t, `r := (t<130)`, M{"t": &customNumber{value: 123}})
+	c := compile(t, `r := (t<130)`, M{"t": core.NewObject(&customNumber{value: 123}, false)})
 	compiledRun(t, c)
 	compiledGet(t, c, "r", true)
 
-	c = compile(t, `r := (t>13)`, M{"t": &customNumber{value: 123}})
+	c = compile(t, `r := (t>13)`, M{"t": core.NewObject(&customNumber{value: 123}, false)})
 	compiledRun(t, c)
 	compiledGet(t, c, "r", true)
 }
@@ -531,28 +541,29 @@ func (n *customNumber) String() string {
 	return strconv.FormatInt(n.value, 10)
 }
 
-func (n *customNumber) BinaryOp(vm core.VM, op token.Token, rhs core.Object) (core.Object, error) {
-	i, ok := rhs.(*value.Int)
+func (n *customNumber) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
+	i, ok := rhs.AsInt()
 	if !ok {
-		return nil, core.NewInvalidBinaryOperatorError(op.String(), n, rhs)
+		return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), n.TypeName(), rhs.TypeName())
 	}
 	return n.binaryOpInt(op, i)
 }
 
-func (n *customNumber) binaryOpInt(op token.Token, rhs *value.Int) (core.Object, error) {
+func (n *customNumber) binaryOpInt(op token.Token, rhs int64) (core.Value, error) {
 	i := n.value
 
 	switch op {
 	case token.Less:
-		return alloc.NewBool(i < rhs.Value()), nil
+		return core.NewBool(i < rhs), nil
 	case token.Greater:
-		return alloc.NewBool(i > rhs.Value()), nil
+		return core.NewBool(i > rhs), nil
 	case token.LessEq:
-		return alloc.NewBool(i <= rhs.Value()), nil
+		return core.NewBool(i <= rhs), nil
 	case token.GreaterEq:
-		return alloc.NewBool(i >= rhs.Value()), nil
+		return core.NewBool(i >= rhs), nil
 	}
-	return nil, core.NewInvalidBinaryOperatorError(op.String(), n, rhs)
+	t := core.NewInt(i)
+	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), n.TypeName(), t.TypeName())
 }
 
 func TestScript_ImportError(t *testing.T) {

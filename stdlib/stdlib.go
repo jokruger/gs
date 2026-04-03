@@ -18,8 +18,7 @@ func AllModuleNames() []string {
 	return names
 }
 
-// GetModuleMap returns the module map that includes all modules
-// for the given module names.
+// GetModuleMap returns the module map that includes all modules for the given module names.
 func GetModuleMap(names ...string) *vm.ModuleMap {
 	modules := vm.NewModuleMap()
 	for _, name := range names {

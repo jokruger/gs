@@ -154,20 +154,21 @@ func RunCompiled(a core.Allocator, modules *vm.ModuleMap, data []byte) (err erro
 func RunREPL(a core.Allocator, modules *vm.ModuleMap, in io.Reader, out io.Writer) {
 	stdin := bufio.NewScanner(in)
 	fileSet := parser.NewFileSet()
-	globals := make([]core.Object, vm.GlobalsSize)
+	globals := make([]core.Value, vm.GlobalsSize)
 	symbolTable := vm.NewSymbolTable()
 	for idx, fn := range vm.BuiltinFuncs {
-		symbolTable.DefineBuiltin(idx, fn.Name())
+		// it is safe to cast because vm.BuiltinFuncs should only contain built-in functions
+		symbolTable.DefineBuiltin(idx, fn.Object().(*value.BuiltinFunction).Name())
 	}
 
 	// embed println function
 	symbol := symbolTable.Define("__repl_println__")
-	globals[symbol.Index] = a.NewBuiltinFunction(
+	t := a.NewBuiltinFunction(
 		"println",
-		func(v core.VM, args ...core.Object) (ret core.Object, err error) {
+		func(v core.VM, args ...core.Value) (ret core.Value, err error) {
 			var printArgs []any
 			for _, arg := range args {
-				if _, isUndefined := arg.(*value.Undefined); isUndefined {
+				if arg.IsUndefined() {
 					printArgs = append(printArgs, "<undefined>")
 				} else {
 					s, _ := arg.AsString()
@@ -181,8 +182,9 @@ func RunREPL(a core.Allocator, modules *vm.ModuleMap, in io.Reader, out io.Write
 		1,
 		true,
 	)
+	globals[symbol.Index] = core.NewObject(t, false)
 
-	var constants []core.Object
+	var constants []core.Value
 	for {
 		_, _ = fmt.Fprint(out, replPrompt)
 		scanned := stdin.Scan()

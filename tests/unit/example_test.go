@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jokruger/gs"
+	"github.com/jokruger/gs/core"
 )
 
 func Example() {
@@ -24,10 +25,10 @@ each([a, b, c, d], func(x) {
 	script := gs.NewScript(alloc, []byte(src))
 
 	// set values
-	script.Add("a", alloc.NewInt(1))
-	script.Add("b", alloc.NewInt(9))
-	script.Add("c", alloc.NewInt(8))
-	script.Add("d", alloc.NewInt(4))
+	script.Add("a", core.NewInt(1))
+	script.Add("b", core.NewInt(9))
+	script.Add("c", core.NewInt(8))
+	script.Add("d", core.NewInt(4))
 
 	// run the script
 	compiled, err := script.RunContext(context.Background())

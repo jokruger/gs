@@ -36,7 +36,7 @@ func main() {
 Key APIs:
 
 - `gs.NewScript(alloc, source)` – prepares a script with local variables.
-- `script.Add(name, value)` / `script.Remove(name)` – manage inputs. Use the allocator to construct `core.Object` instances before injecting them.
+- `script.Add(name, value)` / `script.Remove(name)` – manage inputs. Use the allocator to construct `core.Value` instances before injecting them.
 - `script.SetImports(map)` – control which modules may be loaded. Use `stdlib.GetModuleMap(stdlib.AllModuleNames()...)` or hand-roll a whitelist.
 - `script.EnableFileImport(bool)` and `script.SetImportDir(path)` – allow `import("./module")` in scripts. By default only builtin modules can be imported; file imports are disabled until you opt in.
 - `script.SetMaxAllocs(n)` / `script.SetMaxConstObjects(n)` – enforce limits for untrusted code. Pass `-1` to remove the limit (the default).
@@ -62,7 +62,7 @@ The `Eval` helper in `eval.go` compiles a single expression, runs it, and return
 
 ```go
 res, err := gs.Eval(ctx, alloc.NewHeapAllocator(), `input ? "ok" : "fail"`,
-    map[string]core.Object{"input": alloc.NewBool(true)})
+    map[string]core.Value{"input": core.NewBool(true)})
 ```
 
 It wraps the expression in `__res__ := (...)`, runs the script, and returns the value of `__res__`.

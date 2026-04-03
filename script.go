@@ -8,6 +8,7 @@ import (
 
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
+	"github.com/jokruger/gs/value"
 	"github.com/jokruger/gs/vm"
 )
 
@@ -35,7 +36,7 @@ func NewScript(alloc core.Allocator, input []byte) *Script {
 }
 
 // Add adds a new variable or updates an existing variable to the script.
-func (s *Script) Add(name string, val core.Object) {
+func (s *Script) Add(name string, val core.Value) {
 	s.variables[name] = NewVariable(name, val)
 }
 
@@ -153,7 +154,7 @@ func (s *Script) RunContext(ctx context.Context) (compiled *Compiled, err error)
 	return
 }
 
-func (s *Script) prepCompile() (symbolTable *vm.SymbolTable, globals []core.Object, err error) {
+func (s *Script) prepCompile() (symbolTable *vm.SymbolTable, globals []core.Value, err error) {
 	var names []string
 	for name := range s.variables {
 		names = append(names, name)
@@ -161,10 +162,11 @@ func (s *Script) prepCompile() (symbolTable *vm.SymbolTable, globals []core.Obje
 
 	symbolTable = vm.NewSymbolTable()
 	for idx, fn := range vm.BuiltinFuncs {
-		symbolTable.DefineBuiltin(idx, fn.Name())
+		// it is safe to cast type because we know that all values in vm.BuiltinFuncs are *value.BuiltinFunction objects
+		symbolTable.DefineBuiltin(idx, fn.Object().(*value.BuiltinFunction).Name())
 	}
 
-	globals = make([]core.Object, vm.GlobalsSize)
+	globals = make([]core.Value, vm.GlobalsSize)
 
 	for idx, name := range names {
 		symbol := symbolTable.Define(name)
@@ -181,7 +183,7 @@ type Compiled struct {
 	alloc         core.Allocator
 	globalIndexes map[string]int // global symbol name to index
 	bytecode      *vm.Bytecode
-	globals       []core.Object
+	globals       []core.Value
 	maxAllocs     int64
 	lock          sync.RWMutex
 }
@@ -245,15 +247,13 @@ func (c *Compiled) Clone() *Compiled {
 		alloc:         c.alloc,
 		globalIndexes: c.globalIndexes,
 		bytecode:      c.bytecode,
-		globals:       make([]core.Object, len(c.globals)),
+		globals:       make([]core.Value, len(c.globals)),
 		maxAllocs:     c.maxAllocs,
 	}
 
 	// copy global objects
 	for idx, g := range c.globals {
-		if g != nil {
-			clone.globals[idx] = g.Copy(c.alloc)
-		}
+		clone.globals[idx] = g.Copy(c.alloc)
 	}
 
 	return clone
@@ -269,10 +269,6 @@ func (c *Compiled) IsDefined(name string) bool {
 		return false
 	}
 	v := c.globals[idx]
-	if v == nil {
-		return false
-	}
-
 	return !v.IsUndefined()
 }
 
@@ -281,14 +277,9 @@ func (c *Compiled) Get(name string) *Variable {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	var v core.Object
-
-	v = c.alloc.NewUndefined()
+	v := core.NewUndefined()
 	if idx, ok := c.globalIndexes[name]; ok {
 		v = c.globals[idx]
-		if v == nil {
-			v = c.alloc.NewUndefined()
-		}
 	}
 
 	return NewVariable(name, v)
@@ -302,9 +293,6 @@ func (c *Compiled) GetAll() []*Variable {
 	var vars []*Variable
 	for name, idx := range c.globalIndexes {
 		v := c.globals[idx]
-		if v == nil {
-			v = c.alloc.NewUndefined()
-		}
 		vars = append(vars, NewVariable(name, v))
 	}
 	return vars
@@ -312,7 +300,7 @@ func (c *Compiled) GetAll() []*Variable {
 
 // Set replaces the value of a global variable identified by the name.
 // An error will be returned if the name was not defined during compilation.
-func (c *Compiled) Set(name string, val core.Object) error {
+func (c *Compiled) Set(name string, val core.Value) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 

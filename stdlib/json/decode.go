@@ -16,11 +16,11 @@ import (
 )
 
 // Decode parses the JSON-encoded data and returns the result object.
-func Decode(alloc core.Allocator, data []byte) (core.Object, error) {
+func Decode(alloc core.Allocator, data []byte) (core.Value, error) {
 	d := decodeState{alloc: alloc}
 	err := checkValid(data, &d.scan)
 	if err != nil {
-		return nil, err
+		return core.NewUndefined(), err
 	}
 	d.init(data)
 	d.scan.reset()
@@ -83,21 +83,21 @@ func (d *decodeState) scanWhile(op int) (isFloat bool) {
 	return
 }
 
-func (d *decodeState) value() (core.Object, error) {
+func (d *decodeState) value() (core.Value, error) {
 	switch d.opcode {
 	default:
 		panic(phasePanicMsg)
 	case scanBeginArray:
 		o, err := d.array()
 		if err != nil {
-			return nil, err
+			return core.NewUndefined(), err
 		}
 		d.scanNext()
 		return o, nil
 	case scanBeginObject:
 		o, err := d.object()
 		if err != nil {
-			return nil, err
+			return core.NewUndefined(), err
 		}
 		d.scanNext()
 		return o, nil
@@ -106,8 +106,8 @@ func (d *decodeState) value() (core.Object, error) {
 	}
 }
 
-func (d *decodeState) array() (core.Object, error) {
-	var arr []core.Object
+func (d *decodeState) array() (core.Value, error) {
+	var arr []core.Value
 	for {
 		// Look ahead for ] - can only happen on first iteration.
 		d.scanWhile(scanSkipSpace)
@@ -116,7 +116,7 @@ func (d *decodeState) array() (core.Object, error) {
 		}
 		o, err := d.value()
 		if err != nil {
-			return nil, err
+			return core.NewUndefined(), err
 		}
 		arr = append(arr, o)
 
@@ -131,11 +131,11 @@ func (d *decodeState) array() (core.Object, error) {
 			panic(phasePanicMsg)
 		}
 	}
-	return d.alloc.NewArray(arr, false), nil
+	return d.alloc.NewArrayValue(arr, false), nil
 }
 
-func (d *decodeState) object() (core.Object, error) {
-	m := make(map[string]core.Object)
+func (d *decodeState) object() (core.Value, error) {
+	m := make(map[string]core.Value)
 	for {
 		// Read opening " of string key or closing }.
 		d.scanWhile(scanSkipSpace)
@@ -168,7 +168,7 @@ func (d *decodeState) object() (core.Object, error) {
 		// Read value.
 		o, err := d.value()
 		if err != nil {
-			return nil, err
+			return core.NewUndefined(), err
 		}
 
 		m[key] = o
@@ -184,10 +184,10 @@ func (d *decodeState) object() (core.Object, error) {
 			panic(phasePanicMsg)
 		}
 	}
-	return d.alloc.NewRecord(m, false), nil
+	return d.alloc.NewRecordValue(m, false), nil
 }
 
-func (d *decodeState) literal() (core.Object, error) {
+func (d *decodeState) literal() (core.Value, error) {
 	// All bytes inside literal return scanContinue op code.
 	start := d.readIndex()
 	isFloat := d.scanWhile(scanContinue)
@@ -196,17 +196,17 @@ func (d *decodeState) literal() (core.Object, error) {
 
 	switch c := item[0]; c {
 	case 'n': // null
-		return d.alloc.NewUndefined(), nil
+		return core.NewUndefined(), nil
 
 	case 't', 'f': // true, false
-		return d.alloc.NewBool(c == 't'), nil
+		return core.NewBool(c == 't'), nil
 
 	case '"': // string
 		s, ok := unquote(item)
 		if !ok {
 			panic(phasePanicMsg)
 		}
-		return d.alloc.NewString(s), nil
+		return d.alloc.NewStringValue(s), nil
 
 	default: // number
 		if c != '-' && (c < '0' || c > '9') {
@@ -214,10 +214,10 @@ func (d *decodeState) literal() (core.Object, error) {
 		}
 		if isFloat {
 			n, _ := strconv.ParseFloat(string(item), 10)
-			return d.alloc.NewFloat(n), nil
+			return core.NewFloat(n), nil
 		}
 		n, _ := strconv.ParseInt(string(item), 10, 64)
-		return d.alloc.NewInt(n), nil
+		return core.NewInt(n), nil
 	}
 }
 

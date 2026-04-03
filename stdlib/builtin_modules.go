@@ -3,7 +3,7 @@ package stdlib
 import "github.com/jokruger/gs/core"
 
 // BuiltinModules are builtin type standard library modules.
-var BuiltinModules = map[string]map[string]core.Object{
+var BuiltinModules = map[string]map[string]core.Value{
 	"math":   mathModule,
 	"os":     osModule,
 	"text":   textModule,

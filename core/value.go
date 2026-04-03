@@ -20,12 +20,14 @@ const (
 	V_CHAR      = ValueKind(2)
 	V_FLOAT     = ValueKind(3)
 	V_INT       = ValueKind(4)
-	V_OBJECT    = ValueKind(255)
+
+	V_OBJECT    = ValueKind(254)
+	V_VALUE_PTR = ValueKind(255)
 )
 
 type Value struct {
 	data     uint64
-	ptr      Object
+	ptr      any
 	kind     ValueKind
 	temporal bool
 }
@@ -61,8 +63,15 @@ func NewObject(o Object, temporal bool) Value {
 	return Value{ptr: o, kind: V_OBJECT, temporal: temporal}
 }
 
-func (v *Value) IsObject() bool {
-	return v.kind == V_OBJECT
+func NewValuePtr(o *Value) Value {
+	return Value{ptr: o, kind: V_VALUE_PTR}
+}
+
+func (v *Value) Set(val Value) {
+	v.data = val.data
+	v.ptr = val.ptr
+	v.kind = val.kind
+	v.temporal = val.temporal
 }
 
 func (v *Value) Kind() ValueKind {
@@ -82,11 +91,19 @@ func (v *Value) SetTemporal(temporal bool) {
 }
 
 func (v *Value) Object() Object {
-	return v.ptr
+	return v.ptr.(Object)
 }
 
 func (v *Value) SetObject(o Object) {
 	v.ptr = o
+}
+
+func (v *Value) ValuePtr() *Value {
+	return v.ptr.(*Value)
+}
+
+func (v *Value) SetValuePtr(ptr *Value) {
+	v.ptr = ptr
 }
 
 func (v *Value) Int() int64 {
@@ -167,11 +184,14 @@ func (v Value) GobEncode() ([]byte, error) {
 	case V_OBJECT:
 		var buf bytes.Buffer
 		enc := gob.NewEncoder(&buf)
-		obj := v.ptr
+		obj := v.ptr.(Object)
 		if err := enc.Encode(&obj); err != nil {
 			return nil, err
 		}
 		return append([]byte{uint8(V_OBJECT), flags}, buf.Bytes()...), nil
+
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in GobEncode")
 
 	default:
 		return nil, NewInvalidValueKindError(v.kind)
@@ -235,36 +255,54 @@ func (v *Value) GobDecode(data []byte) error {
 		v.ptr = o
 		return nil
 
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in GobDecode")
+
 	default:
 		return NewInvalidValueKindError(v.kind)
 	}
 }
 
 func (v *Value) Next() bool {
-	if v.kind == V_OBJECT {
+	switch v.kind {
+	case V_OBJECT:
 		if i, ok := v.ptr.(Iterator); ok {
 			return i.Next()
 		}
+		return false
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in Next")
+	default:
+		return false
 	}
-	return false
 }
 
 func (v *Value) Key(alloc Allocator) Value {
-	if v.kind == V_OBJECT {
+	switch v.kind {
+	case V_OBJECT:
 		if i, ok := v.ptr.(Iterator); ok {
 			return i.Key(alloc)
 		}
+		return NewUndefined()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in Key")
+	default:
+		return NewUndefined()
 	}
-	return NewUndefined()
 }
 
 func (v *Value) Value(alloc Allocator) Value {
-	if v.kind == V_OBJECT {
+	switch v.kind {
+	case V_OBJECT:
 		if i, ok := v.ptr.(Iterator); ok {
 			return i.Value(alloc)
 		}
+		return NewUndefined()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in Value")
+	default:
+		return NewUndefined()
 	}
-	return NewUndefined()
 }
 
 func (v *Value) TypeName() string {
@@ -280,7 +318,9 @@ func (v *Value) TypeName() string {
 	case V_INT:
 		return "int"
 	case V_OBJECT:
-		return v.ptr.TypeName()
+		return v.ptr.(Object).TypeName()
+	case V_VALUE_PTR:
+		return "<value-ptr>"
 	default:
 		return "unknown"
 	}
@@ -302,7 +342,9 @@ func (v *Value) String() string {
 	case V_INT:
 		return strconv.FormatInt(v.Int(), 10)
 	case V_OBJECT:
-		return v.ptr.String()
+		return v.ptr.(Object).String()
+	case V_VALUE_PTR:
+		return "<value-ptr>"
 	default:
 		return "unknown"
 	}
@@ -319,35 +361,35 @@ func (v *Value) Interface() any {
 	case V_INT:
 		return v.Int()
 	case V_OBJECT:
-		return v.ptr.Interface()
+		return v.ptr.(Object).Interface()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in Interface")
 	default:
 		return nil
 	}
 }
 
 func (v *Value) Arity() int {
-	if v.kind == V_OBJECT {
-		return v.ptr.Arity()
+	switch v.kind {
+	case V_OBJECT:
+		return v.ptr.(Object).Arity()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in Arity")
+	default:
+		return 0
 	}
-	return 0
 }
 
-func (v *Value) IsImmutable() bool {
-	if v.kind == V_OBJECT {
-		return v.ptr.IsImmutable()
-	}
-	return false
+func (v *Value) IsObject() bool {
+	return v.kind == V_OBJECT
+}
+
+func (v *Value) IsValuePtr() bool {
+	return v.kind == V_VALUE_PTR
 }
 
 func (v *Value) IsUndefined() bool {
 	return v.kind == V_UNDEFINED
-}
-
-func (v *Value) IsString() bool {
-	if v.kind == V_OBJECT {
-		return v.ptr.IsString()
-	}
-	return false
 }
 
 func (v *Value) IsInt() bool {
@@ -366,58 +408,65 @@ func (v *Value) IsChar() bool {
 	return v.kind == V_CHAR
 }
 
+func (v *Value) IsString() bool {
+	if v.kind == V_OBJECT {
+		return v.ptr.(Object).IsString()
+	}
+	return false
+}
+
 func (v *Value) IsBytes() bool {
 	if v.kind == V_OBJECT {
-		return v.ptr.IsBytes()
+		return v.ptr.(Object).IsBytes()
 	}
 	return false
 }
 
 func (v *Value) IsTime() bool {
 	if v.kind == V_OBJECT {
-		return v.ptr.IsTime()
+		return v.ptr.(Object).IsTime()
 	}
 	return false
 }
 
 func (v *Value) IsArray() bool {
 	if v.kind == V_OBJECT {
-		return v.ptr.IsArray()
+		return v.ptr.(Object).IsArray()
 	}
 	return false
 }
 
 func (v *Value) IsError() bool {
 	if v.kind == V_OBJECT {
-		return v.ptr.IsError()
+		return v.ptr.(Object).IsError()
 	}
 	return false
 }
 
 func (v *Value) IsMap() bool {
 	if v.kind == V_OBJECT {
-		return v.ptr.IsMap()
+		return v.ptr.(Object).IsMap()
 	}
 	return false
 }
 
 func (v *Value) IsRecord() bool {
 	if v.kind == V_OBJECT {
-		return v.ptr.IsRecord()
+		return v.ptr.(Object).IsRecord()
 	}
 	return false
 }
 
 func (v *Value) IsCompiledFunction() bool {
 	if v.kind == V_OBJECT {
-		return v.ptr.IsCompiledFunction()
+		return v.ptr.(Object).IsCompiledFunction()
 	}
 	return false
 }
 
 func (v *Value) IsBuiltinFunction() bool {
 	if v.kind == V_OBJECT {
-		return v.ptr.IsBuiltinFunction()
+		return v.ptr.(Object).IsBuiltinFunction()
 	}
 	return false
 }
@@ -433,7 +482,9 @@ func (v *Value) IsTrue() bool {
 	case V_INT:
 		return v.data != 0
 	case V_OBJECT:
-		return v.ptr.IsTrue()
+		return v.ptr.(Object).IsTrue()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in IsTrue")
 	default:
 		return false
 	}
@@ -450,7 +501,9 @@ func (v *Value) IsFalse() bool {
 	case V_INT:
 		return v.data == 0
 	case V_OBJECT:
-		return v.ptr.IsFalse()
+		return v.ptr.(Object).IsFalse()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in IsFalse")
 	default:
 		return true
 	}
@@ -461,24 +514,45 @@ func (v *Value) IsIterable() bool {
 	case V_UNDEFINED:
 		return true
 	case V_OBJECT:
-		return v.ptr.IsIterable()
+		return v.ptr.(Object).IsIterable()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in IsIterable")
 	default:
 		return false
 	}
 }
 
 func (v *Value) IsCallable() bool {
-	if v.kind == V_OBJECT {
-		return v.ptr.IsCallable()
+	switch v.kind {
+	case V_OBJECT:
+		return v.ptr.(Object).IsCallable()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in IsCallable")
+	default:
+		return false
 	}
-	return false
 }
 
 func (v *Value) IsVariadic() bool {
-	if v.kind == V_OBJECT {
-		return v.ptr.IsVariadic()
+	switch v.kind {
+	case V_OBJECT:
+		return v.ptr.(Object).IsVariadic()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in IsVariadic")
+	default:
+		return false
 	}
-	return false
+}
+
+func (v *Value) IsImmutable() bool {
+	switch v.kind {
+	case V_OBJECT:
+		return v.ptr.(Object).IsImmutable()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in IsImmutable")
+	default:
+		return true
+	}
 }
 
 func (v *Value) AsString() (string, bool) {
@@ -495,7 +569,9 @@ func (v *Value) AsString() (string, bool) {
 	case V_INT:
 		return strconv.FormatInt(v.Int(), 10), true
 	case V_OBJECT:
-		return v.ptr.AsString()
+		return v.ptr.(Object).AsString()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in AsString")
 	default:
 		return "", false
 	}
@@ -515,7 +591,9 @@ func (v *Value) AsInt() (int64, bool) {
 	case V_INT:
 		return v.Int(), true
 	case V_OBJECT:
-		return v.ptr.AsInt()
+		return v.ptr.(Object).AsInt()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in AsInt")
 	default:
 		return 0, false
 	}
@@ -528,7 +606,9 @@ func (v *Value) AsFloat() (float64, bool) {
 	case V_INT:
 		return float64(v.Int()), true
 	case V_OBJECT:
-		return v.ptr.AsFloat()
+		return v.ptr.(Object).AsFloat()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in AsFloat")
 	default:
 		return 0, false
 	}
@@ -547,7 +627,9 @@ func (v *Value) AsBool() (bool, bool) {
 	case V_INT:
 		return v.data != 0, true
 	case V_OBJECT:
-		return v.ptr.AsBool()
+		return v.ptr.(Object).AsBool()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in AsBool")
 	default:
 		return false, false
 	}
@@ -560,17 +642,23 @@ func (v *Value) AsChar() (rune, bool) {
 	case V_INT:
 		return rune(v.Int()), true
 	case V_OBJECT:
-		return v.ptr.AsChar()
+		return v.ptr.(Object).AsChar()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in AsChar")
 	default:
 		return 0, false
 	}
 }
 
 func (v *Value) AsBytes() ([]byte, bool) {
-	if v.kind == V_OBJECT {
-		return v.ptr.AsBytes()
+	switch v.kind {
+	case V_OBJECT:
+		return v.ptr.(Object).AsBytes()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in AsBytes")
+	default:
+		return nil, false
 	}
-	return nil, false
 }
 
 func (v *Value) AsTime() (time.Time, bool) {
@@ -578,7 +666,9 @@ func (v *Value) AsTime() (time.Time, bool) {
 	case V_INT:
 		return time.Unix(v.Int(), 0), true
 	case V_OBJECT:
-		return v.ptr.AsTime()
+		return v.ptr.(Object).AsTime()
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in AsTime")
 	default:
 		return time.Time{}, false
 	}
@@ -593,7 +683,9 @@ func (v *Value) BinaryOp(vm VM, op token.Token, rhs Value) (Value, error) {
 	case V_INT:
 		return v.intBinaryOp(vm, op, rhs)
 	case V_OBJECT:
-		return v.ptr.BinaryOp(vm, op, rhs)
+		return v.ptr.(Object).BinaryOp(vm, op, rhs)
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in BinaryOp")
 	default:
 		return NewUndefined(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
@@ -625,7 +717,7 @@ func (v *Value) charBinaryOp(vm VM, op token.Token, rhs Value) (Value, error) {
 
 	case rhs.IsString(): // char op string => string
 		l := string(v.Char())
-		r, _ := rhs.ptr.AsString()
+		r, _ := rhs.ptr.(Object).AsString()
 		switch op {
 		case token.Add:
 			return alloc.NewStringValue(l + r), nil
@@ -793,7 +885,10 @@ func (v *Value) Equals(rhs Value) bool {
 		return r == v.Int()
 
 	case V_OBJECT:
-		return v.ptr.Equals(rhs)
+		return v.ptr.(Object).Equals(rhs)
+
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in Equals")
 
 	default:
 		return false
@@ -801,10 +896,14 @@ func (v *Value) Equals(rhs Value) bool {
 }
 
 func (v *Value) Copy(alloc Allocator) Value {
-	if v.kind == V_OBJECT {
-		return v.ptr.Copy(alloc)
+	switch v.kind {
+	case V_OBJECT:
+		return v.ptr.(Object).Copy(alloc)
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in Copy")
+	default:
+		return Value{data: v.data, kind: v.kind}
 	}
-	return Value{data: v.data, kind: v.kind}
 }
 
 func (v *Value) Access(vm VM, index Value, mode Opcode) (Value, error) {
@@ -820,7 +919,9 @@ func (v *Value) Access(vm VM, index Value, mode Opcode) (Value, error) {
 	case V_INT:
 		return v.intAccess(vm, index, mode)
 	case V_OBJECT:
-		return v.ptr.Access(vm, index, mode)
+		return v.ptr.(Object).Access(vm, index, mode)
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in Access")
 	default:
 		return NewUndefined(), NewNotAccessibleError(v.TypeName())
 	}
@@ -933,22 +1034,34 @@ func (v *Value) intAccess(vm VM, index Value, op Opcode) (Value, error) {
 }
 
 func (v *Value) Assign(idx, val Value) error {
-	if v.kind == V_OBJECT {
-		return v.ptr.Assign(idx, val)
+	switch v.kind {
+	case V_OBJECT:
+		return v.ptr.(Object).Assign(idx, val)
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in Assign")
+	default:
+		return NewNotAssignableError(v.TypeName())
 	}
-	return NewNotAssignableError(v.TypeName())
 }
 
 func (v *Value) Iterate(alloc Allocator) Iterator {
-	if v.kind == V_OBJECT {
-		return v.ptr.Iterate(alloc)
+	switch v.kind {
+	case V_OBJECT:
+		return v.ptr.(Object).Iterate(alloc)
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in Iterate")
+	default:
+		return nil
 	}
-	return nil
 }
 
 func (v *Value) Call(vm VM, args ...Value) (Value, error) {
-	if v.kind == V_OBJECT {
-		return v.ptr.Call(vm, args...)
+	switch v.kind {
+	case V_OBJECT:
+		return v.ptr.(Object).Call(vm, args...)
+	case V_VALUE_PTR:
+		panic("unexpected value pointer in Call")
+	default:
+		return NewUndefined(), NewNotCallableError(v.TypeName())
 	}
-	return NewUndefined(), NewNotCallableError(v.TypeName())
 }

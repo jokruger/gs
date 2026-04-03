@@ -3817,13 +3817,15 @@ func expectRun(t *testing.T, input string, opts *testopts, expected any) {
 		}
 
 		expectedObj := toObject(expected)
-		switch eo := expectedObj.Object().(type) {
-		case *value.Array:
-			expectedObj = alloc.NewArrayValue(eo.Value(), true)
-		case *value.Record:
-			expectedObj = alloc.NewRecordValue(eo.Value(), true)
-		case *value.Map:
-			expectedObj = alloc.NewMapValue(eo.Value(), true)
+		if expectedObj.IsObject() {
+			switch eo := expectedObj.Object().(type) {
+			case *value.Array:
+				expectedObj = alloc.NewArrayValue(eo.Value(), true)
+			case *value.Record:
+				expectedObj = alloc.NewRecordValue(eo.Value(), true)
+			case *value.Map:
+				expectedObj = alloc.NewMapValue(eo.Value(), true)
+			}
 		}
 
 		modules.AddSourceModule("__code__", []byte(fmt.Sprintf("out := undefined; %s; export out", input)))

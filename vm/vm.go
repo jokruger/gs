@@ -13,7 +13,7 @@ import (
 // frame represents a function call frame.
 type frame struct {
 	fn          *value.CompiledFunction
-	freeVars    []*value.ObjectPtr
+	freeVars    []*core.Value
 	ip          int
 	basePointer int
 }
@@ -666,11 +666,9 @@ func (v *VM) run() {
 			// this is needed because there can be free variables referencing the same local variables.
 			val := v.stack[v.sp-1]
 			v.sp--
-			if v.stack[sp].IsObject() {
-				if obj, ok := v.stack[sp].Object().(*value.ObjectPtr); ok {
-					*obj.Value = val
-					val = core.NewObject(obj, false)
-				}
+			if v.stack[sp].IsValuePtr() {
+				v.stack[sp].ValuePtr().Set(val)
+				val = v.stack[sp]
 			}
 			v.stack[sp] = val // also use a copy of popped value
 
@@ -687,10 +685,8 @@ func (v *VM) run() {
 			val := v.stack[v.sp-numSelectors-1]
 			v.sp -= numSelectors + 1
 			dst := v.stack[v.curFrame.basePointer+localIndex]
-			if dst.IsObject() {
-				if obj, ok := dst.Object().(*value.ObjectPtr); ok {
-					dst = *obj.Value
-				}
+			if dst.IsValuePtr() {
+				dst = *dst.ValuePtr()
 			}
 			if e := v.indexAssign(dst, val, selectors); e != nil {
 				v.err = e
@@ -701,10 +697,8 @@ func (v *VM) run() {
 			v.ip++
 			localIndex := int(v.curInsts[v.ip])
 			val := v.stack[v.curFrame.basePointer+localIndex]
-			if val.IsObject() {
-				if obj, ok := val.Object().(*value.ObjectPtr); ok {
-					val = *obj.Value
-				}
+			if val.IsValuePtr() {
+				val = *val.ValuePtr()
 			}
 			v.stack[v.sp] = val
 			v.sp++
@@ -728,16 +722,12 @@ func (v *VM) run() {
 				v.err = fmt.Errorf("not function: %s", fn.TypeName())
 				return
 			}
-			free := make([]*value.ObjectPtr, numFree)
+			free := make([]*core.Value, numFree)
 			for i := 0; i < numFree; i++ {
-				if v.stack[v.sp-numFree+i].IsObject() {
-					if freeVar, ok := v.stack[v.sp-numFree+i].Object().(*value.ObjectPtr); ok {
-						free[i] = freeVar
-					} else {
-						free[i] = &value.ObjectPtr{Value: &v.stack[v.sp-numFree+i]}
-					}
+				if v.stack[v.sp-numFree+i].IsValuePtr() {
+					free[i] = v.stack[v.sp-numFree+i].ValuePtr()
 				} else {
-					free[i] = &value.ObjectPtr{Value: &v.stack[v.sp-numFree+i]}
+					free[i] = &v.stack[v.sp-numFree+i]
 				}
 			}
 			v.sp -= numFree
@@ -760,41 +750,34 @@ func (v *VM) run() {
 		case parser.OpGetFreePtr:
 			v.ip++
 			freeIndex := int(v.curInsts[v.ip])
-			val := v.curFrame.freeVars[freeIndex]
-			v.stack[v.sp] = core.NewObject(val, false)
+			v.stack[v.sp] = core.NewValuePtr(v.curFrame.freeVars[freeIndex])
 			v.sp++
 
 		case parser.OpGetFree:
 			v.ip++
 			freeIndex := int(v.curInsts[v.ip])
-			val := *v.curFrame.freeVars[freeIndex].Value
-			v.stack[v.sp] = val
+			v.stack[v.sp] = *v.curFrame.freeVars[freeIndex]
 			v.sp++
 
 		case parser.OpSetFree:
 			v.ip++
 			freeIndex := int(v.curInsts[v.ip])
-			*v.curFrame.freeVars[freeIndex].Value = v.stack[v.sp-1]
+			*v.curFrame.freeVars[freeIndex] = v.stack[v.sp-1]
 			v.sp--
 
 		case parser.OpGetLocalPtr:
 			v.ip++
 			localIndex := int(v.curInsts[v.ip])
 			sp := v.curFrame.basePointer + localIndex
-			val := v.stack[sp]
-			var freeVar *value.ObjectPtr
-			if val.IsObject() {
-				if obj, ok := val.Object().(*value.ObjectPtr); ok {
-					freeVar = obj
-				} else {
-					freeVar = &value.ObjectPtr{Value: &val}
-					v.stack[sp] = core.NewObject(freeVar, false)
-				}
+			var freeVar *core.Value
+			if v.stack[sp].IsValuePtr() {
+				freeVar = v.stack[sp].ValuePtr()
 			} else {
-				freeVar = &value.ObjectPtr{Value: &val}
-				v.stack[sp] = core.NewObject(freeVar, false)
+				localVal := v.stack[sp]
+				freeVar = &localVal
+				v.stack[sp] = core.NewValuePtr(freeVar)
 			}
-			v.stack[v.sp] = core.NewObject(freeVar, false)
+			v.stack[v.sp] = core.NewValuePtr(freeVar)
 			v.sp++
 
 		case parser.OpSetSelFree:
@@ -809,7 +792,7 @@ func (v *VM) run() {
 			}
 			val := v.stack[v.sp-numSelectors-1]
 			v.sp -= numSelectors + 1
-			e := v.indexAssign(*v.curFrame.freeVars[freeIndex].Value, val, selectors)
+			e := v.indexAssign(*v.curFrame.freeVars[freeIndex], val, selectors)
 			if e != nil {
 				v.err = e
 				return

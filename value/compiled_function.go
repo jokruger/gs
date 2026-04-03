@@ -17,7 +17,7 @@ type CompiledFunction struct {
 	NumParameters int
 	VarArgs       bool
 	SourceMap     map[int]core.Pos
-	Free          []*ObjectPtr
+	Free          []*core.Value
 }
 
 func (o *CompiledFunction) TypeName() string {
@@ -53,7 +53,7 @@ func (o *CompiledFunction) Copy(core.Allocator) core.Value {
 		NumLocals:     o.NumLocals,
 		NumParameters: o.NumParameters,
 		VarArgs:       o.VarArgs,
-		Free:          append([]*ObjectPtr{}, o.Free...), // DO NOT Copy() of elements; these are variable pointers
+		Free:          append([]*core.Value{}, o.Free...), // DO NOT Copy() of elements; these are variable pointers
 	}
 	return core.NewObject(t, false)
 }

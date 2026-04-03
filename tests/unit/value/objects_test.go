@@ -84,8 +84,6 @@ func TestObject_Value(t *testing.T) {
 	v.SetInt(0)
 	v.SetKind(core.V_OBJECT)
 	require.Equal(t, core.V_OBJECT, v.Kind())
-	v.SetObject(nil)
-	require.Equal(t, nil, v.Object())
 	o := alloc.NewString("hello")
 	v.SetObject(o)
 	s, _ := v.AsString()

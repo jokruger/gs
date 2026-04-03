@@ -7,8 +7,7 @@ fib1        fib2        fib3        powSum1     powSum2     powSum3     powSum4 
 
 ===
 
-1) replace *Object type system with boxed scalars:
-    - value is a struct containing type info, flags (immutable, temporal, etc) and 64-bit data - pointer to heap object (for maps, strings, arrays) or int/bool/float/etc packed in the 64-bit data field
+- try value receivers instead of pinter (for core.Value at least)
 
 - add core.Value.IsObject() - true is V_OBJECT or V_OBJECT_PTR, false if scalar (int, bool, float, etc)
 - replace "if .Kind() ?? V_ " with .IsX() !

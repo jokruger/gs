@@ -744,6 +744,152 @@ func TestBytes(t *testing.T) {
 	expectRun(t, `out = "abc".bytes.array.string`, nil, "abc")
 }
 
+func TestArrayIterator(t *testing.T) {
+	expectRun(t, `
+x := [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+y := x[2:5]
+sum1 := 0
+for v in x {
+	sum1 += v
+}
+sum2 := 0
+for v in y {
+	sum2 += v
+}
+out = [sum1, sum2]
+`, nil, ARR{55, 12})
+
+	expectRun(t, `
+x := [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+y := x[2:5]
+isum1 := 0
+sum1 := 0
+for i, v in x {
+	isum1 += i
+	sum1 += v
+}
+isum2 := 0
+sum2 := 0
+for i, v in y {
+	isum2 += i
+	sum2 += v
+}
+out = [isum1, sum1, isum2, sum2]
+`, nil, ARR{45, 55, 3, 12})
+}
+
+func TestStringIterator(t *testing.T) {
+	expectRun(t, `
+x := "abcdefg"
+y := x[2:5]
+res1 := ""
+for v in x {
+	res1 += v
+}
+res2 := ""
+for v in y {
+	res2 += v
+}
+out = [res1, res2]
+`, nil, ARR{"abcdefg", "cde"})
+
+	expectRun(t, `
+x := "abcdefg"
+y := x[2:5]
+isum1 := 0
+res1 := ""
+for i, v in x {
+	isum1 += i
+	res1 += v
+}
+isum2 := 0
+res2 := ""
+for i, v in y {
+	isum2 += i
+	res2 += v
+}
+out = [isum1, res1, isum2, res2]
+`, nil, ARR{21, "abcdefg", 3, "cde"})
+}
+
+func TestBytesIterator(t *testing.T) {
+	expectRun(t, `
+x := bytes("abcdefg")
+y := x[2:5]
+res1 := ""
+for v in x {
+	res1 += v.char
+}
+res2 := ""
+for v in y {
+	res2 += v.char
+}
+out = [res1, res2]
+`, nil, ARR{"abcdefg", "cde"})
+
+	expectRun(t, `
+x := bytes("abcdefg")
+y := x[2:5]
+isum1 := 0
+res1 := ""
+for i, v in x {
+	isum1 += i
+	res1 += v.char
+}
+isum2 := 0
+res2 := ""
+for i, v in y {
+	isum2 += i
+	res2 += v.char
+}
+out = [isum1, res1, isum2, res2]
+`, nil, ARR{21, "abcdefg", 3, "cde"})
+}
+
+func TestRecordIterator(t *testing.T) {
+	expectRun(t, `
+m := {a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10}
+sum1 := 0
+for v in m {
+	sum1 += v
+}
+out = sum1
+`, nil, 55)
+
+	expectRun(t, `
+m := {a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10}
+sum1 := 0
+sum2 := 0
+for k, v in m {
+	sum1 += k[0] - 'a'
+	sum2 += v
+}
+out = [sum1, sum2]
+`, nil, ARR{45, 55})
+}
+
+func TestMapIterator(t *testing.T) {
+	expectRun(t, `
+m := map({a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10})
+sum1 := 0
+for v in m {
+	sum1 += v
+}
+out = sum1
+`, nil, 55)
+
+	expectRun(t, `
+m := map({a: 1, b: 2, c: 3, d: 4, e: 5, f: 6, g: 7, h: 8, i: 9, j: 10})
+sum1 := 0
+sum2 := 0
+for k, v in m {
+	sum1 += k[0] - 'a'
+	sum2 += v
+}
+out = [sum1, sum2]
+`, nil, ARR{45, 55})
+}
+
 func TestAssignment(t *testing.T) {
 	expectRun(t, `a := 1; a = 2; out = a`, nil, 2)
 	expectRun(t, `a := 1; a = 2; out = a`, nil, 2)

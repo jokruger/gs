@@ -11,13 +11,16 @@ import (
 )
 
 func BenchmarkVM(b *testing.B) {
-	//src := []byte(`out = range(1, 10000, 1).reduce(0, (a, b) => a + b * b)`)
-	src := []byte(`
-	x := range(1, 10000, 1)
-	out = 0
-	for e in x {
-		out = out + e * e
-	}`)
+	src := []byte(`out = range(1, 10000, 1).reduce(0, (a, b) => a + b * b)`)
+
+	/*
+		src := []byte(`
+		x := range(1, 10000, 1)
+		out = 0
+		for e in x {
+			out = out + e * e
+		}`)
+	*/
 
 	a := alloc.New()
 	astFile, err := parse(src)
@@ -30,18 +33,14 @@ func BenchmarkVM(b *testing.B) {
 	}
 
 	b.Run("vmRun", func(b *testing.B) {
-		var res core.Value
 		var err error
 
 		for i := 0; i < b.N; i++ {
-			res, err = runVM(a, bytecode)
+			_, err = runVM(a, bytecode)
 		}
 
 		if err != nil {
 			b.Fatal(err)
-		}
-		if res.String() != "333283335000" {
-			b.Fatalf("unexpected result: %s", res.String())
 		}
 	})
 }

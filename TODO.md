@@ -1,12 +1,4 @@
-benchmarks:
-
-fib1        fib2        fib3        powSum1     powSum2     powSum3     powSum4     powSum5     str
-----        ----        ----        -------     -------     -------     -------     -------     ---
-2.223174    2.428714    0.032084    0.109906    0.387080    0.176302                                        (tengo)
-----        ----        ----        -------     -------     -------     -------     -------     ---
-2.484845    2.410546    0.033639    0.081329    0.363750    0.143513    0.281347    0.162489    0.064385
-
-===
+- for int/float/string/etc args, fast path for specific types, only then call .AsX()
 
 - builtin/compiled functions  - separate interfaces and V_BUILTIN_FUNC and V_COMPILED_FUNC, add IsBuiltinFunction, IsCompiledFunction ???
 

@@ -8,6 +8,7 @@ import (
 	"github.com/jokruger/gs/alloc"
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
+	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/vm"
 )
 
@@ -34,23 +35,7 @@ for i := 0; i < 10; i++ {
 `},
 
 	{
-		name: "fib2(30)/10",
-		src: `
-fib := func(x, s) {
-	if x == 0 {
-		return 0 + s
-	} else if x == 1 {
-		return 1 + s
-	}
-	return fib(x-1, fib(x-2, s))
-}
-for i := 0; i < 10; i++ {
-	out = fib(30, 0)
-}
-`},
-
-	{
-		name: "fib3(30)/10000",
+		name: "fib2(30)/10000",
 		src: `
 fib := func(x, a, b) {
 	if x == 0 {
@@ -66,69 +51,52 @@ for i := 0; i < 10000; i++ {
 `},
 
 	{
-		name: "powSum1/100",
+		name: "sumPow1/100",
 		src: `
 for l := 0; l < 100; l++ {
-	x := range(1, 10000, 1)
 	out = 0
-	for e in x {
+	for e in range(1, 10000, 1) {
 		out = out + e * e
 	}
 }
 `},
 
 	{
-		name: "powSum2/100",
+		name: "sumPow2/100",
 		src: `
 for l := 0; l < 100; l++ {
-	x := range(1, 10000, 1)
-	for i := 0; i < len(x); i++ {
-		x[i] = x[i] * x[i]
-	}
-	out = 0
-	for i := 0; i < len(x); i++ {
-		out = out + x[i]
-	}
+	out = range(1, 10000, 1).reduce(0, (a, b) => a + b * b)
 }
 `},
 
 	{
-		name: "powSum3/100",
+		name: "closures/100000",
 		src: `
-for l := 0; l < 100; l++ {
-	x := range(1, 10000, 1)
-	for i, e in x {
-		x[i] = e * e
-	}
-	out = 0
-	for e in x {
-		out += e
-	}
+out = 0
+for i := 0; i < 100000; i++ {
+    func(x) {
+        out += x
+    }(i)
 }
 `},
 
 	{
-		name: "powSum4/100",
+		name: "iter/1000",
 		src: `
-for l := 0; l < 100; l++ {
-	x := range(1, 10000, 1)
-	out = x.map(e => e * e).reduce(0, (a, b) => a + b)
+s := range(0, 1000, 1)
+out = 0
+for i := 0; i < len(s); i++ {
+    for j := 0; j < len(s); j++ {
+        s[j] += s[i]
+		out += 1
+    }
 }
 `},
 
 	{
-		name: "powSum5/100",
+		name: "str1/1000",
 		src: `
-for l := 0; l < 100; l++ {
-	x := range(1, 10000, 1)
-	out = x.reduce(0, (a, b) => a + b * b)
-}
-`},
-
-	{
-		name: "str/100",
-		src: `
-for l := 0; l < 100; l++ {
+for l := 0; l < 1000; l++ {
 	x := range(1, 1000, 1).map(e => "num" + e)
 	if l%2 == 0 {
 		x = x.map(e => e.lower)
@@ -137,6 +105,26 @@ for l := 0; l < 100; l++ {
 	}
 	out = x[l]
 }
+`},
+
+	{
+		name: "str2/1000",
+		src: `
+text := import("text")
+size := 1000
+s := ""
+for r := 0; r < size*2; r++ {
+    if r%2 == 0 {
+        s += string(char(r))
+    }
+}
+n := 0
+for r := char(0); r < size*2; r++ {
+    if text.contains(s, r) {
+        n++
+    }
+}
+out = n
 `},
 }
 
@@ -192,7 +180,8 @@ func compileFile(a core.Allocator, file *parser.File) (time.Duration, *vm.Byteco
 
 	start := time.Now()
 
-	c := gs.NewCompiler(a, file.InputFile, symTable, nil, nil, nil)
+	m := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
+	c := gs.NewCompiler(a, file.InputFile, symTable, nil, m, nil)
 	if err := c.Compile(file); err != nil {
 		return time.Since(start), nil, err
 	}

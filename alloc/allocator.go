@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/iter"
 	"github.com/jokruger/gs/value"
 )
 
@@ -14,7 +15,11 @@ func New() core.Allocator {
 	return &Allocator{}
 }
 
-func (a *Allocator) Release(o core.Object) {
+func (a *Allocator) ReleaseObject(o core.Object) {
+	// No-op, GC will take care of it
+}
+
+func (a *Allocator) ReleaseIterator(i core.Iterator) {
 	// No-op, GC will take care of it
 }
 
@@ -37,25 +42,25 @@ func (a *Allocator) NewTime(v time.Time) core.Object {
 }
 
 func (a *Allocator) NewStringIterator(v []rune) core.Iterator {
-	o := &value.StringIterator{}
+	o := &iter.StringIterator{}
 	o.Set(v)
 	return o
 }
 
 func (a *Allocator) NewBytesIterator(v []byte) core.Iterator {
-	o := &value.BytesIterator{}
+	o := &iter.BytesIterator{}
 	o.Set(v)
 	return o
 }
 
 func (a *Allocator) NewMapIterator(v map[string]core.Value) core.Iterator {
-	o := &value.MapIterator{}
+	o := &iter.MapIterator{}
 	o.Set(v)
 	return o
 }
 
 func (a *Allocator) NewArrayIterator(v []core.Value) core.Iterator {
-	o := &value.ArrayIterator{}
+	o := &iter.ArrayIterator{}
 	o.Set(v)
 	return o
 }

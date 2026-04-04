@@ -99,7 +99,6 @@ func TestObject_Value(t *testing.T) {
 
 func TestObject_TypeName(t *testing.T) {
 	var o core.Value
-	var i core.Iterator
 	var obj core.Object
 
 	o = core.NewInt(0)
@@ -122,15 +121,6 @@ func TestObject_TypeName(t *testing.T) {
 
 	o = alloc.NewRecordValue(nil, false)
 	require.Equal(t, "record", o.TypeName())
-
-	i = alloc.NewArrayIterator(nil)
-	require.Equal(t, "array-iterator", i.TypeName())
-
-	i = alloc.NewStringIterator(nil)
-	require.Equal(t, "string-iterator", i.TypeName())
-
-	i = alloc.NewMapIterator(nil)
-	require.Equal(t, "map-iterator", i.TypeName())
 
 	o = alloc.NewBuiltinFunctionValue("fn", nil, 0, false)
 	require.Equal(t, "<builtin-function:fn/0>", o.TypeName())
@@ -188,15 +178,6 @@ func TestObject_IsFalsy(t *testing.T) {
 	o = alloc.NewRecordValue(map[string]core.Value{"a": core.NewUndefined()}, false)
 	require.False(t, o.IsFalse())
 
-	obj = alloc.NewStringIterator(nil)
-	require.True(t, obj.IsFalse())
-
-	obj = alloc.NewArrayIterator(nil)
-	require.True(t, obj.IsFalse())
-
-	obj = alloc.NewMapIterator(nil)
-	require.True(t, obj.IsFalse())
-
 	obj = alloc.NewBuiltinFunction("fn", nil, 0, false)
 	require.False(t, obj.IsFalse())
 
@@ -218,7 +199,6 @@ func TestObject_IsFalsy(t *testing.T) {
 
 func TestObject_String(t *testing.T) {
 	var o core.Value
-	var obj core.Object
 
 	o = core.NewInt(0)
 	require.Equal(t, "0", o.String())
@@ -256,15 +236,6 @@ func TestObject_String(t *testing.T) {
 	o = alloc.NewErrorValue(alloc.NewStringValue("error 1"))
 	require.Equal(t, `error("error 1")`, o.String())
 
-	obj = alloc.NewStringIterator(nil)
-	require.Equal(t, "<string-iterator>", obj.String())
-
-	obj = alloc.NewArrayIterator(nil)
-	require.Equal(t, "<array-iterator>", obj.String())
-
-	obj = alloc.NewMapIterator(nil)
-	require.Equal(t, "<map-iterator>", obj.String())
-
 	o = core.NewUndefined()
 	require.Equal(t, "undefined", o.String())
 
@@ -289,18 +260,6 @@ func TestObject_BinaryOp(t *testing.T) {
 
 	o = alloc.NewRecordValue(nil, false)
 	_, err = o.BinaryOp(vm, token.Add, core.NewUndefined())
-	require.Error(t, err)
-
-	obj = alloc.NewArrayIterator(nil)
-	_, err = obj.BinaryOp(vm, token.Add, core.NewUndefined())
-	require.Error(t, err)
-
-	obj = alloc.NewStringIterator(nil)
-	_, err = obj.BinaryOp(vm, token.Add, core.NewUndefined())
-	require.Error(t, err)
-
-	obj = alloc.NewMapIterator(nil)
-	_, err = obj.BinaryOp(vm, token.Add, core.NewUndefined())
 	require.Error(t, err)
 
 	obj = alloc.NewBuiltinFunction("fn", nil, 0, false)

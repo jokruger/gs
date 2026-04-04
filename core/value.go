@@ -21,9 +21,33 @@ const (
 	V_FLOAT     = ValueKind(3)
 	V_INT       = ValueKind(4)
 
-	V_OBJECT    = ValueKind(254)
+	V_OBJECT    = ValueKind(253)
+	V_ITERATOR  = ValueKind(254)
 	V_VALUE_PTR = ValueKind(255)
 )
+
+func (k ValueKind) String() string {
+	switch k {
+	case V_UNDEFINED:
+		return "undefined"
+	case V_BOOL:
+		return "bool"
+	case V_CHAR:
+		return "char"
+	case V_FLOAT:
+		return "float"
+	case V_INT:
+		return "int"
+	case V_OBJECT:
+		return "object"
+	case V_ITERATOR:
+		return "iterator"
+	case V_VALUE_PTR:
+		return "value-pointer"
+	default:
+		return fmt.Sprintf("unknown(%d)", k)
+	}
+}
 
 type Value struct {
 	data     uint64
@@ -63,6 +87,10 @@ func NewObject(o Object, temporal bool) Value {
 	return Value{ptr: o, kind: V_OBJECT, temporal: temporal}
 }
 
+func NewIterator(i Iterator) Value {
+	return Value{ptr: i, kind: V_ITERATOR}
+}
+
 func NewValuePtr(o *Value) Value {
 	return Value{ptr: o, kind: V_VALUE_PTR}
 }
@@ -96,6 +124,14 @@ func (v *Value) Object() Object {
 
 func (v *Value) SetObject(o Object) {
 	v.ptr = o
+}
+
+func (v *Value) Iterator() Iterator {
+	return v.ptr.(Iterator)
+}
+
+func (v *Value) SetIterator(i Iterator) {
+	v.ptr = i
 }
 
 func (v *Value) ValuePtr() *Value {
@@ -190,11 +226,8 @@ func (v Value) GobEncode() ([]byte, error) {
 		}
 		return append([]byte{uint8(V_OBJECT), flags}, buf.Bytes()...), nil
 
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in GobEncode")
-
 	default:
-		return nil, NewInvalidValueKindError(v.kind)
+		panic(fmt.Sprintf("unexpected use of %s with GobEncode()", v.kind.String()))
 	}
 }
 
@@ -255,53 +288,41 @@ func (v *Value) GobDecode(data []byte) error {
 		v.ptr = o
 		return nil
 
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in GobDecode")
-
 	default:
-		return NewInvalidValueKindError(v.kind)
+		panic(fmt.Sprintf("unexpected use of %s with GobDecode()", v.kind.String()))
 	}
 }
 
 func (v *Value) Next() bool {
 	switch v.kind {
-	case V_OBJECT:
-		if i, ok := v.ptr.(Iterator); ok {
-			return i.Next()
-		}
+	case V_UNDEFINED:
 		return false
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in Next")
+	case V_ITERATOR:
+		return v.ptr.(Iterator).Next()
 	default:
-		return false
+		panic(fmt.Sprintf("unexpected use of %s with Next()", v.kind.String()))
 	}
 }
 
 func (v *Value) Key(alloc Allocator) Value {
 	switch v.kind {
-	case V_OBJECT:
-		if i, ok := v.ptr.(Iterator); ok {
-			return i.Key(alloc)
-		}
+	case V_UNDEFINED:
 		return NewUndefined()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in Key")
+	case V_ITERATOR:
+		return v.ptr.(Iterator).Key(alloc)
 	default:
-		return NewUndefined()
+		panic(fmt.Sprintf("unexpected use of %s with Key()", v.kind.String()))
 	}
 }
 
 func (v *Value) Value(alloc Allocator) Value {
 	switch v.kind {
-	case V_OBJECT:
-		if i, ok := v.ptr.(Iterator); ok {
-			return i.Value(alloc)
-		}
+	case V_UNDEFINED:
 		return NewUndefined()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in Value")
+	case V_ITERATOR:
+		return v.ptr.(Iterator).Value(alloc)
 	default:
-		return NewUndefined()
+		panic(fmt.Sprintf("unexpected use of %s with Value()", v.kind.String()))
 	}
 }
 
@@ -319,10 +340,10 @@ func (v *Value) TypeName() string {
 		return "int"
 	case V_OBJECT:
 		return v.ptr.(Object).TypeName()
-	case V_VALUE_PTR:
-		return "<value-ptr>"
+	case V_ITERATOR:
+		return v.ptr.(Iterator).TypeName()
 	default:
-		return "unknown"
+		panic(fmt.Sprintf("unexpected use of %s with TypeName()", v.kind.String()))
 	}
 }
 
@@ -343,15 +364,17 @@ func (v *Value) String() string {
 		return strconv.FormatInt(v.Int(), 10)
 	case V_OBJECT:
 		return v.ptr.(Object).String()
-	case V_VALUE_PTR:
-		return "<value-ptr>"
+	case V_ITERATOR:
+		return v.ptr.(Iterator).String()
 	default:
-		return "unknown"
+		panic(fmt.Sprintf("unexpected use of %s with String()", v.kind.String()))
 	}
 }
 
 func (v *Value) Interface() any {
 	switch v.kind {
+	case V_UNDEFINED:
+		return nil
 	case V_BOOL:
 		return v.Bool()
 	case V_CHAR:
@@ -362,10 +385,8 @@ func (v *Value) Interface() any {
 		return v.Int()
 	case V_OBJECT:
 		return v.ptr.(Object).Interface()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in Interface")
 	default:
-		return nil
+		panic(fmt.Sprintf("unexpected use of %s with Interface()", v.kind.String()))
 	}
 }
 
@@ -373,8 +394,8 @@ func (v *Value) Arity() int {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).Arity()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in Arity")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with Arity()", v.kind.String()))
 	default:
 		return 0
 	}
@@ -382,6 +403,10 @@ func (v *Value) Arity() int {
 
 func (v *Value) IsObject() bool {
 	return v.kind == V_OBJECT
+}
+
+func (v *Value) IsIterator() bool {
+	return v.kind == V_ITERATOR
 }
 
 func (v *Value) IsValuePtr() bool {
@@ -483,8 +508,8 @@ func (v *Value) IsTrue() bool {
 		return v.data != 0
 	case V_OBJECT:
 		return v.ptr.(Object).IsTrue()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in IsTrue")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with IsTrue()", v.kind.String()))
 	default:
 		return false
 	}
@@ -502,8 +527,8 @@ func (v *Value) IsFalse() bool {
 		return v.data == 0
 	case V_OBJECT:
 		return v.ptr.(Object).IsFalse()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in IsFalse")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with IsFalse()", v.kind.String()))
 	default:
 		return true
 	}
@@ -515,8 +540,8 @@ func (v *Value) IsIterable() bool {
 		return true
 	case V_OBJECT:
 		return v.ptr.(Object).IsIterable()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in IsIterable")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with IsIterable()", v.kind.String()))
 	default:
 		return false
 	}
@@ -526,8 +551,8 @@ func (v *Value) IsCallable() bool {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).IsCallable()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in IsCallable")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with IsCallable()", v.kind.String()))
 	default:
 		return false
 	}
@@ -537,8 +562,8 @@ func (v *Value) IsVariadic() bool {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).IsVariadic()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in IsVariadic")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with IsVariadic()", v.kind.String()))
 	default:
 		return false
 	}
@@ -548,8 +573,8 @@ func (v *Value) IsImmutable() bool {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).IsImmutable()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in IsImmutable")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with IsImmutable()", v.kind.String()))
 	default:
 		return true
 	}
@@ -570,8 +595,8 @@ func (v *Value) AsString() (string, bool) {
 		return strconv.FormatInt(v.Int(), 10), true
 	case V_OBJECT:
 		return v.ptr.(Object).AsString()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in AsString")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with AsString()", v.kind.String()))
 	default:
 		return "", false
 	}
@@ -592,8 +617,8 @@ func (v *Value) AsInt() (int64, bool) {
 		return v.Int(), true
 	case V_OBJECT:
 		return v.ptr.(Object).AsInt()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in AsInt")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with AsInt()", v.kind.String()))
 	default:
 		return 0, false
 	}
@@ -607,8 +632,8 @@ func (v *Value) AsFloat() (float64, bool) {
 		return float64(v.Int()), true
 	case V_OBJECT:
 		return v.ptr.(Object).AsFloat()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in AsFloat")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with AsFloat()", v.kind.String()))
 	default:
 		return 0, false
 	}
@@ -628,8 +653,8 @@ func (v *Value) AsBool() (bool, bool) {
 		return v.data != 0, true
 	case V_OBJECT:
 		return v.ptr.(Object).AsBool()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in AsBool")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with AsBool()", v.kind.String()))
 	default:
 		return false, false
 	}
@@ -643,8 +668,8 @@ func (v *Value) AsChar() (rune, bool) {
 		return rune(v.Int()), true
 	case V_OBJECT:
 		return v.ptr.(Object).AsChar()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in AsChar")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with AsChar()", v.kind.String()))
 	default:
 		return 0, false
 	}
@@ -654,8 +679,8 @@ func (v *Value) AsBytes() ([]byte, bool) {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).AsBytes()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in AsBytes")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with AsBytes()", v.kind.String()))
 	default:
 		return nil, false
 	}
@@ -667,8 +692,8 @@ func (v *Value) AsTime() (time.Time, bool) {
 		return time.Unix(v.Int(), 0), true
 	case V_OBJECT:
 		return v.ptr.(Object).AsTime()
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in AsTime")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with AsTime()", v.kind.String()))
 	default:
 		return time.Time{}, false
 	}
@@ -684,8 +709,8 @@ func (v *Value) BinaryOp(vm VM, op token.Token, rhs Value) (Value, error) {
 		return v.intBinaryOp(vm, op, rhs)
 	case V_OBJECT:
 		return v.ptr.(Object).BinaryOp(vm, op, rhs)
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in BinaryOp")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with BinaryOp()", v.kind.String()))
 	default:
 		return NewUndefined(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
@@ -887,8 +912,8 @@ func (v *Value) Equals(rhs Value) bool {
 	case V_OBJECT:
 		return v.ptr.(Object).Equals(rhs)
 
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in Equals")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with Equals()", v.kind.String()))
 
 	default:
 		return false
@@ -899,10 +924,10 @@ func (v *Value) Copy(alloc Allocator) Value {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).Copy(alloc)
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in Copy")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with Copy()", v.kind.String()))
 	default:
-		return Value{data: v.data, kind: v.kind}
+		return *v
 	}
 }
 
@@ -920,8 +945,8 @@ func (v *Value) Access(vm VM, index Value, mode Opcode) (Value, error) {
 		return v.intAccess(vm, index, mode)
 	case V_OBJECT:
 		return v.ptr.(Object).Access(vm, index, mode)
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in Access")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with Access()", v.kind.String()))
 	default:
 		return NewUndefined(), NewNotAccessibleError(v.TypeName())
 	}
@@ -1037,8 +1062,8 @@ func (v *Value) Assign(idx, val Value) error {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).Assign(idx, val)
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in Assign")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with Assign()", v.kind.String()))
 	default:
 		return NewNotAssignableError(v.TypeName())
 	}
@@ -1048,8 +1073,8 @@ func (v *Value) Iterate(alloc Allocator) Iterator {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).Iterate(alloc)
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in Iterate")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with Iterate()", v.kind.String()))
 	default:
 		return nil
 	}
@@ -1059,8 +1084,8 @@ func (v *Value) Call(vm VM, args ...Value) (Value, error) {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).Call(vm, args...)
-	case V_VALUE_PTR:
-		panic("unexpected value pointer in Call")
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with Call()", v.kind.String()))
 	default:
 		return NewUndefined(), NewNotCallableError(v.TypeName())
 	}

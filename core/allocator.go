@@ -3,7 +3,8 @@ package core
 import "time"
 
 type Allocator interface {
-	Release(Object)
+	ReleaseObject(Object)
+	ReleaseIterator(Iterator)
 
 	NewString(string) Object
 	NewBytes([]byte) Object

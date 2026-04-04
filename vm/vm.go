@@ -805,13 +805,13 @@ func (v *VM) run() {
 				v.err = fmt.Errorf("not iterable: %s", dst.TypeName())
 				return
 			}
-			iterator := dst.Iterate(v.alloc)
+			it := dst.Iterate(v.alloc)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
-			v.stack[v.sp] = core.NewObject(iterator, false)
+			v.stack[v.sp] = core.NewIterator(it)
 			v.sp++
 
 		case parser.OpIteratorNext:

@@ -8,6 +8,10 @@ fib1        fib2        fib3        powSum1     powSum2     powSum3     powSum4 
 
 ===
 
+- review OpIteratorX - obj on obj
+
+- builtin/compiled functions  - separate interfaces and V_BUILTIN_FUNC and V_COMPILED_FUNC, add IsBuiltinFunction, IsCompiledFunction ???
+
 - try value receivers instead of pinter (for core.Value at least)
 
 - add core.Value.IsObject() - true is V_OBJECT or V_OBJECT_PTR, false if scalar (int, bool, float, etc)

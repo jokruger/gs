@@ -65,6 +65,10 @@ func (o *Error) Copy(alloc core.Allocator) core.Value {
 	return alloc.NewErrorValue(o.value.Copy(alloc))
 }
 
+func (o *Error) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+}
+
 func (o *Error) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {

@@ -92,6 +92,10 @@ func (o *Time) Copy(alloc core.Allocator) core.Value {
 	return alloc.NewTimeValue(o.value)
 }
 
+func (o *Time) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+}
+
 func (o *Time) Access(vm core.VM, index core.Value, op core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {

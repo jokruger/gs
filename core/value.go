@@ -931,6 +931,17 @@ func (v *Value) Copy(alloc Allocator) Value {
 	}
 }
 
+func (v *Value) Method(vm VM, name string, args ...Value) (Value, error) {
+	switch v.kind {
+	case V_OBJECT:
+		return v.ptr.(Object).Method(vm, name, args...)
+	case V_ITERATOR, V_VALUE_PTR:
+		panic(fmt.Sprintf("unexpected use of %s with Method()", v.kind.String()))
+	default:
+		return NewUndefined(), NewInvalidMethodError(name, v.TypeName())
+	}
+}
+
 func (v *Value) Access(vm VM, index Value, mode Opcode) (Value, error) {
 	switch v.kind {
 	case V_UNDEFINED:

@@ -41,6 +41,10 @@ func (o *Object) Copy(core.Allocator) core.Value {
 	return core.NewUndefined()
 }
 
+func (o *Object) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+}
+
 func (o *Object) Access(core.VM, core.Value, core.Opcode) (core.Value, error) {
 	return core.NewUndefined(), core.NewNotAccessibleError(o.TypeName())
 }

@@ -163,6 +163,25 @@ func (o *Map) Copy(alloc core.Allocator) core.Value {
 	return alloc.NewMapValue(c, false)
 }
 
+func (o *Map) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	switch name {
+	case "filter":
+		return o.fnFilter(vm, "map.filter", args...)
+
+	case "count":
+		return o.fnCount(vm, "map.count", args...)
+
+	case "all":
+		return o.fnAll(vm, "map.all", args...)
+
+	case "any":
+		return o.fnAny(vm, "map.any", args...)
+
+	default:
+		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+	}
+}
+
 func (o *Map) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {
@@ -193,18 +212,6 @@ func (o *Map) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value
 
 	case "values":
 		return o.values(vm)
-
-	case "filter":
-		return o.fnFilter(vm, "map.filter")
-
-	case "count":
-		return o.fnCount(vm, "map.count")
-
-	case "all":
-		return o.fnAll(vm, "map.all")
-
-	case "any":
-		return o.fnAny(vm, "map.any")
 
 	default:
 		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
@@ -275,182 +282,170 @@ func (o *Map) values(vm core.VM) (core.Value, error) {
 	return alloc.NewArrayValue(values, false), nil
 }
 
-func (o *Map) fnFilter(vm core.VM, name string) (core.Value, error) {
-	obj := vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Value) (core.Value, error) {
-		if len(args) != 1 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
-		}
+func (o *Map) fnFilter(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 1 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
+	}
 
-		fn := args[0]
-		if !fn.IsCallable() || fn.IsVariadic() {
-			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
-		}
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+	}
 
-		alloc := vm.Allocator()
-		switch fn.Arity() {
-		case 1:
-			filtered := make(map[string]core.Value, len(o.value))
-			for k, v := range o.value {
-				res, err := fn.Call(vm, alloc.NewStringValue(k))
-				if err != nil {
-					return core.NewUndefined(), err
-				}
-				if res.IsTrue() {
-					filtered[k] = v
-				}
+	alloc := vm.Allocator()
+	switch fn.Arity() {
+	case 1:
+		filtered := make(map[string]core.Value, len(o.value))
+		for k, v := range o.value {
+			res, err := fn.Call(vm, alloc.NewStringValue(k))
+			if err != nil {
+				return core.NewUndefined(), err
 			}
-			return alloc.NewMapValue(filtered, false), nil
-
-		case 2:
-			filtered := make(map[string]core.Value, len(o.value))
-			for k, v := range o.value {
-				res, err := fn.Call(vm, alloc.NewStringValue(k), v)
-				if err != nil {
-					return core.NewUndefined(), err
-				}
-				if res.IsTrue() {
-					filtered[k] = v
-				}
+			if res.IsTrue() {
+				filtered[k] = v
 			}
-			return alloc.NewMapValue(filtered, false), nil
-
-		default:
-			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 		}
-	}, 1, false)
-	return core.NewObject(obj, false), nil
+		return alloc.NewMapValue(filtered, false), nil
+
+	case 2:
+		filtered := make(map[string]core.Value, len(o.value))
+		for k, v := range o.value {
+			res, err := fn.Call(vm, alloc.NewStringValue(k), v)
+			if err != nil {
+				return core.NewUndefined(), err
+			}
+			if res.IsTrue() {
+				filtered[k] = v
+			}
+		}
+		return alloc.NewMapValue(filtered, false), nil
+
+	default:
+		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+	}
 }
 
-func (o *Map) fnCount(vm core.VM, name string) (core.Value, error) {
-	obj := vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Value) (core.Value, error) {
-		if len(args) != 1 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
-		}
+func (o *Map) fnCount(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 1 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
+	}
 
-		fn := args[0]
-		if !fn.IsCallable() || fn.IsVariadic() {
-			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
-		}
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+	}
 
-		alloc := vm.Allocator()
-		switch fn.Arity() {
-		case 1:
-			var count int64
-			for k := range o.value {
-				res, err := fn.Call(vm, alloc.NewStringValue(k))
-				if err != nil {
-					return core.NewUndefined(), err
-				}
-				if res.IsTrue() {
-					count++
-				}
+	alloc := vm.Allocator()
+	switch fn.Arity() {
+	case 1:
+		var count int64
+		for k := range o.value {
+			res, err := fn.Call(vm, alloc.NewStringValue(k))
+			if err != nil {
+				return core.NewUndefined(), err
 			}
-			return core.NewInt(count), nil
-
-		case 2:
-			var count int64
-			for k, v := range o.value {
-				res, err := fn.Call(vm, alloc.NewStringValue(k), v)
-				if err != nil {
-					return core.NewUndefined(), err
-				}
-				if res.IsTrue() {
-					count++
-				}
+			if res.IsTrue() {
+				count++
 			}
-			return core.NewInt(count), nil
-
-		default:
-			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 		}
-	}, 1, false)
-	return core.NewObject(obj, false), nil
+		return core.NewInt(count), nil
+
+	case 2:
+		var count int64
+		for k, v := range o.value {
+			res, err := fn.Call(vm, alloc.NewStringValue(k), v)
+			if err != nil {
+				return core.NewUndefined(), err
+			}
+			if res.IsTrue() {
+				count++
+			}
+		}
+		return core.NewInt(count), nil
+
+	default:
+		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+	}
 }
 
-func (o *Map) fnAll(vm core.VM, name string) (core.Value, error) {
-	obj := vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Value) (core.Value, error) {
-		if len(args) != 1 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
-		}
+func (o *Map) fnAll(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 1 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
+	}
 
-		fn := args[0]
-		if !fn.IsCallable() || fn.IsVariadic() {
-			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
-		}
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+	}
 
-		alloc := vm.Allocator()
-		switch fn.Arity() {
-		case 1:
-			for k := range o.value {
-				res, err := fn.Call(vm, alloc.NewStringValue(k))
-				if err != nil {
-					return core.NewUndefined(), err
-				}
-				if res.IsFalse() {
-					return core.NewBool(false), nil
-				}
+	alloc := vm.Allocator()
+	switch fn.Arity() {
+	case 1:
+		for k := range o.value {
+			res, err := fn.Call(vm, alloc.NewStringValue(k))
+			if err != nil {
+				return core.NewUndefined(), err
 			}
-			return core.NewBool(true), nil
-
-		case 2:
-			for k, v := range o.value {
-				res, err := fn.Call(vm, alloc.NewStringValue(k), v)
-				if err != nil {
-					return core.NewUndefined(), err
-				}
-				if res.IsFalse() {
-					return core.NewBool(false), nil
-				}
+			if res.IsFalse() {
+				return core.NewBool(false), nil
 			}
-			return core.NewBool(true), nil
-
-		default:
-			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 		}
-	}, 1, false)
-	return core.NewObject(obj, false), nil
+		return core.NewBool(true), nil
+
+	case 2:
+		for k, v := range o.value {
+			res, err := fn.Call(vm, alloc.NewStringValue(k), v)
+			if err != nil {
+				return core.NewUndefined(), err
+			}
+			if res.IsFalse() {
+				return core.NewBool(false), nil
+			}
+		}
+		return core.NewBool(true), nil
+
+	default:
+		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+	}
 }
 
-func (o *Map) fnAny(vm core.VM, name string) (core.Value, error) {
-	obj := vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Value) (core.Value, error) {
-		if len(args) != 1 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
-		}
+func (o *Map) fnAny(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 1 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
+	}
 
-		fn := args[0]
-		if !fn.IsCallable() || fn.IsVariadic() {
-			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
-		}
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+	}
 
-		alloc := vm.Allocator()
-		switch fn.Arity() {
-		case 1:
-			for k := range o.value {
-				res, err := fn.Call(vm, alloc.NewStringValue(k))
-				if err != nil {
-					return core.NewUndefined(), err
-				}
-				if res.IsTrue() {
-					return core.NewBool(true), nil
-				}
+	alloc := vm.Allocator()
+	switch fn.Arity() {
+	case 1:
+		for k := range o.value {
+			res, err := fn.Call(vm, alloc.NewStringValue(k))
+			if err != nil {
+				return core.NewUndefined(), err
 			}
-			return core.NewBool(false), nil
-
-		case 2:
-			for k, v := range o.value {
-				res, err := fn.Call(vm, alloc.NewStringValue(k), v)
-				if err != nil {
-					return core.NewUndefined(), err
-				}
-				if res.IsTrue() {
-					return core.NewBool(true), nil
-				}
+			if res.IsTrue() {
+				return core.NewBool(true), nil
 			}
-			return core.NewBool(false), nil
-
-		default:
-			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 		}
-	}, 1, false)
-	return core.NewObject(obj, false), nil
+		return core.NewBool(false), nil
+
+	case 2:
+		for k, v := range o.value {
+			res, err := fn.Call(vm, alloc.NewStringValue(k), v)
+			if err != nil {
+				return core.NewUndefined(), err
+			}
+			if res.IsTrue() {
+				return core.NewBool(true), nil
+			}
+		}
+		return core.NewBool(false), nil
+
+	default:
+		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+	}
 }

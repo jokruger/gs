@@ -272,24 +272,35 @@ func updateConstIndexes(insts []byte, indexMap map[int]int) {
 	for i < len(insts) {
 		op := insts[i]
 		numOperands := parser.OpcodeOperands[op]
-		_, read := parser.ReadOperands(numOperands, insts[i+1:])
+		operands, read := parser.ReadOperands(numOperands, insts[i+1:])
 
 		switch op {
 		case parser.OpConstant:
-			curIdx := int(insts[i+2]) | int(insts[i+1])<<8
+			curIdx := operands[0]
 			newIdx, ok := indexMap[curIdx]
 			if !ok {
 				panic(fmt.Errorf("constant index not found: %d", curIdx))
 			}
 			copy(insts[i:], MakeInstruction(op, newIdx))
+
 		case parser.OpClosure:
-			curIdx := int(insts[i+2]) | int(insts[i+1])<<8
-			numFree := int(insts[i+3])
+			curIdx := operands[0]
+			numFree := operands[1]
 			newIdx, ok := indexMap[curIdx]
 			if !ok {
 				panic(fmt.Errorf("constant index not found: %d", curIdx))
 			}
 			copy(insts[i:], MakeInstruction(op, newIdx, numFree))
+
+		case parser.OpMethodCall:
+			curIdx := operands[0]
+			numArgs := operands[1]
+			spread := operands[2]
+			newIdx, ok := indexMap[curIdx]
+			if !ok {
+				panic(fmt.Errorf("constant index not found: %d", curIdx))
+			}
+			copy(insts[i:], MakeInstruction(op, newIdx, numArgs, spread))
 		}
 
 		i += 1 + read

@@ -529,7 +529,7 @@ func (v *VM) run() {
 			if spread == 1 {
 				v.sp--
 				arg := v.stack[v.sp]
-				if arg.Kind() != core.V_OBJECT {
+				if !arg.IsObject() {
 					v.err = fmt.Errorf("spread operator requires an array, got: %s", arg.TypeName())
 					return
 				}
@@ -626,6 +626,65 @@ func (v *VM) run() {
 				v.stack[v.sp] = ret
 				v.sp++
 			}
+
+		case parser.OpMethodCall:
+			operands, read := parser.ReadOperands(parser.OpcodeOperands[code], v.curInsts[v.ip+1:])
+			methodConstIdx := operands[0]
+			numArgs := operands[1]
+			spread := operands[2]
+			v.ip += read
+
+			if methodConstIdx < 0 || methodConstIdx >= len(v.constants) {
+				v.err = fmt.Errorf("invalid method constant index: %d", methodConstIdx)
+				return
+			}
+
+			receiver := v.stack[v.sp-1-numArgs]
+
+			if spread == 1 {
+				v.sp--
+				arg := v.stack[v.sp]
+				if !arg.IsObject() {
+					v.err = fmt.Errorf("spread operator requires an array, got: %s", arg.TypeName())
+					return
+				}
+				switch arr := arg.Object().(type) {
+				case *value.Array:
+					for _, item := range arr.Value() {
+						v.stack[v.sp] = item
+						v.sp++
+					}
+					numArgs += arr.Len() - 1
+				default:
+					v.err = fmt.Errorf("not an array: %s", arr.TypeName())
+					return
+				}
+				receiver = v.stack[v.sp-1-numArgs]
+			}
+
+			methodConst := v.constants[methodConstIdx]
+			methodName, ok := methodConst.AsString()
+			if !ok {
+				v.err = fmt.Errorf("invalid method name constant type: %s", methodConst.TypeName())
+				return
+			}
+
+			args := append([]core.Value(nil), v.stack[v.sp-numArgs:v.sp]...)
+			ret, err := receiver.Method(v, methodName, args...)
+			v.sp -= numArgs + 1
+
+			if err != nil {
+				v.err = err
+				return
+			}
+
+			v.allocs--
+			if v.allocs == 0 {
+				v.err = core.ErrObjectAllocLimit
+				return
+			}
+			v.stack[v.sp] = ret
+			v.sp++
 
 		case parser.OpReturn:
 			v.ip++

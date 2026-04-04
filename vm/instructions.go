@@ -61,6 +61,10 @@ func FormatInstructions(b []byte, posOffset int) []string {
 			out = append(out, fmt.Sprintf("%04d %-7s %-5d %-5d",
 				posOffset+i, parser.OpcodeNames[b[i]],
 				operands[0], operands[1]))
+		case 3:
+			out = append(out, fmt.Sprintf("%04d %-7s %-5d %-5d %-5d",
+				posOffset+i, parser.OpcodeNames[b[i]],
+				operands[0], operands[1], operands[2]))
 		}
 		i += 1 + read
 	}

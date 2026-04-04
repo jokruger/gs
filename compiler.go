@@ -524,6 +524,22 @@ func (c *Compiler) Compile(node parser.Node) error {
 		}
 		c.emit(node, parser.OpCall, len(node.Args), ellipsis)
 
+	case *parser.MethodCallExpr:
+		if err := c.Compile(node.Object); err != nil {
+			return err
+		}
+		for _, arg := range node.Args {
+			if err := c.Compile(arg); err != nil {
+				return err
+			}
+		}
+		ellipsis := 0
+		if node.Ellipsis.IsValid() {
+			ellipsis = 1
+		}
+		methodIdx := c.addConstant(c.alloc.NewStringValue(node.MethodName))
+		c.emit(node, parser.OpMethodCall, methodIdx, len(node.Args), ellipsis)
+
 	case *parser.ImportExpr:
 		if node.ModuleName == "" {
 			return c.errorf(node, "empty module name")

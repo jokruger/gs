@@ -47,7 +47,8 @@ const (
 	OpBinaryOp      = core.Opcode(40) // Binary operation
 	OpSuspend       = core.Opcode(41) // Suspend VM
 	OpSelect        = core.Opcode(42) // Select operation
-	// 43...255 are reserved for future use
+	OpMethodCall    = core.Opcode(43) // Call method on object
+	// 44...255 are reserved for future use
 )
 
 // OpcodeNames are string representation of opcodes.
@@ -95,6 +96,7 @@ var OpcodeNames = [...]string{
 	OpBinaryOp:      "BINARYOP",
 	OpSuspend:       "SUSPEND",
 	OpSelect:        "SELECT",
+	OpMethodCall:    "MCALL",
 }
 
 // OpcodeOperands is the number of operands.
@@ -142,6 +144,7 @@ var OpcodeOperands = [...][]int{
 	OpBinaryOp:      {1},
 	OpSuspend:       {},
 	OpSelect:        {},
+	OpMethodCall:    {2, 1, 1}, // method const index, numArgs, spread
 }
 
 // ReadOperands reads operands from the bytecode.

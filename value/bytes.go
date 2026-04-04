@@ -109,6 +109,10 @@ func (o *Bytes) Copy(alloc core.Allocator) core.Value {
 	return core.NewObject(alloc.NewBytes(t), false)
 }
 
+func (o *Bytes) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+}
+
 func (o *Bytes) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	alloc := vm.Allocator()
 

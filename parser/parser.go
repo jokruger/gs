@@ -262,7 +262,7 @@ L:
 	return x
 }
 
-func (p *Parser) parseCall(x Expr) *CallExpr {
+func (p *Parser) parseCall(x Expr) Expr {
 	if p.trace {
 		defer untracep(tracep(p, "Call"))
 	}
@@ -285,6 +285,25 @@ func (p *Parser) parseCall(x Expr) *CallExpr {
 
 	p.exprLevel--
 	rparen := p.expect(token.RParen)
+
+	// Distinguish method call from regular function call.
+	if sel, ok := x.(*SelectorExpr); ok {
+		// parseSelector currently stores selector as StringLit from an identifier.
+		if method, ok := sel.Sel.(*StringLit); ok {
+			return &MethodCallExpr{
+				Object:     sel.Expr,
+				MethodName: method.Value,
+				MethodPos:  method.ValuePos,
+				LParen:     lparen,
+				RParen:     rparen,
+				Ellipsis:   ellipsis,
+				Args:       list,
+			}
+		}
+		// Defensive fallback: if selector is ever not identifier-based.
+		return &BadExpr{From: sel.Pos(), To: rparen}
+	}
+
 	return &CallExpr{
 		Func:     x,
 		LParen:   lparen,

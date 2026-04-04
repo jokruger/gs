@@ -119,6 +119,15 @@ func (o *String) Copy(alloc core.Allocator) core.Value {
 	return alloc.NewStringValue(string(o.value))
 }
 
+func (o *String) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	switch name {
+	case "trim":
+		return o.fnTrim(vm, "string.trim", args...)
+	default:
+		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+	}
+}
+
 func (o *String) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	alloc := vm.Allocator()
 
@@ -213,9 +222,6 @@ func (o *String) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Va
 		}
 		return alloc.NewStringValue(string(t)), nil
 
-	case "trim":
-		return o.fnTrim(vm, "string.trim")
-
 	default:
 		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 	}
@@ -288,24 +294,21 @@ func (o *String) AsTime() (time.Time, bool) {
 	return val, true
 }
 
-func (o *String) fnTrim(vm core.VM, name string) (core.Value, error) {
-	obj := vm.Allocator().NewBuiltinFunction(name, func(vm core.VM, args ...core.Value) (core.Value, error) {
-		if len(args) > 1 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0 or 1", len(args))
-		}
+func (o *String) fnTrim(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) > 1 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0 or 1", len(args))
+	}
 
-		if len(args) == 0 {
-			t := vm.Allocator().NewString(strings.Trim(string(o.value), " \t\n"))
-			return core.NewObject(t, false), nil
-		}
-
-		s, ok := args[0].AsString()
-		if !ok {
-			return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "string", args[0].TypeName())
-		}
-
-		t := vm.Allocator().NewString(strings.Trim(string(o.value), s))
+	if len(args) == 0 {
+		t := vm.Allocator().NewString(strings.Trim(string(o.value), " \t\n"))
 		return core.NewObject(t, false), nil
-	}, 0, true)
-	return core.NewObject(obj, false), nil
+	}
+
+	s, ok := args[0].AsString()
+	if !ok {
+		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "string", args[0].TypeName())
+	}
+
+	t := vm.Allocator().NewString(strings.Trim(string(o.value), s))
+	return core.NewObject(t, false), nil
 }

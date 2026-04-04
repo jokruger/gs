@@ -58,6 +58,14 @@ func (o *CompiledFunction) Copy(core.Allocator) core.Value {
 	return core.NewObject(t, false)
 }
 
+func (o *CompiledFunction) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+}
+
+func (o *CompiledFunction) Access(core.VM, core.Value, core.Opcode) (core.Value, error) {
+	return core.NewUndefined(), core.NewNotAccessibleError(o.TypeName())
+}
+
 func (o *CompiledFunction) SourcePos(ip int) core.Pos {
 	for ip >= 0 {
 		if p, ok := o.SourceMap[ip]; ok {

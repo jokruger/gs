@@ -141,6 +141,38 @@ func (e *CallExpr) String() string {
 	return e.Func.String() + "(" + strings.Join(args, ", ") + ")"
 }
 
+// MethodCallExpr represents a method call expression.
+type MethodCallExpr struct {
+	Object     Expr
+	MethodName string
+	MethodPos  core.Pos
+	LParen     core.Pos
+	Args       []Expr
+	Ellipsis   core.Pos
+	RParen     core.Pos
+}
+
+func (e *MethodCallExpr) exprNode() {}
+
+func (e *MethodCallExpr) Pos() core.Pos {
+	return e.Object.Pos()
+}
+
+func (e *MethodCallExpr) End() core.Pos {
+	return e.RParen + 1
+}
+
+func (e *MethodCallExpr) String() string {
+	var args []string
+	for _, a := range e.Args {
+		args = append(args, a.String())
+	}
+	if len(args) > 0 && e.Ellipsis.IsValid() {
+		args[len(args)-1] = args[len(args)-1] + "..."
+	}
+	return e.Object.String() + "." + e.MethodName + "(" + strings.Join(args, ", ") + ")"
+}
+
 // CharLit represents a character literal.
 type CharLit struct {
 	Value    rune

@@ -402,35 +402,35 @@ func TestParseCall(t *testing.T) {
 	expectParse(t, `a.b()`, func(p pfn) []Stmt {
 		return stmts(
 			exprStmt(
-				callExpr(
-					selectorExpr(
-						ident("a", p(1, 1)),
-						stringLit("b", p(1, 3))),
+				methodCallExpr(
+					ident("a", p(1, 1)),
+					"b",
+					p(1, 3),
 					p(1, 4), p(1, 5), core.NoPos)))
 	})
 
 	expectParse(t, `a.b.c()`, func(p pfn) []Stmt {
 		return stmts(
 			exprStmt(
-				callExpr(
+				methodCallExpr(
 					selectorExpr(
-						selectorExpr(
-							ident("a", p(1, 1)),
-							stringLit("b", p(1, 3))),
-						stringLit("c", p(1, 5))),
+						ident("a", p(1, 1)),
+						stringLit("b", p(1, 3))),
+					"c",
+					p(1, 5),
 					p(1, 6), p(1, 7), core.NoPos)))
 	})
 
 	expectParse(t, `a["b"].c()`, func(p pfn) []Stmt {
 		return stmts(
 			exprStmt(
-				callExpr(
-					selectorExpr(
-						indexExpr(
-							ident("a", p(1, 1)),
-							stringLit("b", p(1, 3)),
-							p(1, 2), p(1, 6)),
-						stringLit("c", p(1, 8))),
+				methodCallExpr(
+					indexExpr(
+						ident("a", p(1, 1)),
+						stringLit("b", p(1, 3)),
+						p(1, 2), p(1, 6)),
+					"c",
+					p(1, 8),
 					p(1, 9), p(1, 10), core.NoPos)))
 	})
 
@@ -1019,10 +1019,10 @@ func TestParseImport(t *testing.T) {
 	expectParse(t, `import("mod1").func1()`, func(p pfn) []Stmt {
 		return stmts(
 			exprStmt(
-				callExpr(
-					selectorExpr(
-						importExpr("mod1", p(1, 1)),
-						stringLit("func1", p(1, 16))),
+				methodCallExpr(
+					importExpr("mod1", p(1, 1)),
+					"func1",
+					p(1, 16),
 					p(1, 21), p(1, 22), core.NoPos)))
 	})
 
@@ -1926,41 +1926,24 @@ func parenExpr(x Expr, lparen, rparen core.Pos) *ParenExpr {
 	return &ParenExpr{Expr: x, LParen: lparen, RParen: rparen}
 }
 
-func callExpr(
-	f Expr,
-	lparen, rparen, ellipsis core.Pos,
-	args ...Expr,
-) *CallExpr {
-	return &CallExpr{Func: f, LParen: lparen, RParen: rparen,
-		Ellipsis: ellipsis, Args: args}
+func callExpr(f Expr, lparen, rparen, ellipsis core.Pos, args ...Expr) *CallExpr {
+	return &CallExpr{Func: f, LParen: lparen, RParen: rparen, Ellipsis: ellipsis, Args: args}
 }
 
-func indexExpr(
-	x, index Expr,
-	lbrack, rbrack core.Pos,
-) *IndexExpr {
-	return &IndexExpr{
-		Expr: x, Index: index, LBrack: lbrack, RBrack: rbrack,
-	}
+func methodCallExpr(obj Expr, methodName string, methodPos core.Pos, lparen, rparen, ellipsis core.Pos, args ...Expr) *MethodCallExpr {
+	return &MethodCallExpr{Object: obj, MethodName: methodName, MethodPos: methodPos, LParen: lparen, RParen: rparen, Ellipsis: ellipsis, Args: args}
 }
 
-func sliceExpr(
-	x, low, high Expr,
-	lbrack, rbrack core.Pos,
-) *SliceExpr {
-	return &SliceExpr{
-		Expr: x, Low: low, High: high, LBrack: lbrack, RBrack: rbrack,
-	}
+func indexExpr(x, index Expr, lbrack, rbrack core.Pos) *IndexExpr {
+	return &IndexExpr{Expr: x, Index: index, LBrack: lbrack, RBrack: rbrack}
 }
 
-func errorExpr(
-	pos core.Pos,
-	x Expr,
-	lparen, rparen core.Pos,
-) *ErrorExpr {
-	return &ErrorExpr{
-		Expr: x, ErrorPos: pos, LParen: lparen, RParen: rparen,
-	}
+func sliceExpr(x, low, high Expr, lbrack, rbrack core.Pos) *SliceExpr {
+	return &SliceExpr{Expr: x, Low: low, High: high, LBrack: lbrack, RBrack: rbrack}
+}
+
+func errorExpr(pos core.Pos, x Expr, lparen, rparen core.Pos) *ErrorExpr {
+	return &ErrorExpr{Expr: x, ErrorPos: pos, LParen: lparen, RParen: rparen}
 }
 
 func selectorExpr(x, sel Expr) *SelectorExpr {
@@ -2129,6 +2112,21 @@ func equalExpr(t *testing.T, expected, actual Expr) {
 			actual.(*CallExpr).RParen)
 		equalExprs(t, expected.Args,
 			actual.(*CallExpr).Args)
+	case *MethodCallExpr:
+		equalExpr(t, expected.Object,
+			actual.(*MethodCallExpr).Object)
+		require.Equal(t, expected.MethodName,
+			actual.(*MethodCallExpr).MethodName)
+		require.Equal(t, expected.MethodPos,
+			actual.(*MethodCallExpr).MethodPos)
+		require.Equal(t, expected.LParen,
+			actual.(*MethodCallExpr).LParen)
+		require.Equal(t, expected.RParen,
+			actual.(*MethodCallExpr).RParen)
+		require.Equal(t, expected.Ellipsis,
+			actual.(*MethodCallExpr).Ellipsis)
+		equalExprs(t, expected.Args,
+			actual.(*MethodCallExpr).Args)
 	case *ParenExpr:
 		equalExpr(t, expected.Expr,
 			actual.(*ParenExpr).Expr)

@@ -162,6 +162,18 @@ func (o *Record) Copy(alloc core.Allocator) core.Value {
 	return alloc.NewRecordValue(c, false)
 }
 
+func (o *Record) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	v, ok := o.value[name]
+	if !ok {
+		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+	}
+	if !v.IsCallable() {
+		return core.NewUndefined(), fmt.Errorf("%s.%s is not callable, got %s", o.TypeName(), name, v.TypeName())
+	}
+
+	return v.Call(vm, args...)
+}
+
 func (o *Record) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {

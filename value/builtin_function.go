@@ -101,6 +101,10 @@ func (o *BuiltinFunction) Copy(alloc core.Allocator) core.Value {
 	return alloc.NewBuiltinFunctionValue(o.name, o.value, o.arity, o.variadic)
 }
 
+func (o *BuiltinFunction) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+}
+
 func (o *BuiltinFunction) Access(core.VM, core.Value, core.Opcode) (core.Value, error) {
 	return core.NewUndefined(), core.NewNotAccessibleError(o.TypeName())
 }

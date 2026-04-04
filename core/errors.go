@@ -25,6 +25,7 @@ var (
 	ErrNotImplemented        = errors.New("not implemented")
 	ErrInvalidBinaryOperator = errors.New("invalid binary operator")
 	ErrInvalidValueKind      = errors.New("invalid value kind")
+	ErrInvalidMethodError    = errors.New("invalid method error")
 )
 
 func NewLogicError(context string) error {
@@ -101,4 +102,8 @@ func NewInvalidBinaryOperatorError(op string, left string, right string) error {
 
 func NewInvalidValueKindError(kind ValueKind) error {
 	return fmt.Errorf("%w: %d", ErrInvalidValueKind, kind)
+}
+
+func NewInvalidMethodError(method string, valType string) error {
+	return fmt.Errorf("%w: type %s has no method %s", ErrInvalidMethodError, valType, method)
 }

@@ -1,3 +1,12 @@
+- use methods instead of properties for all types! this way it will be more consistent
+- use pattern is_sorted(), sorted(), to_lower(), to_upper(), etc
+- update documentations!
+
+- check "append(" , especially in VM - used in form of "append(nil, ..." without pre-allocating array!
+
+- use unsafe.Pointer instead of any in core.Value (-8 bytes)
+- place kind at the beginning of the struct (with padding) - it is accessed first, so the data/ptr should cached after that
+
 - for int/float/string/etc args, fast path for specific types, only then call .AsX()
 
 - builtin/compiled functions  - separate interfaces and V_BUILTIN_FUNC and V_COMPILED_FUNC, add IsBuiltinFunction, IsCompiledFunction ???

@@ -151,7 +151,7 @@ func (t *SymbolTable) BuiltinSymbols() []*Symbol {
 
 // Names returns the name of all the symbols.
 func (t *SymbolTable) Names() []string {
-	var names []string
+	names := make([]string, 0, len(t.store))
 	for name := range t.store {
 		names = append(names, name)
 	}

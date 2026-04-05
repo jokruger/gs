@@ -295,7 +295,7 @@ func (v *VM) run() {
 			v.ip += 2
 			numElements := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
 
-			var elements []core.Value
+			elements := make([]core.Value, 0, numElements)
 			for i := v.sp - numElements; i < v.sp; i++ {
 				elements = append(elements, v.stack[i])
 			}
@@ -666,8 +666,7 @@ func (v *VM) run() {
 				return
 			}
 
-			args := append([]core.Value(nil), v.stack[v.sp-numArgs:v.sp]...)
-			ret, err := receiver.Method(v, methodName, args...)
+			ret, err := receiver.Method(v, methodName, v.stack[v.sp-numArgs:v.sp]...)
 			v.sp -= numArgs + 1
 
 			if err != nil {

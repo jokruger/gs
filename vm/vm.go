@@ -551,7 +551,8 @@ func (v *VM) run() {
 				return
 			}
 
-			if callee, ok := val.Object().(*value.CompiledFunction); ok {
+			switch callee := val.Object().(type) {
+			case *value.CompiledFunction:
 				if callee.VarArgs {
 					// if the closure is variadic, roll up all variadic parameters into an array
 					realArgs := callee.NumParameters - 1
@@ -563,7 +564,7 @@ func (v *VM) run() {
 						for i := spStart; i < v.sp; i++ {
 							args[i-spStart] = v.stack[i]
 						}
-						v.stack[spStart] = core.NewObject(v.alloc.NewArray(args, true), false)
+						v.stack[spStart] = v.alloc.NewArrayValue(args, true)
 						v.sp = spStart + 1
 					}
 				}
@@ -579,12 +580,9 @@ func (v *VM) run() {
 				// test if it's tail-call
 				if callee == v.curFrame.fn { // recursion
 					nextOp := v.curInsts[v.ip+1]
-					if nextOp == parser.OpReturn ||
-						(nextOp == parser.OpPop &&
-							parser.OpReturn == v.curInsts[v.ip+2]) {
+					if nextOp == parser.OpReturn || (nextOp == parser.OpPop && parser.OpReturn == v.curInsts[v.ip+2]) {
 						for p := 0; p < numArgs; p++ {
-							v.stack[v.curFrame.basePointer+p] =
-								v.stack[v.sp-numArgs+p]
+							v.stack[v.curFrame.basePointer+p] = v.stack[v.sp-numArgs+p]
 						}
 						v.sp -= numArgs + 1
 						v.ip = -1 // reset IP to beginning of the frame
@@ -606,10 +604,9 @@ func (v *VM) run() {
 				v.ip = -1
 				v.framesIndex++
 				v.sp = v.sp - numArgs + callee.NumLocals
-			} else {
-				var args []core.Value
-				args = append(args, v.stack[v.sp-numArgs:v.sp]...)
-				ret, e := val.Call(v, args...)
+
+			default:
+				ret, e := val.Call(v, v.stack[v.sp-numArgs:v.sp]...)
 				v.sp -= numArgs + 1
 
 				// runtime error
@@ -926,9 +923,10 @@ func (v *VM) call(fn *value.CompiledFunction, args ...core.Value) (core.Value, e
 		realArgs := fn.NumParameters - 1
 		varArgs := numArgs - realArgs
 		if varArgs >= 0 {
-			varArgsArray := make([]core.Value, varArgs)
-			copy(varArgsArray, args[realArgs:])
-			args = append(args[:realArgs], core.NewObject(v.alloc.NewArray(varArgsArray, true), false))
+			newArgs := make([]core.Value, realArgs+1)
+			copy(newArgs, args[:realArgs])
+			newArgs[realArgs] = v.alloc.NewArrayValue(args[realArgs:], true)
+			args = newArgs
 			numArgs = realArgs + 1
 		}
 	} else if numArgs != fn.NumParameters {

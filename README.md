@@ -71,6 +71,8 @@ When adding or changing behavior, please add or update the relevant tests in `te
 
 ## Contributing
 
+Before contributing, please review [CONVENTIONS.md](CONVENTIONS.md) for coding standards and repository contracts (especially important for variadic argument handling and VM performance).
+
 1. Fork the repository and clone your fork locally.
 2. Make your changes in a focused branch.
 3. Run the test suite.

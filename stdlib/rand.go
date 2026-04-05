@@ -107,7 +107,7 @@ func randFunc(vm core.VM, args ...core.Value) (core.Value, error) {
 	}
 	src := rand.NewSource(i1)
 	t := randRand(vm, rand.New(src))
-	return core.NewObject(t, false), nil
+	return core.NewObject(t), nil
 }
 
 func randInt63(vm core.VM, args ...core.Value) (core.Value, error) {

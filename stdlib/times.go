@@ -200,8 +200,7 @@ func timesDurationString(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("times.duration_string", "first", "int(compatible)", args[0].TypeName())
 	}
 
-	t := vm.Allocator().NewString(time.Duration(i1).String())
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(time.Duration(i1).String()), nil
 }
 
 func timesMonthString(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -214,8 +213,7 @@ func timesMonthString(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("times.month_string", "first", "int(compatible)", args[0].TypeName())
 	}
 
-	t := vm.Allocator().NewString(time.Month(i1).String())
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(time.Month(i1).String()), nil
 }
 
 func timesDate(vm core.VM, args ...core.Value) (ret core.Value, err error) {
@@ -267,16 +265,14 @@ func timesDate(vm core.VM, args ...core.Value) (ret core.Value, err error) {
 		loc = time.Now().Location()
 	}
 
-	t := vm.Allocator().NewTime(time.Date(int(i1), time.Month(i2), int(i3), int(i4), int(i5), int(i6), int(i7), loc))
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewTimeValue(time.Date(int(i1), time.Month(i2), int(i3), int(i4), int(i5), int(i6), int(i7), loc)), nil
 }
 
 func timesNow(vm core.VM, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
 		return core.NewUndefined(), core.NewWrongNumArgumentsError("times.now", "0", len(args))
 	}
-	t := vm.Allocator().NewTime(time.Now())
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewTimeValue(time.Now()), nil
 }
 
 func timesParse(vm core.VM, args ...core.Value) (ret core.Value, err error) {
@@ -300,8 +296,7 @@ func timesParse(vm core.VM, args ...core.Value) (ret core.Value, err error) {
 		return
 	}
 
-	t := vm.Allocator().NewTime(parsed)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewTimeValue(parsed), nil
 }
 
 func timesUnix(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -319,8 +314,7 @@ func timesUnix(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("times.unix", "second", "int(compatible)", args[1].TypeName())
 	}
 
-	t := vm.Allocator().NewTime(time.Unix(i1, i2))
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewTimeValue(time.Unix(i1, i2)), nil
 }
 
 func timesAdd(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -338,8 +332,7 @@ func timesAdd(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("times.add", "second", "int(compatible)", args[1].TypeName())
 	}
 
-	t := vm.Allocator().NewTime(t1.Add(time.Duration(i2)))
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewTimeValue(t1.Add(time.Duration(i2))), nil
 }
 
 func timesSub(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -385,8 +378,7 @@ func timesAddDate(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("times.add_date", "fourth", "int(compatible)", args[3].TypeName())
 	}
 
-	t := vm.Allocator().NewTime(t1.AddDate(int(i2), int(i3), int(i4)))
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewTimeValue(t1.AddDate(int(i2), int(i3), int(i4))), nil
 }
 
 func timesAfter(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -576,8 +568,7 @@ func timesTimeFormat(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewStringLimitError("times.time_format")
 	}
 
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func timesIsZero(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -603,8 +594,7 @@ func timesToLocal(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("times.to_local", "first", "time(compatible)", args[0].TypeName())
 	}
 
-	t := vm.Allocator().NewTime(t1.Local())
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewTimeValue(t1.Local()), nil
 }
 
 func timesToUTC(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -617,8 +607,7 @@ func timesToUTC(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("times.to_utc", "first", "time(compatible)", args[0].TypeName())
 	}
 
-	t := vm.Allocator().NewTime(t1.UTC())
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewTimeValue(t1.UTC()), nil
 }
 
 func timesTimeLocation(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -631,8 +620,7 @@ func timesTimeLocation(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("times.time_location", "first", "time(compatible)", args[0].TypeName())
 	}
 
-	t := vm.Allocator().NewString(t1.Location().String())
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(t1.Location().String()), nil
 }
 
 func timesInLocation(vm core.VM, args ...core.Value) (ret core.Value, err error) {
@@ -656,8 +644,7 @@ func timesInLocation(vm core.VM, args ...core.Value) (ret core.Value, err error)
 		return
 	}
 
-	t := vm.Allocator().NewTime(t1.In(location))
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewTimeValue(t1.In(location)), nil
 }
 
 func timesTimeString(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -670,6 +657,5 @@ func timesTimeString(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("times.time_string", "first", "time(compatible)", args[0].TypeName())
 	}
 
-	t := vm.Allocator().NewString(t1.String())
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(t1.String()), nil
 }

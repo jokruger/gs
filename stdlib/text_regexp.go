@@ -47,10 +47,10 @@ func makeTextRegexp(vm core.VM, re *regexp.Regexp) *value.Record {
 					"begin": core.NewInt(int64(m[i])),
 					"end":   core.NewInt(int64(m[i+1])),
 				}, true)
-				arr.Append(core.NewObject(t, false))
+				arr.Append(core.NewObject(t))
 			}
 
-			return alloc.NewArrayValue([]core.Value{core.NewObject(arr, false)}, false), nil
+			return alloc.NewArrayValue([]core.Value{core.NewObject(arr)}, false), nil
 		}
 
 		i2, ok := args[1].AsInt()
@@ -71,12 +71,12 @@ func makeTextRegexp(vm core.VM, re *regexp.Regexp) *value.Record {
 					"begin": core.NewInt(int64(m[i])),
 					"end":   core.NewInt(int64(m[i+1])),
 				}, true)
-				subMatch.Append(core.NewObject(t, false))
+				subMatch.Append(core.NewObject(t))
 			}
-			arr.Append(core.NewObject(subMatch, false))
+			arr.Append(core.NewObject(subMatch))
 		}
 
-		return core.NewObject(arr, false), nil
+		return core.NewObject(arr), nil
 	}
 
 	reReplace := func(vm core.VM, args ...core.Value) (core.Value, error) {

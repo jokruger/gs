@@ -1360,7 +1360,7 @@ func TestBuiltinFunctionIs(t *testing.T) {
 	expectRun(t, `out = is_function(x)`,
 		Opts().Symbol("x", core.NewObject(&StringArray{
 			Value: []string{"foo", "bar"},
-		}, false)).Skip2ndPass(),
+		})).Skip2ndPass(),
 		false) // user object
 
 	// is_callable
@@ -1374,7 +1374,7 @@ func TestBuiltinFunctionIs(t *testing.T) {
 	expectRun(t, `out = is_callable(x)`,
 		Opts().Symbol("x", core.NewObject(&StringArray{
 			Value: []string{"foo", "bar"},
-		}, false)).Skip2ndPass(), true) // user object
+		})).Skip2ndPass(), true) // user object
 }
 
 func TestBuiltinFunctionTypeName(t *testing.T) {
@@ -2755,9 +2755,9 @@ func (o *StringArray) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core
 		switch op {
 		case token.Add:
 			if len(rhs.Value) == 0 {
-				return core.NewObject(o, false), nil
+				return core.NewObject(o), nil
 			}
-			return core.NewObject(&StringArray{Value: append(o.Value, rhs.Value...)}, false), nil
+			return core.NewObject(&StringArray{Value: append(o.Value, rhs.Value...)}), nil
 		}
 	}
 
@@ -2787,7 +2787,7 @@ func (o *StringArray) Equals(x core.Value) bool {
 }
 
 func (o *StringArray) Copy(alloc core.Allocator) core.Value {
-	return core.NewObject(&StringArray{Value: append([]string{}, o.Value...)}, false)
+	return core.NewObject(&StringArray{Value: append([]string{}, o.Value...)})
 }
 
 func (o *StringArray) TypeName() string {
@@ -2860,7 +2860,7 @@ func (o *StringArray) IsCallable() bool {
 
 func TestIndexable(t *testing.T) {
 	dict := func() core.Value {
-		return core.NewObject(&StringDict{Value: map[string]string{"a": "foo", "b": "bar"}}, false)
+		return core.NewObject(&StringDict{Value: map[string]string{"a": "foo", "b": "bar"}})
 	}
 
 	expectRun(t, `out = dict["a"]`, Opts().Symbol("dict", dict()).Skip2ndPass(), "foo")
@@ -2868,7 +2868,7 @@ func TestIndexable(t *testing.T) {
 	expectRun(t, `out = dict["x"]`, Opts().Symbol("dict", dict()).Skip2ndPass(), core.NewUndefined())
 
 	strCir := func() core.Value {
-		return core.NewObject(&StringCircle{Value: []string{"one", "two", "three"}}, false)
+		return core.NewObject(&StringCircle{Value: []string{"one", "two", "three"}})
 	}
 
 	expectRun(t, `out = cir[0]`, Opts().Symbol("cir", strCir()).Skip2ndPass(), "one")
@@ -2879,7 +2879,7 @@ func TestIndexable(t *testing.T) {
 	expectError(t, `cir["a"]`, Opts().Symbol("cir", strCir()).Skip2ndPass(), "invalid index type")
 
 	strArr := func() core.Value {
-		return core.NewObject(&StringArray{Value: []string{"one", "two", "three"}}, false)
+		return core.NewObject(&StringArray{Value: []string{"one", "two", "three"}})
 	}
 
 	expectRun(t, `out = arr["one"]`, Opts().Symbol("arr", strArr()).Skip2ndPass(), 0)
@@ -2892,7 +2892,7 @@ func TestIndexable(t *testing.T) {
 
 func TestIndexAssignable(t *testing.T) {
 	dict := func() core.Value {
-		return core.NewObject(&StringDict{Value: map[string]string{"a": "foo", "b": "bar"}}, false)
+		return core.NewObject(&StringDict{Value: map[string]string{"a": "foo", "b": "bar"}})
 	}
 
 	expectRun(t, `dict["a"] = "1984"; out = dict["a"]`, Opts().Symbol("dict", dict()).Skip2ndPass(), "1984")
@@ -2900,7 +2900,7 @@ func TestIndexAssignable(t *testing.T) {
 	expectRun(t, `dict["c"] = 1984; out = dict["C"]`, Opts().Symbol("dict", dict()).Skip2ndPass(), "1984")
 
 	strCir := func() core.Value {
-		return core.NewObject(&StringCircle{Value: []string{"one", "two", "three"}}, false)
+		return core.NewObject(&StringCircle{Value: []string{"one", "two", "three"}})
 	}
 
 	expectRun(t, `cir[0] = "ONE"; out = cir[0]`, Opts().Symbol("cir", strCir()).Skip2ndPass(), "ONE")
@@ -2910,7 +2910,7 @@ func TestIndexAssignable(t *testing.T) {
 	expectError(t, `cir["a"] = "ONE"`, Opts().Symbol("cir", strCir()).Skip2ndPass(), "invalid index type")
 
 	strArr := func() core.Value {
-		return core.NewObject(&StringArray{Value: []string{"one", "two", "three"}}, false)
+		return core.NewObject(&StringArray{Value: []string{"one", "two", "three"}})
 	}
 
 	expectRun(t, `arr[0] = "ONE"; out = arr[0]`, Opts().Symbol("arr", strArr()).Skip2ndPass(), "ONE")
@@ -2957,7 +2957,7 @@ func (o *StringArray) IsIterable() bool {
 
 func TestIterable(t *testing.T) {
 	strArr := func() core.Value {
-		return core.NewObject(&StringArray{Value: []string{"one", "two", "three"}}, false)
+		return core.NewObject(&StringArray{Value: []string{"one", "two", "three"}})
 	}
 
 	expectRun(t, `for i, s in arr { out += i }`, Opts().Symbol("arr", strArr()).Skip2ndPass(), 3)

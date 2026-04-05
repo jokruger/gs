@@ -33,8 +33,7 @@ func b64RawURLDecodeString(vm core.VM, args ...core.Value) (ret core.Value, err 
 	if len(res) > core.MaxBytesLen {
 		return core.NewUndefined(), core.NewBytesLimitError("base64.raw_url_decode")
 	}
-	t := vm.Allocator().NewBytes(res)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewBytesValue(res), nil
 }
 
 func b64URLDecodeString(vm core.VM, args ...core.Value) (ret core.Value, err error) {
@@ -52,8 +51,7 @@ func b64URLDecodeString(vm core.VM, args ...core.Value) (ret core.Value, err err
 	if len(res) > core.MaxBytesLen {
 		return core.NewUndefined(), core.NewBytesLimitError("base64.url_decode")
 	}
-	t := vm.Allocator().NewBytes(res)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewBytesValue(res), nil
 }
 
 func b64RawDecodeString(vm core.VM, args ...core.Value) (ret core.Value, err error) {
@@ -71,8 +69,7 @@ func b64RawDecodeString(vm core.VM, args ...core.Value) (ret core.Value, err err
 	if len(res) > core.MaxBytesLen {
 		return core.NewUndefined(), core.NewBytesLimitError("base64.raw_decode")
 	}
-	t := vm.Allocator().NewBytes(res)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewBytesValue(res), nil
 }
 
 func b64DecodeString(vm core.VM, args ...core.Value) (ret core.Value, err error) {
@@ -90,8 +87,7 @@ func b64DecodeString(vm core.VM, args ...core.Value) (ret core.Value, err error)
 	if len(res) > core.MaxBytesLen {
 		return core.NewUndefined(), core.NewBytesLimitError("base64.decode")
 	}
-	t := vm.Allocator().NewBytes(res)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewBytesValue(res), nil
 }
 
 func b64RawURLEncodeToString(vm core.VM, args ...core.Value) (ret core.Value, err error) {
@@ -103,8 +99,7 @@ func b64RawURLEncodeToString(vm core.VM, args ...core.Value) (ret core.Value, er
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("base64.raw_url_encode", "first", "bytes(compatible)", args[0].TypeName())
 	}
 	res := base64.RawURLEncoding.EncodeToString(y1)
-	t := vm.Allocator().NewString(res)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(res), nil
 }
 
 func b64URLEncodeToString(vm core.VM, args ...core.Value) (ret core.Value, err error) {
@@ -116,8 +111,7 @@ func b64URLEncodeToString(vm core.VM, args ...core.Value) (ret core.Value, err e
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("base64.url_encode", "first", "bytes(compatible)", args[0].TypeName())
 	}
 	res := base64.URLEncoding.EncodeToString(y1)
-	t := vm.Allocator().NewString(res)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(res), nil
 }
 
 func b64RawEncodeToString(vm core.VM, args ...core.Value) (ret core.Value, err error) {
@@ -129,8 +123,7 @@ func b64RawEncodeToString(vm core.VM, args ...core.Value) (ret core.Value, err e
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("base64.raw_encode", "first", "bytes(compatible)", args[0].TypeName())
 	}
 	res := base64.RawStdEncoding.EncodeToString(y1)
-	t := vm.Allocator().NewString(res)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(res), nil
 }
 
 func b64EncodeToString(vm core.VM, args ...core.Value) (ret core.Value, err error) {
@@ -142,6 +135,5 @@ func b64EncodeToString(vm core.VM, args ...core.Value) (ret core.Value, err erro
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("base64.encode", "first", "bytes(compatible)", args[0].TypeName())
 	}
 	res := base64.StdEncoding.EncodeToString(y1)
-	t := vm.Allocator().NewString(res)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(res), nil
 }

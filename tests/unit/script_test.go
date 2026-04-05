@@ -277,9 +277,9 @@ func (o *Counter) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Val
 	if rhs.IsInt() {
 		switch op {
 		case token.Add:
-			return core.NewObject(&Counter{value: o.value + rhs.Int()}, false), nil
+			return core.NewObject(&Counter{value: o.value + rhs.Int()}), nil
 		case token.Sub:
-			return core.NewObject(&Counter{value: o.value - rhs.Int()}, false), nil
+			return core.NewObject(&Counter{value: o.value - rhs.Int()}), nil
 		}
 	}
 
@@ -288,9 +288,9 @@ func (o *Counter) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Val
 		case *Counter:
 			switch op {
 			case token.Add:
-				return core.NewObject(&Counter{value: o.value + rhs.value}, false), nil
+				return core.NewObject(&Counter{value: o.value + rhs.value}), nil
 			case token.Sub:
-				return core.NewObject(&Counter{value: o.value - rhs.value}, false), nil
+				return core.NewObject(&Counter{value: o.value - rhs.value}), nil
 			}
 		}
 	}
@@ -315,7 +315,7 @@ func (o *Counter) Equals(t core.Value) bool {
 }
 
 func (o *Counter) Copy(alloc core.Allocator) core.Value {
-	return core.NewObject(&Counter{value: o.value}, false)
+	return core.NewObject(&Counter{value: o.value})
 }
 
 func (o *Counter) Call(core.VM, ...core.Value) (core.Value, error) {
@@ -327,7 +327,7 @@ func (o *Counter) IsCallable() bool {
 }
 
 func TestScript_CustomObjects(t *testing.T) {
-	c := compile(t, `a := c1(); s := string(c1); c2 := c1; c2++`, M{"c1": core.NewObject(&Counter{value: 5}, false)})
+	c := compile(t, `a := c1(); s := string(c1); c2 := c1; c2++`, M{"c1": core.NewObject(&Counter{value: 5})})
 	compiledRun(t, c)
 	compiledGet(t, c, "a", int64(5))
 	compiledGet(t, c, "s", "Counter(5)")
@@ -340,7 +340,7 @@ for x in arr {
 }
 out := c1()
 `, M{
-		"c1": core.NewObject(&Counter{value: 5}, false),
+		"c1": core.NewObject(&Counter{value: 5}),
 	})
 	compiledRun(t, c)
 	compiledGet(t, c, "out", int64(15))
@@ -517,11 +517,11 @@ func TestCompiled_RunContext(t *testing.T) {
 }
 
 func TestCompiled_CustomObject(t *testing.T) {
-	c := compile(t, `r := (t<130)`, M{"t": core.NewObject(&customNumber{value: 123}, false)})
+	c := compile(t, `r := (t<130)`, M{"t": core.NewObject(&customNumber{value: 123})})
 	compiledRun(t, c)
 	compiledGet(t, c, "r", true)
 
-	c = compile(t, `r := (t>13)`, M{"t": core.NewObject(&customNumber{value: 123}, false)})
+	c = compile(t, `r := (t>13)`, M{"t": core.NewObject(&customNumber{value: 123})})
 	compiledRun(t, c)
 	compiledGet(t, c, "r", true)
 }

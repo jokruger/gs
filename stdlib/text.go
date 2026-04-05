@@ -73,8 +73,7 @@ func strconvItoa(vm core.VM, args ...core.Value) (ret core.Value, err error) {
 	if len(s) > core.MaxStringLen {
 		return core.NewUndefined(), core.NewStringLimitError("text.itoa")
 	}
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func strconvAtoi(vm core.VM, args ...core.Value) (ret core.Value, err error) {
@@ -108,8 +107,7 @@ func stringsTrimSuffix(vm core.VM, args ...core.Value) (core.Value, error) {
 	if len(s) > core.MaxStringLen {
 		return core.NewUndefined(), core.NewStringLimitError("text.trim_suffix")
 	}
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func stringsTrimRight(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -128,8 +126,7 @@ func stringsTrimRight(vm core.VM, args ...core.Value) (core.Value, error) {
 	if len(s) > core.MaxStringLen {
 		return core.NewUndefined(), core.NewStringLimitError("text.trim_right")
 	}
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func stringsTrimPrefix(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -148,8 +145,7 @@ func stringsTrimPrefix(vm core.VM, args ...core.Value) (core.Value, error) {
 	if len(s) > core.MaxStringLen {
 		return core.NewUndefined(), core.NewStringLimitError("text.trim_prefix")
 	}
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func stringsTrimLeft(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -168,8 +164,7 @@ func stringsTrimLeft(vm core.VM, args ...core.Value) (core.Value, error) {
 	if len(s) > core.MaxStringLen {
 		return core.NewUndefined(), core.NewStringLimitError("text.trim_left")
 	}
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func stringsTrim(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -188,8 +183,7 @@ func stringsTrim(vm core.VM, args ...core.Value) (core.Value, error) {
 	if len(s) > core.MaxStringLen {
 		return core.NewUndefined(), core.NewStringLimitError("text.trim")
 	}
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func stringsLastIndexAny(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -481,8 +475,7 @@ func stringsToUpper(vm core.VM, args ...core.Value) (core.Value, error) {
 	if len(s) > core.MaxStringLen {
 		return core.NewUndefined(), core.NewStringLimitError("text.to_upper")
 	}
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func stringsToLower(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -497,8 +490,7 @@ func stringsToLower(vm core.VM, args ...core.Value) (core.Value, error) {
 	if len(s) > core.MaxStringLen {
 		return core.NewUndefined(), core.NewStringLimitError("text.to_lower")
 	}
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func stringsTitle(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -513,8 +505,7 @@ func stringsTitle(vm core.VM, args ...core.Value) (core.Value, error) {
 	if len(s) > core.MaxStringLen {
 		return core.NewUndefined(), core.NewStringLimitError("text.title")
 	}
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func textREMatch(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -574,15 +565,15 @@ func textREFind(vm core.VM, args ...core.Value) (core.Value, error) {
 			if m[i] >= 0 && m[i+1] >= 0 {
 				s := alloc.NewString(s2[m[i]:m[i+1]])
 				t := alloc.NewRecord(map[string]core.Value{
-					"text":  core.NewObject(s, false),
+					"text":  core.NewObject(s),
 					"begin": core.NewInt(int64(m[i])),
 					"end":   core.NewInt(int64(m[i+1])),
 				}, true)
-				arr.Append(core.NewObject(t, false))
+				arr.Append(core.NewObject(t))
 			}
 		}
 
-		return alloc.NewArrayValue([]core.Value{core.NewObject(arr, false)}, false), nil
+		return alloc.NewArrayValue([]core.Value{core.NewObject(arr)}, false), nil
 	}
 
 	i3, ok := args[2].AsInt()
@@ -601,17 +592,17 @@ func textREFind(vm core.VM, args ...core.Value) (core.Value, error) {
 			if m[i] >= 0 && m[i+1] >= 0 {
 				s := alloc.NewString(s2[m[i]:m[i+1]])
 				t := alloc.NewRecord(map[string]core.Value{
-					"text":  core.NewObject(s, false),
+					"text":  core.NewObject(s),
 					"begin": core.NewInt(int64(m[i])),
 					"end":   core.NewInt(int64(m[i+1])),
 				}, true)
-				subMatch.Append(core.NewObject(t, false))
+				subMatch.Append(core.NewObject(t))
 			}
 		}
-		arr.Append(core.NewObject(subMatch, false))
+		arr.Append(core.NewObject(subMatch))
 	}
 
-	return core.NewObject(arr, false), nil
+	return core.NewObject(arr), nil
 }
 
 func textREReplace(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -644,8 +635,7 @@ func textREReplace(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewStringLimitError("text.re_replace")
 	}
 
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func textRESplit(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -705,7 +695,7 @@ func textRECompile(vm core.VM, args ...core.Value) (core.Value, error) {
 	}
 
 	t := makeTextRegexp(vm, re)
-	return core.NewObject(t, false), nil
+	return core.NewObject(t), nil
 }
 
 func textReplace(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -738,8 +728,7 @@ func textReplace(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewStringLimitError("text.replace")
 	}
 
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func textSubstring(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -785,8 +774,7 @@ func textSubstring(vm core.VM, args ...core.Value) (core.Value, error) {
 		i3 = strlen
 	}
 
-	t := vm.Allocator().NewString(s1[i2:i3])
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s1[i2:i3]), nil
 }
 
 func textPadLeft(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -811,8 +799,7 @@ func textPadLeft(vm core.VM, args ...core.Value) (core.Value, error) {
 
 	sLen := len(s1)
 	if sLen >= int(i2) {
-		t := vm.Allocator().NewString(s1)
-		return core.NewObject(t, false), nil
+		return vm.Allocator().NewStringValue(s1), nil
 	}
 
 	s3 := " "
@@ -825,14 +812,12 @@ func textPadLeft(vm core.VM, args ...core.Value) (core.Value, error) {
 
 	padStrLen := len(s3)
 	if padStrLen == 0 {
-		t := vm.Allocator().NewString(s1)
-		return core.NewObject(t, false), nil
+		return vm.Allocator().NewStringValue(s1), nil
 	}
 
 	padCount := ((int(i2) - padStrLen) / padStrLen) + 1
 	retStr := strings.Repeat(s3, padCount) + s1
-	t := vm.Allocator().NewString(retStr[len(retStr)-int(i2):])
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(retStr[len(retStr)-int(i2):]), nil
 }
 
 func textPadRight(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -857,8 +842,7 @@ func textPadRight(vm core.VM, args ...core.Value) (core.Value, error) {
 
 	sLen := len(s1)
 	if sLen >= int(i2) {
-		t := vm.Allocator().NewString(s1)
-		return core.NewObject(t, false), nil
+		return vm.Allocator().NewStringValue(s1), nil
 	}
 
 	s3 := " "
@@ -871,14 +855,12 @@ func textPadRight(vm core.VM, args ...core.Value) (core.Value, error) {
 
 	padStrLen := len(s3)
 	if padStrLen == 0 {
-		t := vm.Allocator().NewString(s1)
-		return core.NewObject(t, false), nil
+		return vm.Allocator().NewStringValue(s1), nil
 	}
 
 	padCount := ((int(i2) - padStrLen) / padStrLen) + 1
 	retStr := s1 + strings.Repeat(s3, padCount)
-	t := vm.Allocator().NewString(retStr[:i2])
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(retStr[:i2]), nil
 }
 
 func textRepeat(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -900,8 +882,7 @@ func textRepeat(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewStringLimitError("text.repeat")
 	}
 
-	t := vm.Allocator().NewString(strings.Repeat(s1, int(i2)))
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(strings.Repeat(s1, int(i2))), nil
 }
 
 func textJoin(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -935,8 +916,7 @@ func textJoin(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewStringLimitError("text.join")
 	}
 
-	t := vm.Allocator().NewString(strings.Join(ss1, s2))
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(strings.Join(ss1, s2)), nil
 }
 
 func textFormatBool(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -956,8 +936,7 @@ func textFormatBool(vm core.VM, args ...core.Value) (core.Value, error) {
 		s = "false"
 	}
 
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func textFormatFloat(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -985,8 +964,7 @@ func textFormatFloat(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("text.format_float", "fourth", "int(compatible)", args[3].TypeName())
 	}
 
-	t := vm.Allocator().NewString(strconv.FormatFloat(f1, s2[0], int(i3), int(i4)))
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(strconv.FormatFloat(f1, s2[0], int(i3), int(i4))), nil
 }
 
 func textFormatInt(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -1004,8 +982,7 @@ func textFormatInt(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("text.format_int", "second", "int(compatible)", args[1].TypeName())
 	}
 
-	t := vm.Allocator().NewString(strconv.FormatInt(i1, int(i2)))
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(strconv.FormatInt(i1, int(i2))), nil
 }
 
 func textParseBool(vm core.VM, args ...core.Value) (core.Value, error) {

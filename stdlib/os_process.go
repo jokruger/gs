@@ -85,7 +85,7 @@ func makeOSProcess(vm core.VM, proc *os.Process) *value.Record {
 			return wrapError(vm, err), nil
 		}
 		t := makeOSProcessState(vm, state)
-		return core.NewObject(t, false), nil
+		return core.NewObject(t), nil
 	}
 
 	alloc := vm.Allocator()

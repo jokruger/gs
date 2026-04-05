@@ -105,7 +105,7 @@ func (o *Time) Access(vm core.VM, index core.Value, op core.Opcode) (core.Value,
 	alloc := vm.Allocator()
 	switch k {
 	case "time":
-		return core.NewObject(o, false), nil
+		return core.NewObject(o), nil
 
 	case "bool":
 		return core.NewBool(o.IsTrue()), nil

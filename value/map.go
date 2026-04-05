@@ -198,8 +198,7 @@ func (o *Map) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value
 
 	switch k {
 	case "record":
-		t := vm.Allocator().NewRecord(o.value, o.immutable)
-		return core.NewObject(t, false), nil
+		return vm.Allocator().NewRecordValue(o.value, o.immutable), nil
 
 	case "empty":
 		return core.NewBool(len(o.value) == 0), nil

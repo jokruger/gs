@@ -489,9 +489,9 @@ func (c *Compiler) Compile(node parser.Node) error {
 			SourceMap:     sourceMap,
 		}
 		if len(freeSymbols) > 0 {
-			c.emit(node, parser.OpClosure, c.addConstant(core.NewObject(compiledFunction, false)), len(freeSymbols))
+			c.emit(node, parser.OpClosure, c.addConstant(core.NewObject(compiledFunction)), len(freeSymbols))
 		} else {
-			c.emit(node, parser.OpConstant, c.addConstant(core.NewObject(compiledFunction, false)))
+			c.emit(node, parser.OpConstant, c.addConstant(core.NewObject(compiledFunction)))
 		}
 
 	case *parser.ReturnStmt:
@@ -557,7 +557,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 				if err != nil {
 					return err
 				}
-				c.emit(node, parser.OpConstant, c.addConstant(core.NewObject(compiled, false)))
+				c.emit(node, parser.OpConstant, c.addConstant(core.NewObject(compiled)))
 				c.emit(node, parser.OpCall, 0, 0)
 			case core.Value: // builtin module
 				c.emit(node, parser.OpConstant, c.addConstant(v))
@@ -583,7 +583,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			if err != nil {
 				return err
 			}
-			c.emit(node, parser.OpConstant, c.addConstant(core.NewObject(compiled, false)))
+			c.emit(node, parser.OpConstant, c.addConstant(core.NewObject(compiled)))
 			c.emit(node, parser.OpCall, 0, 0)
 		} else {
 			return c.errorf(node, "module '%s' not found", node.ModuleName)

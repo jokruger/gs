@@ -204,7 +204,7 @@ func (o *Array) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Val
 
 	switch k {
 	case "array":
-		return core.NewObject(o, false), nil
+		return core.NewObject(o), nil
 
 	case "bytes":
 		bs := make([]byte, len(o.value))
@@ -215,8 +215,7 @@ func (o *Array) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Val
 			}
 			bs[i] = byte(b)
 		}
-		t := vm.Allocator().NewBytes(bs)
-		return core.NewObject(t, false), nil
+		return vm.Allocator().NewBytesValue(bs), nil
 
 	case "string":
 		r := make([]rune, len(o.value))
@@ -227,16 +226,14 @@ func (o *Array) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Val
 			}
 			r[i] = rv
 		}
-		t := vm.Allocator().NewString(string(r))
-		return core.NewObject(t, false), nil
+		return vm.Allocator().NewStringValue(string(r)), nil
 
 	case "record":
 		r := make(map[string]core.Value, len(o.value))
 		for i, v := range o.value {
 			r[strconv.Itoa(i)] = v
 		}
-		t := vm.Allocator().NewRecord(r, false)
-		return core.NewObject(t, false), nil
+		return vm.Allocator().NewRecordValue(r, false), nil
 
 	case "empty":
 		return core.NewBool(len(o.value) == 0), nil

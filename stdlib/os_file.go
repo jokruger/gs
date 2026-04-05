@@ -157,8 +157,7 @@ func makeOSFile(vm core.VM, file *os.File) *value.Record {
 		if len(args) != 0 {
 			return core.NewUndefined(), core.NewWrongNumArgumentsError("os.file.stat", "0", len(args))
 		}
-		t := vm.Allocator().NewString(file.Name())
-		return osStat(vm, core.NewObject(t, false))
+		return osStat(vm, vm.Allocator().NewStringValue(file.Name()))
 	}
 
 	alloc := vm.Allocator()

@@ -116,14 +116,12 @@ func jsonHTMLEscape(vm core.VM, args ...core.Value) (core.Value, error) {
 	case *value.Bytes:
 		var dst bytes.Buffer
 		gojson.HTMLEscape(&dst, o.Value())
-		t := vm.Allocator().NewBytes(dst.Bytes())
-		return core.NewObject(t, false), nil
+		return vm.Allocator().NewBytesValue(dst.Bytes()), nil
 
 	case *value.String:
 		var dst bytes.Buffer
 		gojson.HTMLEscape(&dst, []byte(o.Value()))
-		t := vm.Allocator().NewBytes(dst.Bytes())
-		return core.NewObject(t, false), nil
+		return vm.Allocator().NewBytesValue(dst.Bytes()), nil
 
 	default:
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("json.html_escape", "first", "bytes/string", args[0].TypeName())

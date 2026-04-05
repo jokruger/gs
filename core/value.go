@@ -50,10 +50,9 @@ func (k ValueKind) String() string {
 }
 
 type Value struct {
-	data     uint64
-	ptr      any
-	kind     ValueKind
-	temporal bool
+	data uint64
+	ptr  any
+	kind ValueKind
 }
 
 func NewUndefined() Value {
@@ -80,11 +79,11 @@ func NewInt(i int64) Value {
 	return Value{data: uint64(i), kind: V_INT}
 }
 
-func NewObject(o Object, temporal bool) Value {
+func NewObject(o Object) Value {
 	if o == nil {
 		return NewUndefined()
 	}
-	return Value{ptr: o, kind: V_OBJECT, temporal: temporal}
+	return Value{ptr: o, kind: V_OBJECT}
 }
 
 func NewIterator(i Iterator) Value {
@@ -99,7 +98,6 @@ func (v *Value) Set(val Value) {
 	v.data = val.data
 	v.ptr = val.ptr
 	v.kind = val.kind
-	v.temporal = val.temporal
 }
 
 func (v *Value) Kind() ValueKind {
@@ -108,14 +106,6 @@ func (v *Value) Kind() ValueKind {
 
 func (v *Value) SetKind(k ValueKind) {
 	v.kind = k
-}
-
-func (v *Value) Temporal() bool {
-	return v.temporal
-}
-
-func (v *Value) SetTemporal(temporal bool) {
-	v.temporal = temporal
 }
 
 func (v *Value) Object() Object {
@@ -180,41 +170,33 @@ func (v *Value) SetBool(b bool) {
 
 // must be value receiver because core.Value is used in maps (which require serialization)
 func (v Value) GobEncode() ([]byte, error) {
-	flags := uint8(0)
-	if v.temporal {
-		flags |= 1 << 0
-	}
-
 	switch v.kind {
 	case V_UNDEFINED:
-		return []byte{uint8(V_UNDEFINED), flags}, nil
+		return []byte{uint8(V_UNDEFINED)}, nil
 
 	case V_BOOL:
 		if v.Bool() {
-			return []byte{uint8(V_BOOL), flags, 1}, nil
+			return []byte{uint8(V_BOOL), 1}, nil
 		}
-		return []byte{uint8(V_BOOL), flags, 0}, nil
+		return []byte{uint8(V_BOOL), 0}, nil
 
 	case V_CHAR:
 		r := v.Char()
-		b := make([]byte, 6)
+		b := make([]byte, 5)
 		b[0] = uint8(V_CHAR)
-		b[1] = flags
-		binary.BigEndian.PutUint32(b[2:], uint32(int32(r)))
+		binary.BigEndian.PutUint32(b[1:], uint32(int32(r)))
 		return b, nil
 
 	case V_FLOAT:
-		b := make([]byte, 10)
+		b := make([]byte, 9)
 		b[0] = uint8(V_FLOAT)
-		b[1] = flags
-		binary.BigEndian.PutUint64(b[2:], v.data)
+		binary.BigEndian.PutUint64(b[1:], v.data)
 		return b, nil
 
 	case V_INT:
-		b := make([]byte, 10)
+		b := make([]byte, 9)
 		b[0] = uint8(V_INT)
-		b[1] = flags
-		binary.BigEndian.PutUint64(b[2:], v.data)
+		binary.BigEndian.PutUint64(b[1:], v.data)
 		return b, nil
 
 	case V_OBJECT:
@@ -224,7 +206,7 @@ func (v Value) GobEncode() ([]byte, error) {
 		if err := enc.Encode(&obj); err != nil {
 			return nil, err
 		}
-		return append([]byte{uint8(V_OBJECT), flags}, buf.Bytes()...), nil
+		return append([]byte{uint8(V_OBJECT)}, buf.Bytes()...), nil
 
 	default:
 		panic(fmt.Sprintf("unexpected use of %s with GobEncode()", v.kind.String()))
@@ -232,12 +214,10 @@ func (v Value) GobEncode() ([]byte, error) {
 }
 
 func (v *Value) GobDecode(data []byte) error {
-	if len(data) < 2 {
+	if len(data) < 1 {
 		return NewDecodeBinarySizeError(v.TypeName(), 2, len(data))
 	}
 	v.kind = ValueKind(data[0])
-	flags := data[1]
-	v.temporal = flags&(1<<0) != 0
 
 	switch v.kind {
 	case V_UNDEFINED:
@@ -246,40 +226,40 @@ func (v *Value) GobDecode(data []byte) error {
 		return nil
 
 	case V_BOOL:
-		if len(data) < 3 {
-			return NewDecodeBinarySizeError(v.TypeName(), 3, len(data))
+		if len(data) < 2 {
+			return NewDecodeBinarySizeError(v.TypeName(), 2, len(data))
 		}
-		v.data = uint64(data[2])
+		v.data = uint64(data[1])
 		v.ptr = nil
 		return nil
 
 	case V_CHAR:
-		if len(data) < 6 {
-			return NewDecodeBinarySizeError(v.TypeName(), 6, len(data))
+		if len(data) < 5 {
+			return NewDecodeBinarySizeError(v.TypeName(), 5, len(data))
 		}
-		v.data = uint64(binary.BigEndian.Uint32(data[2:6]))
+		v.data = uint64(binary.BigEndian.Uint32(data[1:5]))
 		v.ptr = nil
 		return nil
 
 	case V_FLOAT:
-		if len(data) < 10 {
-			return NewDecodeBinarySizeError(v.TypeName(), 10, len(data))
+		if len(data) < 9 {
+			return NewDecodeBinarySizeError(v.TypeName(), 9, len(data))
 		}
-		v.data = binary.BigEndian.Uint64(data[2:10])
+		v.data = binary.BigEndian.Uint64(data[1:9])
 		v.ptr = nil
 		return nil
 
 	case V_INT:
-		if len(data) < 10 {
-			return NewDecodeBinarySizeError(v.TypeName(), 10, len(data))
+		if len(data) < 9 {
+			return NewDecodeBinarySizeError(v.TypeName(), 9, len(data))
 		}
-		v.data = binary.BigEndian.Uint64(data[2:10])
+		v.data = binary.BigEndian.Uint64(data[1:9])
 		v.ptr = nil
 		return nil
 
 	case V_OBJECT:
 		var o Object
-		buf := bytes.NewBuffer(data[2:])
+		buf := bytes.NewBuffer(data[1:])
 		dec := gob.NewDecoder(buf)
 		if err := dec.Decode(&o); err != nil {
 			return err

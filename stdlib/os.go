@@ -518,7 +518,7 @@ func osStat(vm core.VM, args ...core.Value) (ret core.Value, err error) {
 		"mode":  core.NewInt(int64(stat.Mode())),
 	}, true).(*value.Record)
 	fstat.SetKey("directory", core.NewBool(stat.IsDir()))
-	return core.NewObject(fstat, false), nil
+	return core.NewObject(fstat), nil
 }
 
 func osCreate(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -534,7 +534,7 @@ func osCreate(vm core.VM, args ...core.Value) (core.Value, error) {
 		return wrapError(vm, err), nil
 	}
 	t := makeOSFile(vm, res)
-	return core.NewObject(t, false), nil
+	return core.NewObject(t), nil
 }
 
 func osOpen(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -550,7 +550,7 @@ func osOpen(vm core.VM, args ...core.Value) (core.Value, error) {
 		return wrapError(vm, err), nil
 	}
 	t := makeOSFile(vm, res)
-	return core.NewObject(t, false), nil
+	return core.NewObject(t), nil
 }
 
 func osOpenFile(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -574,7 +574,7 @@ func osOpenFile(vm core.VM, args ...core.Value) (core.Value, error) {
 		return wrapError(vm, err), nil
 	}
 	t := makeOSFile(vm, res)
-	return core.NewObject(t, false), nil
+	return core.NewObject(t), nil
 }
 
 func osArgs(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -657,7 +657,7 @@ func osExec(vm core.VM, args ...core.Value) (core.Value, error) {
 		execArgs = append(execArgs, execArg)
 	}
 	t := makeOSExecCommand(vm, exec.Command(name, execArgs...))
-	return core.NewObject(t, false), nil
+	return core.NewObject(t), nil
 }
 
 func osFindProcess(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -673,7 +673,7 @@ func osFindProcess(vm core.VM, args ...core.Value) (core.Value, error) {
 		return wrapError(vm, err), nil
 	}
 	t := makeOSProcess(vm, proc)
-	return core.NewObject(t, false), nil
+	return core.NewObject(t), nil
 }
 
 func osStartProcess(vm core.VM, args ...core.Value) (core.Value, error) {
@@ -716,7 +716,7 @@ func osStartProcess(vm core.VM, args ...core.Value) (core.Value, error) {
 		return wrapError(vm, err), nil
 	}
 	t := makeOSProcess(vm, proc)
-	return core.NewObject(t, false), nil
+	return core.NewObject(t), nil
 }
 
 func stringArray(arr []core.Value, argName string) ([]string, error) {

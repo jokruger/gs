@@ -67,15 +67,13 @@ func fmtSprintf(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("fmt.sprintf", "format", "string", args[0].TypeName())
 	}
 	if numArgs == 1 {
-		t := vm.Allocator().NewString(format)
-		return core.NewObject(t, false), nil
+		return vm.Allocator().NewStringValue(format), nil
 	}
 	s, err := formatter.Format(format, args[1:]...)
 	if err != nil {
 		return core.NewUndefined(), err
 	}
-	t := vm.Allocator().NewString(s)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(s), nil
 }
 
 func getPrintArgs(args ...core.Value) ([]any, error) {

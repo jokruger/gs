@@ -1458,5 +1458,5 @@ func compiledFunction(numLocals, numParams int, insts ...[]byte) core.Value {
 		NumLocals:     numLocals,
 		NumParameters: numParams,
 	}
-	return core.NewObject(t, false)
+	return core.NewObject(t)
 }

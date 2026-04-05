@@ -308,7 +308,7 @@ func (v *VM) run() {
 				return
 			}
 
-			v.stack[v.sp] = core.NewObject(arr, false)
+			v.stack[v.sp] = core.NewObject(arr)
 			v.sp++
 
 		case parser.OpRecord:
@@ -332,18 +332,17 @@ func (v *VM) run() {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
-			v.stack[v.sp] = core.NewObject(m, false)
+			v.stack[v.sp] = core.NewObject(m)
 			v.sp++
 
 		case parser.OpError:
 			val := v.stack[v.sp-1]
-			e := v.alloc.NewError(val)
 			v.allocs--
 			if v.allocs == 0 {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
-			v.stack[v.sp-1] = core.NewObject(e, false)
+			v.stack[v.sp-1] = v.alloc.NewErrorValue(val)
 
 		case parser.OpImmutable:
 			val := v.stack[v.sp-1]
@@ -356,23 +355,21 @@ func (v *VM) run() {
 						v.err = core.ErrObjectAllocLimit
 						return
 					}
-					v.stack[v.sp-1] = core.NewObject(t, false)
+					v.stack[v.sp-1] = core.NewObject(t)
 				case *value.Record:
-					t := v.alloc.NewRecord(val.Value(), true)
 					v.allocs--
 					if v.allocs == 0 {
 						v.err = core.ErrObjectAllocLimit
 						return
 					}
-					v.stack[v.sp-1] = core.NewObject(t, false)
+					v.stack[v.sp-1] = v.alloc.NewRecordValue(val.Value(), true)
 				case *value.Map:
-					t := v.alloc.NewMap(val.Value(), true)
 					v.allocs--
 					if v.allocs == 0 {
 						v.err = core.ErrObjectAllocLimit
 						return
 					}
-					v.stack[v.sp-1] = core.NewObject(t, false)
+					v.stack[v.sp-1] = v.alloc.NewMapValue(val.Value(), true)
 				}
 			}
 
@@ -442,7 +439,7 @@ func (v *VM) run() {
 					v.err = core.ErrObjectAllocLimit
 					return
 				}
-				v.stack[v.sp] = core.NewObject(val, false)
+				v.stack[v.sp] = core.NewObject(val)
 				v.sp++
 			case *value.String:
 				numElements := int64(left.Len())
@@ -475,7 +472,7 @@ func (v *VM) run() {
 					v.err = core.ErrObjectAllocLimit
 					return
 				}
-				v.stack[v.sp] = core.NewObject(val, false)
+				v.stack[v.sp] = core.NewObject(val)
 				v.sp++
 			case *value.Bytes:
 				numElements := int64(left.Len())
@@ -508,7 +505,7 @@ func (v *VM) run() {
 					v.err = core.ErrObjectAllocLimit
 					return
 				}
-				v.stack[v.sp] = core.NewObject(val, false)
+				v.stack[v.sp] = core.NewObject(val)
 				v.sp++
 			default:
 				v.err = fmt.Errorf("not indexable: %s", left.TypeName())
@@ -799,7 +796,7 @@ func (v *VM) run() {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
-			v.stack[v.sp] = core.NewObject(cl, false)
+			v.stack[v.sp] = core.NewObject(cl)
 			v.sp++
 
 		case parser.OpGetFreePtr:
@@ -971,7 +968,7 @@ func (v *VM) call(fn *value.CompiledFunction, args ...core.Value) (core.Value, e
 		v.err = core.ErrStackOverflow
 		return core.NewUndefined(), v.err
 	}
-	v.stack[v.sp] = core.NewObject(fn, false) // Use the function itself as placeholder
+	v.stack[v.sp] = core.NewObject(fn) // Use the function itself as placeholder
 	v.sp++
 
 	// Push arguments onto stack

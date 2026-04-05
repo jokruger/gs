@@ -20,7 +20,7 @@ type BuiltinFunction struct {
 func NewStaticBuiltinFunction(name string, val core.NativeFunc, arity int, variadic bool) core.Value {
 	o := &BuiltinFunction{}
 	o.Set(name, val, arity, variadic)
-	return core.NewObject(o, false)
+	return core.NewObject(o)
 }
 
 func (o *BuiltinFunction) GobDecode(b []byte) error {

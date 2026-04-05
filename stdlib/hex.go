@@ -27,8 +27,7 @@ func hexDecodeString(vm core.VM, args ...core.Value) (ret core.Value, err error)
 	if len(res) > core.MaxBytesLen {
 		return core.NewUndefined(), core.NewBytesLimitError("hex.decode")
 	}
-	t := vm.Allocator().NewBytes(res)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewBytesValue(res), nil
 }
 
 func hexEncodeToString(vm core.VM, args ...core.Value) (ret core.Value, err error) {
@@ -40,6 +39,5 @@ func hexEncodeToString(vm core.VM, args ...core.Value) (ret core.Value, err erro
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError("hex.encode", "first", "bytes(compatible)", args[0].TypeName())
 	}
 	res := hex.EncodeToString(y1)
-	t := vm.Allocator().NewString(res)
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(res), nil
 }

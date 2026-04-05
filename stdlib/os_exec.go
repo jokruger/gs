@@ -107,7 +107,7 @@ func makeOSExecCommand(vm core.VM, cmd *exec.Cmd) *value.Record {
 			return core.NewUndefined(), core.NewWrongNumArgumentsError("os.exec.process", "0", len(args))
 		}
 		t := makeOSProcess(vm, cmd.Process)
-		return core.NewObject(t, true), nil
+		return core.NewObject(t), nil
 	}
 
 	alloc := vm.Allocator()

@@ -21,7 +21,7 @@ type String struct {
 func NewStaticString(v string) core.Value {
 	o := &String{}
 	o.Set(v)
-	return core.NewObject(o, false)
+	return core.NewObject(o)
 }
 
 func (o *String) GobDecode(b []byte) error {
@@ -149,7 +149,7 @@ func (o *String) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Va
 
 	switch k {
 	case "string":
-		return core.NewObject(o, false), nil
+		return core.NewObject(o), nil
 
 	case "array":
 		arr := make([]core.Value, len(o.value))
@@ -300,8 +300,7 @@ func (o *String) fnTrim(vm core.VM, name string, args ...core.Value) (core.Value
 	}
 
 	if len(args) == 0 {
-		t := vm.Allocator().NewString(strings.Trim(string(o.value), " \t\n"))
-		return core.NewObject(t, false), nil
+		return vm.Allocator().NewStringValue(strings.Trim(string(o.value), " \t\n")), nil
 	}
 
 	s, ok := args[0].AsString()
@@ -309,6 +308,5 @@ func (o *String) fnTrim(vm core.VM, name string, args ...core.Value) (core.Value
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "string", args[0].TypeName())
 	}
 
-	t := vm.Allocator().NewString(strings.Trim(string(o.value), s))
-	return core.NewObject(t, false), nil
+	return vm.Allocator().NewStringValue(strings.Trim(string(o.value), s)), nil
 }

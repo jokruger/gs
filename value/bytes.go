@@ -106,7 +106,7 @@ func (o *Bytes) Equals(x core.Value) bool {
 func (o *Bytes) Copy(alloc core.Allocator) core.Value {
 	t := make([]byte, len(o.value))
 	copy(t, o.value)
-	return core.NewObject(alloc.NewBytes(t), false)
+	return alloc.NewBytesValue(t)
 }
 
 func (o *Bytes) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
@@ -134,7 +134,7 @@ func (o *Bytes) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Val
 
 	switch k {
 	case "bytes":
-		return core.NewObject(o, false), nil
+		return core.NewObject(o), nil
 
 	case "array":
 		arr := make([]core.Value, len(o.value))

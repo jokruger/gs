@@ -55,7 +55,7 @@ func (o *CompiledFunction) Copy(core.Allocator) core.Value {
 		VarArgs:       o.VarArgs,
 		Free:          append([]*core.Value{}, o.Free...), // DO NOT Copy() of elements; these are variable pointers
 	}
-	return core.NewObject(t, false)
+	return core.NewObject(t)
 }
 
 func (o *CompiledFunction) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {

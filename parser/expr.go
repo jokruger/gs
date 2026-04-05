@@ -33,7 +33,7 @@ func (e *ArrayLit) End() core.Pos {
 }
 
 func (e *ArrayLit) String() string {
-	var elements []string
+	elements := make([]string, 0, len(e.Elements))
 	for _, m := range e.Elements {
 		elements = append(elements, m.String())
 	}
@@ -131,7 +131,7 @@ func (e *CallExpr) End() core.Pos {
 }
 
 func (e *CallExpr) String() string {
-	var args []string
+	args := make([]string, 0, len(e.Args))
 	for _, e := range e.Args {
 		args = append(args, e.String())
 	}
@@ -163,7 +163,7 @@ func (e *MethodCallExpr) End() core.Pos {
 }
 
 func (e *MethodCallExpr) String() string {
-	var args []string
+	args := make([]string, 0, len(e.Args))
 	for _, a := range e.Args {
 		args = append(args, a.String())
 	}
@@ -480,7 +480,7 @@ func (e *RecordLit) End() core.Pos {
 }
 
 func (e *RecordLit) String() string {
-	var elements []string
+	elements := make([]string, 0, len(e.Elements))
 	for _, m := range e.Elements {
 		elements = append(elements, m.String())
 	}

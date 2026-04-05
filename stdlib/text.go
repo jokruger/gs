@@ -594,7 +594,7 @@ func textREFind(vm core.VM, args ...core.Value) (core.Value, error) {
 		return core.NewUndefined(), nil
 	}
 
-	arr := alloc.NewArray(nil, false).(*value.Array)
+	arr := alloc.NewArray(make([]core.Value, 0, len(m)), false).(*value.Array)
 	for _, m := range m {
 		subMatch := alloc.NewArray(nil, false).(*value.Array)
 		for i := 0; i < len(m); i += 2 {
@@ -914,9 +914,9 @@ func textJoin(vm core.VM, args ...core.Value) (core.Value, error) {
 	}
 
 	var slen int
-	var ss1 []string
-	arg0 := args[0].Object().(*value.Array)
-	for idx, a := range arg0.Value() {
+	val := args[0].Object().(*value.Array).Value()
+	ss1 := make([]string, 0, len(val))
+	for idx, a := range val {
 		as, ok := a.AsString()
 		if !ok {
 			return core.NewUndefined(), core.NewInvalidArgumentTypeError("text.join", fmt.Sprintf("first[%d]", idx), "string(compatible)", a.TypeName())

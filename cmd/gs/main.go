@@ -166,7 +166,7 @@ func RunREPL(a core.Allocator, modules *vm.ModuleMap, in io.Reader, out io.Write
 	t := a.NewBuiltinFunction(
 		"println",
 		func(v core.VM, args ...core.Value) (ret core.Value, err error) {
-			var printArgs []any
+			printArgs := make([]any, 0, len(args)+1)
 			for _, arg := range args {
 				if arg.IsUndefined() {
 					printArgs = append(printArgs, "<undefined>")
@@ -276,7 +276,7 @@ func doHelp() {
 }
 
 func addPrints(file *parser.File) *parser.File {
-	var stmts []parser.Stmt
+	stmts := make([]parser.Stmt, 0, len(file.Stmts))
 	for _, s := range file.Stmts {
 		switch s := s.(type) {
 		case *parser.ExprStmt:

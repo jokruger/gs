@@ -50,8 +50,7 @@ func (b *Bytecode) FormatInstructions() []string {
 	return FormatInstructions(b.MainFunction.Instructions, 0)
 }
 
-// FormatConstants returns human readable string representations of
-// compiled constants.
+// FormatConstants returns human readable string representations of compiled constants.
 func (b *Bytecode) FormatConstants() (output []string) {
 	for cidx, cn := range b.Constants {
 		if cn.IsObject() {

@@ -52,19 +52,13 @@ func FormatInstructions(b []byte, posOffset int) []string {
 
 		switch len(numOperands) {
 		case 0:
-			out = append(out, fmt.Sprintf("%04d %-7s",
-				posOffset+i, parser.OpcodeNames[b[i]]))
+			out = append(out, fmt.Sprintf("%04d %-7s", posOffset+i, parser.OpcodeNames[b[i]]))
 		case 1:
-			out = append(out, fmt.Sprintf("%04d %-7s %-5d",
-				posOffset+i, parser.OpcodeNames[b[i]], operands[0]))
+			out = append(out, fmt.Sprintf("%04d %-7s %-5d", posOffset+i, parser.OpcodeNames[b[i]], operands[0]))
 		case 2:
-			out = append(out, fmt.Sprintf("%04d %-7s %-5d %-5d",
-				posOffset+i, parser.OpcodeNames[b[i]],
-				operands[0], operands[1]))
+			out = append(out, fmt.Sprintf("%04d %-7s %-5d %-5d", posOffset+i, parser.OpcodeNames[b[i]], operands[0], operands[1]))
 		case 3:
-			out = append(out, fmt.Sprintf("%04d %-7s %-5d %-5d %-5d",
-				posOffset+i, parser.OpcodeNames[b[i]],
-				operands[0], operands[1], operands[2]))
+			out = append(out, fmt.Sprintf("%04d %-7s %-5d %-5d %-5d", posOffset+i, parser.OpcodeNames[b[i]], operands[0], operands[1], operands[2]))
 		}
 		i += 1 + read
 	}

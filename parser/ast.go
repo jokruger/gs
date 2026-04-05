@@ -59,7 +59,7 @@ func (n *IdentList) NumFields() int {
 }
 
 func (n *IdentList) String() string {
-	var list []string
+	list := make([]string, 0, len(n.List))
 	for i, e := range n.List {
 		if n.VarArgs && i == len(n.List)-1 {
 			list = append(list, "..."+e.String())

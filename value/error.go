@@ -66,7 +66,23 @@ func (o *Error) Copy(alloc core.Allocator) core.Value {
 }
 
 func (o *Error) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
-	return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+	switch name {
+	case "value":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewInvalidMethodError("error.value", o.TypeName())
+		}
+		return o.value, nil
+
+	case "to_string":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewInvalidMethodError("error.to_string", o.TypeName())
+		}
+		s, _ := o.value.AsString()
+		return vm.Allocator().NewStringValue(s), nil
+
+	default:
+		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+	}
 }
 
 func (o *Error) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
@@ -74,13 +90,7 @@ func (o *Error) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Val
 	if !ok {
 		return core.NewUndefined(), core.NewInvalidIndexTypeError("error access", "string", index.TypeName())
 	}
-
-	switch k {
-	case "value":
-		return o.value, nil
-	default:
-		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
-	}
+	return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 }
 
 func (o *Error) Assign(core.Value, core.Value) error {

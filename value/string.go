@@ -121,16 +121,134 @@ func (o *String) Copy(alloc core.Allocator) core.Value {
 
 func (o *String) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	switch name {
+	case "to_string":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_string", "0", len(args))
+		}
+		return core.NewObject(o), nil
+
+	case "to_array":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_array", "0", len(args))
+		}
+		arr := make([]core.Value, len(o.value))
+		for i, r := range o.value {
+			arr[i] = core.NewChar(r)
+		}
+		return vm.Allocator().NewArrayValue(arr, false), nil
+
+	case "to_bool":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_bool", "0", len(args))
+		}
+		b, _ := o.AsBool()
+		return core.NewBool(b), nil
+
+	case "to_bytes":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_bytes", "0", len(args))
+		}
+		return vm.Allocator().NewBytesValue([]byte(string(o.value))), nil
+
+	case "to_char":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_char", "0", len(args))
+		}
+		if len(o.value) == 1 {
+			return core.NewChar(o.value[0]), nil
+		}
+		return core.NewChar(0), nil
+
+	case "to_float":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_float", "0", len(args))
+		}
+		f, _ := o.AsFloat()
+		return core.NewFloat(f), nil
+
+	case "to_int":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_int", "0", len(args))
+		}
+		i, _ := o.AsInt()
+		return core.NewInt(i), nil
+
+	case "to_time":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_time", "0", len(args))
+		}
+		t, _ := o.AsTime()
+		return vm.Allocator().NewTimeValue(t), nil
+
+	case "to_record":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_record", "0", len(args))
+		}
+		m := make(map[string]core.Value, len(o.value))
+		for i, r := range o.value {
+			m[strconv.Itoa(i)] = core.NewChar(r)
+		}
+		return vm.Allocator().NewRecordValue(m, false), nil
+
+	case "is_empty":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.is_empty", "0", len(args))
+		}
+		return core.NewBool(len(o.value) == 0), nil
+
+	case "len":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.len", "0", len(args))
+		}
+		return core.NewInt(int64(len(o.value))), nil
+
+	case "first":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.first", "0", len(args))
+		}
+		if len(o.value) == 0 {
+			return core.NewUndefined(), nil
+		}
+		return core.NewChar(o.value[0]), nil
+
+	case "last":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.last", "0", len(args))
+		}
+		if len(o.value) == 0 {
+			return core.NewUndefined(), nil
+		}
+		return core.NewChar(o.value[len(o.value)-1]), nil
+
+	case "lower":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.lower", "0", len(args))
+		}
+		t := make([]rune, len(o.value))
+		for i, r := range o.value {
+			t[i] = unicode.ToLower(r)
+		}
+		return vm.Allocator().NewStringValue(string(t)), nil
+
+	case "upper":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.upper", "0", len(args))
+		}
+		t := make([]rune, len(o.value))
+		for i, r := range o.value {
+			t[i] = unicode.ToUpper(r)
+		}
+		return vm.Allocator().NewStringValue(string(t)), nil
+
 	case "trim":
 		return o.fnTrim(vm, "string.trim", args...)
+
 	default:
 		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
 	}
 }
 
 func (o *String) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
-	alloc := vm.Allocator()
-
 	if mode == parser.OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
@@ -146,85 +264,7 @@ func (o *String) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Va
 	if !ok {
 		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 	}
-
-	switch k {
-	case "string":
-		return core.NewObject(o), nil
-
-	case "array":
-		arr := make([]core.Value, len(o.value))
-		for i, r := range o.value {
-			arr[i] = core.NewChar(r)
-		}
-		return alloc.NewArrayValue(arr, false), nil
-
-	case "bool":
-		b, _ := o.AsBool()
-		return core.NewBool(b), nil
-
-	case "bytes":
-		return alloc.NewBytesValue([]byte(string(o.value))), nil
-
-	case "char":
-		if len(o.value) == 1 {
-			return core.NewChar(o.value[0]), nil
-		}
-		return core.NewChar(0), nil
-
-	case "float":
-		f, _ := o.AsFloat()
-		return core.NewFloat(f), nil
-
-	case "int":
-		i, _ := o.AsInt()
-		return core.NewInt(i), nil
-
-	case "time":
-		t, _ := o.AsTime()
-		return alloc.NewTimeValue(t), nil
-
-	case "record":
-		m := make(map[string]core.Value, len(o.value))
-		for i, r := range o.value {
-			m[strconv.Itoa(i)] = core.NewChar(r)
-		}
-		return alloc.NewRecordValue(m, false), nil
-
-	case "empty":
-		return core.NewBool(len(o.value) == 0), nil
-
-	case "len":
-		return core.NewInt(int64(len(o.value))), nil
-
-	case "first":
-		if len(o.value) == 0 {
-			return core.NewUndefined(), nil
-		}
-		return core.NewChar(o.value[0]), nil
-
-	case "last":
-		if len(o.value) == 0 {
-			return core.NewUndefined(), nil
-		}
-		return core.NewChar(o.value[len(o.value)-1]), nil
-
-	case "lower":
-		t := make([]rune, len(o.value))
-		for i, r := range o.value {
-			t[i] = unicode.ToLower(r)
-		}
-		return alloc.NewStringValue(string(t)), nil
-
-	case "upper":
-		t := make([]rune, len(o.value))
-		for i, r := range o.value {
-			t[i] = unicode.ToUpper(r)
-		}
-		return alloc.NewStringValue(string(t)), nil
-
-	default:
-		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
-	}
+	return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 }
 
 func (o *String) Assign(core.Value, core.Value) error {

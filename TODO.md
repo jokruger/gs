@@ -108,3 +108,12 @@
 - bytes.base64()
 
 - move type related functions to type member functions; remove duplicates from stdlib (i.e. stdlib must be complimentary extension of type member functions)
+
+
+Recommended Baseline Examples
+
+- Arrays: `map`, `filter`, `reduce`, `sum`, `avg`, `min`, `max`, `len`, `is_empty`, `sort`, `sort_by`
+- Strings: `len`, `is_empty`, `upper`, `lower`, `trim`, `contains`, `has_prefix`, `has_suffix`, `to_int`, `to_float`
+- Int/Float: `abs`, `pow`, `is_zero`, `to_string`, `to_int`, `to_float`
+
+- add time.is_leap_year(), time.is_weekend(), time.is_weekday(), time.is_holiday() (with holiday calendar)

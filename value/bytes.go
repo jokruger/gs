@@ -110,12 +110,75 @@ func (o *Bytes) Copy(alloc core.Allocator) core.Value {
 }
 
 func (o *Bytes) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
-	return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+	switch name {
+	case "to_bytes":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("to_bytes", "0", len(args))
+		}
+		return core.NewObject(o), nil
+
+	case "to_array":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("bytes.to_array", "0", len(args))
+		}
+		arr := make([]core.Value, len(o.value))
+		for i, b := range o.value {
+			arr[i] = core.NewInt(int64(b))
+		}
+		return vm.Allocator().NewArrayValue(arr, false), nil
+
+	case "to_record":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("bytes.to_record", "0", len(args))
+		}
+		m := make(map[string]core.Value, len(o.value))
+		for i, b := range o.value {
+			m[strconv.Itoa(i)] = core.NewInt(int64(b))
+		}
+		return vm.Allocator().NewMapValue(m, false), nil
+
+	case "to_string":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("bytes.to_string", "0", len(args))
+		}
+		return vm.Allocator().NewStringValue(string(o.value)), nil
+
+	case "is_empty":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("bytes.is_empty", "0", len(args))
+		}
+		return core.NewBool(o.IsEmpty()), nil
+
+	case "len":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("bytes.len", "0", len(args))
+		}
+		return core.NewInt(int64(o.Len())), nil
+
+	case "first":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewInvalidMethodError("bytes.first", o.TypeName())
+		}
+		if len(o.value) == 0 {
+			return core.NewUndefined(), nil
+		}
+		return core.NewInt(int64(o.value[0])), nil
+
+	case "last":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewInvalidMethodError("bytes.last", o.TypeName())
+		}
+		if len(o.value) == 0 {
+			return core.NewUndefined(), nil
+		}
+		return core.NewInt(int64(o.value[len(o.value)-1])), nil
+
+	default:
+		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+	}
 }
 
 func (o *Bytes) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
-	alloc := vm.Allocator()
-
 	if mode == parser.OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
@@ -131,49 +194,7 @@ func (o *Bytes) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Val
 	if !ok {
 		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 	}
-
-	switch k {
-	case "bytes":
-		return core.NewObject(o), nil
-
-	case "array":
-		arr := make([]core.Value, len(o.value))
-		for i, b := range o.value {
-			arr[i] = core.NewInt(int64(b))
-		}
-		return alloc.NewArrayValue(arr, false), nil
-
-	case "record":
-		m := make(map[string]core.Value, len(o.value))
-		for i, b := range o.value {
-			m[strconv.Itoa(i)] = core.NewInt(int64(b))
-		}
-		return alloc.NewMapValue(m, false), nil
-
-	case "string":
-		return alloc.NewStringValue(string(o.value)), nil
-
-	case "empty":
-		return core.NewBool(o.IsEmpty()), nil
-
-	case "len":
-		return core.NewInt(int64(o.Len())), nil
-
-	case "first":
-		if len(o.value) == 0 {
-			return core.NewUndefined(), nil
-		}
-		return core.NewInt(int64(o.value[0])), nil
-
-	case "last":
-		if len(o.value) == 0 {
-			return core.NewUndefined(), nil
-		}
-		return core.NewInt(int64(o.value[len(o.value)-1])), nil
-
-	default:
-		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
-	}
+	return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 }
 
 func (o *Bytes) Assign(core.Value, core.Value) error {

@@ -99,9 +99,9 @@ for i := 0; i < len(s); i++ {
 for l := 0; l < 1000; l++ {
 	x := range(1, 1000, 1).map(e => "num" + e)
 	if l%2 == 0 {
-		x = x.map(e => e.lower)
+		x = x.map(e => e.lower())
 	} else {
-		x = x.map(e => e.upper)
+		x = x.map(e => e.upper())
 	}
 	out = x[l]
 }

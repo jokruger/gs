@@ -165,6 +165,18 @@ func (o *Map) Copy(alloc core.Allocator) core.Value {
 
 func (o *Map) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	switch name {
+	case "to_record":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("map.to_record", "0", len(args))
+		}
+		return vm.Allocator().NewRecordValue(o.value, o.immutable), nil
+
+	case "is_empty":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("map.is_empty", "0", len(args))
+		}
+		return core.NewBool(len(o.value) == 0), nil
+
 	case "filter":
 		return o.fnFilter(vm, "map.filter", args...)
 
@@ -176,6 +188,24 @@ func (o *Map) Method(vm core.VM, name string, args ...core.Value) (core.Value, e
 
 	case "any":
 		return o.fnAny(vm, "map.any", args...)
+
+	case "len":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("map.len", "0", len(args))
+		}
+		return core.NewInt(int64(len(o.value))), nil
+
+	case "keys":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("map.keys", "0", len(args))
+		}
+		return o.keys(vm)
+
+	case "values":
+		if len(args) != 0 {
+			return core.NewUndefined(), core.NewWrongNumArgumentsError("map.values", "0", len(args))
+		}
+		return o.values(vm)
 
 	default:
 		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
@@ -196,25 +226,7 @@ func (o *Map) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value
 		return r, nil
 	}
 
-	switch k {
-	case "record":
-		return vm.Allocator().NewRecordValue(o.value, o.immutable), nil
-
-	case "empty":
-		return core.NewBool(len(o.value) == 0), nil
-
-	case "len":
-		return core.NewInt(int64(len(o.value))), nil
-
-	case "keys":
-		return o.keys(vm)
-
-	case "values":
-		return o.values(vm)
-
-	default:
-		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
-	}
+	return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 }
 
 func (o *Map) Assign(index, value core.Value) error {

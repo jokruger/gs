@@ -913,6 +913,14 @@ func (v *Value) Copy(alloc Allocator) Value {
 
 func (v *Value) Method(vm VM, name string, args ...Value) (Value, error) {
 	switch v.kind {
+	case V_BOOL:
+		return v.boolMethod(vm, name, args...)
+	case V_CHAR:
+		return v.charMethod(vm, name, args...)
+	case V_FLOAT:
+		return v.floatMethod(vm, name, args...)
+	case V_INT:
+		return v.intMethod(vm, name, args...)
 	case V_OBJECT:
 		return v.ptr.(Object).Method(vm, name, args...)
 	case V_ITERATOR, V_VALUE_PTR:
@@ -926,14 +934,6 @@ func (v *Value) Access(vm VM, index Value, mode Opcode) (Value, error) {
 	switch v.kind {
 	case V_UNDEFINED:
 		return NewUndefined(), nil
-	case V_BOOL:
-		return v.boolAccess(vm, index, mode)
-	case V_CHAR:
-		return v.charAccess(vm, index, mode)
-	case V_FLOAT:
-		return v.floatAccess(vm, index, mode)
-	case V_INT:
-		return v.intAccess(vm, index, mode)
 	case V_OBJECT:
 		return v.ptr.(Object).Access(vm, index, mode)
 	case V_ITERATOR, V_VALUE_PTR:
@@ -943,109 +943,133 @@ func (v *Value) Access(vm VM, index Value, mode Opcode) (Value, error) {
 	}
 }
 
-func (v *Value) boolAccess(vm VM, index Value, op Opcode) (Value, error) {
-	k, ok := index.AsString()
-	if !ok {
-		return NewUndefined(), NewInvalidSelectorError(v.TypeName(), k)
-	}
-
-	alloc := vm.Allocator()
-	switch k {
-	case "bool":
+func (v *Value) boolMethod(vm VM, name string, args ...Value) (Value, error) {
+	switch name {
+	case "to_bool":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("bool.to_bool", "0", len(args))
+		}
 		return NewBool(v.Bool()), nil
 
-	case "int":
+	case "to_int":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("bool.to_int", "0", len(args))
+		}
 		if v.Bool() {
 			return NewInt(1), nil
 		}
 		return NewInt(0), nil
 
-	case "string":
-		if v.Bool() {
-			return alloc.NewStringValue("true"), nil
+	case "to_string":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("bool.to_string", "0", len(args))
 		}
-		return alloc.NewStringValue("false"), nil
+		if v.Bool() {
+			return vm.Allocator().NewStringValue("true"), nil
+		}
+		return vm.Allocator().NewStringValue("false"), nil
 
 	default:
-		return NewUndefined(), NewInvalidSelectorError(v.TypeName(), k)
+		return NewUndefined(), NewInvalidMethodError(name, "bool")
 	}
 }
 
-func (v *Value) charAccess(vm VM, index Value, op Opcode) (Value, error) {
-	k, ok := index.AsString()
-	if !ok {
-		return NewUndefined(), NewInvalidSelectorError(v.TypeName(), k)
-	}
-
-	alloc := vm.Allocator()
-	switch k {
-	case "char":
+func (v *Value) charMethod(vm VM, name string, args ...Value) (Value, error) {
+	switch name {
+	case "to_char":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("char.to_char", "0", len(args))
+		}
 		return NewChar(v.Char()), nil
 
-	case "bool":
+	case "to_bool":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("char.to_bool", "0", len(args))
+		}
 		return NewBool(v.Char() != 0), nil
 
-	case "int":
+	case "to_int":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("char.to_int", "0", len(args))
+		}
 		return NewInt(int64(v.Char())), nil
 
-	case "string":
-		return alloc.NewStringValue(string(v.Char())), nil
+	case "to_string":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("char.to_string", "0", len(args))
+		}
+		return vm.Allocator().NewStringValue(string(v.Char())), nil
 
 	default:
-		return NewUndefined(), NewInvalidSelectorError(v.TypeName(), k)
+		return NewUndefined(), NewInvalidMethodError(name, "char")
 	}
 }
 
-func (v *Value) floatAccess(vm VM, index Value, op Opcode) (Value, error) {
-	k, ok := index.AsString()
-	if !ok {
-		return NewUndefined(), NewInvalidSelectorError(v.TypeName(), k)
-	}
-
-	alloc := vm.Allocator()
-	switch k {
-	case "float":
+func (v *Value) floatMethod(vm VM, name string, args ...Value) (Value, error) {
+	switch name {
+	case "to_float":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("float.to_float", "0", len(args))
+		}
 		return NewFloat(v.Float()), nil
 
-	case "int":
+	case "to_int":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("float.to_int", "0", len(args))
+		}
 		return NewInt(int64(v.Float())), nil
 
-	case "string":
-		return alloc.NewStringValue(strconv.FormatFloat(v.Float(), 'f', -1, 64)), nil
+	case "to_string":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("float.to_string", "0", len(args))
+		}
+		return vm.Allocator().NewStringValue(strconv.FormatFloat(v.Float(), 'f', -1, 64)), nil
 
 	default:
-		return NewUndefined(), NewInvalidSelectorError(v.TypeName(), k)
+		return NewUndefined(), NewInvalidMethodError(name, "float")
 	}
 }
 
-func (v *Value) intAccess(vm VM, index Value, op Opcode) (Value, error) {
-	k, ok := index.AsString()
-	if !ok {
-		return NewUndefined(), NewInvalidSelectorError(v.TypeName(), k)
-	}
-
-	alloc := vm.Allocator()
-	switch k {
-	case "int":
+func (v *Value) intMethod(vm VM, name string, args ...Value) (Value, error) {
+	switch name {
+	case "to_int":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("int.to_int", "0", len(args))
+		}
 		return NewInt(v.Int()), nil
 
-	case "float":
+	case "to_float":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("int.to_float", "0", len(args))
+		}
 		return NewFloat(float64(v.Int())), nil
 
-	case "bool":
+	case "to_bool":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("int.to_bool", "0", len(args))
+		}
 		return NewBool(v.Int() != 0), nil
 
-	case "char":
+	case "to_char":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("int.to_char", "0", len(args))
+		}
 		return NewChar(rune(v.Int())), nil
 
-	case "string":
-		return alloc.NewStringValue(strconv.FormatInt(v.Int(), 10)), nil
+	case "to_string":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("int.to_string", "0", len(args))
+		}
+		return vm.Allocator().NewStringValue(strconv.FormatInt(v.Int(), 10)), nil
 
-	case "time":
-		return alloc.NewTimeValue(time.Unix(v.Int(), 0)), nil
+	case "to_time":
+		if len(args) != 0 {
+			return NewUndefined(), NewWrongNumArgumentsError("int.to_time", "0", len(args))
+		}
+		return vm.Allocator().NewTimeValue(time.Unix(v.Int(), 0)), nil
 
 	default:
-		return NewUndefined(), NewInvalidSelectorError(v.TypeName(), k)
+		return NewUndefined(), NewInvalidMethodError(name, "int")
 	}
 }
 

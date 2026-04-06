@@ -196,12 +196,12 @@ func() {
 	v = core.NewBool(false)
 	expectRun(t, fmt.Sprintf(`out = false == %s`, v.String()), nil, true)
 
-	expectRun(t, `out = true.bool`, nil, true)
-	expectRun(t, `out = false.bool`, nil, false)
-	expectRun(t, `out = true.int`, nil, 1)
-	expectRun(t, `out = false.int`, nil, 0)
-	expectRun(t, `out = true.string`, nil, "true")
-	expectRun(t, `out = false.string`, nil, "false")
+	expectRun(t, `out = true.to_bool()`, nil, true)
+	expectRun(t, `out = false.to_bool()`, nil, false)
+	expectRun(t, `out = true.to_int()`, nil, 1)
+	expectRun(t, `out = false.to_int()`, nil, 0)
+	expectRun(t, `out = true.to_string()`, nil, "true")
+	expectRun(t, `out = false.to_string()`, nil, "false")
 }
 
 func TestInteger(t *testing.T) {
@@ -240,13 +240,13 @@ func TestInteger(t *testing.T) {
 	expectRun(t, `out = 5 + "-5"`, nil, 0)
 	expectRun(t, `out = 5 + "5"`, nil, 10)
 
-	expectRun(t, `out = (12).int`, nil, 12)
-	expectRun(t, `out = (0).bool`, nil, false)
-	expectRun(t, `out = (10).bool`, nil, true)
-	expectRun(t, `out = (48).char`, nil, '0')
-	expectRun(t, `out = (48).float`, nil, 48.0)
-	expectRun(t, `out = (48).string`, nil, "48")
-	expectRun(t, `out = (1234567890).time.utc.string`, nil, "2009-02-13 23:31:30 +0000 UTC")
+	expectRun(t, `out = (12).to_int()`, nil, 12)
+	expectRun(t, `out = (0).to_bool()`, nil, false)
+	expectRun(t, `out = (10).to_bool()`, nil, true)
+	expectRun(t, `out = (48).to_char()`, nil, '0')
+	expectRun(t, `out = (48).to_float()`, nil, 48.0)
+	expectRun(t, `out = (48).to_string()`, nil, "48")
+	expectRun(t, `out = (1234567890).to_time().to_utc().to_string()`, nil, "2009-02-13 23:31:30 +0000 UTC")
 }
 
 func TestFloat(t *testing.T) {
@@ -268,9 +268,9 @@ func TestFloat(t *testing.T) {
 	expectRun(t, `out = 5.0 + "-5.0"`, nil, 0.0)
 	expectRun(t, `out = 5.0 + "5.0"`, nil, 10.0)
 
-	expectRun(t, `out = (1.5).float`, nil, 1.5)
-	expectRun(t, `out = (1.5).int`, nil, 1)
-	expectRun(t, `out = (1.5).string`, nil, "1.5")
+	expectRun(t, `out = (1.5).to_float()`, nil, 1.5)
+	expectRun(t, `out = (1.5).to_int()`, nil, 1)
+	expectRun(t, `out = (1.5).to_string()`, nil, "1.5")
 }
 
 func TestChar(t *testing.T) {
@@ -311,10 +311,10 @@ func TestChar(t *testing.T) {
 	expectRun(t, `out = '4' + "4"`, nil, "44")
 	expectError(t, `'4' - "4"`, nil, "invalid binary operator: char - string")
 
-	expectRun(t, `out = '4'.char`, nil, '4')
-	expectRun(t, `out = '4'.bool`, nil, true)
-	expectRun(t, `out = '4'.int`, nil, 52)
-	expectRun(t, `out = '4'.string`, nil, "4")
+	expectRun(t, `out = '4'.to_char()`, nil, '4')
+	expectRun(t, `out = '4'.to_bool()`, nil, true)
+	expectRun(t, `out = '4'.to_int()`, nil, 52)
+	expectRun(t, `out = '4'.to_string()`, nil, "4")
 }
 
 func TestString(t *testing.T) {
@@ -408,37 +408,37 @@ func TestString(t *testing.T) {
 	v = alloc.NewStringValue("123₴")
 	expectRun(t, fmt.Sprintf(`out = "123₴" == %s`, v.String()), nil, true)
 
-	expectRun(t, `out = "".empty`, nil, true)
-	expectRun(t, `out = "abcd".empty`, nil, false)
-	expectRun(t, `out = "abcd".len`, nil, 4)
-	expectRun(t, `out = "abcd".first`, nil, 'a')
-	expectRun(t, `out = "abcd".last`, nil, 'd')
-	expectRun(t, `out = "Abcd".lower`, nil, "abcd")
-	expectRun(t, `out = "Abcd".upper`, nil, "ABCD")
+	expectRun(t, `out = "".is_empty()`, nil, true)
+	expectRun(t, `out = "abcd".is_empty()`, nil, false)
+	expectRun(t, `out = "abcd".len()`, nil, 4)
+	expectRun(t, `out = "abcd".first()`, nil, 'a')
+	expectRun(t, `out = "abcd".last()`, nil, 'd')
+	expectRun(t, `out = "Abcd".lower()`, nil, "abcd")
+	expectRun(t, `out = "Abcd".upper()`, nil, "ABCD")
 	expectRun(t, `out = "abcd ".trim()`, nil, "abcd")
 	expectRun(t, `out = "abcd".trim("ad")`, nil, "bc")
 
-	expectRun(t, `out = "abc".string`, nil, "abc")
-	expectRun(t, `out = "abc".array`, nil, ARR{'a', 'b', 'c'})
-	expectRun(t, `out = "abc".array.string`, nil, "abc")
-	expectRun(t, `out = "true".bool`, nil, true)
-	expectRun(t, `out = "false".bool`, nil, false)
-	expectRun(t, `out = "abc".bool`, nil, false)
-	expectRun(t, `out = "true".bool.string`, nil, "true")
-	expectRun(t, `out = "abc".bytes`, nil, alloc.NewBytesValue([]byte{'a', 'b', 'c'}))
-	expectRun(t, `out = "abc".bytes.string`, nil, "abc")
-	expectRun(t, `out = "a".char`, nil, 'a')
-	expectRun(t, `out = "a".char.string`, nil, "a")
-	expectRun(t, `out = "1.2".float`, nil, 1.2)
-	expectRun(t, `out = "1.2".float.string`, nil, "1.2")
-	expectRun(t, `out = "12".int`, nil, 12)
-	expectRun(t, `out = "12".float.string`, nil, "12")
-	expectRun(t, `out = "abc".int`, nil, 0)
-	expectRun(t, `out = "abc".record`, nil, MAP{"0": 'a', "1": 'b', "2": 'c'})
+	expectRun(t, `out = "abc".to_string()`, nil, "abc")
+	expectRun(t, `out = "abc".to_array()`, nil, ARR{'a', 'b', 'c'})
+	expectRun(t, `out = "abc".to_array().to_string()`, nil, "abc")
+	expectRun(t, `out = "true".to_bool()`, nil, true)
+	expectRun(t, `out = "false".to_bool()`, nil, false)
+	expectRun(t, `out = "abc".to_bool()`, nil, false)
+	expectRun(t, `out = "true".to_bool().to_string()`, nil, "true")
+	expectRun(t, `out = "abc".to_bytes()`, nil, alloc.NewBytesValue([]byte{'a', 'b', 'c'}))
+	expectRun(t, `out = "abc".to_bytes().to_string()`, nil, "abc")
+	expectRun(t, `out = "a".to_char()`, nil, 'a')
+	expectRun(t, `out = "a".to_char().to_string()`, nil, "a")
+	expectRun(t, `out = "1.2".to_float()`, nil, 1.2)
+	expectRun(t, `out = "1.2".to_float().to_string()`, nil, "1.2")
+	expectRun(t, `out = "12".to_int()`, nil, 12)
+	expectRun(t, `out = "12".to_float().to_string()`, nil, "12")
+	expectRun(t, `out = "abc".to_int()`, nil, 0)
+	expectRun(t, `out = "abc".to_record()`, nil, MAP{"0": 'a', "1": 'b', "2": 'c'})
 
 	expectRun(t, `out = " їЇґҐ ".trim()`, nil, "їЇґҐ")
-	expectRun(t, `out = "їЇґҐ".upper`, nil, "ЇЇҐҐ")
-	expectRun(t, `out = "їЇґҐ".lower`, nil, "їїґґ")
+	expectRun(t, `out = "їЇґҐ".upper()`, nil, "ЇЇҐҐ")
+	expectRun(t, `out = "їЇґҐ".lower()`, nil, "їїґґ")
 	expectRun(t, `out = "їЇґҐ"[1]`, nil, 'Ї')
 	expectRun(t, `out = "їЇґҐ"[1:2]`, nil, "Ї")
 	expectRun(t, `out = "їЇґҐ"[1:3]`, nil, "Їґ")
@@ -446,18 +446,18 @@ func TestString(t *testing.T) {
 
 func TestError(t *testing.T) {
 	expectRun(t, `out = error(1)`, nil, errorObject(1))
-	expectRun(t, `out = error(1).value`, nil, 1)
+	expectRun(t, `out = error(1).value()`, nil, 1)
 	expectRun(t, `out = error("some error")`, nil, errorObject("some error"))
 	expectRun(t, `out = error("some" + " error")`, nil, errorObject("some error"))
 	expectRun(t, `out = func() { return error(5) }()`, nil, errorObject(5))
 	expectRun(t, `out = error(error("foo"))`, nil, errorObject(errorObject("foo")))
 	expectRun(t, `out = error("some error")`, nil, errorObject("some error"))
-	expectRun(t, `out = error("some error").value`, nil, "some error")
-	expectRun(t, `out = error("some error")["value"]`, nil, "some error")
+	expectRun(t, `out = error("some error").value()`, nil, "some error")
+	expectRun(t, `out = error("some error").to_string()`, nil, "some error")
 
-	expectError(t, `error("error").err`, nil, "invalid selector: type error has no property or method err")
-	expectError(t, `error("error").value_`, nil, "invalid selector: type error has no property or method value_")
-	expectError(t, `error([1,2,3])[1]`, nil, "invalid selector: type error has no property or method 1")
+	expectError(t, `error("error").err`, nil, "invalid selector: type error has no property err")
+	expectError(t, `error("error").value_`, nil, "invalid selector: type error has no property value_")
+	expectError(t, `error([1,2,3])[1]`, nil, "invalid selector: type error has no property 1")
 
 	s, _ := alloc.NewError(alloc.NewStringValue("abc")).AsString()
 	require.Equal(t, "abc", s)
@@ -527,33 +527,35 @@ func TestArray(t *testing.T) {
 	}, false)
 	expectRun(t, fmt.Sprintf(`out = [1, undefined, "3"] == %s`, v.String()), nil, true)
 
-	expectError(t, `[1, 2, 3].q`, nil, "Runtime Error: invalid selector: type array has no property or method q\n\tat test:1:11")
+	expectError(t, `[1, 2, 3].q`, nil, "Runtime Error: invalid selector: type array has no property q\n\tat test:1:11")
 
-	expectRun(t, `t := []; out = t.empty`, nil, true)
-	expectRun(t, `t := [1, 2, 3]; out = t.empty`, nil, false)
+	expectRun(t, `t := []; out = t.sort()`, nil, ARR{})
+	expectRun(t, `t := [1, 2, 3]; out = t.sort()`, nil, ARR{1, 2, 3})
+	expectRun(t, `t := [3, 2, 1]; out = t.sort()`, nil, ARR{1, 2, 3})
 
-	expectRun(t, `t := []; out = t.len`, nil, 0)
-	expectRun(t, `t := [1, 2, 3]; out = t.len`, nil, 3)
+	expectRun(t, `t := []; out = t.is_empty()`, nil, true)
+	expectRun(t, `t := [1, 2, 3]; out = t.is_empty()`, nil, false)
 
-	expectRun(t, `t := [3, 1, 2]; out = string(t.sort())`, nil, "[1, 2, 3]")
+	expectRun(t, `t := []; out = t.len()`, nil, 0)
+	expectRun(t, `t := [1, 2, 3]; out = t.len()`, nil, 3)
 
-	expectRun(t, `out = [].first`, nil, core.NewUndefined())
-	expectRun(t, `out = [1, 2, 3].first`, nil, 1)
+	expectRun(t, `out = [].first()`, nil, core.NewUndefined())
+	expectRun(t, `out = [1, 2, 3].first()`, nil, 1)
 
-	expectRun(t, `out = [].last`, nil, core.NewUndefined())
-	expectRun(t, `out = [1, 2, 3].last`, nil, 3)
+	expectRun(t, `out = [].last()`, nil, core.NewUndefined())
+	expectRun(t, `out = [1, 2, 3].last()`, nil, 3)
 
-	expectRun(t, `out = [].min`, nil, core.NewUndefined())
-	expectRun(t, `out = [1, 2, 3].min`, nil, 1)
+	expectRun(t, `out = [].min()`, nil, core.NewUndefined())
+	expectRun(t, `out = [1, 2, 3].min()`, nil, 1)
 
-	expectRun(t, `out = [].max`, nil, core.NewUndefined())
-	expectRun(t, `out = [1, 2, 3].max`, nil, 3)
+	expectRun(t, `out = [].max()`, nil, core.NewUndefined())
+	expectRun(t, `out = [1, 2, 3].max()`, nil, 3)
 
-	expectRun(t, `out = [].sum`, nil, core.NewUndefined())
-	expectRun(t, `out = [1, 2, 3].sum`, nil, 6)
+	expectRun(t, `out = [].sum()`, nil, core.NewUndefined())
+	expectRun(t, `out = [1, 2, 3].sum()`, nil, 6)
 
-	expectRun(t, `out = [].avg`, nil, core.NewUndefined())
-	expectRun(t, `out = [1, 2, 3].avg`, nil, 2)
+	expectRun(t, `out = [].avg()`, nil, core.NewUndefined())
+	expectRun(t, `out = [1, 2, 3].avg()`, nil, 2)
 
 	expectRun(t, `out = [].count(x => x > 0)`, nil, 0)
 	expectRun(t, `out = [1, 2, 3, -10].count(x => x > 0)`, nil, 3)
@@ -581,10 +583,10 @@ func TestArray(t *testing.T) {
 	expectRun(t, `out = [1, 2, 3].reduce(0, (a, v) => a + v)`, nil, 6)
 	expectRun(t, `out = [1, 2, 3].reduce(0, (a, i, v) => a + i)`, nil, 3)
 
-	expectRun(t, `out = [1, 2, 3].array`, nil, ARR{1, 2, 3})
-	expectRun(t, `out = [48, 49, -1].bytes`, nil, alloc.NewBytesValue([]byte{48, 49, 0}))
-	expectRun(t, `out = [48, 49, -1].record`, nil, MAP{"0": 48, "1": 49, "2": -1})
-	expectRun(t, `out = [48, 49, 50].string`, nil, "012")
+	expectRun(t, `out = [1, 2, 3].to_array()`, nil, ARR{1, 2, 3})
+	expectRun(t, `out = [48, 49, -1].to_bytes()`, nil, alloc.NewBytesValue([]byte{48, 49, 0}))
+	expectRun(t, `out = [48, 49, -1].to_record()`, nil, MAP{"0": 48, "1": 49, "2": -1})
+	expectRun(t, `out = [48, 49, 50].to_string()`, nil, "012")
 }
 
 func TestRecord(t *testing.T) {
@@ -654,19 +656,19 @@ func TestMap(t *testing.T) {
 	expectRun(t, `out = map({a: 1, b: 2})["b"]`, nil, 2)
 	expectRun(t, `out = map({a: 1, b: 2})["q"]`, nil, core.NewUndefined())
 	expectRun(t, `t := map({a: 1, b: 2}); t["a"] = 3; out = t["a"]`, nil, 3)
-	expectError(t, `map({a: 1, b: 2}).q`, nil, "Runtime Error: invalid selector: type map has no property or method q\n\tat test:1:19")
+	expectError(t, `map({a: 1, b: 2}).q`, nil, "Runtime Error: invalid selector: type map has no property q\n\tat test:1:19")
 
-	expectRun(t, `t := map({a: 1, b: 2}); out = t.empty`, nil, false)
-	expectRun(t, `t := map(); out = t.empty`, nil, true)
+	expectRun(t, `t := map({a: 1, b: 2}); out = t.is_empty()`, nil, false)
+	expectRun(t, `t := map(); out = t.is_empty()`, nil, true)
 
-	expectRun(t, `t := map({a: 1, b: 2}); out = t.len`, nil, 2)
-	expectRun(t, `t := map(); out = t.len`, nil, 0)
+	expectRun(t, `t := map({a: 1, b: 2}); out = t.len()`, nil, 2)
+	expectRun(t, `t := map(); out = t.len()`, nil, 0)
 
-	expectRun(t, `t := map({a: 1, b: 2}); out = string(t.keys.sort())`, nil, `["a", "b"]`)
-	expectRun(t, `t := map({a: 1, b: 2}); out = string(t.values.sort())`, nil, `[1, 2]`)
+	expectRun(t, `t := map({a: 1, b: 2}); out = string(t.keys().sort())`, nil, `["a", "b"]`)
+	expectRun(t, `t := map({a: 1, b: 2}); out = string(t.values().sort())`, nil, `[1, 2]`)
 
-	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = string(t.filter(k => k != "b").keys.sort())`, nil, `["a", "c"]`)
-	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = string(t.filter((k, v) => v > 1).keys.sort())`, nil, `["b", "c"]`)
+	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = string(t.filter(k => k != "b").keys().sort())`, nil, `["a", "c"]`)
+	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = string(t.filter((k, v) => v > 1).keys().sort())`, nil, `["b", "c"]`)
 
 	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = t.count(k => k != "b")`, nil, 2)
 	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = t.count((k, v) => v > 1)`, nil, 2)
@@ -689,27 +691,27 @@ func TestTime(t *testing.T) {
 	require.Equal(t, `time("2020-06-20 01:02:03.000000004 +0000 UTC")`, o.String())
 
 	expectRun(t, fmt.Sprintf(`out = time("2020-06-20 01:02:03.000000004 UTC") == %s`, o.String()), nil, true)
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").year`, nil, 2020)
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").month`, nil, 6)
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").day`, nil, 20)
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").hour`, nil, 1)
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").minute`, nil, 2)
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").second`, nil, 3)
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").nanosecond`, nil, 4)
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").unix`, nil, 1592614923)
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").unix_nano`, nil, 1592614923000000004)
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").week_day`, nil, 6)
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").week_day_name`, nil, "Saturday")
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").month_name`, nil, "June")
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").year_day`, nil, 172) // June 20 is the 172nd day of the year (173rd in leap years)
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").date_str`, nil, "2020-06-20")
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").time_str`, nil, "01:02:03")
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").date_time_str`, nil, "2020-06-20 01:02:03")
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").utc.string`, nil, "2020-06-19 23:02:03.000000004 +0000 UTC")
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").zone_offset`, nil, 7200)
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").year()`, nil, 2020)
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").month()`, nil, 6)
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").day()`, nil, 20)
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").hour()`, nil, 1)
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").minute()`, nil, 2)
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").second()`, nil, 3)
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").nanosecond()`, nil, 4)
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").unix()`, nil, 1592614923)
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").unix_nano()`, nil, 1592614923000000004)
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").week_day()`, nil, 6)
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").week_day_name()`, nil, "Saturday")
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").month_name()`, nil, "June")
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 UTC").year_day()`, nil, 172) // June 20 is the 172nd day of the year (173rd in leap years)
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").to_date_string()`, nil, "2020-06-20")
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").to_time_string()`, nil, "01:02:03")
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").to_date_time_string()`, nil, "2020-06-20 01:02:03")
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").to_utc().to_string()`, nil, "2020-06-19 23:02:03.000000004 +0000 UTC")
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").zone_offset()`, nil, 7200)
 
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").string`, nil, "2020-06-20 01:02:03.000000004 +0200 +0200")
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").int.time.utc.string`, nil, "2020-06-19 23:02:03 +0000 UTC")
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").to_string()`, nil, "2020-06-20 01:02:03.000000004 +0200 +0200")
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").to_int().to_time().to_utc().to_string()`, nil, "2020-06-19 23:02:03 +0000 UTC")
 }
 
 func TestBytes(t *testing.T) {
@@ -732,16 +734,16 @@ func TestBytes(t *testing.T) {
 	v := alloc.NewBytesValue([]byte("hello"))
 	expectRun(t, fmt.Sprintf(`out = bytes("hello") == %s`, v.String()), nil, true)
 
-	expectRun(t, `out = bytes("abcde").len`, nil, 5)
-	expectRun(t, `out = bytes("abcde").empty`, nil, false)
-	expectRun(t, `out = bytes().empty`, nil, true)
-	expectRun(t, `out = bytes("abcde").first`, nil, 97)
-	expectRun(t, `out = bytes("abcde").last`, nil, 101)
+	expectRun(t, `out = bytes("abcde").len()`, nil, 5)
+	expectRun(t, `out = bytes("abcde").is_empty()`, nil, false)
+	expectRun(t, `out = bytes().is_empty()`, nil, true)
+	expectRun(t, `out = bytes("abcde").first()`, nil, 97)
+	expectRun(t, `out = bytes("abcde").last()`, nil, 101)
 
-	expectRun(t, `out = bytes("abc").array`, nil, ARR{97, 98, 99})
-	expectRun(t, `out = bytes("abc").record`, nil, MAP{"0": 97, "1": 98, "2": 99})
-	expectRun(t, `out = bytes("abc").string`, nil, "abc")
-	expectRun(t, `out = "abc".bytes.array.string`, nil, "abc")
+	expectRun(t, `out = bytes("abc").to_array()`, nil, ARR{97, 98, 99})
+	expectRun(t, `out = bytes("abc").to_record()`, nil, MAP{"0": 97, "1": 98, "2": 99})
+	expectRun(t, `out = bytes("abc").to_string()`, nil, "abc")
+	expectRun(t, `out = "abc".to_bytes().to_array().to_string()`, nil, "abc")
 }
 
 func TestArrayIterator(t *testing.T) {
@@ -818,11 +820,11 @@ x := bytes("abcdefg")
 y := x[2:5]
 res1 := ""
 for v in x {
-	res1 += v.char
+	res1 += v.to_char()
 }
 res2 := ""
 for v in y {
-	res2 += v.char
+	res2 += v.to_char()
 }
 out = [res1, res2]
 `, nil, ARR{"abcdefg", "cde"})
@@ -834,13 +836,13 @@ isum1 := 0
 res1 := ""
 for i, v in x {
 	isum1 += i
-	res1 += v.char
+	res1 += v.to_char()
 }
 isum2 := 0
 res2 := ""
 for i, v in y {
 	isum2 += i
-	res2 += v.char
+	res2 += v.to_char()
 }
 out = [isum1, res1, isum2, res2]
 `, nil, ARR{21, "abcdefg", 3, "cde"})
@@ -3917,9 +3919,9 @@ func TestLambdas(t *testing.T) {
 func TestIntegrity(t *testing.T) {
 	expectRun(t, `
 		x := [9, 8, 7, 6, 5, 4, 3, 2, 1]
-		r1 := x.sort().filter(e => e % 2 == 0).last
+		r1 := x.sort().filter(e => e % 2 == 0).last()
 		y := map({a: 1, b: 2, c: 3})
-		r2 := y.values.sort().filter(e => e == 2).first
+		r2 := y.values().sort().filter(e => e == 2).first()
 
 		out = string([r1, r2])
 	`, nil, "[8, 2]")

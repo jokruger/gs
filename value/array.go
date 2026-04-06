@@ -159,6 +159,18 @@ func (o *Array) Copy(alloc core.Allocator) core.Value {
 
 func (o *Array) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	switch name {
+	case "to_array":
+		return o.fnToArray(vm, "array.to_array", args...)
+
+	case "to_bytes":
+		return o.fnToBytes(vm, "array.to_bytes", args...)
+
+	case "to_string":
+		return o.fnToString(vm, "array.to_string", args...)
+
+	case "to_record":
+		return o.fnToRecord(vm, "array.to_record", args...)
+
 	case "sort":
 		return o.fnSort(vm, "array.sort", args...)
 
@@ -179,6 +191,30 @@ func (o *Array) Method(vm core.VM, name string, args ...core.Value) (core.Value,
 
 	case "reduce":
 		return o.fnReduce(vm, "array.reduce", args...)
+
+	case "is_empty":
+		return o.fnIsEmpty(vm, "array.is_empty", args...)
+
+	case "len":
+		return o.fnLen(vm, "array.len", args...)
+
+	case "first":
+		return o.fnFirst(vm, "array.first", args...)
+
+	case "last":
+		return o.fnLast(vm, "array.last", args...)
+
+	case "min":
+		return o.fnMin(vm, "array.min", args...)
+
+	case "max":
+		return o.fnMax(vm, "array.max", args...)
+
+	case "sum":
+		return o.fnSum(vm, "array.sum", args...)
+
+	case "avg":
+		return o.fnAvg(vm, "array.avg", args...)
 
 	default:
 		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
@@ -201,73 +237,7 @@ func (o *Array) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Val
 	if !ok {
 		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 	}
-
-	switch k {
-	case "array":
-		return core.NewObject(o), nil
-
-	case "bytes":
-		bs := make([]byte, len(o.value))
-		for i, e := range o.value {
-			b, ok := e.AsInt()
-			if !ok || b < 0 || b > 255 {
-				b = 0
-			}
-			bs[i] = byte(b)
-		}
-		return vm.Allocator().NewBytesValue(bs), nil
-
-	case "string":
-		r := make([]rune, len(o.value))
-		for i, e := range o.value {
-			rv, ok := e.AsChar()
-			if !ok {
-				rv = ' '
-			}
-			r[i] = rv
-		}
-		return vm.Allocator().NewStringValue(string(r)), nil
-
-	case "record":
-		r := make(map[string]core.Value, len(o.value))
-		for i, v := range o.value {
-			r[strconv.Itoa(i)] = v
-		}
-		return vm.Allocator().NewRecordValue(r, false), nil
-
-	case "empty":
-		return core.NewBool(len(o.value) == 0), nil
-
-	case "len":
-		return core.NewInt(int64(len(o.value))), nil
-
-	case "first":
-		if len(o.value) == 0 {
-			return core.NewUndefined(), nil
-		}
-		return o.value[0], nil
-
-	case "last":
-		if len(o.value) == 0 {
-			return core.NewUndefined(), nil
-		}
-		return o.value[len(o.value)-1], nil
-
-	case "min":
-		return o.min(vm)
-
-	case "max":
-		return o.max(vm)
-
-	case "sum":
-		return o.sum(vm)
-
-	case "avg":
-		return o.avg(vm)
-
-	default:
-		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
-	}
+	return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
 }
 
 func (o *Array) Assign(index, value core.Value) (err error) {
@@ -329,80 +299,6 @@ func (o *Array) AsBytes() ([]byte, bool) {
 		bs[i] = byte(b)
 	}
 	return bs, true
-}
-
-func (o *Array) min(vm core.VM) (core.Value, error) {
-	if len(o.value) == 0 {
-		return core.NewUndefined(), nil
-	}
-
-	v := o.value[0]
-	for i := 1; i < len(o.value); i++ {
-		less, err := o.value[i].BinaryOp(vm, token.Less, v)
-		if err != nil {
-			return core.NewUndefined(), err
-		}
-		if less.IsTrue() {
-			v = o.value[i]
-		}
-	}
-
-	return v, nil
-}
-
-func (o *Array) max(vm core.VM) (core.Value, error) {
-	if len(o.value) == 0 {
-		return core.NewUndefined(), nil
-	}
-
-	v := o.value[0]
-	for i := 1; i < len(o.value); i++ {
-		greater, err := o.value[i].BinaryOp(vm, token.Greater, v)
-		if err != nil {
-			return core.NewUndefined(), err
-		}
-		if greater.IsTrue() {
-			v = o.value[i]
-		}
-	}
-
-	return v, nil
-}
-
-func (o *Array) sum(vm core.VM) (core.Value, error) {
-	if len(o.value) == 0 {
-		return core.NewUndefined(), nil
-	}
-
-	var err error
-	v := o.value[0]
-	for i := 1; i < len(o.value); i++ {
-		v, err = v.BinaryOp(vm, token.Add, o.value[i])
-		if err != nil {
-			return core.NewUndefined(), err
-		}
-	}
-
-	return v, nil
-}
-
-func (o *Array) avg(vm core.VM) (core.Value, error) {
-	if len(o.value) == 0 {
-		return core.NewUndefined(), nil
-	}
-
-	sum, err := o.sum(vm)
-	if err != nil {
-		return core.NewUndefined(), err
-	}
-
-	length := core.NewInt(int64(len(o.value)))
-	avg, err := sum.BinaryOp(vm, token.Quo, length)
-	if err != nil {
-		return core.NewUndefined(), err
-	}
-
-	return avg, nil
 }
 
 func (o *Array) fnSort(vm core.VM, name string, args ...core.Value) (core.Value, error) {
@@ -668,4 +564,176 @@ func (o *Array) fnReduce(vm core.VM, name string, args ...core.Value) (core.Valu
 	default:
 		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "second", "f/2 or f/3", fn.TypeName())
 	}
+}
+
+func (o *Array) fnToArray(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 0 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	return core.NewObject(o), nil
+}
+
+func (o *Array) fnToBytes(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 0 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	bs := make([]byte, len(o.value))
+	for i, e := range o.value {
+		b, ok := e.AsInt()
+		if !ok || b < 0 || b > 255 {
+			b = 0
+		}
+		bs[i] = byte(b)
+	}
+	return vm.Allocator().NewBytesValue(bs), nil
+}
+
+func (o *Array) fnToString(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 0 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	r := make([]rune, len(o.value))
+	for i, e := range o.value {
+		rv, ok := e.AsChar()
+		if !ok {
+			rv = ' '
+		}
+		r[i] = rv
+	}
+	return vm.Allocator().NewStringValue(string(r)), nil
+}
+
+func (o *Array) fnToRecord(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 0 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	r := make(map[string]core.Value, len(o.value))
+	for i, v := range o.value {
+		r[strconv.Itoa(i)] = v
+	}
+	return vm.Allocator().NewRecordValue(r, false), nil
+}
+
+func (o *Array) fnIsEmpty(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 0 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	return core.NewBool(len(o.value) == 0), nil
+}
+
+func (o *Array) fnLen(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 0 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	return core.NewInt(int64(len(o.value))), nil
+}
+
+func (o *Array) fnFirst(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 0 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	if len(o.value) == 0 {
+		return core.NewUndefined(), nil
+	}
+	return o.value[0], nil
+}
+
+func (o *Array) fnLast(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 0 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	if len(o.value) == 0 {
+		return core.NewUndefined(), nil
+	}
+	return o.value[len(o.value)-1], nil
+}
+
+func (o *Array) fnMin(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 0 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	if len(o.value) == 0 {
+		return core.NewUndefined(), nil
+	}
+
+	v := o.value[0]
+	for i := 1; i < len(o.value); i++ {
+		less, err := o.value[i].BinaryOp(vm, token.Less, v)
+		if err != nil {
+			return core.NewUndefined(), err
+		}
+		if less.IsTrue() {
+			v = o.value[i]
+		}
+	}
+
+	return v, nil
+}
+
+func (o *Array) fnMax(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 0 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	if len(o.value) == 0 {
+		return core.NewUndefined(), nil
+	}
+
+	v := o.value[0]
+	for i := 1; i < len(o.value); i++ {
+		greater, err := o.value[i].BinaryOp(vm, token.Greater, v)
+		if err != nil {
+			return core.NewUndefined(), err
+		}
+		if greater.IsTrue() {
+			v = o.value[i]
+		}
+	}
+
+	return v, nil
+}
+
+func (o *Array) fnSum(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 0 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	if len(o.value) == 0 {
+		return core.NewUndefined(), nil
+	}
+
+	var err error
+	v := o.value[0]
+	for i := 1; i < len(o.value); i++ {
+		v, err = v.BinaryOp(vm, token.Add, o.value[i])
+		if err != nil {
+			return core.NewUndefined(), err
+		}
+	}
+
+	return v, nil
+}
+
+func (o *Array) fnAvg(vm core.VM, name string, args ...core.Value) (core.Value, error) {
+	if len(args) != 0 {
+		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	if len(o.value) == 0 {
+		return core.NewUndefined(), nil
+	}
+
+	var err error
+	sum := o.value[0]
+	for i := 1; i < len(o.value); i++ {
+		sum, err = sum.BinaryOp(vm, token.Add, o.value[i])
+		if err != nil {
+			return core.NewUndefined(), err
+		}
+	}
+
+	length := core.NewInt(int64(len(o.value)))
+	avg, err := sum.BinaryOp(vm, token.Quo, length)
+	if err != nil {
+		return core.NewUndefined(), err
+	}
+
+	return avg, nil
 }

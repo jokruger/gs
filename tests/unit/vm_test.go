@@ -582,6 +582,7 @@ func TestArray(t *testing.T) {
 	expectRun(t, `out = [].reduce(0, (a, v) => a + v)`, nil, 0)
 	expectRun(t, `out = [1, 2, 3].reduce(0, (a, v) => a + v)`, nil, 6)
 	expectRun(t, `out = [1, 2, 3].reduce(0, (a, i, v) => a + i)`, nil, 3)
+	expectRun(t, `out = [1, 2].reduce(0, (a, v) => a + [10, 20].reduce(0, (b, w) => b + w) + v)`, nil, 63)
 
 	expectRun(t, `out = [1, 2, 3].to_array()`, nil, ARR{1, 2, 3})
 	expectRun(t, `out = [48, 49, -1].to_bytes()`, nil, alloc.NewBytesValue([]byte{48, 49, 0}))

@@ -10,31 +10,46 @@ import (
 	"github.com/jokruger/gs/value"
 )
 
+var (
+	callbackTrampolineInstructions = [...]byte{parser.OpSuspend}
+	callbackTrampolineFn           = &value.CompiledFunction{Instructions: callbackTrampolineInstructions[:]}
+)
+
 // frame represents a function call frame.
 type frame struct {
-	fn          *value.CompiledFunction
-	freeVars    []*core.Value
-	ip          int
-	basePointer int
+	// Hot scalar fields first: read and written on every instruction fetch and return.
+	ip          int // instruction pointer within fn.Instructions; -1 means "before first instruction"
+	basePointer int // index into VM stack where this frame's locals start
+
+	// Pointer fields: accessed on closure captures and function entry/exit.
+	fn       *value.CompiledFunction // the function being executed
+	freeVars []*core.Value           // captured free variables for closures
 }
 
 // VM is a virtual machine that executes the bytecode compiled by Compiler.
 type VM struct {
-	alloc       core.Allocator
-	constants   []core.Value
-	stack       [StackSize]core.Value
-	sp          int
-	globals     []core.Value
-	fileSet     *parser.SourceFileSet
-	frames      [MaxFrames]frame
-	framesIndex int
-	curFrame    *frame
-	curInsts    []byte
-	ip          int
-	aborting    int64
-	maxAllocs   int64
-	allocs      int64
-	err         error
+	// Dispatch state
+	ip       int    // instruction pointer into curInsts
+	sp       int    // stack pointer (index of next free slot)
+	curInsts []byte // instructions of the current frame
+	curFrame *frame // frame currently being executed
+	aborting int64  // non-zero to abort execution; checked atomically each loop
+
+	// Runtime state
+	constants   []core.Value   // constant pool used by OpConstant, method dispatch, closures, and other opcode operands
+	globals     []core.Value   // global variable storage used by global load/store/select opcodes
+	alloc       core.Allocator // object allocator used by arrays, records, iterators, errors, closures, and call helpers
+	allocs      int64          // remaining allocation budget; decremented whenever a new object-like value is created
+	maxAllocs   int64          // configured allocation budget; copied into allocs at the start of Run
+	framesIndex int            // number of active frames; updated on calls, returns, and synthetic callback frames
+
+	// Cold diagnostic state: only used when execution aborts or a stack trace is formatted.
+	fileSet *parser.SourceFileSet // source positions for runtime stack traces
+	err     error                 // last runtime error captured by run()
+
+	// Large fixed-size arrays
+	frames [MaxFrames]frame      // call frame stack
+	stack  [StackSize]core.Value // operand stack
 }
 
 // NewVM creates a VM.
@@ -940,42 +955,31 @@ func (v *VM) call(fn *value.CompiledFunction, args ...core.Value) (core.Value, e
 	// Clear error for fresh call
 	v.err = nil
 
-	// Check if we have room for frames
-	if v.framesIndex >= MaxFrames {
+	// This helper consumes two frame slots: a synthetic trampoline frame and the callee frame.
+	if v.framesIndex+1 >= MaxFrames {
+		v.err = core.NewStackOverflowError("native callback frames")
+		return core.NewUndefined(), v.err
+	}
+	if v.sp+1+numArgs > StackSize {
 		v.err = core.ErrStackOverflow
 		return core.NewUndefined(), v.err
 	}
 
-	// Create synthetic trampoline frame with just OpSuspend
-	// This acts as the "caller" that the callback will return to
+	// Create a synthetic trampoline frame that returns into OpSuspend.
+	// The function object is immutable and shared; the per-call state lives in the frame.
 	trampolineFrame := &v.frames[v.framesIndex]
-	trampolineFrame.fn = &value.CompiledFunction{
-		Instructions:  []byte{parser.OpSuspend},
-		NumLocals:     0,
-		NumParameters: 0,
-		VarArgs:       false,
-		SourceMap:     nil,
-		Free:          nil,
-	}
+	trampolineFrame.fn = callbackTrampolineFn
 	trampolineFrame.freeVars = nil
-	trampolineFrame.ip = -1 // Will be set to 0 before OpSuspend executes
+	trampolineFrame.ip = -1
 	trampolineFrame.basePointer = v.sp
 	v.framesIndex++
 
 	// Push callee slot (matches normal OpCall stack layout)
 	// This is where OpReturn will write the return value
-	if v.sp >= StackSize {
-		v.err = core.ErrStackOverflow
-		return core.NewUndefined(), v.err
-	}
 	v.stack[v.sp] = core.NewObject(fn) // Use the function itself as placeholder
 	v.sp++
 
 	// Push arguments onto stack
-	if v.sp+numArgs > StackSize {
-		v.err = core.ErrStackOverflow
-		return core.NewUndefined(), v.err
-	}
 	for _, arg := range args {
 		v.stack[v.sp] = arg
 		v.sp++

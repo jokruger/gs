@@ -4112,7 +4112,7 @@ func traceCompileRun(
 		globals[sym.Index] = valueCopy
 	}
 	for idx, fn := range vm.BuiltinFuncs {
-		symTable.DefineBuiltin(idx, fn.Object().(*value.BuiltinFunction).Name())
+		symTable.DefineBuiltin(idx, fn.BuiltinFunction().Name)
 	}
 
 	tr := &vmTracer{}

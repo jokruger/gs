@@ -13,7 +13,7 @@ import (
 // Bytecode is a compiled instructions and constants.
 type Bytecode struct {
 	FileSet      *parser.SourceFileSet
-	MainFunction *value.CompiledFunction
+	MainFunction *core.CompiledFunction
 	Constants    []core.Value
 }
 
@@ -53,14 +53,13 @@ func (b *Bytecode) FormatInstructions() []string {
 // FormatConstants returns human readable string representations of compiled constants.
 func (b *Bytecode) FormatConstants() (output []string) {
 	for cidx, cn := range b.Constants {
-		if cn.IsObject() {
-			if cn, ok := cn.Object().(*value.CompiledFunction); ok {
-				output = append(output, fmt.Sprintf("[% 3d] (Compiled Function|%p)", cidx, &cn))
-				for _, l := range FormatInstructions(cn.Instructions, 0) {
-					output = append(output, fmt.Sprintf("     %s", l))
-				}
-				continue
+		if cn.IsCompiledFunction() {
+			f := cn.CompiledFunction()
+			output = append(output, fmt.Sprintf("[% 3d] (Compiled Function|%p)", cidx, f))
+			for _, l := range FormatInstructions(f.Instructions, 0) {
+				output = append(output, fmt.Sprintf("     %s", l))
 			}
+			continue
 		}
 		output = append(output, fmt.Sprintf("[% 3d] %s (%s|%v)", cidx, cn.String(), cn.TypeName(), cn))
 	}
@@ -102,7 +101,7 @@ func (b *Bytecode) RemoveDuplicates() {
 	var deduped []core.Value
 
 	indexMap := make(map[int]int) // mapping from old constant index to new index
-	fns := make(map[*value.CompiledFunction]int)
+	fns := make(map[*core.CompiledFunction]int)
 	ints := make(map[int64]int)
 	strings := make(map[string]int)
 	floats := make(map[float64]int)
@@ -153,7 +152,7 @@ func (b *Bytecode) RemoveDuplicates() {
 			}
 
 		case c.IsCompiledFunction():
-			cf := c.Object().(*value.CompiledFunction)
+			cf := c.CompiledFunction()
 			if newIdx, ok := fns[cf]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
@@ -204,7 +203,7 @@ func (b *Bytecode) RemoveDuplicates() {
 	// other compiled functions in constants
 	for _, c := range b.Constants {
 		if c.IsCompiledFunction() {
-			updateConstIndexes(c.Object().(*value.CompiledFunction).Instructions, indexMap)
+			updateConstIndexes(c.CompiledFunction().Instructions, indexMap)
 		}
 	}
 }
@@ -323,8 +322,8 @@ func init() {
 	gob.Register(&parser.SourceFileSet{})
 	gob.Register(&parser.SourceFile{})
 
-	gob.Register(&value.CompiledFunction{})
-	gob.Register(&value.BuiltinFunction{})
+	gob.Register(&core.CompiledFunction{})
+	gob.Register(&core.BuiltinFunction{})
 
 	gob.Register(&value.Bytes{})
 	gob.Register(&value.String{})

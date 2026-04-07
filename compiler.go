@@ -12,7 +12,6 @@ import (
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
-	"github.com/jokruger/gs/value"
 	"github.com/jokruger/gs/vm"
 )
 
@@ -54,7 +53,7 @@ type Compiler struct {
 	scopes          []compilationScope
 	scopeIndex      int
 	modules         vm.ModuleGetter
-	compiledModules map[string]*value.CompiledFunction
+	compiledModules map[string]*core.CompiledFunction
 	allowFileImport bool
 	loops           []*loop
 	loopIndex       int
@@ -84,7 +83,7 @@ func NewCompiler(
 	// add builtin functions to the symbol table
 	for idx, fn := range vm.BuiltinFuncs {
 		// it is safe to cast type because we know that all builtin functions are *value.BuiltinFunction objects
-		symbolTable.DefineBuiltin(idx, fn.Object().(*value.BuiltinFunction).Name())
+		symbolTable.DefineBuiltin(idx, fn.BuiltinFunction().Name)
 	}
 
 	// builtin modules
@@ -102,7 +101,7 @@ func NewCompiler(
 		loopIndex:       -1,
 		trace:           trace,
 		modules:         modules,
-		compiledModules: make(map[string]*value.CompiledFunction),
+		compiledModules: make(map[string]*core.CompiledFunction),
 		importFileExt:   []string{SourceFileExtDefault},
 	}
 }
@@ -481,7 +480,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			}
 		}
 
-		compiledFunction := &value.CompiledFunction{
+		compiledFunction := &core.CompiledFunction{
 			Instructions:  instructions,
 			NumLocals:     numLocals,
 			NumParameters: len(node.Type.Params.List),
@@ -489,9 +488,9 @@ func (c *Compiler) Compile(node parser.Node) error {
 			SourceMap:     sourceMap,
 		}
 		if len(freeSymbols) > 0 {
-			c.emit(node, parser.OpClosure, c.addConstant(core.ObjectValue(compiledFunction)), len(freeSymbols))
+			c.emit(node, parser.OpClosure, c.addConstant(core.CompiledFunctionValue(compiledFunction)), len(freeSymbols))
 		} else {
-			c.emit(node, parser.OpConstant, c.addConstant(core.ObjectValue(compiledFunction)))
+			c.emit(node, parser.OpConstant, c.addConstant(core.CompiledFunctionValue(compiledFunction)))
 		}
 
 	case *parser.ReturnStmt:
@@ -557,7 +556,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 				if err != nil {
 					return err
 				}
-				c.emit(node, parser.OpConstant, c.addConstant(core.ObjectValue(compiled)))
+				c.emit(node, parser.OpConstant, c.addConstant(core.CompiledFunctionValue(compiled)))
 				c.emit(node, parser.OpCall, 0, 0)
 			case core.Value: // builtin module
 				c.emit(node, parser.OpConstant, c.addConstant(v))
@@ -583,7 +582,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			if err != nil {
 				return err
 			}
-			c.emit(node, parser.OpConstant, c.addConstant(core.ObjectValue(compiled)))
+			c.emit(node, parser.OpConstant, c.addConstant(core.CompiledFunctionValue(compiled)))
 			c.emit(node, parser.OpCall, 0, 0)
 		} else {
 			return c.errorf(node, "module '%s' not found", node.ModuleName)
@@ -650,7 +649,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 func (c *Compiler) Bytecode() *vm.Bytecode {
 	return &vm.Bytecode{
 		FileSet: c.file.Set(),
-		MainFunction: &value.CompiledFunction{
+		MainFunction: &core.CompiledFunction{
 			Instructions: append(c.currentInstructions(), parser.OpSuspend),
 			SourceMap:    c.currentSourceMap(),
 		},
@@ -1018,7 +1017,7 @@ func (c *Compiler) checkCyclicImports(
 	return nil
 }
 
-func (c *Compiler) compileModule(node parser.Node, modulePath string, src []byte, isFile bool) (*value.CompiledFunction, error) {
+func (c *Compiler) compileModule(node parser.Node, modulePath string, src []byte, isFile bool) (*core.CompiledFunction, error) {
 	if err := c.checkCyclicImports(node, modulePath); err != nil {
 		return nil, err
 	}
@@ -1058,7 +1057,7 @@ func (c *Compiler) compileModule(node parser.Node, modulePath string, src []byte
 	return compiledFunc, nil
 }
 
-func (c *Compiler) loadCompiledModule(modulePath string) (mod *value.CompiledFunction, ok bool) {
+func (c *Compiler) loadCompiledModule(modulePath string) (mod *core.CompiledFunction, ok bool) {
 	if c.parent != nil {
 		return c.parent.loadCompiledModule(modulePath)
 	}
@@ -1066,7 +1065,7 @@ func (c *Compiler) loadCompiledModule(modulePath string) (mod *value.CompiledFun
 	return
 }
 
-func (c *Compiler) storeCompiledModule(modulePath string, module *value.CompiledFunction) {
+func (c *Compiler) storeCompiledModule(modulePath string, module *core.CompiledFunction) {
 	if c.parent != nil {
 		c.parent.storeCompiledModule(modulePath, module)
 	}

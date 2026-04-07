@@ -15,7 +15,6 @@ import (
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/stdlib"
-	"github.com/jokruger/gs/value"
 	"github.com/jokruger/gs/vm"
 )
 
@@ -158,7 +157,7 @@ func RunREPL(a core.Allocator, modules *vm.ModuleMap, in io.Reader, out io.Write
 	symbolTable := vm.NewSymbolTable()
 	for idx, fn := range vm.BuiltinFuncs {
 		// it is safe to cast because vm.BuiltinFuncs should only contain built-in functions
-		symbolTable.DefineBuiltin(idx, fn.Object().(*value.BuiltinFunction).Name())
+		symbolTable.DefineBuiltin(idx, fn.BuiltinFunction().Name)
 	}
 
 	// embed println function
@@ -182,7 +181,7 @@ func RunREPL(a core.Allocator, modules *vm.ModuleMap, in io.Reader, out io.Write
 		1,
 		true,
 	)
-	globals[symbol.Index] = core.ObjectValue(t)
+	globals[symbol.Index] = core.BuiltinFunctionValue(t)
 
 	var constants []core.Value
 	for {

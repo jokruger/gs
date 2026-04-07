@@ -4,12 +4,11 @@ import (
 	"encoding/hex"
 
 	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/value"
 )
 
 var hexModule = map[string]core.Value{
-	"encode": value.NewStaticBuiltinFunction("encode", hexEncodeToString, 1, false),
-	"decode": value.NewStaticBuiltinFunction("decode", hexDecodeString, 1, false),
+	"encode": core.NewStaticBuiltinFunction("encode", hexEncodeToString, 1, false),
+	"decode": core.NewStaticBuiltinFunction("decode", hexDecodeString, 1, false),
 }
 
 func hexDecodeString(vm core.VM, args ...core.Value) (ret core.Value, err error) {

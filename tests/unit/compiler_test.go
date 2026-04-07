@@ -12,7 +12,6 @@ import (
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/value"
 	"github.com/jokruger/gs/vm"
 )
 
@@ -1341,7 +1340,7 @@ func concatInsts(instructions ...[]byte) []byte {
 func bytecode(instructions []byte, constants []core.Value) *vm.Bytecode {
 	return &vm.Bytecode{
 		FileSet:      parser.NewFileSet(),
-		MainFunction: &value.CompiledFunction{Instructions: instructions},
+		MainFunction: &core.CompiledFunction{Instructions: instructions},
 		Constants:    constants,
 	}
 }
@@ -1413,7 +1412,7 @@ func traceCompile(input string, symbols map[string]core.Value) (res *vm.Bytecode
 		symTable.Define(name)
 	}
 	for idx, fn := range vm.BuiltinFuncs {
-		symTable.DefineBuiltin(idx, fn.Object().(*value.BuiltinFunction).Name())
+		symTable.DefineBuiltin(idx, fn.BuiltinFunction().Name)
 	}
 
 	tr := &compileTracer{}
@@ -1453,10 +1452,10 @@ func stringObject(v string) core.Value {
 }
 
 func compiledFunction(numLocals, numParams int, insts ...[]byte) core.Value {
-	t := &value.CompiledFunction{
+	t := &core.CompiledFunction{
 		Instructions:  concatInsts(insts...),
 		NumLocals:     numLocals,
 		NumParameters: numParams,
 	}
-	return core.ObjectValue(t)
+	return core.CompiledFunctionValue(t)
 }

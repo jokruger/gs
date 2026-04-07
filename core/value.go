@@ -21,9 +21,11 @@ const (
 	V_FLOAT     = ValueKind(3)
 	V_INT       = ValueKind(4)
 
-	V_OBJECT    = ValueKind(253)
-	V_ITERATOR  = ValueKind(254)
-	V_VALUE_PTR = ValueKind(255)
+	V_OBJECT            = ValueKind(251)
+	V_ITERATOR          = ValueKind(252)
+	V_VALUE_PTR         = ValueKind(253)
+	V_BUILTIN_FUNCTION  = ValueKind(254)
+	V_COMPILED_FUNCTION = ValueKind(255)
 )
 
 func (k ValueKind) String() string {
@@ -44,6 +46,10 @@ func (k ValueKind) String() string {
 		return "iterator"
 	case V_VALUE_PTR:
 		return "value-pointer"
+	case V_BUILTIN_FUNCTION:
+		return "builtin-function"
+	case V_COMPILED_FUNCTION:
+		return "compiled-function"
 	default:
 		return fmt.Sprintf("unknown(%d)", k)
 	}
@@ -94,6 +100,14 @@ func ValuePtrValue(o *Value) Value {
 	return Value{kind: V_VALUE_PTR, ptr: o}
 }
 
+func BuiltinFunctionValue(f *BuiltinFunction) Value {
+	return Value{kind: V_BUILTIN_FUNCTION, ptr: f}
+}
+
+func CompiledFunctionValue(f *CompiledFunction) Value {
+	return Value{kind: V_COMPILED_FUNCTION, ptr: f}
+}
+
 func (v *Value) Set(val Value) {
 	v.data = val.data
 	v.ptr = val.ptr
@@ -130,6 +144,22 @@ func (v *Value) ValuePtr() *Value {
 
 func (v *Value) SetValuePtr(ptr *Value) {
 	v.ptr = ptr
+}
+
+func (v *Value) BuiltinFunction() *BuiltinFunction {
+	return v.ptr.(*BuiltinFunction)
+}
+
+func (v *Value) SetBuiltinFunction(f *BuiltinFunction) {
+	v.ptr = f
+}
+
+func (v *Value) CompiledFunction() *CompiledFunction {
+	return v.ptr.(*CompiledFunction)
+}
+
+func (v *Value) SetCompiledFunction(f *CompiledFunction) {
+	v.ptr = f
 }
 
 func (v *Value) Int() int64 {
@@ -208,6 +238,24 @@ func (v Value) GobEncode() ([]byte, error) {
 		}
 		return append([]byte{uint8(V_OBJECT)}, buf.Bytes()...), nil
 
+	case V_BUILTIN_FUNCTION:
+		var buf bytes.Buffer
+		enc := gob.NewEncoder(&buf)
+		f := v.ptr.(*BuiltinFunction)
+		if err := enc.Encode(f); err != nil {
+			return nil, err
+		}
+		return append([]byte{uint8(V_BUILTIN_FUNCTION)}, buf.Bytes()...), nil
+
+	case V_COMPILED_FUNCTION:
+		var buf bytes.Buffer
+		enc := gob.NewEncoder(&buf)
+		f := v.ptr.(*CompiledFunction)
+		if err := enc.Encode(f); err != nil {
+			return nil, err
+		}
+		return append([]byte{uint8(V_COMPILED_FUNCTION)}, buf.Bytes()...), nil
+
 	default:
 		panic(fmt.Sprintf("unexpected use of %s with GobEncode()", v.kind.String()))
 	}
@@ -268,6 +316,28 @@ func (v *Value) GobDecode(data []byte) error {
 		v.ptr = o
 		return nil
 
+	case V_BUILTIN_FUNCTION:
+		var f *BuiltinFunction
+		buf := bytes.NewBuffer(data[1:])
+		dec := gob.NewDecoder(buf)
+		if err := dec.Decode(&f); err != nil {
+			return err
+		}
+		v.data = 0
+		v.ptr = f
+		return nil
+
+	case V_COMPILED_FUNCTION:
+		var f *CompiledFunction
+		buf := bytes.NewBuffer(data[1:])
+		dec := gob.NewDecoder(buf)
+		if err := dec.Decode(&f); err != nil {
+			return err
+		}
+		v.data = 0
+		v.ptr = f
+		return nil
+
 	default:
 		panic(fmt.Sprintf("unexpected use of %s with GobDecode()", v.kind.String()))
 	}
@@ -310,18 +380,39 @@ func (v *Value) TypeName() string {
 	switch v.kind {
 	case V_UNDEFINED:
 		return "undefined"
+
 	case V_BOOL:
 		return "bool"
+
 	case V_CHAR:
 		return "char"
+
 	case V_FLOAT:
 		return "float"
+
 	case V_INT:
 		return "int"
+
 	case V_OBJECT:
 		return v.ptr.(Object).TypeName()
+
 	case V_ITERATOR:
 		return v.ptr.(Iterator).TypeName()
+
+	case V_BUILTIN_FUNCTION:
+		o := v.ptr.(*BuiltinFunction)
+		if o.Variadic {
+			return fmt.Sprintf("<builtin-function:%s/%d+>", o.Name, o.Arity)
+		}
+		return fmt.Sprintf("<builtin-function:%s/%d>", o.Name, o.Arity)
+
+	case V_COMPILED_FUNCTION:
+		o := v.ptr.(*CompiledFunction)
+		if o.VarArgs {
+			return fmt.Sprintf("<compiled-function/%d+>", o.NumParameters)
+		}
+		return fmt.Sprintf("<compiled-function/%d>", o.NumParameters)
+
 	default:
 		panic(fmt.Sprintf("unexpected use of %s with TypeName()", v.kind.String()))
 	}
@@ -331,21 +422,42 @@ func (v *Value) String() string {
 	switch v.kind {
 	case V_UNDEFINED:
 		return "undefined"
+
 	case V_BOOL:
 		if v.Bool() {
 			return "true"
 		}
 		return "false"
+
 	case V_CHAR:
 		return fmt.Sprintf("%q", v.Char())
+
 	case V_FLOAT:
 		return strconv.FormatFloat(v.Float(), 'f', -1, 64)
+
 	case V_INT:
 		return strconv.FormatInt(v.Int(), 10)
+
 	case V_OBJECT:
 		return v.ptr.(Object).String()
+
 	case V_ITERATOR:
 		return v.ptr.(Iterator).String()
+
+	case V_BUILTIN_FUNCTION:
+		o := v.ptr.(*BuiltinFunction)
+		if o.Variadic {
+			return fmt.Sprintf("<builtin-function:%s/%d+>", o.Name, o.Arity)
+		}
+		return fmt.Sprintf("<builtin-function:%s/%d>", o.Name, o.Arity)
+
+	case V_COMPILED_FUNCTION:
+		o := v.ptr.(*CompiledFunction)
+		if o.VarArgs {
+			return fmt.Sprintf("<compiled-function/%d+>", o.NumParameters)
+		}
+		return fmt.Sprintf("<compiled-function/%d>", o.NumParameters)
+
 	default:
 		panic(fmt.Sprintf("unexpected use of %s with String()", v.kind.String()))
 	}
@@ -374,8 +486,16 @@ func (v *Value) Arity() int {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).Arity()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with Arity()", v.kind.String()))
+
+	case V_BUILTIN_FUNCTION:
+		return v.ptr.(*BuiltinFunction).Arity
+
+	case V_COMPILED_FUNCTION:
+		return v.ptr.(*CompiledFunction).NumParameters
+
 	default:
 		return 0
 	}
@@ -391,6 +511,14 @@ func (v *Value) IsIterator() bool {
 
 func (v *Value) IsValuePtr() bool {
 	return v.kind == V_VALUE_PTR
+}
+
+func (v *Value) IsBuiltinFunction() bool {
+	return v.kind == V_BUILTIN_FUNCTION
+}
+
+func (v *Value) IsCompiledFunction() bool {
+	return v.kind == V_COMPILED_FUNCTION
 }
 
 func (v *Value) IsUndefined() bool {
@@ -462,34 +590,29 @@ func (v *Value) IsRecord() bool {
 	return false
 }
 
-func (v *Value) IsCompiledFunction() bool {
-	if v.kind == V_OBJECT {
-		return v.ptr.(Object).IsCompiledFunction()
-	}
-	return false
-}
-
-func (v *Value) IsBuiltinFunction() bool {
-	if v.kind == V_OBJECT {
-		return v.ptr.(Object).IsBuiltinFunction()
-	}
-	return false
-}
-
 func (v *Value) IsTrue() bool {
 	switch v.kind {
 	case V_BOOL:
 		return v.data != 0
+
 	case V_CHAR:
 		return v.data != 0
+
 	case V_FLOAT:
 		return !math.IsNaN(v.Float())
+
 	case V_INT:
 		return v.data != 0
+
 	case V_OBJECT:
 		return v.ptr.(Object).IsTrue()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with IsTrue()", v.kind.String()))
+
+	case V_BUILTIN_FUNCTION, V_COMPILED_FUNCTION:
+		return true
+
 	default:
 		return false
 	}
@@ -499,16 +622,25 @@ func (v *Value) IsFalse() bool {
 	switch v.kind {
 	case V_BOOL:
 		return v.data == 0
+
 	case V_CHAR:
 		return v.data == 0
+
 	case V_FLOAT:
 		return math.IsNaN(v.Float())
+
 	case V_INT:
 		return v.data == 0
+
 	case V_OBJECT:
 		return v.ptr.(Object).IsFalse()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with IsFalse()", v.kind.String()))
+
+	case V_BUILTIN_FUNCTION, V_COMPILED_FUNCTION:
+		return false
+
 	default:
 		return true
 	}
@@ -518,10 +650,13 @@ func (v *Value) IsIterable() bool {
 	switch v.kind {
 	case V_UNDEFINED:
 		return true
+
 	case V_OBJECT:
 		return v.ptr.(Object).IsIterable()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with IsIterable()", v.kind.String()))
+
 	default:
 		return false
 	}
@@ -531,8 +666,13 @@ func (v *Value) IsCallable() bool {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).IsCallable()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with IsCallable()", v.kind.String()))
+
+	case V_BUILTIN_FUNCTION, V_COMPILED_FUNCTION:
+		return true
+
 	default:
 		return false
 	}
@@ -542,8 +682,16 @@ func (v *Value) IsVariadic() bool {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).IsVariadic()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with IsVariadic()", v.kind.String()))
+
+	case V_BUILTIN_FUNCTION:
+		return v.ptr.(*BuiltinFunction).Variadic
+
+	case V_COMPILED_FUNCTION:
+		return v.ptr.(*CompiledFunction).VarArgs
+
 	default:
 		return false
 	}
@@ -553,8 +701,10 @@ func (v *Value) IsImmutable() bool {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).IsImmutable()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with IsImmutable()", v.kind.String()))
+
 	default:
 		return true
 	}
@@ -567,16 +717,22 @@ func (v *Value) AsString() (string, bool) {
 			return "true", true
 		}
 		return "false", true
+
 	case V_CHAR:
 		return string(v.Char()), true
+
 	case V_FLOAT:
 		return strconv.FormatFloat(v.Float(), 'f', -1, 64), true
+
 	case V_INT:
 		return strconv.FormatInt(v.Int(), 10), true
+
 	case V_OBJECT:
 		return v.ptr.(Object).AsString()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with AsString()", v.kind.String()))
+
 	default:
 		return "", false
 	}
@@ -589,16 +745,22 @@ func (v *Value) AsInt() (int64, bool) {
 			return 1, true
 		}
 		return 0, true
+
 	case V_CHAR:
 		return int64(v.Char()), true
+
 	case V_FLOAT:
 		return int64(v.Float()), true
+
 	case V_INT:
 		return v.Int(), true
+
 	case V_OBJECT:
 		return v.ptr.(Object).AsInt()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with AsInt()", v.kind.String()))
+
 	default:
 		return 0, false
 	}
@@ -608,12 +770,16 @@ func (v *Value) AsFloat() (float64, bool) {
 	switch v.kind {
 	case V_FLOAT:
 		return v.Float(), true
+
 	case V_INT:
 		return float64(v.Int()), true
+
 	case V_OBJECT:
 		return v.ptr.(Object).AsFloat()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with AsFloat()", v.kind.String()))
+
 	default:
 		return 0, false
 	}
@@ -623,18 +789,25 @@ func (v *Value) AsBool() (bool, bool) {
 	switch v.kind {
 	case V_UNDEFINED:
 		return false, true
+
 	case V_BOOL:
 		return v.Bool(), true
+
 	case V_CHAR:
 		return v.data != 0, true
+
 	case V_FLOAT:
 		return !math.IsNaN(v.Float()), true
+
 	case V_INT:
 		return v.data != 0, true
+
 	case V_OBJECT:
 		return v.ptr.(Object).AsBool()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with AsBool()", v.kind.String()))
+
 	default:
 		return false, false
 	}
@@ -644,12 +817,16 @@ func (v *Value) AsChar() (rune, bool) {
 	switch v.kind {
 	case V_CHAR:
 		return v.Char(), true
+
 	case V_INT:
 		return rune(v.Int()), true
+
 	case V_OBJECT:
 		return v.ptr.(Object).AsChar()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with AsChar()", v.kind.String()))
+
 	default:
 		return 0, false
 	}
@@ -659,8 +836,10 @@ func (v *Value) AsBytes() ([]byte, bool) {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).AsBytes()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with AsBytes()", v.kind.String()))
+
 	default:
 		return nil, false
 	}
@@ -670,10 +849,13 @@ func (v *Value) AsTime() (time.Time, bool) {
 	switch v.kind {
 	case V_INT:
 		return time.Unix(v.Int(), 0), true
+
 	case V_OBJECT:
 		return v.ptr.(Object).AsTime()
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with AsTime()", v.kind.String()))
+
 	default:
 		return time.Time{}, false
 	}
@@ -683,14 +865,19 @@ func (v *Value) BinaryOp(vm VM, op token.Token, rhs Value) (Value, error) {
 	switch v.kind {
 	case V_CHAR:
 		return v.charBinaryOp(vm, op, rhs)
+
 	case V_FLOAT:
 		return v.floatBinaryOp(vm, op, rhs)
+
 	case V_INT:
 		return v.intBinaryOp(vm, op, rhs)
+
 	case V_OBJECT:
 		return v.ptr.(Object).BinaryOp(vm, op, rhs)
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with BinaryOp()", v.kind.String()))
+
 	default:
 		return UndefinedValue(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
@@ -895,6 +1082,18 @@ func (v *Value) Equals(rhs Value) bool {
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with Equals()", v.kind.String()))
 
+	case V_BUILTIN_FUNCTION:
+		if rhs.kind != V_BUILTIN_FUNCTION {
+			return false
+		}
+		return v.ptr.(*BuiltinFunction) == rhs.ptr.(*BuiltinFunction)
+
+	case V_COMPILED_FUNCTION:
+		if rhs.kind != V_COMPILED_FUNCTION {
+			return false
+		}
+		return v.ptr.(*CompiledFunction) == rhs.ptr.(*CompiledFunction)
+
 	default:
 		return false
 	}
@@ -904,8 +1103,13 @@ func (v *Value) Copy(alloc Allocator) Value {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).Copy(alloc)
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with Copy()", v.kind.String()))
+
+	case V_BUILTIN_FUNCTION, V_COMPILED_FUNCTION:
+		return *v
+
 	default:
 		return *v
 	}
@@ -915,16 +1119,22 @@ func (v *Value) Method(vm VM, name string, args ...Value) (Value, error) {
 	switch v.kind {
 	case V_BOOL:
 		return v.boolMethod(vm, name, args...)
+
 	case V_CHAR:
 		return v.charMethod(vm, name, args...)
+
 	case V_FLOAT:
 		return v.floatMethod(vm, name, args...)
+
 	case V_INT:
 		return v.intMethod(vm, name, args...)
+
 	case V_OBJECT:
 		return v.ptr.(Object).Method(vm, name, args...)
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with Method()", v.kind.String()))
+
 	default:
 		return UndefinedValue(), NewInvalidMethodError(name, v.TypeName())
 	}
@@ -934,10 +1144,13 @@ func (v *Value) Access(vm VM, index Value, mode Opcode) (Value, error) {
 	switch v.kind {
 	case V_UNDEFINED:
 		return UndefinedValue(), nil
+
 	case V_OBJECT:
 		return v.ptr.(Object).Access(vm, index, mode)
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with Access()", v.kind.String()))
+
 	default:
 		return UndefinedValue(), NewNotAccessibleError(v.TypeName())
 	}
@@ -1077,8 +1290,10 @@ func (v *Value) Assign(idx, val Value) error {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).Assign(idx, val)
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with Assign()", v.kind.String()))
+
 	default:
 		return NewNotAssignableError(v.TypeName())
 	}
@@ -1088,8 +1303,10 @@ func (v *Value) Iterate(alloc Allocator) Iterator {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).Iterate(alloc)
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with Iterate()", v.kind.String()))
+
 	default:
 		return nil
 	}
@@ -1099,8 +1316,16 @@ func (v *Value) Call(vm VM, args ...Value) (Value, error) {
 	switch v.kind {
 	case V_OBJECT:
 		return v.ptr.(Object).Call(vm, args...)
+
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with Call()", v.kind.String()))
+
+	case V_BUILTIN_FUNCTION:
+		return v.ptr.(*BuiltinFunction).Value(vm, args...)
+
+	case V_COMPILED_FUNCTION:
+		return vm.Call(v.ptr.(*CompiledFunction), args...)
+
 	default:
 		return UndefinedValue(), NewNotCallableError(v.TypeName())
 	}

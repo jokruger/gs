@@ -8,7 +8,6 @@ import (
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/value"
 	"github.com/jokruger/gs/vm"
 )
 
@@ -70,7 +69,7 @@ func TestNumObjects(t *testing.T) {
 	testCountObjects(t, alloc.NewBuiltinFunctionValue("", nil, 0, false), 1)
 	testCountObjects(t, alloc.NewBytesValue([]byte("foobar")), 1)
 	testCountObjects(t, core.CharValue('가'), 1)
-	testCountObjects(t, core.ObjectValue(&value.CompiledFunction{}), 1)
+	testCountObjects(t, core.CompiledFunctionValue(&core.CompiledFunction{}), 1)
 	testCountObjects(t, alloc.NewErrorValue(core.IntValue(5)), 2)
 	testCountObjects(t, core.FloatValue(19.84), 1)
 	testCountObjects(t, alloc.NewArrayValue([]core.Value{

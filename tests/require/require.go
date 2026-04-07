@@ -65,6 +65,12 @@ func Unbox(v any) any {
 		if v.IsObject() {
 			return v.Object()
 		}
+		if v.IsCompiledFunction() {
+			return v.CompiledFunction()
+		}
+		if v.IsBuiltinFunction() {
+			return v.BuiltinFunction()
+		}
 	}
 	return v
 }
@@ -216,8 +222,20 @@ func Equal(t *testing.T, expected, actual any, msg ...any) {
 			equalObjectMap(t, e.Value(), a.Value(), msg...)
 		}
 
-	case *value.CompiledFunction:
-		equalCompiledFunction(t, e, a.(*value.CompiledFunction), msg...)
+	case *core.CompiledFunction:
+		switch a := a.(type) {
+		case *core.CompiledFunction:
+			equalCompiledFunction(t, e, a, msg...)
+			return
+		case core.Value:
+			if a.IsCompiledFunction() {
+				equalCompiledFunction(t, e, a.CompiledFunction(), msg...)
+			} else {
+				failExpectedActual(t, "compiled function", a.TypeName(), msg...)
+			}
+		default:
+			failExpectedActual(t, "compiled function", reflect.TypeOf(a), msg...)
+		}
 
 	case *value.Error:
 		if e.String() != a.(*value.Error).String() {
@@ -225,6 +243,20 @@ func Equal(t *testing.T, expected, actual any, msg ...any) {
 		}
 
 	case core.Value:
+		if e.IsCompiledFunction() {
+			switch a := a.(type) {
+			case *core.CompiledFunction:
+				equalCompiledFunction(t, e.CompiledFunction(), a, msg...)
+			case core.Value:
+				if a.IsCompiledFunction() {
+					equalCompiledFunction(t, e.CompiledFunction(), a.CompiledFunction(), msg...)
+				} else {
+					failExpectedActual(t, "compiled function", a.TypeName(), msg...)
+				}
+			default:
+				failExpectedActual(t, "compiled function", reflect.TypeOf(a), msg...)
+			}
+		}
 		if !e.Equals(a.(core.Value)) {
 			failExpectedActual(t, e, a, msg...)
 		}
@@ -330,10 +362,8 @@ func equalObjectMap(t *testing.T, expected, actual map[string]core.Value, msg ..
 	}
 }
 
-func equalCompiledFunction(t *testing.T, expected, actual core.Object, msg ...any) {
-	expectedT := expected.(*value.CompiledFunction)
-	actualT := actual.(*value.CompiledFunction)
-	Equal(t, vm.FormatInstructions(expectedT.Instructions, 0), vm.FormatInstructions(actualT.Instructions, 0), msg...)
+func equalCompiledFunction(t *testing.T, expected, actual *core.CompiledFunction, msg ...any) {
+	Equal(t, vm.FormatInstructions(expected.Instructions, 0), vm.FormatInstructions(actual.Instructions, 0), msg...)
 }
 
 func isNil(v any) bool {

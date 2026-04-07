@@ -8,7 +8,6 @@ import (
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/value"
 	"github.com/jokruger/gs/vm"
 )
 
@@ -364,7 +363,7 @@ func fileSet(files ...srcfile) *parser.SourceFileSet {
 func bytecodeFileSet(instructions []byte, constants []core.Value, fileSet *parser.SourceFileSet) *vm.Bytecode {
 	return &vm.Bytecode{
 		FileSet:      fileSet,
-		MainFunction: &value.CompiledFunction{Instructions: instructions},
+		MainFunction: &core.CompiledFunction{Instructions: instructions},
 		Constants:    constants,
 	}
 }

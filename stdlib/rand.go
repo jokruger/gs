@@ -8,15 +8,15 @@ import (
 )
 
 var randModule = map[string]core.Value{
-	"int":        value.NewStaticBuiltinFunction("int", randInt63, 0, false),
-	"float":      value.NewStaticBuiltinFunction("float", randFloat64, 0, false),
-	"int_n":      value.NewStaticBuiltinFunction("int_n", randInt63n, 1, false),
-	"exp_float":  value.NewStaticBuiltinFunction("exp_float", randExpFloat64, 0, false),
-	"norm_float": value.NewStaticBuiltinFunction("norm_float", randNormFloat64, 0, false),
-	"perm":       value.NewStaticBuiltinFunction("perm", randPerm, 1, false),
-	"seed":       value.NewStaticBuiltinFunction("seed", randSeed, 1, false),
-	"read":       value.NewStaticBuiltinFunction("read", randRead, 1, false),
-	"rand":       value.NewStaticBuiltinFunction("rand", randFunc, 1, false),
+	"int":        core.NewStaticBuiltinFunction("int", randInt63, 0, false),
+	"float":      core.NewStaticBuiltinFunction("float", randFloat64, 0, false),
+	"int_n":      core.NewStaticBuiltinFunction("int_n", randInt63n, 1, false),
+	"exp_float":  core.NewStaticBuiltinFunction("exp_float", randExpFloat64, 0, false),
+	"norm_float": core.NewStaticBuiltinFunction("norm_float", randNormFloat64, 0, false),
+	"perm":       core.NewStaticBuiltinFunction("perm", randPerm, 1, false),
+	"seed":       core.NewStaticBuiltinFunction("seed", randSeed, 1, false),
+	"read":       core.NewStaticBuiltinFunction("read", randRead, 1, false),
+	"rand":       core.NewStaticBuiltinFunction("rand", randFunc, 1, false),
 }
 
 func randPerm(vm core.VM, args ...core.Value) (core.Value, error) {

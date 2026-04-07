@@ -89,8 +89,8 @@ func (a *Allocator) NewArray(val []core.Value, immutable bool) core.Object {
 	return o
 }
 
-func (a *Allocator) NewBuiltinFunction(name string, val core.NativeFunc, arity int, variadic bool) core.Object {
-	o := &value.BuiltinFunction{}
+func (a *Allocator) NewBuiltinFunction(name string, val core.NativeFunc, arity int, variadic bool) *core.BuiltinFunction {
+	o := &core.BuiltinFunction{}
 	o.Set(name, val, arity, variadic)
 	return o
 }
@@ -124,5 +124,5 @@ func (a *Allocator) NewArrayValue(v []core.Value, immutable bool) core.Value {
 }
 
 func (a *Allocator) NewBuiltinFunctionValue(name string, val core.NativeFunc, arity int, variadic bool) core.Value {
-	return core.ObjectValue(a.NewBuiltinFunction(name, val, arity, variadic))
+	return core.BuiltinFunctionValue(a.NewBuiltinFunction(name, val, arity, variadic))
 }

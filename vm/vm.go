@@ -12,7 +12,7 @@ import (
 
 var (
 	callbackTrampolineInstructions = [...]byte{parser.OpSuspend}
-	callbackTrampolineFn           = &value.CompiledFunction{Instructions: callbackTrampolineInstructions[:]}
+	callbackTrampolineFn           = &core.CompiledFunction{Instructions: callbackTrampolineInstructions[:]}
 )
 
 // frame represents a function call frame.
@@ -22,8 +22,8 @@ type frame struct {
 	basePointer int // index into VM stack where this frame's locals start
 
 	// Pointer fields: accessed on closure captures and function entry/exit.
-	fn       *value.CompiledFunction // the function being executed
-	freeVars []*core.Value           // captured free variables for closures
+	fn       *core.CompiledFunction // the function being executed
+	freeVars []*core.Value          // captured free variables for closures
 }
 
 // VM is a virtual machine that executes the bytecode compiled by Compiler.
@@ -90,15 +90,103 @@ func (v *VM) IsStackEmpty() bool {
 }
 
 // Call calls a compiled function with the given arguments and returns the result.
-func (v *VM) Call(fn core.Object, args ...core.Value) (core.Value, error) {
-	switch f := fn.(type) {
-	case *value.CompiledFunction:
-		return v.call(f, args...)
-	case *value.BuiltinFunction:
-		return f.Call(v, args...)
-	default:
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("vm.Call", "fn", "callable", fn.TypeName())
+func (v *VM) Call(fn *core.CompiledFunction, args ...core.Value) (core.Value, error) {
+	// Check argument count and roll up variadic args if needed
+	numArgs := len(args)
+	if fn.VarArgs {
+		if numArgs < fn.NumParameters-1 {
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("call", fmt.Sprintf("at least %d", fn.NumParameters-1), numArgs)
+		}
+		realArgs := fn.NumParameters - 1
+		varArgs := numArgs - realArgs
+		if varArgs >= 0 {
+			newArgs := make([]core.Value, realArgs+1)
+			copy(newArgs, args[:realArgs])
+			newArgs[realArgs] = v.alloc.NewArrayValue(args[realArgs:], true)
+			args = newArgs
+			numArgs = realArgs + 1
+		}
+	} else if numArgs != fn.NumParameters {
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError("call", fmt.Sprintf("%d", fn.NumParameters), numArgs)
 	}
+
+	// Save current VM state
+	savedFramesIndex := v.framesIndex
+	savedSp := v.sp
+	savedIp := v.ip
+	savedCurFrame := v.curFrame
+	savedCurInsts := v.curInsts
+	savedErr := v.err
+
+	// Clear error for fresh call
+	v.err = nil
+
+	// This helper consumes two frame slots: a synthetic trampoline frame and the callee frame.
+	if v.framesIndex+1 >= MaxFrames {
+		v.err = core.NewStackOverflowError("native callback frames")
+		return core.UndefinedValue(), v.err
+	}
+	if v.sp+1+numArgs > StackSize {
+		v.err = core.ErrStackOverflow
+		return core.UndefinedValue(), v.err
+	}
+
+	// Create a synthetic trampoline frame that returns into OpSuspend.
+	// The function object is immutable and shared; the per-call state lives in the frame.
+	trampolineFrame := &v.frames[v.framesIndex]
+	trampolineFrame.fn = callbackTrampolineFn
+	trampolineFrame.freeVars = nil
+	trampolineFrame.ip = -1
+	trampolineFrame.basePointer = v.sp
+	v.framesIndex++
+
+	// Push callee slot (matches normal OpCall stack layout)
+	// This is where OpReturn will write the return value
+	v.stack[v.sp] = core.CompiledFunctionValue(fn) // Use the function itself as placeholder
+	v.sp++
+
+	// Push arguments onto stack
+	for _, arg := range args {
+		v.stack[v.sp] = arg
+		v.sp++
+	}
+
+	// Set up callback frame (similar to OpCall for CompiledFunction)
+	v.curFrame = &v.frames[v.framesIndex]
+	v.curFrame.fn = fn
+	v.curFrame.freeVars = fn.Free
+	v.curFrame.basePointer = v.sp - numArgs // Points to first arg (after callee slot)
+	v.curFrame.ip = -1
+	v.curInsts = fn.Instructions
+	v.ip = -1
+	v.framesIndex++
+	v.sp = v.sp - numArgs + fn.NumLocals
+
+	// Execute the callback by calling run()
+	// When callback returns (OpReturn), it will return to trampoline frame
+	// Trampoline executes OpSuspend, which exits run()
+	v.run()
+
+	// Extract result before restoring state
+	// OpReturn places the result at sp-1, which is the callee slot we reserved
+	var result core.Value
+	if v.err == nil {
+		// The return value is at savedSp (the callee slot position)
+		result = v.stack[savedSp]
+	}
+
+	// Restore VM state
+	v.framesIndex = savedFramesIndex
+	v.sp = savedSp
+	v.ip = savedIp
+	v.curFrame = savedCurFrame
+	v.curInsts = savedCurInsts
+
+	// Preserve error from callback, but restore if no error
+	err := v.err
+	v.err = savedErr
+
+	return result, err
 }
 
 // Run starts the execution.
@@ -558,13 +646,10 @@ func (v *VM) run() {
 				}
 			}
 
-			if !val.IsObject() {
-				v.err = fmt.Errorf("not callable: %s", val.TypeName())
-				return
-			}
+			switch {
+			case val.IsCompiledFunction():
+				callee := val.CompiledFunction()
 
-			switch callee := val.Object().(type) {
-			case *value.CompiledFunction:
 				if callee.VarArgs {
 					// if the closure is variadic, roll up all variadic parameters into an array
 					realArgs := callee.NumParameters - 1
@@ -784,11 +869,7 @@ func (v *VM) run() {
 				v.err = fmt.Errorf("not function: %s", v.constants[constIndex].TypeName())
 				return
 			}
-			fn, ok := v.constants[constIndex].Object().(*value.CompiledFunction)
-			if !ok {
-				v.err = fmt.Errorf("not function: %s", fn.TypeName())
-				return
-			}
+			fn := v.constants[constIndex].CompiledFunction()
 			free := make([]*core.Value, numFree)
 			for i := 0; i < numFree; i++ {
 				if v.stack[v.sp-numFree+i].IsValuePtr() {
@@ -798,7 +879,7 @@ func (v *VM) run() {
 				}
 			}
 			v.sp -= numFree
-			cl := &value.CompiledFunction{
+			cl := &core.CompiledFunction{
 				Instructions:  fn.Instructions,
 				NumLocals:     fn.NumLocals,
 				NumParameters: fn.NumParameters,
@@ -811,7 +892,7 @@ func (v *VM) run() {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
-			v.stack[v.sp] = core.ObjectValue(cl)
+			v.stack[v.sp] = core.CompiledFunctionValue(cl)
 			v.sp++
 
 		case parser.OpGetFreePtr:
@@ -922,103 +1003,4 @@ func (v *VM) indexAssign(dst, src core.Value, selectors []core.Value) error {
 		dst = next
 	}
 	return dst.Assign(selectors[0], src)
-}
-
-func (v *VM) call(fn *value.CompiledFunction, args ...core.Value) (core.Value, error) {
-	// Check argument count and roll up variadic args if needed
-	numArgs := len(args)
-	if fn.VarArgs {
-		if numArgs < fn.NumParameters-1 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("call", fmt.Sprintf("at least %d", fn.NumParameters-1), numArgs)
-		}
-		realArgs := fn.NumParameters - 1
-		varArgs := numArgs - realArgs
-		if varArgs >= 0 {
-			newArgs := make([]core.Value, realArgs+1)
-			copy(newArgs, args[:realArgs])
-			newArgs[realArgs] = v.alloc.NewArrayValue(args[realArgs:], true)
-			args = newArgs
-			numArgs = realArgs + 1
-		}
-	} else if numArgs != fn.NumParameters {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("call", fmt.Sprintf("%d", fn.NumParameters), numArgs)
-	}
-
-	// Save current VM state
-	savedFramesIndex := v.framesIndex
-	savedSp := v.sp
-	savedIp := v.ip
-	savedCurFrame := v.curFrame
-	savedCurInsts := v.curInsts
-	savedErr := v.err
-
-	// Clear error for fresh call
-	v.err = nil
-
-	// This helper consumes two frame slots: a synthetic trampoline frame and the callee frame.
-	if v.framesIndex+1 >= MaxFrames {
-		v.err = core.NewStackOverflowError("native callback frames")
-		return core.UndefinedValue(), v.err
-	}
-	if v.sp+1+numArgs > StackSize {
-		v.err = core.ErrStackOverflow
-		return core.UndefinedValue(), v.err
-	}
-
-	// Create a synthetic trampoline frame that returns into OpSuspend.
-	// The function object is immutable and shared; the per-call state lives in the frame.
-	trampolineFrame := &v.frames[v.framesIndex]
-	trampolineFrame.fn = callbackTrampolineFn
-	trampolineFrame.freeVars = nil
-	trampolineFrame.ip = -1
-	trampolineFrame.basePointer = v.sp
-	v.framesIndex++
-
-	// Push callee slot (matches normal OpCall stack layout)
-	// This is where OpReturn will write the return value
-	v.stack[v.sp] = core.ObjectValue(fn) // Use the function itself as placeholder
-	v.sp++
-
-	// Push arguments onto stack
-	for _, arg := range args {
-		v.stack[v.sp] = arg
-		v.sp++
-	}
-
-	// Set up callback frame (similar to OpCall for CompiledFunction)
-	v.curFrame = &v.frames[v.framesIndex]
-	v.curFrame.fn = fn
-	v.curFrame.freeVars = fn.Free
-	v.curFrame.basePointer = v.sp - numArgs // Points to first arg (after callee slot)
-	v.curFrame.ip = -1
-	v.curInsts = fn.Instructions
-	v.ip = -1
-	v.framesIndex++
-	v.sp = v.sp - numArgs + fn.NumLocals
-
-	// Execute the callback by calling run()
-	// When callback returns (OpReturn), it will return to trampoline frame
-	// Trampoline executes OpSuspend, which exits run()
-	v.run()
-
-	// Extract result before restoring state
-	// OpReturn places the result at sp-1, which is the callee slot we reserved
-	var result core.Value
-	if v.err == nil {
-		// The return value is at savedSp (the callee slot position)
-		result = v.stack[savedSp]
-	}
-
-	// Restore VM state
-	v.framesIndex = savedFramesIndex
-	v.sp = savedSp
-	v.ip = savedIp
-	v.curFrame = savedCurFrame
-	v.curInsts = savedCurInsts
-
-	// Preserve error from callback, but restore if no error
-	err := v.err
-	v.err = savedErr
-
-	return result, err
 }

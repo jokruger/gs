@@ -5,14 +5,13 @@ import (
 
 	"github.com/jokruger/gs/core"
 	mock "github.com/jokruger/gs/tests"
-	"github.com/jokruger/gs/value"
 	"github.com/jokruger/gs/vm"
 )
 
 func Test_builtinDelete(t *testing.T) {
 	var builtinDelete core.Value
 	for _, f := range vm.BuiltinFuncs {
-		if f.Object().(*value.BuiltinFunction).Name() == "delete" {
+		if f.BuiltinFunction().Name == "delete" {
 			builtinDelete = f
 			break
 		}
@@ -118,7 +117,7 @@ func Test_builtinDelete(t *testing.T) {
 func Test_builtinSplice(t *testing.T) {
 	var builtinSplice core.Value
 	for _, f := range vm.BuiltinFuncs {
-		if f.Object().(*value.BuiltinFunction).Name() == "splice" {
+		if f.BuiltinFunction().Name == "splice" {
 			builtinSplice = f
 			break
 		}
@@ -290,7 +289,7 @@ func Test_builtinSplice(t *testing.T) {
 func Test_builtinRange(t *testing.T) {
 	var builtinRange core.Value
 	for _, f := range vm.BuiltinFuncs {
-		if f.Object().(*value.BuiltinFunction).Name() == "range" {
+		if f.BuiltinFunction().Name == "range" {
 			builtinRange = f
 			break
 		}

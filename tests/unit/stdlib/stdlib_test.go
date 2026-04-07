@@ -126,23 +126,23 @@ func (c callres) call(funcName string, args ...any) callres {
 			return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
 		}
 
-		f, ok := m.Object().(*value.BuiltinFunction)
-		if !ok {
-			return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
-		}
-
-		res, err := f.Call(v, oargs...)
+		res, err := m.Call(v, oargs...)
 		return callres{t: c.t, o: res, e: err}
 	}
 
 	if o, ok := c.o.(core.Value); ok {
-		switch o := o.Object().(type) {
-		case *value.BuiltinFunction:
+		if o.IsBuiltinFunction() {
 			res, err := o.Call(v, oargs...)
 			return callres{t: c.t, o: res, e: err}
+		}
 
-		case *value.Record:
-			m, ok := o.Get(funcName)
+		if o.IsRecord() {
+			r, ok := o.Object().(*value.Record)
+			if !ok {
+				return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
+			}
+
+			m, ok := r.Get(funcName)
 			if !ok {
 				return callres{t: c.t, e: fmt.Errorf("function not found: %s", funcName)}
 			}
@@ -151,16 +151,8 @@ func (c callres) call(funcName string, args ...any) callres {
 				return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
 			}
 
-			f, ok := m.Object().(*value.BuiltinFunction)
-			if !ok {
-				return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
-			}
-
-			res, err := f.Call(v, oargs...)
+			res, err := m.Call(v, oargs...)
 			return callres{t: c.t, o: res, e: err}
-
-		default:
-			panic(fmt.Errorf("unexpected object: %+v (%T)", o, o))
 		}
 	}
 

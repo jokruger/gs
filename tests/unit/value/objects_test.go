@@ -8,7 +8,6 @@ import (
 	mock "github.com/jokruger/gs/tests"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/token"
-	"github.com/jokruger/gs/value"
 	_ "github.com/jokruger/gs/vm"
 )
 
@@ -99,7 +98,6 @@ func TestObject_Value(t *testing.T) {
 
 func TestObject_TypeName(t *testing.T) {
 	var o core.Value
-	var obj core.Object
 
 	o = core.IntValue(0)
 	require.Equal(t, "int", o.TypeName())
@@ -125,9 +123,6 @@ func TestObject_TypeName(t *testing.T) {
 	o = alloc.NewBuiltinFunctionValue("fn", nil, 0, false)
 	require.Equal(t, "<builtin-function:fn/0>", o.TypeName())
 
-	obj = &value.CompiledFunction{}
-	require.Equal(t, "<compiled-function/0>", obj.TypeName())
-
 	o = core.UndefinedValue()
 	require.Equal(t, "undefined", o.TypeName())
 
@@ -140,7 +135,6 @@ func TestObject_TypeName(t *testing.T) {
 
 func TestObject_IsFalsy(t *testing.T) {
 	var o core.Value
-	var obj core.Object
 
 	o = core.IntValue(0)
 	require.True(t, o.IsFalse())
@@ -177,12 +171,6 @@ func TestObject_IsFalsy(t *testing.T) {
 
 	o = alloc.NewRecordValue(map[string]core.Value{"a": core.UndefinedValue()}, false)
 	require.False(t, o.IsFalse())
-
-	obj = alloc.NewBuiltinFunction("fn", nil, 0, false)
-	require.False(t, obj.IsFalse())
-
-	obj = &value.CompiledFunction{}
-	require.False(t, obj.IsFalse())
 
 	o = core.UndefinedValue()
 	require.True(t, o.IsFalse())
@@ -248,7 +236,6 @@ func TestObject_String(t *testing.T) {
 
 func TestObject_BinaryOp(t *testing.T) {
 	var o core.Value
-	var obj core.Object
 
 	o = core.CharValue(0)
 	_, err := o.BinaryOp(vm, token.Add, core.UndefinedValue())
@@ -260,14 +247,6 @@ func TestObject_BinaryOp(t *testing.T) {
 
 	o = alloc.NewRecordValue(nil, false)
 	_, err = o.BinaryOp(vm, token.Add, core.UndefinedValue())
-	require.Error(t, err)
-
-	obj = alloc.NewBuiltinFunction("fn", nil, 0, false)
-	_, err = obj.BinaryOp(vm, token.Add, core.UndefinedValue())
-	require.Error(t, err)
-
-	obj = &value.CompiledFunction{}
-	_, err = obj.BinaryOp(vm, token.Add, core.UndefinedValue())
 	require.Error(t, err)
 
 	o = core.UndefinedValue()

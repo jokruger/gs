@@ -5,14 +5,13 @@ import (
 
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/formatter"
-	"github.com/jokruger/gs/value"
 )
 
 var fmtModule = map[string]core.Value{
-	"print":   value.NewStaticBuiltinFunction("print", fmtPrint, 0, true),
-	"printf":  value.NewStaticBuiltinFunction("printf", fmtPrintf, 1, true),
-	"println": value.NewStaticBuiltinFunction("println", fmtPrintln, 0, true),
-	"sprintf": value.NewStaticBuiltinFunction("sprintf", fmtSprintf, 1, true),
+	"print":   core.NewStaticBuiltinFunction("print", fmtPrint, 0, true),
+	"printf":  core.NewStaticBuiltinFunction("printf", fmtPrintf, 1, true),
+	"println": core.NewStaticBuiltinFunction("println", fmtPrintln, 0, true),
+	"sprintf": core.NewStaticBuiltinFunction("sprintf", fmtSprintf, 1, true),
 }
 
 func fmtPrint(vm core.VM, args ...core.Value) (core.Value, error) {

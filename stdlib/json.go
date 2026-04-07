@@ -10,10 +10,10 @@ import (
 )
 
 var jsonModule = map[string]core.Value{
-	"decode":      value.NewStaticBuiltinFunction("decode", jsonDecode, 1, false),
-	"encode":      value.NewStaticBuiltinFunction("encode", jsonEncode, 1, false),
-	"indent":      value.NewStaticBuiltinFunction("indent", jsonIndent, 3, false),
-	"html_escape": value.NewStaticBuiltinFunction("html_escape", jsonHTMLEscape, 1, false),
+	"decode":      core.NewStaticBuiltinFunction("decode", jsonDecode, 1, false),
+	"encode":      core.NewStaticBuiltinFunction("encode", jsonEncode, 1, false),
+	"indent":      core.NewStaticBuiltinFunction("indent", jsonIndent, 3, false),
+	"html_escape": core.NewStaticBuiltinFunction("html_escape", jsonHTMLEscape, 1, false),
 }
 
 func jsonDecode(vm core.VM, args ...core.Value) (core.Value, error) {

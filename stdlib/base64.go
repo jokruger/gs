@@ -4,18 +4,17 @@ import (
 	"encoding/base64"
 
 	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/value"
 )
 
 var base64Module = map[string]core.Value{
-	"encode":         value.NewStaticBuiltinFunction("encode", b64EncodeToString, 1, false),
-	"decode":         value.NewStaticBuiltinFunction("decode", b64DecodeString, 1, false),
-	"raw_encode":     value.NewStaticBuiltinFunction("raw_encode", b64RawEncodeToString, 1, false),
-	"raw_decode":     value.NewStaticBuiltinFunction("raw_decode", b64RawDecodeString, 1, false),
-	"url_encode":     value.NewStaticBuiltinFunction("url_encode", b64URLEncodeToString, 1, false),
-	"url_decode":     value.NewStaticBuiltinFunction("url_decode", b64URLDecodeString, 1, false),
-	"raw_url_encode": value.NewStaticBuiltinFunction("raw_url_encode", b64RawURLEncodeToString, 1, false),
-	"raw_url_decode": value.NewStaticBuiltinFunction("raw_url_decode", b64RawURLDecodeString, 1, false),
+	"encode":         core.NewStaticBuiltinFunction("encode", b64EncodeToString, 1, false),
+	"decode":         core.NewStaticBuiltinFunction("decode", b64DecodeString, 1, false),
+	"raw_encode":     core.NewStaticBuiltinFunction("raw_encode", b64RawEncodeToString, 1, false),
+	"raw_decode":     core.NewStaticBuiltinFunction("raw_decode", b64RawDecodeString, 1, false),
+	"url_encode":     core.NewStaticBuiltinFunction("url_encode", b64URLEncodeToString, 1, false),
+	"url_decode":     core.NewStaticBuiltinFunction("url_decode", b64URLDecodeString, 1, false),
+	"raw_url_encode": core.NewStaticBuiltinFunction("raw_url_encode", b64RawURLEncodeToString, 1, false),
+	"raw_url_decode": core.NewStaticBuiltinFunction("raw_url_decode", b64RawURLDecodeString, 1, false),
 }
 
 func b64RawURLDecodeString(vm core.VM, args ...core.Value) (ret core.Value, err error) {

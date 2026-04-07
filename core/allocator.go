@@ -17,7 +17,7 @@ type Allocator interface {
 	NewMap(val map[string]Value, immutable bool) Object
 	NewRecord(val map[string]Value, immutable bool) Object
 	NewArray(val []Value, immutable bool) Object
-	NewBuiltinFunction(name string, val NativeFunc, arity int, variadic bool) Object
+	NewBuiltinFunction(name string, val NativeFunc, arity int, variadic bool) *BuiltinFunction
 
 	NewStringValue(string) Value
 	NewBytesValue([]byte) Value

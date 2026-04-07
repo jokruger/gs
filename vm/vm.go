@@ -111,11 +111,11 @@ func (v *VM) Call(fn *core.CompiledFunction, args ...core.Value) (core.Value, er
 	}
 
 	// Save current VM state
-	savedFramesIndex := v.framesIndex
-	savedSp := v.sp
 	savedIp := v.ip
-	savedCurFrame := v.curFrame
+	savedSp := v.sp
 	savedCurInsts := v.curInsts
+	savedCurFrame := v.curFrame
+	savedFramesIndex := v.framesIndex
 	savedErr := v.err
 
 	// Clear error for fresh call
@@ -134,10 +134,10 @@ func (v *VM) Call(fn *core.CompiledFunction, args ...core.Value) (core.Value, er
 	// Create a synthetic trampoline frame that returns into OpSuspend.
 	// The function object is immutable and shared; the per-call state lives in the frame.
 	trampolineFrame := &v.frames[v.framesIndex]
-	trampolineFrame.fn = callbackTrampolineFn
-	trampolineFrame.freeVars = nil
 	trampolineFrame.ip = -1
 	trampolineFrame.basePointer = v.sp
+	trampolineFrame.fn = callbackTrampolineFn
+	trampolineFrame.freeVars = nil
 	v.framesIndex++
 
 	// Push callee slot (matches normal OpCall stack layout)
@@ -153,10 +153,10 @@ func (v *VM) Call(fn *core.CompiledFunction, args ...core.Value) (core.Value, er
 
 	// Set up callback frame (similar to OpCall for CompiledFunction)
 	v.curFrame = &v.frames[v.framesIndex]
+	v.curFrame.ip = -1
+	v.curFrame.basePointer = v.sp - numArgs // Points to first arg (after callee slot)
 	v.curFrame.fn = fn
 	v.curFrame.freeVars = fn.Free
-	v.curFrame.basePointer = v.sp - numArgs // Points to first arg (after callee slot)
-	v.curFrame.ip = -1
 	v.curInsts = fn.Instructions
 	v.ip = -1
 	v.framesIndex++
@@ -176,11 +176,11 @@ func (v *VM) Call(fn *core.CompiledFunction, args ...core.Value) (core.Value, er
 	}
 
 	// Restore VM state
-	v.framesIndex = savedFramesIndex
-	v.sp = savedSp
 	v.ip = savedIp
-	v.curFrame = savedCurFrame
+	v.sp = savedSp
 	v.curInsts = savedCurInsts
+	v.curFrame = savedCurFrame
+	v.framesIndex = savedFramesIndex
 
 	// Preserve error from callback, but restore if no error
 	err := v.err

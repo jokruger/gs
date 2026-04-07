@@ -69,7 +69,7 @@ func runVM(a core.Allocator, bytecode *vm.Bytecode) (core.Value, error) {
 
 	v := vm.NewVM(a, bytecode, globals, -1)
 	if err := v.Run(); err != nil {
-		return core.NewUndefined(), err
+		return core.UndefinedValue(), err
 	}
 
 	return globals[0], nil

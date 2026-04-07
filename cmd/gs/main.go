@@ -182,7 +182,7 @@ func RunREPL(a core.Allocator, modules *vm.ModuleMap, in io.Reader, out io.Write
 		1,
 		true,
 	)
-	globals[symbol.Index] = core.NewObject(t)
+	globals[symbol.Index] = core.ObjectValue(t)
 
 	var constants []core.Value
 	for {

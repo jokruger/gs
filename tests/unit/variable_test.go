@@ -32,7 +32,7 @@ func TestVariable(t *testing.T) {
 			CharValue:   rune(1),
 			BoolValue:   true,
 			StringValue: "1",
-			Object:      core.NewInt(1),
+			Object:      core.IntValue(1),
 		},
 		{
 			Name:        "b",
@@ -51,13 +51,13 @@ func TestVariable(t *testing.T) {
 			FloatValue:  0,
 			BoolValue:   true,
 			StringValue: "true",
-			Object:      core.NewBool(true),
+			Object:      core.BoolValue(true),
 		},
 		{
 			Name:        "d",
 			Value:       nil,
 			ValueType:   "undefined",
-			Object:      core.NewUndefined(),
+			Object:      core.UndefinedValue(),
 			IsUndefined: true,
 		},
 	}

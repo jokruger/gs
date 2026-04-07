@@ -10,28 +10,28 @@ import (
 func FromInterface(alloc core.Allocator, v any) (core.Value, error) {
 	switch v := v.(type) {
 	case nil:
-		return core.NewUndefined(), nil
+		return core.UndefinedValue(), nil
 
 	case string:
 		return alloc.NewStringValue(v), nil
 
 	case int64:
-		return core.NewInt(v), nil
+		return core.IntValue(v), nil
 
 	case int:
-		return core.NewInt(int64(v)), nil
+		return core.IntValue(int64(v)), nil
 
 	case bool:
-		return core.NewBool(v), nil
+		return core.BoolValue(v), nil
 
 	case rune:
-		return core.NewChar(v), nil
+		return core.CharValue(v), nil
 
 	case byte:
-		return core.NewChar(rune(v)), nil
+		return core.CharValue(rune(v)), nil
 
 	case float64:
-		return core.NewFloat(v), nil
+		return core.FloatValue(v), nil
 
 	case []byte:
 		return alloc.NewBytesValue(v), nil
@@ -47,7 +47,7 @@ func FromInterface(alloc core.Allocator, v any) (core.Value, error) {
 		for vk, vv := range v {
 			vo, err := FromInterface(alloc, vv)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			kv[vk] = vo
 		}
@@ -61,7 +61,7 @@ func FromInterface(alloc core.Allocator, v any) (core.Value, error) {
 		for i, e := range v {
 			vo, err := FromInterface(alloc, e)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			arr[i] = vo
 		}
@@ -77,5 +77,5 @@ func FromInterface(alloc core.Allocator, v any) (core.Value, error) {
 		return alloc.NewBuiltinFunctionValue("anonymous", v, 0, true), nil
 	}
 
-	return core.NewUndefined(), fmt.Errorf("cannot convert to object: %T", v)
+	return core.UndefinedValue(), fmt.Errorf("cannot convert to object: %T", v)
 }

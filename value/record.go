@@ -119,7 +119,7 @@ func (o *Record) Interface() any {
 }
 
 func (o *Record) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
-	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
 func (o *Record) Equals(x core.Value) bool {
@@ -165,10 +165,10 @@ func (o *Record) Copy(alloc core.Allocator) core.Value {
 func (o *Record) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	v, ok := o.value[name]
 	if !ok {
-		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+		return core.UndefinedValue(), core.NewInvalidMethodError(name, o.TypeName())
 	}
 	if !v.IsCallable() {
-		return core.NewUndefined(), fmt.Errorf("%s.%s is not callable, got %s", o.TypeName(), name, v.TypeName())
+		return core.UndefinedValue(), fmt.Errorf("%s.%s is not callable, got %s", o.TypeName(), name, v.TypeName())
 	}
 
 	return v.Call(vm, args...)
@@ -177,11 +177,11 @@ func (o *Record) Method(vm core.VM, name string, args ...core.Value) (core.Value
 func (o *Record) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return core.NewUndefined(), core.NewInvalidIndexTypeError("record access", "string", index.TypeName())
+		return core.UndefinedValue(), core.NewInvalidIndexTypeError("record access", "string", index.TypeName())
 	}
 	r, ok := o.value[k]
 	if !ok {
-		return core.NewUndefined(), nil
+		return core.UndefinedValue(), nil
 	}
 	return r, nil
 }

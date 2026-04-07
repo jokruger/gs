@@ -21,7 +21,7 @@ type String struct {
 func NewStaticString(v string) core.Value {
 	o := &String{}
 	o.Set(v)
-	return core.NewObject(o)
+	return core.ObjectValue(o)
 }
 
 func (o *String) GobDecode(b []byte) error {
@@ -88,23 +88,23 @@ func (o *String) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Valu
 	alloc := vm.Allocator()
 	v, ok := rhs.AsString()
 	if !ok {
-		return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+		return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 	}
 
 	switch op {
 	case token.Add:
 		return alloc.NewStringValue(string(o.value) + v), nil
 	case token.Less:
-		return core.NewBool(string(o.value) < v), nil
+		return core.BoolValue(string(o.value) < v), nil
 	case token.LessEq:
-		return core.NewBool(string(o.value) <= v), nil
+		return core.BoolValue(string(o.value) <= v), nil
 	case token.Greater:
-		return core.NewBool(string(o.value) > v), nil
+		return core.BoolValue(string(o.value) > v), nil
 	case token.GreaterEq:
-		return core.NewBool(string(o.value) >= v), nil
+		return core.BoolValue(string(o.value) >= v), nil
 	}
 
-	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
 func (o *String) Equals(x core.Value) bool {
@@ -123,106 +123,106 @@ func (o *String) Method(vm core.VM, name string, args ...core.Value) (core.Value
 	switch name {
 	case "to_string":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_string", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.to_string", "0", len(args))
 		}
-		return core.NewObject(o), nil
+		return core.ObjectValue(o), nil
 
 	case "to_array":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_array", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.to_array", "0", len(args))
 		}
 		arr := make([]core.Value, len(o.value))
 		for i, r := range o.value {
-			arr[i] = core.NewChar(r)
+			arr[i] = core.CharValue(r)
 		}
 		return vm.Allocator().NewArrayValue(arr, false), nil
 
 	case "to_bool":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_bool", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.to_bool", "0", len(args))
 		}
 		b, _ := o.AsBool()
-		return core.NewBool(b), nil
+		return core.BoolValue(b), nil
 
 	case "to_bytes":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_bytes", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.to_bytes", "0", len(args))
 		}
 		return vm.Allocator().NewBytesValue([]byte(string(o.value))), nil
 
 	case "to_char":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_char", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.to_char", "0", len(args))
 		}
 		if len(o.value) == 1 {
-			return core.NewChar(o.value[0]), nil
+			return core.CharValue(o.value[0]), nil
 		}
-		return core.NewChar(0), nil
+		return core.CharValue(0), nil
 
 	case "to_float":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_float", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.to_float", "0", len(args))
 		}
 		f, _ := o.AsFloat()
-		return core.NewFloat(f), nil
+		return core.FloatValue(f), nil
 
 	case "to_int":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_int", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.to_int", "0", len(args))
 		}
 		i, _ := o.AsInt()
-		return core.NewInt(i), nil
+		return core.IntValue(i), nil
 
 	case "to_time":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_time", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.to_time", "0", len(args))
 		}
 		t, _ := o.AsTime()
 		return vm.Allocator().NewTimeValue(t), nil
 
 	case "to_record":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.to_record", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.to_record", "0", len(args))
 		}
 		m := make(map[string]core.Value, len(o.value))
 		for i, r := range o.value {
-			m[strconv.Itoa(i)] = core.NewChar(r)
+			m[strconv.Itoa(i)] = core.CharValue(r)
 		}
 		return vm.Allocator().NewRecordValue(m, false), nil
 
 	case "is_empty":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.is_empty", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.is_empty", "0", len(args))
 		}
-		return core.NewBool(len(o.value) == 0), nil
+		return core.BoolValue(len(o.value) == 0), nil
 
 	case "len":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.len", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.len", "0", len(args))
 		}
-		return core.NewInt(int64(len(o.value))), nil
+		return core.IntValue(int64(len(o.value))), nil
 
 	case "first":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.first", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.first", "0", len(args))
 		}
 		if len(o.value) == 0 {
-			return core.NewUndefined(), nil
+			return core.UndefinedValue(), nil
 		}
-		return core.NewChar(o.value[0]), nil
+		return core.CharValue(o.value[0]), nil
 
 	case "last":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.last", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.last", "0", len(args))
 		}
 		if len(o.value) == 0 {
-			return core.NewUndefined(), nil
+			return core.UndefinedValue(), nil
 		}
-		return core.NewChar(o.value[len(o.value)-1]), nil
+		return core.CharValue(o.value[len(o.value)-1]), nil
 
 	case "lower":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.lower", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.lower", "0", len(args))
 		}
 		t := make([]rune, len(o.value))
 		for i, r := range o.value {
@@ -232,7 +232,7 @@ func (o *String) Method(vm core.VM, name string, args ...core.Value) (core.Value
 
 	case "upper":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("string.upper", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("string.upper", "0", len(args))
 		}
 		t := make([]rune, len(o.value))
 		for i, r := range o.value {
@@ -244,7 +244,7 @@ func (o *String) Method(vm core.VM, name string, args ...core.Value) (core.Value
 		return o.fnTrim(vm, "string.trim", args...)
 
 	default:
-		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+		return core.UndefinedValue(), core.NewInvalidMethodError(name, o.TypeName())
 	}
 }
 
@@ -252,19 +252,19 @@ func (o *String) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Va
 	if mode == parser.OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
-			return core.NewUndefined(), core.NewInvalidIndexTypeError("string access", "int", index.TypeName())
+			return core.UndefinedValue(), core.NewInvalidIndexTypeError("string access", "int", index.TypeName())
 		}
 		if i < 0 || i >= int64(len(o.value)) {
-			return core.NewUndefined(), nil
+			return core.UndefinedValue(), nil
 		}
-		return core.NewChar(o.value[i]), nil
+		return core.CharValue(o.value[i]), nil
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
+		return core.UndefinedValue(), core.NewInvalidSelectorError(o.TypeName(), k)
 	}
-	return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
+	return core.UndefinedValue(), core.NewInvalidSelectorError(o.TypeName(), k)
 }
 
 func (o *String) Assign(core.Value, core.Value) error {
@@ -336,7 +336,7 @@ func (o *String) AsTime() (time.Time, bool) {
 
 func (o *String) fnTrim(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) > 1 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0 or 1", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0 or 1", len(args))
 	}
 
 	if len(args) == 0 {
@@ -345,7 +345,7 @@ func (o *String) fnTrim(vm core.VM, name string, args ...core.Value) (core.Value
 
 	s, ok := args[0].AsString()
 	if !ok {
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "string", args[0].TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "string", args[0].TypeName())
 	}
 
 	return vm.Allocator().NewStringValue(strings.Trim(string(o.value), s)), nil

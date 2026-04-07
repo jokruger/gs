@@ -97,7 +97,7 @@ func (v *VM) Call(fn core.Object, args ...core.Value) (core.Value, error) {
 	case *value.BuiltinFunction:
 		return f.Call(v, args...)
 	default:
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError("vm.Call", "fn", "callable", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("vm.Call", "fn", "callable", fn.TypeName())
 	}
 }
 
@@ -143,7 +143,7 @@ func (v *VM) run() {
 			v.sp++
 
 		case parser.OpNull:
-			v.stack[v.sp] = core.NewUndefined()
+			v.stack[v.sp] = core.UndefinedValue()
 			v.sp++
 
 		case parser.OpBinaryOp:
@@ -171,31 +171,31 @@ func (v *VM) run() {
 			right := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
 			v.sp -= 2
-			v.stack[v.sp] = core.NewBool(left.Equals(right))
+			v.stack[v.sp] = core.BoolValue(left.Equals(right))
 			v.sp++
 
 		case parser.OpNotEqual:
 			right := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
 			v.sp -= 2
-			v.stack[v.sp] = core.NewBool(!left.Equals(right))
+			v.stack[v.sp] = core.BoolValue(!left.Equals(right))
 			v.sp++
 
 		case parser.OpPop:
 			v.sp--
 
 		case parser.OpTrue:
-			v.stack[v.sp] = core.NewBool(true)
+			v.stack[v.sp] = core.BoolValue(true)
 			v.sp++
 
 		case parser.OpFalse:
-			v.stack[v.sp] = core.NewBool(false)
+			v.stack[v.sp] = core.BoolValue(false)
 			v.sp++
 
 		case parser.OpLNot:
 			operand := v.stack[v.sp-1]
 			v.sp--
-			v.stack[v.sp] = core.NewBool(operand.IsFalse())
+			v.stack[v.sp] = core.BoolValue(operand.IsFalse())
 			v.sp++
 
 		case parser.OpBComplement:
@@ -204,7 +204,7 @@ func (v *VM) run() {
 
 			switch {
 			case operand.IsInt():
-				res := core.NewInt(^operand.Int())
+				res := core.IntValue(^operand.Int())
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -223,7 +223,7 @@ func (v *VM) run() {
 
 			switch {
 			case operand.IsInt():
-				res := core.NewInt(-operand.Int())
+				res := core.IntValue(-operand.Int())
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -232,7 +232,7 @@ func (v *VM) run() {
 				v.stack[v.sp] = res
 				v.sp++
 			case operand.IsFloat():
-				res := core.NewFloat(-operand.Float())
+				res := core.FloatValue(-operand.Float())
 				v.allocs--
 				if v.allocs == 0 {
 					v.err = core.ErrObjectAllocLimit
@@ -323,7 +323,7 @@ func (v *VM) run() {
 				return
 			}
 
-			v.stack[v.sp] = core.NewObject(arr)
+			v.stack[v.sp] = core.ObjectValue(arr)
 			v.sp++
 
 		case parser.OpRecord:
@@ -347,7 +347,7 @@ func (v *VM) run() {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
-			v.stack[v.sp] = core.NewObject(m)
+			v.stack[v.sp] = core.ObjectValue(m)
 			v.sp++
 
 		case parser.OpError:
@@ -370,7 +370,7 @@ func (v *VM) run() {
 						v.err = core.ErrObjectAllocLimit
 						return
 					}
-					v.stack[v.sp-1] = core.NewObject(t)
+					v.stack[v.sp-1] = core.ObjectValue(t)
 				case *value.Record:
 					v.allocs--
 					if v.allocs == 0 {
@@ -454,7 +454,7 @@ func (v *VM) run() {
 					v.err = core.ErrObjectAllocLimit
 					return
 				}
-				v.stack[v.sp] = core.NewObject(val)
+				v.stack[v.sp] = core.ObjectValue(val)
 				v.sp++
 			case *value.String:
 				numElements := int64(left.Len())
@@ -487,7 +487,7 @@ func (v *VM) run() {
 					v.err = core.ErrObjectAllocLimit
 					return
 				}
-				v.stack[v.sp] = core.NewObject(val)
+				v.stack[v.sp] = core.ObjectValue(val)
 				v.sp++
 			case *value.Bytes:
 				numElements := int64(left.Len())
@@ -520,7 +520,7 @@ func (v *VM) run() {
 					v.err = core.ErrObjectAllocLimit
 					return
 				}
-				v.stack[v.sp] = core.NewObject(val)
+				v.stack[v.sp] = core.ObjectValue(val)
 				v.sp++
 			default:
 				v.err = fmt.Errorf("not indexable: %s", left.TypeName())
@@ -700,7 +700,7 @@ func (v *VM) run() {
 			if int(v.curInsts[v.ip]) == 1 {
 				retVal = v.stack[v.sp-1]
 			} else {
-				retVal = core.NewUndefined()
+				retVal = core.UndefinedValue()
 			}
 			//v.sp--
 			v.framesIndex--
@@ -811,13 +811,13 @@ func (v *VM) run() {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
-			v.stack[v.sp] = core.NewObject(cl)
+			v.stack[v.sp] = core.ObjectValue(cl)
 			v.sp++
 
 		case parser.OpGetFreePtr:
 			v.ip++
 			freeIndex := int(v.curInsts[v.ip])
-			v.stack[v.sp] = core.NewValuePtr(v.curFrame.freeVars[freeIndex])
+			v.stack[v.sp] = core.ValuePtrValue(v.curFrame.freeVars[freeIndex])
 			v.sp++
 
 		case parser.OpGetFree:
@@ -842,9 +842,9 @@ func (v *VM) run() {
 			} else {
 				localVal := v.stack[sp]
 				freeVar = &localVal
-				v.stack[sp] = core.NewValuePtr(freeVar)
+				v.stack[sp] = core.ValuePtrValue(freeVar)
 			}
-			v.stack[v.sp] = core.NewValuePtr(freeVar)
+			v.stack[v.sp] = core.ValuePtrValue(freeVar)
 			v.sp++
 
 		case parser.OpSetSelFree:
@@ -878,14 +878,14 @@ func (v *VM) run() {
 				v.err = core.ErrObjectAllocLimit
 				return
 			}
-			v.stack[v.sp] = core.NewIterator(it)
+			v.stack[v.sp] = core.IteratorValue(it)
 			v.sp++
 
 		case parser.OpIteratorNext:
 			it := v.stack[v.sp-1]
 			v.sp--
 			hasMore := it.Next()
-			v.stack[v.sp] = core.NewBool(hasMore)
+			v.stack[v.sp] = core.BoolValue(hasMore)
 			v.sp++
 
 		case parser.OpIteratorKey:
@@ -929,7 +929,7 @@ func (v *VM) call(fn *value.CompiledFunction, args ...core.Value) (core.Value, e
 	numArgs := len(args)
 	if fn.VarArgs {
 		if numArgs < fn.NumParameters-1 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("call", fmt.Sprintf("at least %d", fn.NumParameters-1), numArgs)
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("call", fmt.Sprintf("at least %d", fn.NumParameters-1), numArgs)
 		}
 		realArgs := fn.NumParameters - 1
 		varArgs := numArgs - realArgs
@@ -941,7 +941,7 @@ func (v *VM) call(fn *value.CompiledFunction, args ...core.Value) (core.Value, e
 			numArgs = realArgs + 1
 		}
 	} else if numArgs != fn.NumParameters {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError("call", fmt.Sprintf("%d", fn.NumParameters), numArgs)
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError("call", fmt.Sprintf("%d", fn.NumParameters), numArgs)
 	}
 
 	// Save current VM state
@@ -958,11 +958,11 @@ func (v *VM) call(fn *value.CompiledFunction, args ...core.Value) (core.Value, e
 	// This helper consumes two frame slots: a synthetic trampoline frame and the callee frame.
 	if v.framesIndex+1 >= MaxFrames {
 		v.err = core.NewStackOverflowError("native callback frames")
-		return core.NewUndefined(), v.err
+		return core.UndefinedValue(), v.err
 	}
 	if v.sp+1+numArgs > StackSize {
 		v.err = core.ErrStackOverflow
-		return core.NewUndefined(), v.err
+		return core.UndefinedValue(), v.err
 	}
 
 	// Create a synthetic trampoline frame that returns into OpSuspend.
@@ -976,7 +976,7 @@ func (v *VM) call(fn *value.CompiledFunction, args ...core.Value) (core.Value, e
 
 	// Push callee slot (matches normal OpCall stack layout)
 	// This is where OpReturn will write the return value
-	v.stack[v.sp] = core.NewObject(fn) // Use the function itself as placeholder
+	v.stack[v.sp] = core.ObjectValue(fn) // Use the function itself as placeholder
 	v.sp++
 
 	// Push arguments onto stack

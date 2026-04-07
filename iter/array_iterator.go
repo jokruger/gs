@@ -32,7 +32,7 @@ func (i *ArrayIterator) Next() bool {
 }
 
 func (i *ArrayIterator) Key(core.Allocator) core.Value {
-	return core.NewInt(int64(i.i - 1))
+	return core.IntValue(int64(i.i - 1))
 }
 
 func (i *ArrayIterator) Value(core.Allocator) core.Value {

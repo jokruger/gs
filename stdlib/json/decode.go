@@ -20,7 +20,7 @@ func Decode(alloc core.Allocator, data []byte) (core.Value, error) {
 	d := decodeState{alloc: alloc}
 	err := checkValid(data, &d.scan)
 	if err != nil {
-		return core.NewUndefined(), err
+		return core.UndefinedValue(), err
 	}
 	d.init(data)
 	d.scan.reset()
@@ -90,14 +90,14 @@ func (d *decodeState) value() (core.Value, error) {
 	case scanBeginArray:
 		o, err := d.array()
 		if err != nil {
-			return core.NewUndefined(), err
+			return core.UndefinedValue(), err
 		}
 		d.scanNext()
 		return o, nil
 	case scanBeginObject:
 		o, err := d.object()
 		if err != nil {
-			return core.NewUndefined(), err
+			return core.UndefinedValue(), err
 		}
 		d.scanNext()
 		return o, nil
@@ -116,7 +116,7 @@ func (d *decodeState) array() (core.Value, error) {
 		}
 		o, err := d.value()
 		if err != nil {
-			return core.NewUndefined(), err
+			return core.UndefinedValue(), err
 		}
 		arr = append(arr, o)
 
@@ -168,7 +168,7 @@ func (d *decodeState) object() (core.Value, error) {
 		// Read value.
 		o, err := d.value()
 		if err != nil {
-			return core.NewUndefined(), err
+			return core.UndefinedValue(), err
 		}
 
 		m[key] = o
@@ -196,10 +196,10 @@ func (d *decodeState) literal() (core.Value, error) {
 
 	switch c := item[0]; c {
 	case 'n': // null
-		return core.NewUndefined(), nil
+		return core.UndefinedValue(), nil
 
 	case 't', 'f': // true, false
-		return core.NewBool(c == 't'), nil
+		return core.BoolValue(c == 't'), nil
 
 	case '"': // string
 		s, ok := unquote(item)
@@ -214,10 +214,10 @@ func (d *decodeState) literal() (core.Value, error) {
 		}
 		if isFloat {
 			n, _ := strconv.ParseFloat(string(item), 10)
-			return core.NewFloat(n), nil
+			return core.FloatValue(n), nil
 		}
 		n, _ := strconv.ParseInt(string(item), 10, 64)
-		return core.NewInt(n), nil
+		return core.IntValue(n), nil
 	}
 }
 

@@ -55,11 +55,11 @@ type Value struct {
 	ptr  any
 }
 
-func NewUndefined() Value {
+func UndefinedValue() Value {
 	return Value{kind: V_UNDEFINED}
 }
 
-func NewBool(b bool) Value {
+func BoolValue(b bool) Value {
 	v := Value{kind: V_BOOL}
 	if b {
 		v.data = 1
@@ -67,30 +67,30 @@ func NewBool(b bool) Value {
 	return v
 }
 
-func NewChar(c rune) Value {
+func CharValue(c rune) Value {
 	return Value{kind: V_CHAR, data: uint64(c)}
 }
 
-func NewFloat(f float64) Value {
+func FloatValue(f float64) Value {
 	return Value{kind: V_FLOAT, data: math.Float64bits(f)}
 }
 
-func NewInt(i int64) Value {
+func IntValue(i int64) Value {
 	return Value{kind: V_INT, data: uint64(i)}
 }
 
-func NewObject(o Object) Value {
+func ObjectValue(o Object) Value {
 	if o == nil {
-		return NewUndefined()
+		return UndefinedValue()
 	}
 	return Value{kind: V_OBJECT, ptr: o}
 }
 
-func NewIterator(i Iterator) Value {
+func IteratorValue(i Iterator) Value {
 	return Value{kind: V_ITERATOR, ptr: i}
 }
 
-func NewValuePtr(o *Value) Value {
+func ValuePtrValue(o *Value) Value {
 	return Value{kind: V_VALUE_PTR, ptr: o}
 }
 
@@ -287,7 +287,7 @@ func (v *Value) Next() bool {
 func (v *Value) Key(alloc Allocator) Value {
 	switch v.kind {
 	case V_UNDEFINED:
-		return NewUndefined()
+		return UndefinedValue()
 	case V_ITERATOR:
 		return v.ptr.(Iterator).Key(alloc)
 	default:
@@ -298,7 +298,7 @@ func (v *Value) Key(alloc Allocator) Value {
 func (v *Value) Value(alloc Allocator) Value {
 	switch v.kind {
 	case V_UNDEFINED:
-		return NewUndefined()
+		return UndefinedValue()
 	case V_ITERATOR:
 		return v.ptr.(Iterator).Value(alloc)
 	default:
@@ -692,7 +692,7 @@ func (v *Value) BinaryOp(vm VM, op token.Token, rhs Value) (Value, error) {
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with BinaryOp()", v.kind.String()))
 	default:
-		return NewUndefined(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		return UndefinedValue(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
 }
 
@@ -705,19 +705,19 @@ func (v *Value) charBinaryOp(vm VM, op token.Token, rhs Value) (Value, error) {
 		r := rhs.Int()
 		switch op {
 		case token.Add:
-			return NewInt(l + r), nil
+			return IntValue(l + r), nil
 		case token.Sub:
-			return NewInt(l - r), nil
+			return IntValue(l - r), nil
 		case token.Less:
-			return NewBool(l < r), nil
+			return BoolValue(l < r), nil
 		case token.Greater:
-			return NewBool(l > r), nil
+			return BoolValue(l > r), nil
 		case token.LessEq:
-			return NewBool(l <= r), nil
+			return BoolValue(l <= r), nil
 		case token.GreaterEq:
-			return NewBool(l >= r), nil
+			return BoolValue(l >= r), nil
 		default:
-			return NewUndefined(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+			return UndefinedValue(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 		}
 
 	case rhs.IsString(): // char op string => string
@@ -727,32 +727,32 @@ func (v *Value) charBinaryOp(vm VM, op token.Token, rhs Value) (Value, error) {
 		case token.Add:
 			return alloc.NewStringValue(l + r), nil
 		default:
-			return NewUndefined(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+			return UndefinedValue(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 		}
 
 	default:
 		// char op any => char
 		r, ok := rhs.AsChar()
 		if !ok {
-			return NewUndefined(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+			return UndefinedValue(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 		}
 
 		l := v.Char()
 		switch op {
 		case token.Add:
-			return NewChar(l + r), nil
+			return CharValue(l + r), nil
 		case token.Sub:
-			return NewChar(l - r), nil
+			return CharValue(l - r), nil
 		case token.Less:
-			return NewBool(l < r), nil
+			return BoolValue(l < r), nil
 		case token.Greater:
-			return NewBool(l > r), nil
+			return BoolValue(l > r), nil
 		case token.LessEq:
-			return NewBool(l <= r), nil
+			return BoolValue(l <= r), nil
 		case token.GreaterEq:
-			return NewBool(l >= r), nil
+			return BoolValue(l >= r), nil
 		default:
-			return NewUndefined(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+			return UndefinedValue(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 		}
 	}
 }
@@ -760,29 +760,29 @@ func (v *Value) charBinaryOp(vm VM, op token.Token, rhs Value) (Value, error) {
 func (v *Value) floatBinaryOp(vm VM, op token.Token, rhs Value) (Value, error) {
 	r, ok := rhs.AsFloat()
 	if !ok {
-		return NewUndefined(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		return UndefinedValue(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
 
 	l := v.Float()
 	switch op {
 	case token.Add:
-		return NewFloat(l + r), nil
+		return FloatValue(l + r), nil
 	case token.Sub:
-		return NewFloat(l - r), nil
+		return FloatValue(l - r), nil
 	case token.Mul:
-		return NewFloat(l * r), nil
+		return FloatValue(l * r), nil
 	case token.Quo:
-		return NewFloat(l / r), nil
+		return FloatValue(l / r), nil
 	case token.Less:
-		return NewBool(l < r), nil
+		return BoolValue(l < r), nil
 	case token.Greater:
-		return NewBool(l > r), nil
+		return BoolValue(l > r), nil
 	case token.LessEq:
-		return NewBool(l <= r), nil
+		return BoolValue(l <= r), nil
 	case token.GreaterEq:
-		return NewBool(l >= r), nil
+		return BoolValue(l >= r), nil
 	default:
-		return NewUndefined(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		return UndefinedValue(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
 }
 
@@ -793,66 +793,66 @@ func (v *Value) intBinaryOp(vm VM, op token.Token, rhs Value) (Value, error) {
 		r := rhs.Float()
 		switch op {
 		case token.Add:
-			return NewFloat(l + r), nil
+			return FloatValue(l + r), nil
 		case token.Sub:
-			return NewFloat(l - r), nil
+			return FloatValue(l - r), nil
 		case token.Mul:
-			return NewFloat(l * r), nil
+			return FloatValue(l * r), nil
 		case token.Quo:
-			return NewFloat(l / r), nil
+			return FloatValue(l / r), nil
 		case token.Less:
-			return NewBool(l < r), nil
+			return BoolValue(l < r), nil
 		case token.Greater:
-			return NewBool(l > r), nil
+			return BoolValue(l > r), nil
 		case token.LessEq:
-			return NewBool(l <= r), nil
+			return BoolValue(l <= r), nil
 		case token.GreaterEq:
-			return NewBool(l >= r), nil
+			return BoolValue(l >= r), nil
 		default:
-			return NewUndefined(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+			return UndefinedValue(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 		}
 	}
 
 	// int op any => int
 	r, ok := rhs.AsInt()
 	if !ok {
-		return NewUndefined(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		return UndefinedValue(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
 
 	l := v.Int()
 	switch op {
 	case token.Add:
-		return NewInt(l + r), nil
+		return IntValue(l + r), nil
 	case token.Sub:
-		return NewInt(l - r), nil
+		return IntValue(l - r), nil
 	case token.Mul:
-		return NewInt(l * r), nil
+		return IntValue(l * r), nil
 	case token.Quo:
-		return NewInt(l / r), nil
+		return IntValue(l / r), nil
 	case token.Rem:
-		return NewInt(l % r), nil
+		return IntValue(l % r), nil
 	case token.And:
-		return NewInt(l & r), nil
+		return IntValue(l & r), nil
 	case token.Or:
-		return NewInt(l | r), nil
+		return IntValue(l | r), nil
 	case token.Xor:
-		return NewInt(l ^ r), nil
+		return IntValue(l ^ r), nil
 	case token.AndNot:
-		return NewInt(l &^ r), nil
+		return IntValue(l &^ r), nil
 	case token.Shl:
-		return NewInt(l << uint64(r)), nil
+		return IntValue(l << uint64(r)), nil
 	case token.Shr:
-		return NewInt(l >> uint64(r)), nil
+		return IntValue(l >> uint64(r)), nil
 	case token.Less:
-		return NewBool(l < r), nil
+		return BoolValue(l < r), nil
 	case token.Greater:
-		return NewBool(l > r), nil
+		return BoolValue(l > r), nil
 	case token.LessEq:
-		return NewBool(l <= r), nil
+		return BoolValue(l <= r), nil
 	case token.GreaterEq:
-		return NewBool(l >= r), nil
+		return BoolValue(l >= r), nil
 	default:
-		return NewUndefined(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		return UndefinedValue(), NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
 }
 
@@ -926,20 +926,20 @@ func (v *Value) Method(vm VM, name string, args ...Value) (Value, error) {
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with Method()", v.kind.String()))
 	default:
-		return NewUndefined(), NewInvalidMethodError(name, v.TypeName())
+		return UndefinedValue(), NewInvalidMethodError(name, v.TypeName())
 	}
 }
 
 func (v *Value) Access(vm VM, index Value, mode Opcode) (Value, error) {
 	switch v.kind {
 	case V_UNDEFINED:
-		return NewUndefined(), nil
+		return UndefinedValue(), nil
 	case V_OBJECT:
 		return v.ptr.(Object).Access(vm, index, mode)
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with Access()", v.kind.String()))
 	default:
-		return NewUndefined(), NewNotAccessibleError(v.TypeName())
+		return UndefinedValue(), NewNotAccessibleError(v.TypeName())
 	}
 }
 
@@ -947,22 +947,22 @@ func (v *Value) boolMethod(vm VM, name string, args ...Value) (Value, error) {
 	switch name {
 	case "to_bool":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("bool.to_bool", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("bool.to_bool", "0", len(args))
 		}
-		return NewBool(v.Bool()), nil
+		return BoolValue(v.Bool()), nil
 
 	case "to_int":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("bool.to_int", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("bool.to_int", "0", len(args))
 		}
 		if v.Bool() {
-			return NewInt(1), nil
+			return IntValue(1), nil
 		}
-		return NewInt(0), nil
+		return IntValue(0), nil
 
 	case "to_string":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("bool.to_string", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("bool.to_string", "0", len(args))
 		}
 		if v.Bool() {
 			return vm.Allocator().NewStringValue("true"), nil
@@ -970,7 +970,7 @@ func (v *Value) boolMethod(vm VM, name string, args ...Value) (Value, error) {
 		return vm.Allocator().NewStringValue("false"), nil
 
 	default:
-		return NewUndefined(), NewInvalidMethodError(name, "bool")
+		return UndefinedValue(), NewInvalidMethodError(name, "bool")
 	}
 }
 
@@ -978,30 +978,30 @@ func (v *Value) charMethod(vm VM, name string, args ...Value) (Value, error) {
 	switch name {
 	case "to_char":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("char.to_char", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("char.to_char", "0", len(args))
 		}
-		return NewChar(v.Char()), nil
+		return CharValue(v.Char()), nil
 
 	case "to_bool":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("char.to_bool", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("char.to_bool", "0", len(args))
 		}
-		return NewBool(v.Char() != 0), nil
+		return BoolValue(v.Char() != 0), nil
 
 	case "to_int":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("char.to_int", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("char.to_int", "0", len(args))
 		}
-		return NewInt(int64(v.Char())), nil
+		return IntValue(int64(v.Char())), nil
 
 	case "to_string":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("char.to_string", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("char.to_string", "0", len(args))
 		}
 		return vm.Allocator().NewStringValue(string(v.Char())), nil
 
 	default:
-		return NewUndefined(), NewInvalidMethodError(name, "char")
+		return UndefinedValue(), NewInvalidMethodError(name, "char")
 	}
 }
 
@@ -1009,24 +1009,24 @@ func (v *Value) floatMethod(vm VM, name string, args ...Value) (Value, error) {
 	switch name {
 	case "to_float":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("float.to_float", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("float.to_float", "0", len(args))
 		}
-		return NewFloat(v.Float()), nil
+		return FloatValue(v.Float()), nil
 
 	case "to_int":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("float.to_int", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("float.to_int", "0", len(args))
 		}
-		return NewInt(int64(v.Float())), nil
+		return IntValue(int64(v.Float())), nil
 
 	case "to_string":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("float.to_string", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("float.to_string", "0", len(args))
 		}
 		return vm.Allocator().NewStringValue(strconv.FormatFloat(v.Float(), 'f', -1, 64)), nil
 
 	default:
-		return NewUndefined(), NewInvalidMethodError(name, "float")
+		return UndefinedValue(), NewInvalidMethodError(name, "float")
 	}
 }
 
@@ -1034,42 +1034,42 @@ func (v *Value) intMethod(vm VM, name string, args ...Value) (Value, error) {
 	switch name {
 	case "to_int":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("int.to_int", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("int.to_int", "0", len(args))
 		}
-		return NewInt(v.Int()), nil
+		return IntValue(v.Int()), nil
 
 	case "to_float":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("int.to_float", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("int.to_float", "0", len(args))
 		}
-		return NewFloat(float64(v.Int())), nil
+		return FloatValue(float64(v.Int())), nil
 
 	case "to_bool":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("int.to_bool", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("int.to_bool", "0", len(args))
 		}
-		return NewBool(v.Int() != 0), nil
+		return BoolValue(v.Int() != 0), nil
 
 	case "to_char":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("int.to_char", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("int.to_char", "0", len(args))
 		}
-		return NewChar(rune(v.Int())), nil
+		return CharValue(rune(v.Int())), nil
 
 	case "to_string":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("int.to_string", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("int.to_string", "0", len(args))
 		}
 		return vm.Allocator().NewStringValue(strconv.FormatInt(v.Int(), 10)), nil
 
 	case "to_time":
 		if len(args) != 0 {
-			return NewUndefined(), NewWrongNumArgumentsError("int.to_time", "0", len(args))
+			return UndefinedValue(), NewWrongNumArgumentsError("int.to_time", "0", len(args))
 		}
 		return vm.Allocator().NewTimeValue(time.Unix(v.Int(), 0)), nil
 
 	default:
-		return NewUndefined(), NewInvalidMethodError(name, "int")
+		return UndefinedValue(), NewInvalidMethodError(name, "int")
 	}
 }
 
@@ -1102,6 +1102,6 @@ func (v *Value) Call(vm VM, args ...Value) (Value, error) {
 	case V_ITERATOR, V_VALUE_PTR:
 		panic(fmt.Sprintf("unexpected use of %s with Call()", v.kind.String()))
 	default:
-		return NewUndefined(), NewNotCallableError(v.TypeName())
+		return UndefinedValue(), NewNotCallableError(v.TypeName())
 	}
 }

@@ -113,7 +113,7 @@ func (o *Array) Interface() any {
 
 func (o *Array) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
 	if !rhs.IsObject() {
-		return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+		return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 	}
 
 	alloc := vm.Allocator()
@@ -124,7 +124,7 @@ func (o *Array) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value
 		}
 	}
 
-	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
 func (o *Array) Equals(x core.Value) bool {
@@ -217,7 +217,7 @@ func (o *Array) Method(vm core.VM, name string, args ...core.Value) (core.Value,
 		return o.fnAvg(vm, "array.avg", args...)
 
 	default:
-		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+		return core.UndefinedValue(), core.NewInvalidMethodError(name, o.TypeName())
 	}
 }
 
@@ -225,19 +225,19 @@ func (o *Array) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Val
 	if mode == parser.OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
-			return core.NewUndefined(), core.NewInvalidIndexTypeError("array access", "int", index.TypeName())
+			return core.UndefinedValue(), core.NewInvalidIndexTypeError("array access", "int", index.TypeName())
 		}
 		if i < 0 || i >= int64(len(o.value)) {
-			return core.NewUndefined(), nil
+			return core.UndefinedValue(), nil
 		}
 		return o.value[i], nil
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
+		return core.UndefinedValue(), core.NewInvalidSelectorError(o.TypeName(), k)
 	}
-	return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
+	return core.UndefinedValue(), core.NewInvalidSelectorError(o.TypeName(), k)
 }
 
 func (o *Array) Assign(index, value core.Value) (err error) {
@@ -303,7 +303,7 @@ func (o *Array) AsBytes() ([]byte, bool) {
 
 func (o *Array) fnSort(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 
 	r := o.Copy(vm.Allocator())
@@ -328,12 +328,12 @@ func (o *Array) fnSort(vm core.VM, name string, args ...core.Value) (core.Value,
 
 func (o *Array) fnFilter(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	alloc := vm.Allocator()
@@ -343,7 +343,7 @@ func (o *Array) fnFilter(vm core.VM, name string, args ...core.Value) (core.Valu
 		for _, v := range o.value {
 			res, err := fn.Call(vm, v)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			if res.IsTrue() {
 				filtered = append(filtered, v)
@@ -354,9 +354,9 @@ func (o *Array) fnFilter(vm core.VM, name string, args ...core.Value) (core.Valu
 	case 2:
 		filtered := make([]core.Value, 0, len(o.value))
 		for i, v := range o.value {
-			res, err := fn.Call(vm, core.NewInt(int64(i)), v)
+			res, err := fn.Call(vm, core.IntValue(int64(i)), v)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			if res.IsTrue() {
 				filtered = append(filtered, v)
@@ -365,18 +365,18 @@ func (o *Array) fnFilter(vm core.VM, name string, args ...core.Value) (core.Valu
 		return alloc.NewArrayValue(filtered, false), nil
 
 	default:
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func (o *Array) fnCount(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	var count int64
@@ -385,7 +385,7 @@ func (o *Array) fnCount(vm core.VM, name string, args ...core.Value) (core.Value
 		for _, v := range o.value {
 			res, err := fn.Call(vm, v)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			if res.IsTrue() {
 				count++
@@ -394,9 +394,9 @@ func (o *Array) fnCount(vm core.VM, name string, args ...core.Value) (core.Value
 
 	case 2:
 		for i, v := range o.value {
-			res, err := fn.Call(vm, core.NewInt(int64(i)), v)
+			res, err := fn.Call(vm, core.IntValue(int64(i)), v)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			if res.IsTrue() {
 				count++
@@ -404,20 +404,20 @@ func (o *Array) fnCount(vm core.VM, name string, args ...core.Value) (core.Value
 		}
 
 	default:
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 
-	return core.NewInt(count), nil
+	return core.IntValue(count), nil
 }
 
 func (o *Array) fnAll(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	switch fn.Arity() {
@@ -425,39 +425,39 @@ func (o *Array) fnAll(vm core.VM, name string, args ...core.Value) (core.Value, 
 		for _, v := range o.value {
 			res, err := fn.Call(vm, v)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			if res.IsFalse() {
-				return core.NewBool(false), nil
+				return core.BoolValue(false), nil
 			}
 		}
-		return core.NewBool(true), nil
+		return core.BoolValue(true), nil
 
 	case 2:
 		for i, v := range o.value {
-			res, err := fn.Call(vm, core.NewInt(int64(i)), v)
+			res, err := fn.Call(vm, core.IntValue(int64(i)), v)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			if res.IsFalse() {
-				return core.NewBool(false), nil
+				return core.BoolValue(false), nil
 			}
 		}
-		return core.NewBool(true), nil
+		return core.BoolValue(true), nil
 
 	default:
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func (o *Array) fnAny(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	switch fn.Arity() {
@@ -465,39 +465,39 @@ func (o *Array) fnAny(vm core.VM, name string, args ...core.Value) (core.Value, 
 		for _, v := range o.value {
 			res, err := fn.Call(vm, v)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			if res.IsTrue() {
-				return core.NewBool(true), nil
+				return core.BoolValue(true), nil
 			}
 		}
-		return core.NewBool(false), nil
+		return core.BoolValue(false), nil
 
 	case 2:
 		for i, v := range o.value {
-			res, err := fn.Call(vm, core.NewInt(int64(i)), v)
+			res, err := fn.Call(vm, core.IntValue(int64(i)), v)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			if res.IsTrue() {
-				return core.NewBool(true), nil
+				return core.BoolValue(true), nil
 			}
 		}
-		return core.NewBool(false), nil
+		return core.BoolValue(false), nil
 
 	default:
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func (o *Array) fnMap(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "1", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	alloc := vm.Allocator()
@@ -507,7 +507,7 @@ func (o *Array) fnMap(vm core.VM, name string, args ...core.Value) (core.Value, 
 		for _, v := range o.value {
 			res, err := fn.Call(vm, v)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			mapped = append(mapped, res)
 		}
@@ -516,28 +516,28 @@ func (o *Array) fnMap(vm core.VM, name string, args ...core.Value) (core.Value, 
 	case 2:
 		mapped := make([]core.Value, 0, len(o.value))
 		for i, v := range o.value {
-			res, err := fn.Call(vm, core.NewInt(int64(i)), v)
+			res, err := fn.Call(vm, core.IntValue(int64(i)), v)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			mapped = append(mapped, res)
 		}
 		return alloc.NewArrayValue(mapped, false), nil
 
 	default:
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func (o *Array) fnReduce(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 2 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "2", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "2", len(args))
 	}
 
 	acc := args[0]
 	fn := args[1]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "second", "non-variadic function", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "second", "non-variadic function", fn.TypeName())
 	}
 
 	switch fn.Arity() {
@@ -545,7 +545,7 @@ func (o *Array) fnReduce(vm core.VM, name string, args ...core.Value) (core.Valu
 		for _, v := range o.value {
 			res, err := fn.Call(vm, acc, v)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			acc = res
 		}
@@ -553,29 +553,29 @@ func (o *Array) fnReduce(vm core.VM, name string, args ...core.Value) (core.Valu
 
 	case 3:
 		for i, v := range o.value {
-			res, err := fn.Call(vm, acc, core.NewInt(int64(i)), v)
+			res, err := fn.Call(vm, acc, core.IntValue(int64(i)), v)
 			if err != nil {
-				return core.NewUndefined(), err
+				return core.UndefinedValue(), err
 			}
 			acc = res
 		}
 		return acc, nil
 
 	default:
-		return core.NewUndefined(), core.NewInvalidArgumentTypeError(name, "second", "f/2 or f/3", fn.TypeName())
+		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "second", "f/2 or f/3", fn.TypeName())
 	}
 }
 
 func (o *Array) fnToArray(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
-	return core.NewObject(o), nil
+	return core.ObjectValue(o), nil
 }
 
 func (o *Array) fnToBytes(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	bs := make([]byte, len(o.value))
 	for i, e := range o.value {
@@ -590,7 +590,7 @@ func (o *Array) fnToBytes(vm core.VM, name string, args ...core.Value) (core.Val
 
 func (o *Array) fnToString(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	r := make([]rune, len(o.value))
 	for i, e := range o.value {
@@ -605,7 +605,7 @@ func (o *Array) fnToString(vm core.VM, name string, args ...core.Value) (core.Va
 
 func (o *Array) fnToRecord(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	r := make(map[string]core.Value, len(o.value))
 	for i, v := range o.value {
@@ -616,51 +616,51 @@ func (o *Array) fnToRecord(vm core.VM, name string, args ...core.Value) (core.Va
 
 func (o *Array) fnIsEmpty(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
-	return core.NewBool(len(o.value) == 0), nil
+	return core.BoolValue(len(o.value) == 0), nil
 }
 
 func (o *Array) fnLen(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
-	return core.NewInt(int64(len(o.value))), nil
+	return core.IntValue(int64(len(o.value))), nil
 }
 
 func (o *Array) fnFirst(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	if len(o.value) == 0 {
-		return core.NewUndefined(), nil
+		return core.UndefinedValue(), nil
 	}
 	return o.value[0], nil
 }
 
 func (o *Array) fnLast(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	if len(o.value) == 0 {
-		return core.NewUndefined(), nil
+		return core.UndefinedValue(), nil
 	}
 	return o.value[len(o.value)-1], nil
 }
 
 func (o *Array) fnMin(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	if len(o.value) == 0 {
-		return core.NewUndefined(), nil
+		return core.UndefinedValue(), nil
 	}
 
 	v := o.value[0]
 	for i := 1; i < len(o.value); i++ {
 		less, err := o.value[i].BinaryOp(vm, token.Less, v)
 		if err != nil {
-			return core.NewUndefined(), err
+			return core.UndefinedValue(), err
 		}
 		if less.IsTrue() {
 			v = o.value[i]
@@ -672,17 +672,17 @@ func (o *Array) fnMin(vm core.VM, name string, args ...core.Value) (core.Value, 
 
 func (o *Array) fnMax(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	if len(o.value) == 0 {
-		return core.NewUndefined(), nil
+		return core.UndefinedValue(), nil
 	}
 
 	v := o.value[0]
 	for i := 1; i < len(o.value); i++ {
 		greater, err := o.value[i].BinaryOp(vm, token.Greater, v)
 		if err != nil {
-			return core.NewUndefined(), err
+			return core.UndefinedValue(), err
 		}
 		if greater.IsTrue() {
 			v = o.value[i]
@@ -694,10 +694,10 @@ func (o *Array) fnMax(vm core.VM, name string, args ...core.Value) (core.Value, 
 
 func (o *Array) fnSum(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	if len(o.value) == 0 {
-		return core.NewUndefined(), nil
+		return core.UndefinedValue(), nil
 	}
 
 	var err error
@@ -705,7 +705,7 @@ func (o *Array) fnSum(vm core.VM, name string, args ...core.Value) (core.Value, 
 	for i := 1; i < len(o.value); i++ {
 		v, err = v.BinaryOp(vm, token.Add, o.value[i])
 		if err != nil {
-			return core.NewUndefined(), err
+			return core.UndefinedValue(), err
 		}
 	}
 
@@ -714,10 +714,10 @@ func (o *Array) fnSum(vm core.VM, name string, args ...core.Value) (core.Value, 
 
 func (o *Array) fnAvg(vm core.VM, name string, args ...core.Value) (core.Value, error) {
 	if len(args) != 0 {
-		return core.NewUndefined(), core.NewWrongNumArgumentsError(name, "0", len(args))
+		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	if len(o.value) == 0 {
-		return core.NewUndefined(), nil
+		return core.UndefinedValue(), nil
 	}
 
 	var err error
@@ -725,14 +725,14 @@ func (o *Array) fnAvg(vm core.VM, name string, args ...core.Value) (core.Value, 
 	for i := 1; i < len(o.value); i++ {
 		sum, err = sum.BinaryOp(vm, token.Add, o.value[i])
 		if err != nil {
-			return core.NewUndefined(), err
+			return core.UndefinedValue(), err
 		}
 	}
 
-	length := core.NewInt(int64(len(o.value)))
+	length := core.IntValue(int64(len(o.value)))
 	avg, err := sum.BinaryOp(vm, token.Quo, length)
 	if err != nil {
-		return core.NewUndefined(), err
+		return core.UndefinedValue(), err
 	}
 
 	return avg, nil

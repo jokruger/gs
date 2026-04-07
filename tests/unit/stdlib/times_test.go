@@ -15,7 +15,7 @@ func TestTimes(t *testing.T) {
 	location, _ := time.LoadLocation("Pacific/Auckland")
 	time3 := time.Date(1982, 9, 28, 19, 21, 44, 999, location)
 
-	module(t, "times").call("sleep", 1).expect(core.NewUndefined())
+	module(t, "times").call("sleep", 1).expect(core.UndefinedValue())
 
 	r := module(t, "times").call("since", time.Now().Add(-time.Hour)).o.(core.Value)
 	require.True(t, r.IsInt())

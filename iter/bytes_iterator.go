@@ -32,9 +32,9 @@ func (i *BytesIterator) Next() bool {
 }
 
 func (i *BytesIterator) Key(core.Allocator) core.Value {
-	return core.NewInt(int64(i.i - 1))
+	return core.IntValue(int64(i.i - 1))
 }
 
 func (i *BytesIterator) Value(core.Allocator) core.Value {
-	return core.NewInt(int64(i.v[i.i-1]))
+	return core.IntValue(int64(i.v[i.i-1]))
 }

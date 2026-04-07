@@ -45,10 +45,10 @@ func TestScript_Add(t *testing.T) {
 		func(v core.VM, args ...core.Value) (ret core.Value, err error) {
 			if len(args) > 0 {
 				if args[0].IsInt() {
-					return core.NewInt(args[0].Int() + 1), nil
+					return core.IntValue(args[0].Int() + 1), nil
 				}
 			}
-			return core.NewInt(0), nil
+			return core.IntValue(0), nil
 		}))
 	c, err := s.Compile()
 	require.NoError(t, err)
@@ -198,7 +198,7 @@ e := mod1.double(s)
 			"unknown",
 			func(v core.VM, args ...core.Value) (ret core.Value, err error) {
 				arg0, _ := args[0].AsInt()
-				ret = core.NewInt(arg0 * 2)
+				ret = core.IntValue(arg0 * 2)
 				return
 			},
 			1,
@@ -277,9 +277,9 @@ func (o *Counter) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Val
 	if rhs.IsInt() {
 		switch op {
 		case token.Add:
-			return core.NewObject(&Counter{value: o.value + rhs.Int()}), nil
+			return core.ObjectValue(&Counter{value: o.value + rhs.Int()}), nil
 		case token.Sub:
-			return core.NewObject(&Counter{value: o.value - rhs.Int()}), nil
+			return core.ObjectValue(&Counter{value: o.value - rhs.Int()}), nil
 		}
 	}
 
@@ -288,14 +288,14 @@ func (o *Counter) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Val
 		case *Counter:
 			switch op {
 			case token.Add:
-				return core.NewObject(&Counter{value: o.value + rhs.value}), nil
+				return core.ObjectValue(&Counter{value: o.value + rhs.value}), nil
 			case token.Sub:
-				return core.NewObject(&Counter{value: o.value - rhs.value}), nil
+				return core.ObjectValue(&Counter{value: o.value - rhs.value}), nil
 			}
 		}
 	}
 
-	return core.NewUndefined(), errors.New("invalid operator")
+	return core.UndefinedValue(), errors.New("invalid operator")
 }
 
 func (o *Counter) IsFalse() bool {
@@ -315,11 +315,11 @@ func (o *Counter) Equals(t core.Value) bool {
 }
 
 func (o *Counter) Copy(alloc core.Allocator) core.Value {
-	return core.NewObject(&Counter{value: o.value})
+	return core.ObjectValue(&Counter{value: o.value})
 }
 
 func (o *Counter) Call(core.VM, ...core.Value) (core.Value, error) {
-	return core.NewInt(o.value), nil
+	return core.IntValue(o.value), nil
 }
 
 func (o *Counter) IsCallable() bool {
@@ -327,7 +327,7 @@ func (o *Counter) IsCallable() bool {
 }
 
 func TestScript_CustomObjects(t *testing.T) {
-	c := compile(t, `a := c1(); s := string(c1); c2 := c1; c2++`, M{"c1": core.NewObject(&Counter{value: 5})})
+	c := compile(t, `a := c1(); s := string(c1); c2 := c1; c2++`, M{"c1": core.ObjectValue(&Counter{value: 5})})
 	compiledRun(t, c)
 	compiledGet(t, c, "a", int64(5))
 	compiledGet(t, c, "s", "Counter(5)")
@@ -340,7 +340,7 @@ for x in arr {
 }
 out := c1()
 `, M{
-		"c1": core.NewObject(&Counter{value: 5}),
+		"c1": core.ObjectValue(&Counter{value: 5}),
 	})
 	compiledRun(t, c)
 	compiledGet(t, c, "out", int64(15))
@@ -517,11 +517,11 @@ func TestCompiled_RunContext(t *testing.T) {
 }
 
 func TestCompiled_CustomObject(t *testing.T) {
-	c := compile(t, `r := (t<130)`, M{"t": core.NewObject(&customNumber{value: 123})})
+	c := compile(t, `r := (t<130)`, M{"t": core.ObjectValue(&customNumber{value: 123})})
 	compiledRun(t, c)
 	compiledGet(t, c, "r", true)
 
-	c = compile(t, `r := (t>13)`, M{"t": core.NewObject(&customNumber{value: 123})})
+	c = compile(t, `r := (t>13)`, M{"t": core.ObjectValue(&customNumber{value: 123})})
 	compiledRun(t, c)
 	compiledGet(t, c, "r", true)
 }
@@ -544,7 +544,7 @@ func (n *customNumber) String() string {
 func (n *customNumber) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
 	i, ok := rhs.AsInt()
 	if !ok {
-		return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), n.TypeName(), rhs.TypeName())
+		return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), n.TypeName(), rhs.TypeName())
 	}
 	return n.binaryOpInt(op, i)
 }
@@ -554,16 +554,16 @@ func (n *customNumber) binaryOpInt(op token.Token, rhs int64) (core.Value, error
 
 	switch op {
 	case token.Less:
-		return core.NewBool(i < rhs), nil
+		return core.BoolValue(i < rhs), nil
 	case token.Greater:
-		return core.NewBool(i > rhs), nil
+		return core.BoolValue(i > rhs), nil
 	case token.LessEq:
-		return core.NewBool(i <= rhs), nil
+		return core.BoolValue(i <= rhs), nil
 	case token.GreaterEq:
-		return core.NewBool(i >= rhs), nil
+		return core.BoolValue(i >= rhs), nil
 	}
-	t := core.NewInt(i)
-	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), n.TypeName(), t.TypeName())
+	t := core.IntValue(i)
+	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), n.TypeName(), t.TypeName())
 }
 
 func TestScript_ImportError(t *testing.T) {

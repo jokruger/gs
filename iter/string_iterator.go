@@ -32,9 +32,9 @@ func (i *StringIterator) Next() bool {
 }
 
 func (i *StringIterator) Key(core.Allocator) core.Value {
-	return core.NewInt(int64(i.i - 1))
+	return core.IntValue(int64(i.i - 1))
 }
 
 func (i *StringIterator) Value(core.Allocator) core.Value {
-	return core.NewChar(i.v[i.i-1])
+	return core.CharValue(i.v[i.i-1])
 }

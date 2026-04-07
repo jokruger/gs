@@ -1445,7 +1445,7 @@ func objectsArray(o ...core.Value) []core.Value {
 }
 
 func intObject(v int64) core.Value {
-	return core.NewInt(v)
+	return core.IntValue(v)
 }
 
 func stringObject(v string) core.Value {
@@ -1458,5 +1458,5 @@ func compiledFunction(numLocals, numParams int, insts ...[]byte) core.Value {
 		NumLocals:     numLocals,
 		NumParameters: numParams,
 	}
-	return core.NewObject(t)
+	return core.ObjectValue(t)
 }

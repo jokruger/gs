@@ -20,7 +20,7 @@ type BuiltinFunction struct {
 func NewStaticBuiltinFunction(name string, val core.NativeFunc, arity int, variadic bool) core.Value {
 	o := &BuiltinFunction{}
 	o.Set(name, val, arity, variadic)
-	return core.NewObject(o)
+	return core.ObjectValue(o)
 }
 
 func (o *BuiltinFunction) GobDecode(b []byte) error {
@@ -94,7 +94,7 @@ func (o *BuiltinFunction) Arity() int {
 }
 
 func (o *BuiltinFunction) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
-	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
 func (o *BuiltinFunction) Copy(alloc core.Allocator) core.Value {
@@ -102,11 +102,11 @@ func (o *BuiltinFunction) Copy(alloc core.Allocator) core.Value {
 }
 
 func (o *BuiltinFunction) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
-	return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+	return core.UndefinedValue(), core.NewInvalidMethodError(name, o.TypeName())
 }
 
 func (o *BuiltinFunction) Access(core.VM, core.Value, core.Opcode) (core.Value, error) {
-	return core.NewUndefined(), core.NewNotAccessibleError(o.TypeName())
+	return core.UndefinedValue(), core.NewNotAccessibleError(o.TypeName())
 }
 
 func (o *BuiltinFunction) Assign(core.Value, core.Value) error {
@@ -115,7 +115,7 @@ func (o *BuiltinFunction) Assign(core.Value, core.Value) error {
 
 func (o *BuiltinFunction) Call(vm core.VM, args ...core.Value) (core.Value, error) {
 	if o.value == nil {
-		return core.NewUndefined(), core.NewLogicError(fmt.Sprintf("built-in function %s is referencing nil", o.name))
+		return core.UndefinedValue(), core.NewLogicError(fmt.Sprintf("built-in function %s is referencing nil", o.name))
 	}
 	return o.value(vm, args...)
 }

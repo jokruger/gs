@@ -47,9 +47,9 @@ func TestFileStatFile(t *testing.T) {
 	module(t, "os").call("stat", tf.Name()).expect(alloc.NewRecordValue(map[string]core.Value{
 		"name":      alloc.NewStringValue(stat.Name()),
 		"mtime":     alloc.NewTimeValue(stat.ModTime()),
-		"size":      core.NewInt(stat.Size()),
-		"mode":      core.NewInt(int64(stat.Mode())),
-		"directory": core.NewBool(false),
+		"size":      core.IntValue(stat.Size()),
+		"mode":      core.IntValue(int64(stat.Mode())),
+		"directory": core.BoolValue(false),
 	}, true))
 }
 
@@ -64,9 +64,9 @@ func TestFileStatDir(t *testing.T) {
 	module(t, "os").call("stat", td).expect(alloc.NewRecordValue(map[string]core.Value{
 		"name":      alloc.NewStringValue(stat.Name()),
 		"mtime":     alloc.NewTimeValue(stat.ModTime()),
-		"size":      core.NewInt(stat.Size()),
-		"mode":      core.NewInt(int64(stat.Mode())),
-		"directory": core.NewBool(true),
+		"size":      core.IntValue(stat.Size()),
+		"mode":      core.IntValue(int64(stat.Mode())),
+		"directory": core.BoolValue(true),
 	}, true))
 }
 

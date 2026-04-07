@@ -27,7 +27,7 @@ func (o *Object) Arity() int {
 }
 
 func (o *Object) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
-	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
 func (o *Object) Equals(x core.Value) bool {
@@ -38,15 +38,15 @@ func (o *Object) Equals(x core.Value) bool {
 }
 
 func (o *Object) Copy(core.Allocator) core.Value {
-	return core.NewUndefined()
+	return core.UndefinedValue()
 }
 
 func (o *Object) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
-	return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+	return core.UndefinedValue(), core.NewInvalidMethodError(name, o.TypeName())
 }
 
 func (o *Object) Access(core.VM, core.Value, core.Opcode) (core.Value, error) {
-	return core.NewUndefined(), core.NewNotAccessibleError(o.TypeName())
+	return core.UndefinedValue(), core.NewNotAccessibleError(o.TypeName())
 }
 
 func (o *Object) Assign(core.Value, core.Value) error {
@@ -58,7 +58,7 @@ func (o *Object) Iterate(core.Allocator) core.Iterator {
 }
 
 func (o *Object) Call(core.VM, ...core.Value) (core.Value, error) {
-	return core.NewUndefined(), nil
+	return core.UndefinedValue(), nil
 }
 
 func (o *Object) IsUndefined() bool {

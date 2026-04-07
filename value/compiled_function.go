@@ -55,15 +55,15 @@ func (o *CompiledFunction) Copy(core.Allocator) core.Value {
 		VarArgs:       o.VarArgs,
 		Free:          append([]*core.Value{}, o.Free...), // DO NOT Copy() of elements; these are variable pointers
 	}
-	return core.NewObject(t)
+	return core.ObjectValue(t)
 }
 
 func (o *CompiledFunction) Method(vm core.VM, name string, args ...core.Value) (core.Value, error) {
-	return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+	return core.UndefinedValue(), core.NewInvalidMethodError(name, o.TypeName())
 }
 
 func (o *CompiledFunction) Access(core.VM, core.Value, core.Opcode) (core.Value, error) {
-	return core.NewUndefined(), core.NewNotAccessibleError(o.TypeName())
+	return core.UndefinedValue(), core.NewNotAccessibleError(o.TypeName())
 }
 
 func (o *CompiledFunction) SourcePos(ip int) core.Pos {

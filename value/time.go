@@ -61,23 +61,23 @@ func (o *Time) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value,
 
 	v, ok := rhs.AsTime()
 	if !ok {
-		return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+		return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 	}
 
 	switch op {
 	case token.Sub: // time - time => int (duration)
-		return core.NewInt(int64(o.value.Sub(v))), nil
+		return core.IntValue(int64(o.value.Sub(v))), nil
 	case token.Less: // time < time => bool
-		return core.NewBool(o.value.Before(v)), nil
+		return core.BoolValue(o.value.Before(v)), nil
 	case token.Greater:
-		return core.NewBool(o.value.After(v)), nil
+		return core.BoolValue(o.value.After(v)), nil
 	case token.LessEq:
-		return core.NewBool(o.value.Equal(v) || o.value.Before(v)), nil
+		return core.BoolValue(o.value.Equal(v) || o.value.Before(v)), nil
 	case token.GreaterEq:
-		return core.NewBool(o.value.Equal(v) || o.value.After(v)), nil
+		return core.BoolValue(o.value.Equal(v) || o.value.After(v)), nil
 	}
 
-	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
 func (o *Time) Equals(x core.Value) bool {
@@ -96,162 +96,162 @@ func (o *Time) Method(vm core.VM, name string, args ...core.Value) (core.Value, 
 	switch name {
 	case "to_time":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.to_time", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.to_time", "0", len(args))
 		}
-		return core.NewObject(o), nil
+		return core.ObjectValue(o), nil
 
 	case "to_bool":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.to_bool", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.to_bool", "0", len(args))
 		}
-		return core.NewBool(o.IsTrue()), nil
+		return core.BoolValue(o.IsTrue()), nil
 
 	case "to_int":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.to_int", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.to_int", "0", len(args))
 		}
-		return core.NewInt(o.value.Unix()), nil
+		return core.IntValue(o.value.Unix()), nil
 
 	case "to_string":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.to_string", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.to_string", "0", len(args))
 		}
 		return vm.Allocator().NewStringValue(o.value.String()), nil
 
 	case "year":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.year", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.year", "0", len(args))
 		}
-		return core.NewInt(int64(o.value.Year())), nil
+		return core.IntValue(int64(o.value.Year())), nil
 
 	case "month":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.month", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.month", "0", len(args))
 		}
-		return core.NewInt(int64(o.value.Month())), nil
+		return core.IntValue(int64(o.value.Month())), nil
 
 	case "day":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.day", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.day", "0", len(args))
 		}
-		return core.NewInt(int64(o.value.Day())), nil
+		return core.IntValue(int64(o.value.Day())), nil
 
 	case "hour":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.hour", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.hour", "0", len(args))
 		}
-		return core.NewInt(int64(o.value.Hour())), nil
+		return core.IntValue(int64(o.value.Hour())), nil
 
 	case "minute":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.minute", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.minute", "0", len(args))
 		}
-		return core.NewInt(int64(o.value.Minute())), nil
+		return core.IntValue(int64(o.value.Minute())), nil
 
 	case "second":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.second", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.second", "0", len(args))
 		}
-		return core.NewInt(int64(o.value.Second())), nil
+		return core.IntValue(int64(o.value.Second())), nil
 
 	case "nanosecond":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.nanosecond", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.nanosecond", "0", len(args))
 		}
-		return core.NewInt(int64(o.value.Nanosecond())), nil
+		return core.IntValue(int64(o.value.Nanosecond())), nil
 
 	case "unix":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.unix", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.unix", "0", len(args))
 		}
-		return core.NewInt(o.value.Unix()), nil
+		return core.IntValue(o.value.Unix()), nil
 
 	case "unix_nano":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.unix_nano", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.unix_nano", "0", len(args))
 		}
-		return core.NewInt(o.value.UnixNano()), nil
+		return core.IntValue(o.value.UnixNano()), nil
 
 	case "week_day":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.week_day", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.week_day", "0", len(args))
 		}
-		return core.NewInt(int64(o.value.Weekday())), nil
+		return core.IntValue(int64(o.value.Weekday())), nil
 
 	case "year_day":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.year_day", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.year_day", "0", len(args))
 		}
-		return core.NewInt(int64(o.value.YearDay())), nil
+		return core.IntValue(int64(o.value.YearDay())), nil
 
 	case "month_name":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.month_name", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.month_name", "0", len(args))
 		}
 		return vm.Allocator().NewStringValue(o.value.Month().String()), nil
 
 	case "week_day_name":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.week_day_name", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.week_day_name", "0", len(args))
 		}
 		return vm.Allocator().NewStringValue(o.value.Weekday().String()), nil
 
 	case "to_utc":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.to_utc", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.to_utc", "0", len(args))
 		}
 		return vm.Allocator().NewTimeValue(o.value.UTC()), nil
 
 	case "to_local":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.to_local", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.to_local", "0", len(args))
 		}
 		return vm.Allocator().NewTimeValue(o.value.Local()), nil
 
 	case "to_date_string":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.to_date_string", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.to_date_string", "0", len(args))
 		}
 		return vm.Allocator().NewStringValue(o.value.Format(time.DateOnly)), nil
 
 	case "to_time_string":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.to_time_string", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.to_time_string", "0", len(args))
 		}
 		return vm.Allocator().NewStringValue(o.value.Format(time.TimeOnly)), nil
 
 	case "to_date_time_string":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.to_date_time_string", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.to_date_time_string", "0", len(args))
 		}
 		return vm.Allocator().NewStringValue(o.value.Format(time.DateTime)), nil
 
 	case "zone_offset":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.zone_offset", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.zone_offset", "0", len(args))
 		}
 		_, offset := o.value.Zone()
-		return core.NewInt(int64(offset)), nil
+		return core.IntValue(int64(offset)), nil
 
 	case "zone_name":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewWrongNumArgumentsError("time.zone_name", "0", len(args))
+			return core.UndefinedValue(), core.NewWrongNumArgumentsError("time.zone_name", "0", len(args))
 		}
 		name, _ := o.value.Zone()
 		return vm.Allocator().NewStringValue(name), nil
 
 	default:
-		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+		return core.UndefinedValue(), core.NewInvalidMethodError(name, o.TypeName())
 	}
 }
 
 func (o *Time) Access(vm core.VM, index core.Value, op core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return core.NewUndefined(), core.NewInvalidIndexTypeError("map access", "string", index.TypeName())
+		return core.UndefinedValue(), core.NewInvalidIndexTypeError("map access", "string", index.TypeName())
 	}
 
-	return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
+	return core.UndefinedValue(), core.NewInvalidSelectorError(o.TypeName(), k)
 }
 
 func (o *Time) Assign(core.Value, core.Value) error {

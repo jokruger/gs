@@ -96,33 +96,33 @@ func (a *Allocator) NewBuiltinFunction(name string, val core.NativeFunc, arity i
 }
 
 func (a *Allocator) NewStringValue(v string) core.Value {
-	return core.NewObject(a.NewString(v))
+	return core.ObjectValue(a.NewString(v))
 }
 
 func (a *Allocator) NewBytesValue(v []byte) core.Value {
-	return core.NewObject(a.NewBytes(v))
+	return core.ObjectValue(a.NewBytes(v))
 }
 
 func (a *Allocator) NewTimeValue(v time.Time) core.Value {
-	return core.NewObject(a.NewTime(v))
+	return core.ObjectValue(a.NewTime(v))
 }
 
 func (a *Allocator) NewErrorValue(v core.Value) core.Value {
-	return core.NewObject(a.NewError(v))
+	return core.ObjectValue(a.NewError(v))
 }
 
 func (a *Allocator) NewMapValue(v map[string]core.Value, immutable bool) core.Value {
-	return core.NewObject(a.NewMap(v, immutable))
+	return core.ObjectValue(a.NewMap(v, immutable))
 }
 
 func (a *Allocator) NewRecordValue(v map[string]core.Value, immutable bool) core.Value {
-	return core.NewObject(a.NewRecord(v, immutable))
+	return core.ObjectValue(a.NewRecord(v, immutable))
 }
 
 func (a *Allocator) NewArrayValue(v []core.Value, immutable bool) core.Value {
-	return core.NewObject(a.NewArray(v, immutable))
+	return core.ObjectValue(a.NewArray(v, immutable))
 }
 
 func (a *Allocator) NewBuiltinFunctionValue(name string, val core.NativeFunc, arity int, variadic bool) core.Value {
-	return core.NewObject(a.NewBuiltinFunction(name, val, arity, variadic))
+	return core.ObjectValue(a.NewBuiltinFunction(name, val, arity, variadic))
 }

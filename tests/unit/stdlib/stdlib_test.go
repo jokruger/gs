@@ -192,17 +192,17 @@ func object(v any) core.Value {
 	case string:
 		return alloc.NewStringValue(v)
 	case int64:
-		return core.NewInt(v)
+		return core.IntValue(v)
 	case int: // for convenience
-		return core.NewInt(int64(v))
+		return core.IntValue(int64(v))
 	case bool:
-		return core.NewBool(v)
+		return core.BoolValue(v)
 	case rune:
-		return core.NewChar(v)
+		return core.CharValue(v)
 	case byte: // for convenience
-		return core.NewChar(rune(v))
+		return core.CharValue(rune(v))
 	case float64:
-		return core.NewFloat(v)
+		return core.FloatValue(v)
 	case []byte:
 		return alloc.NewBytesValue(v)
 	case MAP:
@@ -234,7 +234,7 @@ func object(v any) core.Value {
 	case []int:
 		var objs []core.Value
 		for _, e := range v {
-			objs = append(objs, core.NewInt(int64(e)))
+			objs = append(objs, core.IntValue(int64(e)))
 		}
 		return alloc.NewArrayValue(objs, false)
 	}

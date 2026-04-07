@@ -51,7 +51,7 @@ func (o *Error) Interface() any {
 }
 
 func (o *Error) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
-	return core.NewUndefined(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
 func (o *Error) Equals(x core.Value) bool {
@@ -69,28 +69,28 @@ func (o *Error) Method(vm core.VM, name string, args ...core.Value) (core.Value,
 	switch name {
 	case "value":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewInvalidMethodError("error.value", o.TypeName())
+			return core.UndefinedValue(), core.NewInvalidMethodError("error.value", o.TypeName())
 		}
 		return o.value, nil
 
 	case "to_string":
 		if len(args) != 0 {
-			return core.NewUndefined(), core.NewInvalidMethodError("error.to_string", o.TypeName())
+			return core.UndefinedValue(), core.NewInvalidMethodError("error.to_string", o.TypeName())
 		}
 		s, _ := o.value.AsString()
 		return vm.Allocator().NewStringValue(s), nil
 
 	default:
-		return core.NewUndefined(), core.NewInvalidMethodError(name, o.TypeName())
+		return core.UndefinedValue(), core.NewInvalidMethodError(name, o.TypeName())
 	}
 }
 
 func (o *Error) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return core.NewUndefined(), core.NewInvalidIndexTypeError("error access", "string", index.TypeName())
+		return core.UndefinedValue(), core.NewInvalidIndexTypeError("error access", "string", index.TypeName())
 	}
-	return core.NewUndefined(), core.NewInvalidSelectorError(o.TypeName(), k)
+	return core.UndefinedValue(), core.NewInvalidSelectorError(o.TypeName(), k)
 }
 
 func (o *Error) Assign(core.Value, core.Value) error {

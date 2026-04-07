@@ -198,10 +198,10 @@ func (c *Compiler) Compile(node parser.Node) error {
 		}
 
 	case *parser.IntLit:
-		c.emit(node, parser.OpConstant, c.addConstant(core.NewInt(node.Value)))
+		c.emit(node, parser.OpConstant, c.addConstant(core.IntValue(node.Value)))
 
 	case *parser.FloatLit:
-		c.emit(node, parser.OpConstant, c.addConstant(core.NewFloat(node.Value)))
+		c.emit(node, parser.OpConstant, c.addConstant(core.FloatValue(node.Value)))
 
 	case *parser.BoolLit:
 		if node.Value {
@@ -217,7 +217,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewStringValue(node.Value)))
 
 	case *parser.CharLit:
-		c.emit(node, parser.OpConstant, c.addConstant(core.NewChar(node.Value)))
+		c.emit(node, parser.OpConstant, c.addConstant(core.CharValue(node.Value)))
 
 	case *parser.UndefinedLit:
 		c.emit(node, parser.OpNull)
@@ -489,9 +489,9 @@ func (c *Compiler) Compile(node parser.Node) error {
 			SourceMap:     sourceMap,
 		}
 		if len(freeSymbols) > 0 {
-			c.emit(node, parser.OpClosure, c.addConstant(core.NewObject(compiledFunction)), len(freeSymbols))
+			c.emit(node, parser.OpClosure, c.addConstant(core.ObjectValue(compiledFunction)), len(freeSymbols))
 		} else {
-			c.emit(node, parser.OpConstant, c.addConstant(core.NewObject(compiledFunction)))
+			c.emit(node, parser.OpConstant, c.addConstant(core.ObjectValue(compiledFunction)))
 		}
 
 	case *parser.ReturnStmt:
@@ -557,7 +557,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 				if err != nil {
 					return err
 				}
-				c.emit(node, parser.OpConstant, c.addConstant(core.NewObject(compiled)))
+				c.emit(node, parser.OpConstant, c.addConstant(core.ObjectValue(compiled)))
 				c.emit(node, parser.OpCall, 0, 0)
 			case core.Value: // builtin module
 				c.emit(node, parser.OpConstant, c.addConstant(v))
@@ -583,7 +583,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			if err != nil {
 				return err
 			}
-			c.emit(node, parser.OpConstant, c.addConstant(core.NewObject(compiled)))
+			c.emit(node, parser.OpConstant, c.addConstant(core.ObjectValue(compiled)))
 			c.emit(node, parser.OpCall, 0, 0)
 		} else {
 			return c.errorf(node, "module '%s' not found", node.ModuleName)

@@ -709,7 +709,7 @@ func (p *pp) free() {
 	}
 
 	p.buf = p.buf[:0]
-	p.arg = core.NewUndefined()
+	p.arg = core.UndefinedValue()
 	ppFree.Put(p)
 }
 

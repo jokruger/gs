@@ -101,19 +101,19 @@ func TestObject_TypeName(t *testing.T) {
 	var o core.Value
 	var obj core.Object
 
-	o = core.NewInt(0)
+	o = core.IntValue(0)
 	require.Equal(t, "int", o.TypeName())
 
-	o = core.NewFloat(0)
+	o = core.FloatValue(0)
 	require.Equal(t, "float", o.TypeName())
 
-	o = core.NewChar(0)
+	o = core.CharValue(0)
 	require.Equal(t, "char", o.TypeName())
 
 	o = alloc.NewStringValue("")
 	require.Equal(t, "string", o.TypeName())
 
-	o = core.NewBool(false)
+	o = core.BoolValue(false)
 	require.Equal(t, "bool", o.TypeName())
 
 	o = alloc.NewArrayValue(nil, false)
@@ -128,10 +128,10 @@ func TestObject_TypeName(t *testing.T) {
 	obj = &value.CompiledFunction{}
 	require.Equal(t, "<compiled-function/0>", obj.TypeName())
 
-	o = core.NewUndefined()
+	o = core.UndefinedValue()
 	require.Equal(t, "undefined", o.TypeName())
 
-	o = alloc.NewErrorValue(core.NewUndefined())
+	o = alloc.NewErrorValue(core.UndefinedValue())
 	require.Equal(t, "error", o.TypeName())
 
 	o = alloc.NewBytesValue(nil)
@@ -142,22 +142,22 @@ func TestObject_IsFalsy(t *testing.T) {
 	var o core.Value
 	var obj core.Object
 
-	o = core.NewInt(0)
+	o = core.IntValue(0)
 	require.True(t, o.IsFalse())
 
-	o = core.NewInt(1)
+	o = core.IntValue(1)
 	require.False(t, o.IsFalse())
 
-	o = core.NewFloat(0)
+	o = core.FloatValue(0)
 	require.False(t, o.IsFalse())
 
-	o = core.NewFloat(1)
+	o = core.FloatValue(1)
 	require.False(t, o.IsFalse())
 
-	o = core.NewChar(' ')
+	o = core.CharValue(' ')
 	require.False(t, o.IsFalse())
 
-	o = core.NewChar('T')
+	o = core.CharValue('T')
 	require.False(t, o.IsFalse())
 
 	o = alloc.NewStringValue("")
@@ -169,13 +169,13 @@ func TestObject_IsFalsy(t *testing.T) {
 	o = alloc.NewArrayValue(nil, false)
 	require.True(t, o.IsFalse())
 
-	o = alloc.NewArrayValue([]core.Value{core.NewUndefined()}, false)
+	o = alloc.NewArrayValue([]core.Value{core.UndefinedValue()}, false)
 	require.False(t, o.IsFalse())
 
 	o = alloc.NewRecordValue(nil, false)
 	require.True(t, o.IsFalse())
 
-	o = alloc.NewRecordValue(map[string]core.Value{"a": core.NewUndefined()}, false)
+	o = alloc.NewRecordValue(map[string]core.Value{"a": core.UndefinedValue()}, false)
 	require.False(t, o.IsFalse())
 
 	obj = alloc.NewBuiltinFunction("fn", nil, 0, false)
@@ -184,10 +184,10 @@ func TestObject_IsFalsy(t *testing.T) {
 	obj = &value.CompiledFunction{}
 	require.False(t, obj.IsFalse())
 
-	o = core.NewUndefined()
+	o = core.UndefinedValue()
 	require.True(t, o.IsFalse())
 
-	o = alloc.NewErrorValue(core.NewUndefined())
+	o = alloc.NewErrorValue(core.UndefinedValue())
 	require.True(t, o.IsFalse())
 
 	o = alloc.NewBytesValue(nil)
@@ -200,22 +200,22 @@ func TestObject_IsFalsy(t *testing.T) {
 func TestObject_String(t *testing.T) {
 	var o core.Value
 
-	o = core.NewInt(0)
+	o = core.IntValue(0)
 	require.Equal(t, "0", o.String())
 
-	o = core.NewInt(1)
+	o = core.IntValue(1)
 	require.Equal(t, "1", o.String())
 
-	o = core.NewFloat(0)
+	o = core.FloatValue(0)
 	require.Equal(t, "0", o.String())
 
-	o = core.NewFloat(1)
+	o = core.FloatValue(1)
 	require.Equal(t, "1", o.String())
 
-	o = core.NewChar(' ')
+	o = core.CharValue(' ')
 	require.Equal(t, "' '", o.String())
 
-	o = core.NewChar('T')
+	o = core.CharValue('T')
 	require.Equal(t, "'T'", o.String())
 
 	o = alloc.NewStringValue("")
@@ -230,13 +230,13 @@ func TestObject_String(t *testing.T) {
 	o = alloc.NewRecordValue(nil, false)
 	require.Equal(t, "{}", o.String())
 
-	o = alloc.NewErrorValue(core.NewUndefined())
+	o = alloc.NewErrorValue(core.UndefinedValue())
 	require.Equal(t, "error(undefined)", o.String())
 
 	o = alloc.NewErrorValue(alloc.NewStringValue("error 1"))
 	require.Equal(t, `error("error 1")`, o.String())
 
-	o = core.NewUndefined()
+	o = core.UndefinedValue()
 	require.Equal(t, "undefined", o.String())
 
 	o = alloc.NewBytesValue(nil)
@@ -250,32 +250,32 @@ func TestObject_BinaryOp(t *testing.T) {
 	var o core.Value
 	var obj core.Object
 
-	o = core.NewChar(0)
-	_, err := o.BinaryOp(vm, token.Add, core.NewUndefined())
+	o = core.CharValue(0)
+	_, err := o.BinaryOp(vm, token.Add, core.UndefinedValue())
 	require.Error(t, err)
 
-	o = core.NewBool(false)
-	_, err = o.BinaryOp(vm, token.Add, core.NewUndefined())
+	o = core.BoolValue(false)
+	_, err = o.BinaryOp(vm, token.Add, core.UndefinedValue())
 	require.Error(t, err)
 
 	o = alloc.NewRecordValue(nil, false)
-	_, err = o.BinaryOp(vm, token.Add, core.NewUndefined())
+	_, err = o.BinaryOp(vm, token.Add, core.UndefinedValue())
 	require.Error(t, err)
 
 	obj = alloc.NewBuiltinFunction("fn", nil, 0, false)
-	_, err = obj.BinaryOp(vm, token.Add, core.NewUndefined())
+	_, err = obj.BinaryOp(vm, token.Add, core.UndefinedValue())
 	require.Error(t, err)
 
 	obj = &value.CompiledFunction{}
-	_, err = obj.BinaryOp(vm, token.Add, core.NewUndefined())
+	_, err = obj.BinaryOp(vm, token.Add, core.UndefinedValue())
 	require.Error(t, err)
 
-	o = core.NewUndefined()
-	_, err = o.BinaryOp(vm, token.Add, core.NewUndefined())
+	o = core.UndefinedValue()
+	_, err = o.BinaryOp(vm, token.Add, core.UndefinedValue())
 	require.Error(t, err)
 
-	o = alloc.NewErrorValue(core.NewUndefined())
-	_, err = o.BinaryOp(vm, token.Add, core.NewUndefined())
+	o = alloc.NewErrorValue(core.UndefinedValue())
+	_, err = o.BinaryOp(vm, token.Add, core.UndefinedValue())
 	require.Error(t, err)
 }
 
@@ -291,45 +291,45 @@ func TestArray_BinaryOp(t *testing.T) {
 		alloc.NewArrayValue([]core.Value{}, false))
 	testBinaryOp(t, alloc.NewArrayValue(nil, false), token.Add,
 		alloc.NewArrayValue([]core.Value{
-			core.NewInt(1),
+			core.IntValue(1),
 		}, false), alloc.NewArrayValue([]core.Value{
-			core.NewInt(1),
+			core.IntValue(1),
 		}, false))
 	testBinaryOp(t, alloc.NewArrayValue(nil, false), token.Add,
 		alloc.NewArrayValue([]core.Value{
-			core.NewInt(1),
-			core.NewInt(2),
-			core.NewInt(3),
+			core.IntValue(1),
+			core.IntValue(2),
+			core.IntValue(3),
 		}, false), alloc.NewArrayValue([]core.Value{
-			core.NewInt(1),
-			core.NewInt(2),
-			core.NewInt(3),
+			core.IntValue(1),
+			core.IntValue(2),
+			core.IntValue(3),
 		}, false))
 	testBinaryOp(t, alloc.NewArrayValue([]core.Value{
-		core.NewInt(1),
-		core.NewInt(2),
-		core.NewInt(3),
+		core.IntValue(1),
+		core.IntValue(2),
+		core.IntValue(3),
 	}, false), token.Add, alloc.NewArrayValue(nil, false),
 		alloc.NewArrayValue([]core.Value{
-			core.NewInt(1),
-			core.NewInt(2),
-			core.NewInt(3),
+			core.IntValue(1),
+			core.IntValue(2),
+			core.IntValue(3),
 		}, false))
 	testBinaryOp(t, alloc.NewArrayValue([]core.Value{
-		core.NewInt(1),
-		core.NewInt(2),
-		core.NewInt(3),
+		core.IntValue(1),
+		core.IntValue(2),
+		core.IntValue(3),
 	}, false), token.Add, alloc.NewArrayValue([]core.Value{
-		core.NewInt(4),
-		core.NewInt(5),
-		core.NewInt(6),
+		core.IntValue(4),
+		core.IntValue(5),
+		core.IntValue(6),
 	}, false), alloc.NewArrayValue([]core.Value{
-		core.NewInt(1),
-		core.NewInt(2),
-		core.NewInt(3),
-		core.NewInt(4),
-		core.NewInt(5),
-		core.NewInt(6),
+		core.IntValue(1),
+		core.IntValue(2),
+		core.IntValue(3),
+		core.IntValue(4),
+		core.IntValue(5),
+		core.IntValue(6),
 	}, false))
 }
 
@@ -347,21 +347,21 @@ func TestError_Equals(t *testing.T) {
 	require.False(t, err1.Equals(err2))
 	require.False(t, err2.Equals(err1))
 
-	bool1 := core.NewBool(true)
-	bool2 := core.NewBool(true)
-	bool3 := core.NewBool(false)
+	bool1 := core.BoolValue(true)
+	bool2 := core.BoolValue(true)
+	bool3 := core.BoolValue(false)
 
-	char1 := core.NewChar('A')
-	char2 := core.NewChar('A')
-	char3 := core.NewChar('B')
+	char1 := core.CharValue('A')
+	char2 := core.CharValue('A')
+	char3 := core.CharValue('B')
 
-	int1 := core.NewInt(123)
-	int2 := core.NewInt(123)
-	int3 := core.NewInt(456)
+	int1 := core.IntValue(123)
+	int2 := core.IntValue(123)
+	int3 := core.IntValue(456)
 
-	float1 := core.NewFloat(3.14)
-	float2 := core.NewFloat(3.14)
-	float3 := core.NewFloat(2.71828)
+	float1 := core.FloatValue(3.14)
+	float2 := core.FloatValue(3.14)
+	float3 := core.FloatValue(2.71828)
 
 	string1 := alloc.NewStringValue("hello")
 	string2 := alloc.NewStringValue("hello")
@@ -371,28 +371,28 @@ func TestError_Equals(t *testing.T) {
 	bytes2 := alloc.NewBytesValue([]byte("foo"))
 	bytes3 := alloc.NewBytesValue([]byte("bar"))
 
-	array1 := alloc.NewArrayValue([]core.Value{core.NewInt(1), core.NewInt(2)}, false)
-	array2 := alloc.NewArrayValue([]core.Value{core.NewInt(1), core.NewInt(2)}, false)
-	array3 := alloc.NewArrayValue([]core.Value{core.NewInt(1), core.NewInt(3)}, false)
+	array1 := alloc.NewArrayValue([]core.Value{core.IntValue(1), core.IntValue(2)}, false)
+	array2 := alloc.NewArrayValue([]core.Value{core.IntValue(1), core.IntValue(2)}, false)
+	array3 := alloc.NewArrayValue([]core.Value{core.IntValue(1), core.IntValue(3)}, false)
 
-	map1 := alloc.NewRecordValue(map[string]core.Value{"a": core.NewInt(1)}, false)
-	map2 := alloc.NewRecordValue(map[string]core.Value{"a": core.NewInt(1)}, false)
-	map3 := alloc.NewRecordValue(map[string]core.Value{"a": core.NewInt(2)}, false)
+	map1 := alloc.NewRecordValue(map[string]core.Value{"a": core.IntValue(1)}, false)
+	map2 := alloc.NewRecordValue(map[string]core.Value{"a": core.IntValue(1)}, false)
+	map3 := alloc.NewRecordValue(map[string]core.Value{"a": core.IntValue(2)}, false)
 
-	record1 := alloc.NewRecordValue(map[string]core.Value{"a": core.NewInt(1)}, false)
-	record2 := alloc.NewRecordValue(map[string]core.Value{"a": core.NewInt(1)}, false)
-	record3 := alloc.NewRecordValue(map[string]core.Value{"a": core.NewInt(2)}, false)
+	record1 := alloc.NewRecordValue(map[string]core.Value{"a": core.IntValue(1)}, false)
+	record2 := alloc.NewRecordValue(map[string]core.Value{"a": core.IntValue(1)}, false)
+	record3 := alloc.NewRecordValue(map[string]core.Value{"a": core.IntValue(2)}, false)
 
 	// compare to undefined
-	require.False(t, bool1.Equals(core.NewUndefined()))
-	require.False(t, char1.Equals(core.NewUndefined()))
-	require.False(t, int1.Equals(core.NewUndefined()))
-	require.False(t, float1.Equals(core.NewUndefined()))
-	require.False(t, string1.Equals(core.NewUndefined()))
-	require.False(t, bytes1.Equals(core.NewUndefined()))
-	require.False(t, array1.Equals(core.NewUndefined()))
-	require.False(t, map1.Equals(core.NewUndefined()))
-	require.False(t, record1.Equals(core.NewUndefined()))
+	require.False(t, bool1.Equals(core.UndefinedValue()))
+	require.False(t, char1.Equals(core.UndefinedValue()))
+	require.False(t, int1.Equals(core.UndefinedValue()))
+	require.False(t, float1.Equals(core.UndefinedValue()))
+	require.False(t, string1.Equals(core.UndefinedValue()))
+	require.False(t, bytes1.Equals(core.UndefinedValue()))
+	require.False(t, array1.Equals(core.UndefinedValue()))
+	require.False(t, map1.Equals(core.UndefinedValue()))
+	require.False(t, record1.Equals(core.UndefinedValue()))
 
 	// compare to equal
 	require.True(t, bool1.Equals(bool2))
@@ -421,24 +421,24 @@ func TestFloat_BinaryOp(t *testing.T) {
 	// float + float
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := float64(-2); r <= 2.1; r += 0.4 {
-			testBinaryOp(t, core.NewFloat(l), token.Add,
-				core.NewFloat(r), core.NewFloat(l+r))
+			testBinaryOp(t, core.FloatValue(l), token.Add,
+				core.FloatValue(r), core.FloatValue(l+r))
 		}
 	}
 
 	// float - float
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := float64(-2); r <= 2.1; r += 0.4 {
-			testBinaryOp(t, core.NewFloat(l), token.Sub,
-				core.NewFloat(r), core.NewFloat(l-r))
+			testBinaryOp(t, core.FloatValue(l), token.Sub,
+				core.FloatValue(r), core.FloatValue(l-r))
 		}
 	}
 
 	// float * float
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := float64(-2); r <= 2.1; r += 0.4 {
-			testBinaryOp(t, core.NewFloat(l), token.Mul,
-				core.NewFloat(r), core.NewFloat(l*r))
+			testBinaryOp(t, core.FloatValue(l), token.Mul,
+				core.FloatValue(r), core.FloatValue(l*r))
 		}
 	}
 
@@ -446,8 +446,8 @@ func TestFloat_BinaryOp(t *testing.T) {
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := float64(-2); r <= 2.1; r += 0.4 {
 			if r != 0 {
-				testBinaryOp(t, core.NewFloat(l), token.Quo,
-					core.NewFloat(r), core.NewFloat(l/r))
+				testBinaryOp(t, core.FloatValue(l), token.Quo,
+					core.FloatValue(r), core.FloatValue(l/r))
 			}
 		}
 	}
@@ -455,56 +455,56 @@ func TestFloat_BinaryOp(t *testing.T) {
 	// float < float
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := float64(-2); r <= 2.1; r += 0.4 {
-			testBinaryOp(t, core.NewFloat(l), token.Less,
-				core.NewFloat(r), boolValue(l < r))
+			testBinaryOp(t, core.FloatValue(l), token.Less,
+				core.FloatValue(r), boolValue(l < r))
 		}
 	}
 
 	// float > float
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := float64(-2); r <= 2.1; r += 0.4 {
-			testBinaryOp(t, core.NewFloat(l), token.Greater,
-				core.NewFloat(r), boolValue(l > r))
+			testBinaryOp(t, core.FloatValue(l), token.Greater,
+				core.FloatValue(r), boolValue(l > r))
 		}
 	}
 
 	// float <= float
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := float64(-2); r <= 2.1; r += 0.4 {
-			testBinaryOp(t, core.NewFloat(l), token.LessEq,
-				core.NewFloat(r), boolValue(l <= r))
+			testBinaryOp(t, core.FloatValue(l), token.LessEq,
+				core.FloatValue(r), boolValue(l <= r))
 		}
 	}
 
 	// float >= float
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := float64(-2); r <= 2.1; r += 0.4 {
-			testBinaryOp(t, core.NewFloat(l), token.GreaterEq,
-				core.NewFloat(r), boolValue(l >= r))
+			testBinaryOp(t, core.FloatValue(l), token.GreaterEq,
+				core.FloatValue(r), boolValue(l >= r))
 		}
 	}
 
 	// float + int
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewFloat(l), token.Add,
-				core.NewInt(r), core.NewFloat(l+float64(r)))
+			testBinaryOp(t, core.FloatValue(l), token.Add,
+				core.IntValue(r), core.FloatValue(l+float64(r)))
 		}
 	}
 
 	// float - int
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewFloat(l), token.Sub,
-				core.NewInt(r), core.NewFloat(l-float64(r)))
+			testBinaryOp(t, core.FloatValue(l), token.Sub,
+				core.IntValue(r), core.FloatValue(l-float64(r)))
 		}
 	}
 
 	// float * int
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewFloat(l), token.Mul,
-				core.NewInt(r), core.NewFloat(l*float64(r)))
+			testBinaryOp(t, core.FloatValue(l), token.Mul,
+				core.IntValue(r), core.FloatValue(l*float64(r)))
 		}
 	}
 
@@ -512,9 +512,9 @@ func TestFloat_BinaryOp(t *testing.T) {
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := int64(-2); r <= 2; r++ {
 			if r != 0 {
-				testBinaryOp(t, core.NewFloat(l), token.Quo,
-					core.NewInt(r),
-					core.NewFloat(l/float64(r)))
+				testBinaryOp(t, core.FloatValue(l), token.Quo,
+					core.IntValue(r),
+					core.FloatValue(l/float64(r)))
 			}
 		}
 	}
@@ -522,32 +522,32 @@ func TestFloat_BinaryOp(t *testing.T) {
 	// float < int
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewFloat(l), token.Less,
-				core.NewInt(r), boolValue(l < float64(r)))
+			testBinaryOp(t, core.FloatValue(l), token.Less,
+				core.IntValue(r), boolValue(l < float64(r)))
 		}
 	}
 
 	// float > int
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewFloat(l), token.Greater,
-				core.NewInt(r), boolValue(l > float64(r)))
+			testBinaryOp(t, core.FloatValue(l), token.Greater,
+				core.IntValue(r), boolValue(l > float64(r)))
 		}
 	}
 
 	// float <= int
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewFloat(l), token.LessEq,
-				core.NewInt(r), boolValue(l <= float64(r)))
+			testBinaryOp(t, core.FloatValue(l), token.LessEq,
+				core.IntValue(r), boolValue(l <= float64(r)))
 		}
 	}
 
 	// float >= int
 	for l := float64(-2); l <= 2.1; l += 0.4 {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewFloat(l), token.GreaterEq,
-				core.NewInt(r), boolValue(l >= float64(r)))
+			testBinaryOp(t, core.FloatValue(l), token.GreaterEq,
+				core.IntValue(r), boolValue(l >= float64(r)))
 		}
 	}
 }
@@ -556,24 +556,24 @@ func TestInt_BinaryOp(t *testing.T) {
 	// int + int
 	for l := int64(-2); l <= 2; l++ {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewInt(l), token.Add,
-				core.NewInt(r), core.NewInt(l+r))
+			testBinaryOp(t, core.IntValue(l), token.Add,
+				core.IntValue(r), core.IntValue(l+r))
 		}
 	}
 
 	// int - int
 	for l := int64(-2); l <= 2; l++ {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewInt(l), token.Sub,
-				core.NewInt(r), core.NewInt(l-r))
+			testBinaryOp(t, core.IntValue(l), token.Sub,
+				core.IntValue(r), core.IntValue(l-r))
 		}
 	}
 
 	// int * int
 	for l := int64(-2); l <= 2; l++ {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewInt(l), token.Mul,
-				core.NewInt(r), core.NewInt(l*r))
+			testBinaryOp(t, core.IntValue(l), token.Mul,
+				core.IntValue(r), core.IntValue(l*r))
 		}
 	}
 
@@ -581,8 +581,8 @@ func TestInt_BinaryOp(t *testing.T) {
 	for l := int64(-2); l <= 2; l++ {
 		for r := int64(-2); r <= 2; r++ {
 			if r != 0 {
-				testBinaryOp(t, core.NewInt(l), token.Quo,
-					core.NewInt(r), core.NewInt(l/r))
+				testBinaryOp(t, core.IntValue(l), token.Quo,
+					core.IntValue(r), core.IntValue(l/r))
 			}
 		}
 	}
@@ -591,243 +591,243 @@ func TestInt_BinaryOp(t *testing.T) {
 	for l := int64(-4); l <= 4; l++ {
 		for r := -int64(-4); r <= 4; r++ {
 			if r == 0 {
-				testBinaryOp(t, core.NewInt(l), token.Rem,
-					core.NewInt(r), core.NewInt(l%r))
+				testBinaryOp(t, core.IntValue(l), token.Rem,
+					core.IntValue(r), core.IntValue(l%r))
 			}
 		}
 	}
 
 	// int & int
 	testBinaryOp(t,
-		core.NewInt(0), token.And, core.NewInt(0),
-		core.NewInt(int64(0)))
+		core.IntValue(0), token.And, core.IntValue(0),
+		core.IntValue(int64(0)))
 	testBinaryOp(t,
-		core.NewInt(1), token.And, core.NewInt(0),
-		core.NewInt(int64(1)&int64(0)))
+		core.IntValue(1), token.And, core.IntValue(0),
+		core.IntValue(int64(1)&int64(0)))
 	testBinaryOp(t,
-		core.NewInt(0), token.And, core.NewInt(1),
-		core.NewInt(int64(0)&int64(1)))
+		core.IntValue(0), token.And, core.IntValue(1),
+		core.IntValue(int64(0)&int64(1)))
 	testBinaryOp(t,
-		core.NewInt(1), token.And, core.NewInt(1),
-		core.NewInt(int64(1)))
+		core.IntValue(1), token.And, core.IntValue(1),
+		core.IntValue(int64(1)))
 	testBinaryOp(t,
-		core.NewInt(0), token.And, core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(0)&int64(0xffffffff)))
+		core.IntValue(0), token.And, core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(0)&int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(1), token.And, core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(1)&int64(0xffffffff)))
+		core.IntValue(1), token.And, core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(1)&int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(int64(0xffffffff)), token.And,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(0xffffffff)))
+		core.IntValue(int64(0xffffffff)), token.And,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(1984), token.And,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(1984)&int64(0xffffffff)))
-	testBinaryOp(t, core.NewInt(-1984), token.And,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(-1984)&int64(0xffffffff)))
+		core.IntValue(1984), token.And,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(1984)&int64(0xffffffff)))
+	testBinaryOp(t, core.IntValue(-1984), token.And,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(-1984)&int64(0xffffffff)))
 
 	// int | int
 	testBinaryOp(t,
-		core.NewInt(0), token.Or, core.NewInt(0),
-		core.NewInt(int64(0)))
+		core.IntValue(0), token.Or, core.IntValue(0),
+		core.IntValue(int64(0)))
 	testBinaryOp(t,
-		core.NewInt(1), token.Or, core.NewInt(0),
-		core.NewInt(int64(1)|int64(0)))
+		core.IntValue(1), token.Or, core.IntValue(0),
+		core.IntValue(int64(1)|int64(0)))
 	testBinaryOp(t,
-		core.NewInt(0), token.Or, core.NewInt(1),
-		core.NewInt(int64(0)|int64(1)))
+		core.IntValue(0), token.Or, core.IntValue(1),
+		core.IntValue(int64(0)|int64(1)))
 	testBinaryOp(t,
-		core.NewInt(1), token.Or, core.NewInt(1),
-		core.NewInt(int64(1)))
+		core.IntValue(1), token.Or, core.IntValue(1),
+		core.IntValue(int64(1)))
 	testBinaryOp(t,
-		core.NewInt(0), token.Or, core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(0)|int64(0xffffffff)))
+		core.IntValue(0), token.Or, core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(0)|int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(1), token.Or, core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(1)|int64(0xffffffff)))
+		core.IntValue(1), token.Or, core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(1)|int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(int64(0xffffffff)), token.Or,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(0xffffffff)))
+		core.IntValue(int64(0xffffffff)), token.Or,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(1984), token.Or,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(1984)|int64(0xffffffff)))
+		core.IntValue(1984), token.Or,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(1984)|int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(-1984), token.Or,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(-1984)|int64(0xffffffff)))
+		core.IntValue(-1984), token.Or,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(-1984)|int64(0xffffffff)))
 
 	// int ^ int
 	testBinaryOp(t,
-		core.NewInt(0), token.Xor, core.NewInt(0),
-		core.NewInt(int64(0)))
+		core.IntValue(0), token.Xor, core.IntValue(0),
+		core.IntValue(int64(0)))
 	testBinaryOp(t,
-		core.NewInt(1), token.Xor, core.NewInt(0),
-		core.NewInt(int64(1)^int64(0)))
+		core.IntValue(1), token.Xor, core.IntValue(0),
+		core.IntValue(int64(1)^int64(0)))
 	testBinaryOp(t,
-		core.NewInt(0), token.Xor, core.NewInt(1),
-		core.NewInt(int64(0)^int64(1)))
+		core.IntValue(0), token.Xor, core.IntValue(1),
+		core.IntValue(int64(0)^int64(1)))
 	testBinaryOp(t,
-		core.NewInt(1), token.Xor, core.NewInt(1),
-		core.NewInt(int64(0)))
+		core.IntValue(1), token.Xor, core.IntValue(1),
+		core.IntValue(int64(0)))
 	testBinaryOp(t,
-		core.NewInt(0), token.Xor, core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(0)^int64(0xffffffff)))
+		core.IntValue(0), token.Xor, core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(0)^int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(1), token.Xor, core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(1)^int64(0xffffffff)))
+		core.IntValue(1), token.Xor, core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(1)^int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(int64(0xffffffff)), token.Xor,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(0)))
+		core.IntValue(int64(0xffffffff)), token.Xor,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(0)))
 	testBinaryOp(t,
-		core.NewInt(1984), token.Xor,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(1984)^int64(0xffffffff)))
+		core.IntValue(1984), token.Xor,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(1984)^int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(-1984), token.Xor,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(-1984)^int64(0xffffffff)))
+		core.IntValue(-1984), token.Xor,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(-1984)^int64(0xffffffff)))
 
 	// int &^ int
 	testBinaryOp(t,
-		core.NewInt(0), token.AndNot, core.NewInt(0),
-		core.NewInt(int64(0)))
+		core.IntValue(0), token.AndNot, core.IntValue(0),
+		core.IntValue(int64(0)))
 	testBinaryOp(t,
-		core.NewInt(1), token.AndNot, core.NewInt(0),
-		core.NewInt(int64(1)&^int64(0)))
+		core.IntValue(1), token.AndNot, core.IntValue(0),
+		core.IntValue(int64(1)&^int64(0)))
 	testBinaryOp(t,
-		core.NewInt(0), token.AndNot,
-		core.NewInt(1), core.NewInt(int64(0)&^int64(1)))
+		core.IntValue(0), token.AndNot,
+		core.IntValue(1), core.IntValue(int64(0)&^int64(1)))
 	testBinaryOp(t,
-		core.NewInt(1), token.AndNot, core.NewInt(1),
-		core.NewInt(int64(0)))
+		core.IntValue(1), token.AndNot, core.IntValue(1),
+		core.IntValue(int64(0)))
 	testBinaryOp(t,
-		core.NewInt(0), token.AndNot,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(0)&^int64(0xffffffff)))
+		core.IntValue(0), token.AndNot,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(0)&^int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(1), token.AndNot,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(1)&^int64(0xffffffff)))
+		core.IntValue(1), token.AndNot,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(1)&^int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(int64(0xffffffff)), token.AndNot,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(0)))
+		core.IntValue(int64(0xffffffff)), token.AndNot,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(0)))
 	testBinaryOp(t,
-		core.NewInt(1984), token.AndNot,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(1984)&^int64(0xffffffff)))
+		core.IntValue(1984), token.AndNot,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(1984)&^int64(0xffffffff)))
 	testBinaryOp(t,
-		core.NewInt(-1984), token.AndNot,
-		core.NewInt(int64(0xffffffff)),
-		core.NewInt(int64(-1984)&^int64(0xffffffff)))
+		core.IntValue(-1984), token.AndNot,
+		core.IntValue(int64(0xffffffff)),
+		core.IntValue(int64(-1984)&^int64(0xffffffff)))
 
 	// int << int
 	for s := int64(0); s < 64; s++ {
 		testBinaryOp(t,
-			core.NewInt(0), token.Shl, core.NewInt(s),
-			core.NewInt(int64(0)<<uint(s)))
+			core.IntValue(0), token.Shl, core.IntValue(s),
+			core.IntValue(int64(0)<<uint(s)))
 		testBinaryOp(t,
-			core.NewInt(1), token.Shl, core.NewInt(s),
-			core.NewInt(int64(1)<<uint(s)))
+			core.IntValue(1), token.Shl, core.IntValue(s),
+			core.IntValue(int64(1)<<uint(s)))
 		testBinaryOp(t,
-			core.NewInt(2), token.Shl, core.NewInt(s),
-			core.NewInt(int64(2)<<uint(s)))
+			core.IntValue(2), token.Shl, core.IntValue(s),
+			core.IntValue(int64(2)<<uint(s)))
 		testBinaryOp(t,
-			core.NewInt(-1), token.Shl, core.NewInt(s),
-			core.NewInt(int64(-1)<<uint(s)))
+			core.IntValue(-1), token.Shl, core.IntValue(s),
+			core.IntValue(int64(-1)<<uint(s)))
 		testBinaryOp(t,
-			core.NewInt(-2), token.Shl, core.NewInt(s),
-			core.NewInt(int64(-2)<<uint(s)))
+			core.IntValue(-2), token.Shl, core.IntValue(s),
+			core.IntValue(int64(-2)<<uint(s)))
 		testBinaryOp(t,
-			core.NewInt(int64(0xffffffff)), token.Shl,
-			core.NewInt(s),
-			core.NewInt(int64(0xffffffff)<<uint(s)))
+			core.IntValue(int64(0xffffffff)), token.Shl,
+			core.IntValue(s),
+			core.IntValue(int64(0xffffffff)<<uint(s)))
 	}
 
 	// int >> int
 	for s := int64(0); s < 64; s++ {
 		testBinaryOp(t,
-			core.NewInt(0), token.Shr, core.NewInt(s),
-			core.NewInt(int64(0)>>uint(s)))
+			core.IntValue(0), token.Shr, core.IntValue(s),
+			core.IntValue(int64(0)>>uint(s)))
 		testBinaryOp(t,
-			core.NewInt(1), token.Shr, core.NewInt(s),
-			core.NewInt(int64(1)>>uint(s)))
+			core.IntValue(1), token.Shr, core.IntValue(s),
+			core.IntValue(int64(1)>>uint(s)))
 		testBinaryOp(t,
-			core.NewInt(2), token.Shr, core.NewInt(s),
-			core.NewInt(int64(2)>>uint(s)))
+			core.IntValue(2), token.Shr, core.IntValue(s),
+			core.IntValue(int64(2)>>uint(s)))
 		testBinaryOp(t,
-			core.NewInt(-1), token.Shr, core.NewInt(s),
-			core.NewInt(int64(-1)>>uint(s)))
+			core.IntValue(-1), token.Shr, core.IntValue(s),
+			core.IntValue(int64(-1)>>uint(s)))
 		testBinaryOp(t,
-			core.NewInt(-2), token.Shr, core.NewInt(s),
-			core.NewInt(int64(-2)>>uint(s)))
+			core.IntValue(-2), token.Shr, core.IntValue(s),
+			core.IntValue(int64(-2)>>uint(s)))
 		testBinaryOp(t,
-			core.NewInt(int64(0xffffffff)), token.Shr,
-			core.NewInt(s),
-			core.NewInt(int64(0xffffffff)>>uint(s)))
+			core.IntValue(int64(0xffffffff)), token.Shr,
+			core.IntValue(s),
+			core.IntValue(int64(0xffffffff)>>uint(s)))
 	}
 
 	// int < int
 	for l := int64(-2); l <= 2; l++ {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewInt(l), token.Less,
-				core.NewInt(r), boolValue(l < r))
+			testBinaryOp(t, core.IntValue(l), token.Less,
+				core.IntValue(r), boolValue(l < r))
 		}
 	}
 
 	// int > int
 	for l := int64(-2); l <= 2; l++ {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewInt(l), token.Greater,
-				core.NewInt(r), boolValue(l > r))
+			testBinaryOp(t, core.IntValue(l), token.Greater,
+				core.IntValue(r), boolValue(l > r))
 		}
 	}
 
 	// int <= int
 	for l := int64(-2); l <= 2; l++ {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewInt(l), token.LessEq,
-				core.NewInt(r), boolValue(l <= r))
+			testBinaryOp(t, core.IntValue(l), token.LessEq,
+				core.IntValue(r), boolValue(l <= r))
 		}
 	}
 
 	// int >= int
 	for l := int64(-2); l <= 2; l++ {
 		for r := int64(-2); r <= 2; r++ {
-			testBinaryOp(t, core.NewInt(l), token.GreaterEq,
-				core.NewInt(r), boolValue(l >= r))
+			testBinaryOp(t, core.IntValue(l), token.GreaterEq,
+				core.IntValue(r), boolValue(l >= r))
 		}
 	}
 
 	// int + float
 	for l := int64(-2); l <= 2; l++ {
 		for r := float64(-2); r <= 2.1; r += 0.5 {
-			testBinaryOp(t, core.NewInt(l), token.Add,
-				core.NewFloat(r),
-				core.NewFloat(float64(l)+r))
+			testBinaryOp(t, core.IntValue(l), token.Add,
+				core.FloatValue(r),
+				core.FloatValue(float64(l)+r))
 		}
 	}
 
 	// int - float
 	for l := int64(-2); l <= 2; l++ {
 		for r := float64(-2); r <= 2.1; r += 0.5 {
-			testBinaryOp(t, core.NewInt(l), token.Sub,
-				core.NewFloat(r),
-				core.NewFloat(float64(l)-r))
+			testBinaryOp(t, core.IntValue(l), token.Sub,
+				core.FloatValue(r),
+				core.FloatValue(float64(l)-r))
 		}
 	}
 
 	// int * float
 	for l := int64(-2); l <= 2; l++ {
 		for r := float64(-2); r <= 2.1; r += 0.5 {
-			testBinaryOp(t, core.NewInt(l), token.Mul,
-				core.NewFloat(r),
-				core.NewFloat(float64(l)*r))
+			testBinaryOp(t, core.IntValue(l), token.Mul,
+				core.FloatValue(r),
+				core.FloatValue(float64(l)*r))
 		}
 	}
 
@@ -835,9 +835,9 @@ func TestInt_BinaryOp(t *testing.T) {
 	for l := int64(-2); l <= 2; l++ {
 		for r := float64(-2); r <= 2.1; r += 0.5 {
 			if r != 0 {
-				testBinaryOp(t, core.NewInt(l), token.Quo,
-					core.NewFloat(r),
-					core.NewFloat(float64(l)/r))
+				testBinaryOp(t, core.IntValue(l), token.Quo,
+					core.FloatValue(r),
+					core.FloatValue(float64(l)/r))
 			}
 		}
 	}
@@ -845,39 +845,39 @@ func TestInt_BinaryOp(t *testing.T) {
 	// int < float
 	for l := int64(-2); l <= 2; l++ {
 		for r := float64(-2); r <= 2.1; r += 0.5 {
-			testBinaryOp(t, core.NewInt(l), token.Less,
-				core.NewFloat(r), boolValue(float64(l) < r))
+			testBinaryOp(t, core.IntValue(l), token.Less,
+				core.FloatValue(r), boolValue(float64(l) < r))
 		}
 	}
 
 	// int > float
 	for l := int64(-2); l <= 2; l++ {
 		for r := float64(-2); r <= 2.1; r += 0.5 {
-			testBinaryOp(t, core.NewInt(l), token.Greater,
-				core.NewFloat(r), boolValue(float64(l) > r))
+			testBinaryOp(t, core.IntValue(l), token.Greater,
+				core.FloatValue(r), boolValue(float64(l) > r))
 		}
 	}
 
 	// int <= float
 	for l := int64(-2); l <= 2; l++ {
 		for r := float64(-2); r <= 2.1; r += 0.5 {
-			testBinaryOp(t, core.NewInt(l), token.LessEq,
-				core.NewFloat(r), boolValue(float64(l) <= r))
+			testBinaryOp(t, core.IntValue(l), token.LessEq,
+				core.FloatValue(r), boolValue(float64(l) <= r))
 		}
 	}
 
 	// int >= float
 	for l := int64(-2); l <= 2; l++ {
 		for r := float64(-2); r <= 2.1; r += 0.5 {
-			testBinaryOp(t, core.NewInt(l), token.GreaterEq,
-				core.NewFloat(r), boolValue(float64(l) >= r))
+			testBinaryOp(t, core.IntValue(l), token.GreaterEq,
+				core.FloatValue(r), boolValue(float64(l) >= r))
 		}
 	}
 }
 
 func TestRecord_Index(t *testing.T) {
 	m := alloc.NewRecordValue(make(map[string]core.Value), false)
-	k := core.NewInt(1)
+	k := core.IntValue(1)
 	v := alloc.NewStringValue("abcdef")
 	err := m.Assign(k, v)
 
@@ -901,7 +901,7 @@ func TestString_BinaryOp(t *testing.T) {
 
 			rc := []rune(rstr)[r]
 			testBinaryOp(t, alloc.NewStringValue(ls), token.Add,
-				core.NewChar(rc),
+				core.CharValue(rc),
 				alloc.NewStringValue(ls+string(rc)))
 		}
 	}
@@ -915,5 +915,5 @@ func testBinaryOp(t *testing.T, lhs core.Value, op token.Token, rhs core.Value, 
 }
 
 func boolValue(b bool) core.Value {
-	return core.NewBool(b)
+	return core.BoolValue(b)
 }

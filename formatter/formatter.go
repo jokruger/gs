@@ -7,6 +7,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/errs"
 )
 
 // Strings for use with fmtbuf.WriteString. This is less overhead than using fmtbuf.Write with byte arrays.
@@ -85,7 +86,7 @@ func (f *formatter) writePadding(n int) {
 	newLen := oldLen + n
 
 	if newLen > core.MaxStringLen {
-		panic(core.NewStringLimitError("formatter.writePadding"))
+		panic(errs.NewStringLimitError("formatter.writePadding"))
 	}
 
 	// Make enough room for padding.
@@ -620,7 +621,7 @@ type fmtbuf []byte
 
 func (b *fmtbuf) Write(p []byte) {
 	if len(*b)+len(p) > core.MaxStringLen {
-		panic(core.NewStringLimitError("formatter.Write"))
+		panic(errs.NewStringLimitError("formatter.Write"))
 	}
 
 	*b = append(*b, p...)
@@ -628,7 +629,7 @@ func (b *fmtbuf) Write(p []byte) {
 
 func (b *fmtbuf) WriteString(s string) {
 	if len(*b)+len(s) > core.MaxStringLen {
-		panic(core.NewStringLimitError("formatter.WriteString"))
+		panic(errs.NewStringLimitError("formatter.WriteString"))
 	}
 
 	*b = append(*b, s...)
@@ -636,7 +637,7 @@ func (b *fmtbuf) WriteString(s string) {
 
 func (b *fmtbuf) WriteSingleByte(c byte) {
 	if len(*b) >= core.MaxStringLen {
-		panic(core.NewStringLimitError("formatter.WriteSingleByte"))
+		panic(errs.NewStringLimitError("formatter.WriteSingleByte"))
 	}
 
 	*b = append(*b, c)
@@ -644,7 +645,7 @@ func (b *fmtbuf) WriteSingleByte(c byte) {
 
 func (b *fmtbuf) WriteRune(r rune) {
 	if len(*b)+utf8.RuneLen(r) > core.MaxStringLen {
-		panic(core.NewStringLimitError("formatter.WriteRune"))
+		panic(errs.NewStringLimitError("formatter.WriteRune"))
 	}
 
 	if r < utf8.RuneSelf {
@@ -1040,7 +1041,7 @@ func (p *pp) missingArg(verb rune) {
 func (p *pp) doFormat(format string, a []core.Value) (err error) {
 	defer func() {
 		if r := recover(); r != nil {
-			if e, ok := r.(error); ok && errors.Is(e, core.ErrStringLimit) {
+			if e, ok := r.(error); ok && errors.Is(e, errs.ErrStringLimit) {
 				err = e
 				return
 			}

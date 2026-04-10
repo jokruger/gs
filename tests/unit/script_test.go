@@ -13,6 +13,7 @@ import (
 
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/stdlib"
 	"github.com/jokruger/gs/tests/require"
 	"github.com/jokruger/gs/token"
@@ -544,7 +545,7 @@ func (n *customNumber) String() string {
 func (n *customNumber) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
 	i, ok := rhs.AsInt()
 	if !ok {
-		return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), n.TypeName(), rhs.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), n.TypeName(), rhs.TypeName())
 	}
 	return n.binaryOpInt(op, i)
 }
@@ -563,7 +564,7 @@ func (n *customNumber) binaryOpInt(op token.Token, rhs int64) (core.Value, error
 		return core.BoolValue(i >= rhs), nil
 	}
 	t := core.IntValue(i)
-	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), n.TypeName(), t.TypeName())
+	return core.UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), n.TypeName(), t.TypeName())
 }
 
 func TestScript_ImportError(t *testing.T) {

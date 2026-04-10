@@ -1,4 +1,4 @@
-package core
+package errs
 
 import (
 	"errors"
@@ -6,13 +6,11 @@ import (
 )
 
 var (
-	ErrLogicError            = errors.New("logic error")
+	ErrLogic                 = errors.New("logic error")
 	ErrStackOverflow         = errors.New("stack overflow")
 	ErrObjectAllocLimit      = errors.New("object allocation limit exceeded")
 	ErrBytesLimit            = errors.New("bytes size limit exceeded")
 	ErrStringLimit           = errors.New("string size limit exceeded")
-	ErrDecodeBinarySize      = errors.New("invalid binary size")
-	ErrBinaryNotSupported    = errors.New("binary serialization not supported")
 	ErrInvalidArgumentType   = errors.New("invalid argument type")
 	ErrIndexOutOfBounds      = errors.New("index out of bounds")
 	ErrWrongNumArguments     = errors.New("wrong number of arguments")
@@ -25,11 +23,12 @@ var (
 	ErrNotImplemented        = errors.New("not implemented")
 	ErrInvalidBinaryOperator = errors.New("invalid binary operator")
 	ErrInvalidValueKind      = errors.New("invalid value kind")
-	ErrInvalidMethodError    = errors.New("invalid method error")
+	ErrInvalidMethod         = errors.New("invalid method error")
+	ErrInvalidBinarySize     = errors.New("invalid binary size")
 )
 
 func NewLogicError(context string) error {
-	return fmt.Errorf("%w: %s", ErrLogicError, context)
+	return fmt.Errorf("%w: %s", ErrLogic, context)
 }
 
 func NewStackOverflowError(context string) error {
@@ -46,14 +45,6 @@ func NewBytesLimitError(context string) error {
 
 func NewStringLimitError(context string) error {
 	return fmt.Errorf("%w: %s", ErrStringLimit, context)
-}
-
-func NewDecodeBinarySizeError(valType string, expected int, got int) error {
-	return fmt.Errorf("%w: type %s expects %d bytes, got %d", ErrDecodeBinarySize, valType, expected, got)
-}
-
-func NewBinaryNotSupportedError(valType string) error {
-	return fmt.Errorf("%w: type %s", ErrBinaryNotSupported, valType)
 }
 
 func NewInvalidArgumentTypeError(context string, name string, expected string, got string) error {
@@ -100,10 +91,10 @@ func NewInvalidBinaryOperatorError(op string, left string, right string) error {
 	return fmt.Errorf("%w: %s %s %s", ErrInvalidBinaryOperator, left, op, right)
 }
 
-func NewInvalidValueKindError(kind ValueKind) error {
-	return fmt.Errorf("%w: %d", ErrInvalidValueKind, kind)
+func NewInvalidMethodError(method string, valType string) error {
+	return fmt.Errorf("%w: type %s has no method %s", ErrInvalidMethod, valType, method)
 }
 
-func NewInvalidMethodError(method string, valType string) error {
-	return fmt.Errorf("%w: type %s has no method %s", ErrInvalidMethodError, valType, method)
+func NewInvalidBinarySizeError(valType string, expected int, got int) error {
+	return fmt.Errorf("%w: type %s expects binary size %d, got %d", ErrInvalidBinarySize, valType, expected, got)
 }

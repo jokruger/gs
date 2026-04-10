@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
 	"github.com/jokruger/gs/vm"
@@ -211,7 +212,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 
 	case *parser.StringLit:
 		if len(node.Value) > core.MaxStringLen {
-			return c.error(node, core.NewStringLimitError("string literal compiler"))
+			return c.error(node, errs.NewStringLimitError("string literal compiler"))
 		}
 		c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewStringValue(node.Value)))
 
@@ -357,7 +358,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		for _, elt := range node.Elements {
 			// key
 			if len(elt.Key) > core.MaxStringLen {
-				return c.error(node, core.NewStringLimitError("map literal key compiler"))
+				return c.error(node, errs.NewStringLimitError("map literal key compiler"))
 			}
 			c.emit(node, parser.OpConstant, c.addConstant(c.alloc.NewStringValue(elt.Key)))
 

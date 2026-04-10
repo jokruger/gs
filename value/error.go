@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/token"
 )
 
@@ -51,7 +52,7 @@ func (o *Error) Interface() any {
 }
 
 func (o *Error) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
-	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+	return core.UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
 func (o *Error) Equals(x core.Value) bool {
@@ -69,32 +70,32 @@ func (o *Error) Method(vm core.VM, name string, args []core.Value) (core.Value, 
 	switch name {
 	case "value":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewInvalidMethodError("error.value", o.TypeName())
+			return core.UndefinedValue(), errs.NewInvalidMethodError("error.value", o.TypeName())
 		}
 		return o.value, nil
 
 	case "to_string":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewInvalidMethodError("error.to_string", o.TypeName())
+			return core.UndefinedValue(), errs.NewInvalidMethodError("error.to_string", o.TypeName())
 		}
 		s, _ := o.value.AsString()
 		return vm.Allocator().NewStringValue(s), nil
 
 	default:
-		return core.UndefinedValue(), core.NewInvalidMethodError(name, o.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidMethodError(name, o.TypeName())
 	}
 }
 
 func (o *Error) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return core.UndefinedValue(), core.NewInvalidIndexTypeError("error access", "string", index.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidIndexTypeError("error access", "string", index.TypeName())
 	}
-	return core.UndefinedValue(), core.NewInvalidSelectorError(o.TypeName(), k)
+	return core.UndefinedValue(), errs.NewInvalidSelectorError(o.TypeName(), k)
 }
 
 func (o *Error) Assign(core.Value, core.Value) error {
-	return core.NewNotAssignableError(o.TypeName())
+	return errs.NewNotAssignableError(o.TypeName())
 }
 
 func (o *Error) IsError() bool {

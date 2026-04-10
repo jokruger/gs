@@ -109,6 +109,7 @@
 
 - move type related functions to type member functions; remove duplicates from stdlib (i.e. stdlib must be complimentary extension of type member functions)
 
+- make Len/Append/Delete a Value function, so len() can be used for user defined types too
 
 Recommended Baseline Examples
 
@@ -124,3 +125,6 @@ Recommended Baseline Examples
 - string-iterator, array-iterator, etc -> value level?
 
 - value: use unsafe.Pointer and API to register custom types!
+
+- check if use of different storage fields in Value affects performance (due to mem offset), shell we always use d64 first? shell we add bool field instead of d8?
+

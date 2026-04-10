@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/token"
 )
 
@@ -119,7 +120,7 @@ func (o *Record) Interface() any {
 }
 
 func (o *Record) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
-	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+	return core.UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
 func (o *Record) Equals(x core.Value) bool {
@@ -165,7 +166,7 @@ func (o *Record) Copy(alloc core.Allocator) core.Value {
 func (o *Record) Method(vm core.VM, name string, args []core.Value) (core.Value, error) {
 	v, ok := o.value[name]
 	if !ok {
-		return core.UndefinedValue(), core.NewInvalidMethodError(name, o.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidMethodError(name, o.TypeName())
 	}
 	if !v.IsCallable() {
 		return core.UndefinedValue(), fmt.Errorf("%s.%s is not callable, got %s", o.TypeName(), name, v.TypeName())
@@ -177,7 +178,7 @@ func (o *Record) Method(vm core.VM, name string, args []core.Value) (core.Value,
 func (o *Record) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return core.UndefinedValue(), core.NewInvalidIndexTypeError("record access", "string", index.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidIndexTypeError("record access", "string", index.TypeName())
 	}
 	r, ok := o.value[k]
 	if !ok {
@@ -188,12 +189,12 @@ func (o *Record) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Va
 
 func (o *Record) Assign(index, value core.Value) error {
 	if o.immutable {
-		return core.NewNotAssignableError(o.TypeName())
+		return errs.NewNotAssignableError(o.TypeName())
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return core.NewInvalidIndexTypeError("record assignment", "string", index.TypeName())
+		return errs.NewInvalidIndexTypeError("record assignment", "string", index.TypeName())
 	}
 	o.value[k] = value
 

@@ -5,6 +5,7 @@ import (
 	"sync/atomic"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
 	"github.com/jokruger/gs/value"
@@ -95,7 +96,7 @@ func (v *VM) Call(fn *core.CompiledFunction, args []core.Value) (core.Value, err
 	numArgs := len(args)
 	if fn.VarArgs {
 		if numArgs < fn.NumParameters-1 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("call", fmt.Sprintf("at least %d", fn.NumParameters-1), numArgs)
+			return core.UndefinedValue(), errs.NewWrongNumArgumentsError("call", fmt.Sprintf("at least %d", fn.NumParameters-1), numArgs)
 		}
 		realArgs := fn.NumParameters - 1
 		varArgs := numArgs - realArgs
@@ -107,7 +108,7 @@ func (v *VM) Call(fn *core.CompiledFunction, args []core.Value) (core.Value, err
 			numArgs = realArgs + 1
 		}
 	} else if numArgs != fn.NumParameters {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("call", fmt.Sprintf("%d", fn.NumParameters), numArgs)
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("call", fmt.Sprintf("%d", fn.NumParameters), numArgs)
 	}
 
 	// Save current VM state
@@ -123,11 +124,11 @@ func (v *VM) Call(fn *core.CompiledFunction, args []core.Value) (core.Value, err
 
 	// This helper consumes two frame slots: a synthetic trampoline frame and the callee frame.
 	if v.framesIndex+1 >= MaxFrames {
-		v.err = core.NewStackOverflowError("native callback frames")
+		v.err = errs.NewStackOverflowError("native callback frames")
 		return core.UndefinedValue(), v.err
 	}
 	if v.sp+1+numArgs > StackSize {
-		v.err = core.ErrStackOverflow
+		v.err = errs.ErrStackOverflow
 		return core.UndefinedValue(), v.err
 	}
 
@@ -248,7 +249,7 @@ func (v *VM) run() {
 
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = core.ErrObjectAllocLimit
+				v.err = errs.ErrObjectAllocLimit
 				return
 			}
 
@@ -295,7 +296,7 @@ func (v *VM) run() {
 				res := core.IntValue(^operand.Int())
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = core.ErrObjectAllocLimit
+					v.err = errs.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = res
@@ -314,7 +315,7 @@ func (v *VM) run() {
 				res := core.IntValue(-operand.Int())
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = core.ErrObjectAllocLimit
+					v.err = errs.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = res
@@ -323,7 +324,7 @@ func (v *VM) run() {
 				res := core.FloatValue(-operand.Float())
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = core.ErrObjectAllocLimit
+					v.err = errs.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = res
@@ -407,7 +408,7 @@ func (v *VM) run() {
 			arr := v.alloc.NewArray(elements, false)
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = core.ErrObjectAllocLimit
+				v.err = errs.ErrObjectAllocLimit
 				return
 			}
 
@@ -432,7 +433,7 @@ func (v *VM) run() {
 			m := v.alloc.NewRecord(kv, false)
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = core.ErrObjectAllocLimit
+				v.err = errs.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp] = core.ObjectValue(m)
@@ -442,7 +443,7 @@ func (v *VM) run() {
 			val := v.stack[v.sp-1]
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = core.ErrObjectAllocLimit
+				v.err = errs.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp-1] = v.alloc.NewErrorValue(val)
@@ -455,21 +456,21 @@ func (v *VM) run() {
 					t := v.alloc.NewArray(val.Value(), true)
 					v.allocs--
 					if v.allocs == 0 {
-						v.err = core.ErrObjectAllocLimit
+						v.err = errs.ErrObjectAllocLimit
 						return
 					}
 					v.stack[v.sp-1] = core.ObjectValue(t)
 				case *value.Record:
 					v.allocs--
 					if v.allocs == 0 {
-						v.err = core.ErrObjectAllocLimit
+						v.err = errs.ErrObjectAllocLimit
 						return
 					}
 					v.stack[v.sp-1] = v.alloc.NewRecordValue(val.Value(), true)
 				case *value.Map:
 					v.allocs--
 					if v.allocs == 0 {
-						v.err = core.ErrObjectAllocLimit
+						v.err = errs.ErrObjectAllocLimit
 						return
 					}
 					v.stack[v.sp-1] = v.alloc.NewMapValue(val.Value(), true)
@@ -539,7 +540,7 @@ func (v *VM) run() {
 				val := v.alloc.NewArray(left.Slice(int(lowIdx), int(highIdx)), false)
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = core.ErrObjectAllocLimit
+					v.err = errs.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = core.ObjectValue(val)
@@ -572,7 +573,7 @@ func (v *VM) run() {
 				val := v.alloc.NewString(left.Substring(int(lowIdx), int(highIdx)))
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = core.ErrObjectAllocLimit
+					v.err = errs.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = core.ObjectValue(val)
@@ -605,7 +606,7 @@ func (v *VM) run() {
 				val := v.alloc.NewBytes(left.Slice(int(lowIdx), int(highIdx)))
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = core.ErrObjectAllocLimit
+					v.err = errs.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = core.ObjectValue(val)
@@ -687,7 +688,7 @@ func (v *VM) run() {
 					}
 				}
 				if v.framesIndex >= MaxFrames {
-					v.err = core.ErrStackOverflow
+					v.err = errs.ErrStackOverflow
 					return
 				}
 
@@ -714,7 +715,7 @@ func (v *VM) run() {
 
 				v.allocs--
 				if v.allocs == 0 {
-					v.err = core.ErrObjectAllocLimit
+					v.err = errs.ErrObjectAllocLimit
 					return
 				}
 				v.stack[v.sp] = ret
@@ -773,7 +774,7 @@ func (v *VM) run() {
 
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = core.ErrObjectAllocLimit
+				v.err = errs.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp] = ret
@@ -889,7 +890,7 @@ func (v *VM) run() {
 			}
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = core.ErrObjectAllocLimit
+				v.err = errs.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp] = core.CompiledFunctionValue(cl)
@@ -956,7 +957,7 @@ func (v *VM) run() {
 			it := dst.Iterate(v.alloc)
 			v.allocs--
 			if v.allocs == 0 {
-				v.err = core.ErrObjectAllocLimit
+				v.err = errs.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp] = core.IteratorValue(it)

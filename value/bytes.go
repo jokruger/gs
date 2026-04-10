@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
 )
@@ -84,7 +85,7 @@ func (o *Bytes) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value
 	alloc := vm.Allocator()
 	v, ok := rhs.AsBytes()
 	if !ok {
-		return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 	}
 
 	switch op {
@@ -92,7 +93,7 @@ func (o *Bytes) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value
 		return alloc.NewBytesValue(append(o.value, v...)), nil
 	}
 
-	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+	return core.UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
 func (o *Bytes) Equals(x core.Value) bool {
@@ -113,13 +114,13 @@ func (o *Bytes) Method(vm core.VM, name string, args []core.Value) (core.Value, 
 	switch name {
 	case "to_bytes":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("to_bytes", "0", len(args))
+			return core.UndefinedValue(), errs.NewWrongNumArgumentsError("to_bytes", "0", len(args))
 		}
 		return core.ObjectValue(o), nil
 
 	case "to_array":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("bytes.to_array", "0", len(args))
+			return core.UndefinedValue(), errs.NewWrongNumArgumentsError("bytes.to_array", "0", len(args))
 		}
 		arr := make([]core.Value, len(o.value))
 		for i, b := range o.value {
@@ -129,7 +130,7 @@ func (o *Bytes) Method(vm core.VM, name string, args []core.Value) (core.Value, 
 
 	case "to_record":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("bytes.to_record", "0", len(args))
+			return core.UndefinedValue(), errs.NewWrongNumArgumentsError("bytes.to_record", "0", len(args))
 		}
 		m := make(map[string]core.Value, len(o.value))
 		for i, b := range o.value {
@@ -139,25 +140,25 @@ func (o *Bytes) Method(vm core.VM, name string, args []core.Value) (core.Value, 
 
 	case "to_string":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("bytes.to_string", "0", len(args))
+			return core.UndefinedValue(), errs.NewWrongNumArgumentsError("bytes.to_string", "0", len(args))
 		}
 		return vm.Allocator().NewStringValue(string(o.value)), nil
 
 	case "is_empty":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("bytes.is_empty", "0", len(args))
+			return core.UndefinedValue(), errs.NewWrongNumArgumentsError("bytes.is_empty", "0", len(args))
 		}
 		return core.BoolValue(o.IsEmpty()), nil
 
 	case "len":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("bytes.len", "0", len(args))
+			return core.UndefinedValue(), errs.NewWrongNumArgumentsError("bytes.len", "0", len(args))
 		}
 		return core.IntValue(int64(o.Len())), nil
 
 	case "first":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewInvalidMethodError("bytes.first", o.TypeName())
+			return core.UndefinedValue(), errs.NewInvalidMethodError("bytes.first", o.TypeName())
 		}
 		if len(o.value) == 0 {
 			return core.UndefinedValue(), nil
@@ -166,7 +167,7 @@ func (o *Bytes) Method(vm core.VM, name string, args []core.Value) (core.Value, 
 
 	case "last":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewInvalidMethodError("bytes.last", o.TypeName())
+			return core.UndefinedValue(), errs.NewInvalidMethodError("bytes.last", o.TypeName())
 		}
 		if len(o.value) == 0 {
 			return core.UndefinedValue(), nil
@@ -174,7 +175,7 @@ func (o *Bytes) Method(vm core.VM, name string, args []core.Value) (core.Value, 
 		return core.IntValue(int64(o.value[len(o.value)-1])), nil
 
 	default:
-		return core.UndefinedValue(), core.NewInvalidMethodError(name, o.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidMethodError(name, o.TypeName())
 	}
 }
 
@@ -182,7 +183,7 @@ func (o *Bytes) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Val
 	if mode == parser.OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
-			return core.UndefinedValue(), core.NewInvalidIndexTypeError("bytes index", "int", index.TypeName())
+			return core.UndefinedValue(), errs.NewInvalidIndexTypeError("bytes index", "int", index.TypeName())
 		}
 		if i < 0 || i >= int64(len(o.value)) {
 			return core.UndefinedValue(), nil
@@ -192,13 +193,13 @@ func (o *Bytes) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Val
 
 	k, ok := index.AsString()
 	if !ok {
-		return core.UndefinedValue(), core.NewInvalidSelectorError(o.TypeName(), k)
+		return core.UndefinedValue(), errs.NewInvalidSelectorError(o.TypeName(), k)
 	}
-	return core.UndefinedValue(), core.NewInvalidSelectorError(o.TypeName(), k)
+	return core.UndefinedValue(), errs.NewInvalidSelectorError(o.TypeName(), k)
 }
 
 func (o *Bytes) Assign(core.Value, core.Value) error {
-	return core.NewNotAssignableError(o.TypeName())
+	return errs.NewNotAssignableError(o.TypeName())
 }
 
 func (o *Bytes) Iterate(alloc core.Allocator) core.Iterator {

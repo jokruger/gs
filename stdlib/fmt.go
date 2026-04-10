@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/formatter"
 )
 
@@ -26,12 +27,12 @@ func fmtPrint(vm core.VM, args []core.Value) (core.Value, error) {
 func fmtPrintf(vm core.VM, args []core.Value) (core.Value, error) {
 	numArgs := len(args)
 	if numArgs == 0 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("fmt.printf", "at least 1", numArgs)
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("fmt.printf", "at least 1", numArgs)
 	}
 
 	format, ok := args[0].AsString()
 	if !ok {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("fmt.printf", "format", "string", args[0].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("fmt.printf", "format", "string", args[0].TypeName())
 	}
 	if numArgs == 1 {
 		fmt.Print(format)
@@ -58,12 +59,12 @@ func fmtPrintln(vm core.VM, args []core.Value) (core.Value, error) {
 func fmtSprintf(vm core.VM, args []core.Value) (core.Value, error) {
 	numArgs := len(args)
 	if numArgs == 0 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("fmt.sprintf", "at least 1", numArgs)
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("fmt.sprintf", "at least 1", numArgs)
 	}
 
 	format, ok := args[0].AsString()
 	if !ok {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("fmt.sprintf", "format", "string", args[0].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("fmt.sprintf", "format", "string", args[0].TypeName())
 	}
 	if numArgs == 1 {
 		return vm.Allocator().NewStringValue(format), nil
@@ -84,7 +85,7 @@ func getPrintArgs(args ...core.Value) ([]any, error) {
 		slen := len(s)
 		// make sure length does not exceed the limit
 		if l+slen > core.MaxStringLen {
-			return nil, core.NewStringLimitError("fmt.print/println")
+			return nil, errs.NewStringLimitError("fmt.print/println")
 		}
 		l += slen
 		printArgs = append(printArgs, s)

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/parser"
 	"github.com/jokruger/gs/token"
 )
@@ -120,7 +121,7 @@ func (o *Map) Interface() any {
 }
 
 func (o *Map) BinaryOp(vm core.VM, op token.Token, rhs core.Value) (core.Value, error) {
-	return core.UndefinedValue(), core.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
+	return core.UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), o.TypeName(), rhs.TypeName())
 }
 
 func (o *Map) Equals(x core.Value) bool {
@@ -167,13 +168,13 @@ func (o *Map) Method(vm core.VM, name string, args []core.Value) (core.Value, er
 	switch name {
 	case "to_record":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("map.to_record", "0", len(args))
+			return core.UndefinedValue(), errs.NewWrongNumArgumentsError("map.to_record", "0", len(args))
 		}
 		return vm.Allocator().NewRecordValue(o.value, o.immutable), nil
 
 	case "is_empty":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("map.is_empty", "0", len(args))
+			return core.UndefinedValue(), errs.NewWrongNumArgumentsError("map.is_empty", "0", len(args))
 		}
 		return core.BoolValue(len(o.value) == 0), nil
 
@@ -191,31 +192,31 @@ func (o *Map) Method(vm core.VM, name string, args []core.Value) (core.Value, er
 
 	case "len":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("map.len", "0", len(args))
+			return core.UndefinedValue(), errs.NewWrongNumArgumentsError("map.len", "0", len(args))
 		}
 		return core.IntValue(int64(len(o.value))), nil
 
 	case "keys":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("map.keys", "0", len(args))
+			return core.UndefinedValue(), errs.NewWrongNumArgumentsError("map.keys", "0", len(args))
 		}
 		return o.keys(vm)
 
 	case "values":
 		if len(args) != 0 {
-			return core.UndefinedValue(), core.NewWrongNumArgumentsError("map.values", "0", len(args))
+			return core.UndefinedValue(), errs.NewWrongNumArgumentsError("map.values", "0", len(args))
 		}
 		return o.values(vm)
 
 	default:
-		return core.UndefinedValue(), core.NewInvalidMethodError(name, o.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidMethodError(name, o.TypeName())
 	}
 }
 
 func (o *Map) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return core.UndefinedValue(), core.NewInvalidIndexTypeError("map access", "string", index.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidIndexTypeError("map access", "string", index.TypeName())
 	}
 
 	if mode == parser.OpIndex {
@@ -226,17 +227,17 @@ func (o *Map) Access(vm core.VM, index core.Value, mode core.Opcode) (core.Value
 		return r, nil
 	}
 
-	return core.UndefinedValue(), core.NewInvalidSelectorError(o.TypeName(), k)
+	return core.UndefinedValue(), errs.NewInvalidSelectorError(o.TypeName(), k)
 }
 
 func (o *Map) Assign(index, value core.Value) error {
 	if o.immutable {
-		return core.NewNotAssignableError(o.TypeName())
+		return errs.NewNotAssignableError(o.TypeName())
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return core.NewInvalidIndexTypeError("map assignment", "string", index.TypeName())
+		return errs.NewInvalidIndexTypeError("map assignment", "string", index.TypeName())
 	}
 	o.value[k] = value
 
@@ -295,12 +296,12 @@ func (o *Map) values(vm core.VM) (core.Value, error) {
 
 func (o *Map) fnFilter(vm core.VM, name string, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	alloc := vm.Allocator()
@@ -336,18 +337,18 @@ func (o *Map) fnFilter(vm core.VM, name string, args []core.Value) (core.Value, 
 		return alloc.NewMapValue(filtered, false), nil
 
 	default:
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func (o *Map) fnCount(vm core.VM, name string, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	alloc := vm.Allocator()
@@ -383,18 +384,18 @@ func (o *Map) fnCount(vm core.VM, name string, args []core.Value) (core.Value, e
 		return core.IntValue(count), nil
 
 	default:
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func (o *Map) fnAll(vm core.VM, name string, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	alloc := vm.Allocator()
@@ -428,18 +429,18 @@ func (o *Map) fnAll(vm core.VM, name string, args []core.Value) (core.Value, err
 		return core.BoolValue(true), nil
 
 	default:
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func (o *Map) fnAny(vm core.VM, name string, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError(name, "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	alloc := vm.Allocator()
@@ -473,6 +474,6 @@ func (o *Map) fnAny(vm core.VM, name string, args []core.Value) (core.Value, err
 		return core.BoolValue(false), nil
 
 	default:
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }

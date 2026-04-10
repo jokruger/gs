@@ -32,11 +32,11 @@ clean:
 bench-test: generate
     @go test -test.fullpath=true -run ^$ -bench=^BenchmarkVM$ -benchmem -cpuprofile cpu.prof -memprofile mem.prof -trace trace.prof ./tests/benchmark
 
-#cpu:
-#       go tool pprof -http=:8080 cpu.prof
+cpu:
+       go tool pprof -http=:8080 cpu.prof
 
-#mem:
-#    go tool pprof -http=:8080 mem.prof
+mem:
+    go tool pprof -http=:8080 mem.prof
 
-#trace:
-#       go tool trace trace.prof
+trace:
+       go tool trace trace.prof

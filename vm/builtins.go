@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/jokruger/gs/core"
+	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/formatter"
 	"github.com/jokruger/gs/value"
 )
@@ -51,119 +52,119 @@ var BuiltinFuncs = map[int]core.Value{
 
 func builtinTypeName(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("type_name", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("type_name", "1", len(args))
 	}
 	return vm.Allocator().NewStringValue(args[0].TypeName()), nil
 }
 
 func builtinIsString(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_string", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_string", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsString()), nil
 }
 
 func builtinIsInt(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_int", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_int", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsInt()), nil
 }
 
 func builtinIsFloat(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_float", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_float", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsFloat()), nil
 }
 
 func builtinIsBool(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_bool", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_bool", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsBool()), nil
 }
 
 func builtinIsChar(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_char", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_char", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsChar()), nil
 }
 
 func builtinIsBytes(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_bytes", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_bytes", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsBytes()), nil
 }
 
 func builtinIsArray(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_array", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_array", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsArray()), nil
 }
 
 func builtinIsRecord(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_record", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_record", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsRecord()), nil
 }
 
 func builtinIsMap(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_map", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_map", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsMap()), nil
 }
 
 func builtinIsImmutable(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_immutable", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_immutable", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsImmutable()), nil
 }
 
 func builtinIsTime(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_time", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_time", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsTime()), nil
 }
 
 func builtinIsError(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_error", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_error", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsError()), nil
 }
 
 func builtinIsUndefined(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_undefined", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_undefined", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsUndefined()), nil
 }
 
 func builtinIsFunction(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_function", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_function", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsCompiledFunction()), nil
 }
 
 func builtinIsCallable(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_callable", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_callable", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsCallable()), nil
 }
 
 func builtinIsIterable(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("is_iterable", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("is_iterable", "1", len(args))
 	}
 	return core.BoolValue(args[0].IsIterable()), nil
 }
@@ -171,11 +172,11 @@ func builtinIsIterable(vm core.VM, args []core.Value) (core.Value, error) {
 // len(obj object) => int
 func builtinLen(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("len", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("len", "1", len(args))
 	}
 
 	if args[0].Kind() != core.V_OBJECT {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("len", "first", "record/map/array/string/bytes", args[0].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("len", "first", "record/map/array/string/bytes", args[0].TypeName())
 	}
 
 	switch arg := args[0].Object().(type) {
@@ -190,7 +191,7 @@ func builtinLen(vm core.VM, args []core.Value) (core.Value, error) {
 	case *value.Map:
 		return core.IntValue(int64(arg.Len())), nil
 	default:
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("len", "first", "record/map/array/string/bytes", arg.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("len", "first", "record/map/array/string/bytes", arg.TypeName())
 	}
 }
 
@@ -198,7 +199,7 @@ func builtinLen(vm core.VM, args []core.Value) (core.Value, error) {
 func builtinRange(vm core.VM, args []core.Value) (core.Value, error) {
 	numArgs := len(args)
 	if numArgs < 2 || numArgs > 3 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("range", "2 or 3", numArgs)
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("range", "2 or 3", numArgs)
 	}
 
 	var start, stop, step int64
@@ -214,11 +215,11 @@ func builtinRange(vm core.VM, args []core.Value) (core.Value, error) {
 			case 2:
 				name = "step"
 			}
-			return core.UndefinedValue(), core.NewInvalidArgumentTypeError("range", name, "int", arg.TypeName())
+			return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("range", name, "int", arg.TypeName())
 		}
 
 		if i == 2 && v <= 0 {
-			return core.UndefinedValue(), core.NewLogicError(fmt.Sprintf("range step must be greater than 0, got %d", v))
+			return core.UndefinedValue(), errs.NewLogicError(fmt.Sprintf("range step must be greater than 0, got %d", v))
 		}
 
 		switch i {
@@ -261,11 +262,11 @@ func buildRange(alloc core.Allocator, start, stop, step int64) core.Value {
 func builtinFormat(vm core.VM, args []core.Value) (core.Value, error) {
 	numArgs := len(args)
 	if numArgs == 0 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("format", "at least 1", numArgs)
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("format", "at least 1", numArgs)
 	}
 	format, ok := args[0].AsString()
 	if !ok {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("format", "first", "string", args[0].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("format", "first", "string", args[0].TypeName())
 	}
 	if numArgs == 1 {
 		return vm.Allocator().NewStringValue(format), nil
@@ -279,7 +280,7 @@ func builtinFormat(vm core.VM, args []core.Value) (core.Value, error) {
 
 func builtinCopy(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("copy", "1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("copy", "1", len(args))
 	}
 	return args[0].Copy(vm.Allocator()), nil
 }
@@ -290,13 +291,13 @@ func builtinString(vm core.VM, args []core.Value) (core.Value, error) {
 	}
 
 	if len(args) != 1 && len(args) != 2 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("string", "0, 1 or 2", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("string", "0, 1 or 2", len(args))
 	}
 
 	v, ok := args[0].AsString()
 	if ok {
 		if len(v) > core.MaxStringLen {
-			return core.UndefinedValue(), core.NewStringLimitError("string constructor")
+			return core.UndefinedValue(), errs.NewStringLimitError("string constructor")
 		}
 		return vm.Allocator().NewStringValue(v), nil
 	}
@@ -314,7 +315,7 @@ func builtinInt(vm core.VM, args []core.Value) (core.Value, error) {
 	}
 
 	if len(args) != 1 && len(args) != 2 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("int", "0, 1 or 2", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("int", "0, 1 or 2", len(args))
 	}
 
 	v, ok := args[0].AsInt()
@@ -335,7 +336,7 @@ func builtinFloat(vm core.VM, args []core.Value) (core.Value, error) {
 	}
 
 	if len(args) != 1 && len(args) != 2 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("float", "0, 1 or 2", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("float", "0, 1 or 2", len(args))
 	}
 
 	v, ok := args[0].AsFloat()
@@ -356,7 +357,7 @@ func builtinBool(vm core.VM, args []core.Value) (core.Value, error) {
 	}
 
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("bool", "0 or 1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("bool", "0 or 1", len(args))
 	}
 
 	v, ok := args[0].AsBool()
@@ -373,7 +374,7 @@ func builtinChar(vm core.VM, args []core.Value) (core.Value, error) {
 	}
 
 	if len(args) != 1 && len(args) != 2 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("char", "0, 1 or 2", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("char", "0, 1 or 2", len(args))
 	}
 
 	v, ok := args[0].AsChar()
@@ -394,21 +395,21 @@ func builtinBytes(vm core.VM, args []core.Value) (core.Value, error) {
 	}
 
 	if len(args) != 1 && len(args) != 2 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("bytes", "0, 1 or 2", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("bytes", "0, 1 or 2", len(args))
 	}
 
 	// bytes(N) => create a new bytes with given size N
 	if args[0].IsInt() {
 		n := args[0].Int()
 		if n > int64(core.MaxBytesLen) {
-			return core.UndefinedValue(), core.NewBytesLimitError("bytes constructor")
+			return core.UndefinedValue(), errs.NewBytesLimitError("bytes constructor")
 		}
 		return vm.Allocator().NewBytesValue(make([]byte, int(n))), nil
 	}
 
 	if v, ok := args[0].AsBytes(); ok {
 		if len(v) > core.MaxBytesLen {
-			return core.UndefinedValue(), core.NewBytesLimitError("bytes constructor")
+			return core.UndefinedValue(), errs.NewBytesLimitError("bytes constructor")
 		}
 		return vm.Allocator().NewBytesValue(v), nil
 	}
@@ -426,7 +427,7 @@ func builtinTime(vm core.VM, args []core.Value) (core.Value, error) {
 	}
 
 	if len(args) != 1 && len(args) != 2 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("time", "0, 1 or 2", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("time", "0, 1 or 2", len(args))
 	}
 
 	if v, ok := args[0].AsTime(); ok {
@@ -446,11 +447,11 @@ func builtinMap(vm core.VM, args []core.Value) (core.Value, error) {
 	}
 
 	if len(args) != 1 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("map", "0 or 1", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("map", "0 or 1", len(args))
 	}
 
 	if args[0].Kind() != core.V_OBJECT {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("map", "first", "record or map", args[0].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("map", "first", "record or map", args[0].TypeName())
 	}
 
 	alloc := vm.Allocator()
@@ -470,18 +471,18 @@ func builtinMap(vm core.VM, args []core.Value) (core.Value, error) {
 		return vm.Allocator().NewMapValue(v, false), nil
 
 	default:
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("map", "first", "map or record", arg.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("map", "first", "map or record", arg.TypeName())
 	}
 }
 
 // append(arr, items...)
 func builtinAppend(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) < 2 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("append", "at least 2", len(args))
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("append", "at least 2", len(args))
 	}
 
 	if args[0].Kind() != core.V_OBJECT {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("append", "first", "array", args[0].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("append", "first", "array", args[0].TypeName())
 	}
 
 	switch arg := args[0].Object().(type) {
@@ -489,7 +490,7 @@ func builtinAppend(vm core.VM, args []core.Value) (core.Value, error) {
 		return vm.Allocator().NewArrayValue(append(arg.Value(), args[1:]...), false), nil
 
 	default:
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("append", "first", "array", arg.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("append", "first", "array", arg.TypeName())
 	}
 }
 
@@ -499,15 +500,15 @@ func builtinAppend(vm core.VM, args []core.Value) (core.Value, error) {
 func builtinDelete(vm core.VM, args []core.Value) (core.Value, error) {
 	argsLen := len(args)
 	if argsLen != 2 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("delete", "2", argsLen)
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("delete", "2", argsLen)
 	}
 
 	if args[0].Kind() != core.V_OBJECT {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("delete", "first", "record or map", args[0].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("delete", "first", "record or map", args[0].TypeName())
 	}
 
 	if args[0].IsImmutable() {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("delete", "first", "mutable record or map", args[0].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("delete", "first", "mutable record or map", args[0].TypeName())
 	}
 
 	switch arg := args[0].Object().(type) {
@@ -516,17 +517,17 @@ func builtinDelete(vm core.VM, args []core.Value) (core.Value, error) {
 			arg.Delete(key)
 			return core.UndefinedValue(), nil
 		}
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("delete", "second", "string", args[1].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("delete", "second", "string", args[1].TypeName())
 
 	case *value.Map:
 		if key, ok := args[1].AsString(); ok {
 			arg.Delete(key)
 			return core.UndefinedValue(), nil
 		}
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("delete", "second", "string", args[1].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("delete", "second", "string", args[1].TypeName())
 
 	default:
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("delete", "first", "record or map", arg.TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("delete", "first", "record or map", arg.TypeName())
 	}
 }
 
@@ -535,20 +536,20 @@ func builtinDelete(vm core.VM, args []core.Value) (core.Value, error) {
 func builtinSplice(vm core.VM, args []core.Value) (core.Value, error) {
 	argsLen := len(args)
 	if argsLen == 0 {
-		return core.UndefinedValue(), core.NewWrongNumArgumentsError("splice", "at least 1", argsLen)
+		return core.UndefinedValue(), errs.NewWrongNumArgumentsError("splice", "at least 1", argsLen)
 	}
 
 	if !args[0].IsObject() {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("splice", "first", "array", args[0].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("splice", "first", "array", args[0].TypeName())
 	}
 
 	array, ok := args[0].Object().(*value.Array)
 	if !ok {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("splice", "first", "array", args[0].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("splice", "first", "array", args[0].TypeName())
 	}
 
 	if array.IsImmutable() {
-		return core.UndefinedValue(), core.NewInvalidArgumentTypeError("splice", "first", "mutable array", args[0].TypeName())
+		return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("splice", "first", "mutable array", args[0].TypeName())
 	}
 
 	arrayLen := int(array.Len())
@@ -557,11 +558,11 @@ func builtinSplice(vm core.VM, args []core.Value) (core.Value, error) {
 	if argsLen > 1 {
 		arg1, ok := args[1].AsInt()
 		if !ok {
-			return core.UndefinedValue(), core.NewInvalidArgumentTypeError("splice", "second", "int", args[1].TypeName())
+			return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("splice", "second", "int", args[1].TypeName())
 		}
 		startIdx = int(arg1)
 		if startIdx < 0 || startIdx > arrayLen {
-			return core.UndefinedValue(), core.NewIndexOutOfBoundsError("splice, start index", startIdx, arrayLen)
+			return core.UndefinedValue(), errs.NewIndexOutOfBoundsError("splice, start index", startIdx, arrayLen)
 		}
 	}
 
@@ -569,11 +570,11 @@ func builtinSplice(vm core.VM, args []core.Value) (core.Value, error) {
 	if argsLen > 2 {
 		arg2, ok := args[2].AsInt()
 		if !ok {
-			return core.UndefinedValue(), core.NewInvalidArgumentTypeError("splice", "third", "int", args[2].TypeName())
+			return core.UndefinedValue(), errs.NewInvalidArgumentTypeError("splice", "third", "int", args[2].TypeName())
 		}
 		delCount = int(arg2)
 		if delCount < 0 {
-			return core.UndefinedValue(), core.NewLogicError("splice delete count must be non-negative")
+			return core.UndefinedValue(), errs.NewLogicError("splice delete count must be non-negative")
 		}
 	}
 	// if count of to be deleted items is bigger than expected, truncate it

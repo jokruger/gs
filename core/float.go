@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/gs/token"
 )
 
 func FloatValue(f float64) Value {
@@ -84,6 +85,10 @@ func floatTypeIsTrue(v Value) bool {
 	return !math.IsNaN(toFloat(v))
 }
 
+func floatTypeAsInt(v Value) (int64, bool) {
+	return int64(toFloat(v)), true
+}
+
 func floatTypeAsString(v Value) (string, bool) {
 	return strconv.FormatFloat(toFloat(v), 'f', -1, 64), true
 }
@@ -128,5 +133,34 @@ func floatTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 
 	default:
 		return UndefinedValue(), errs.NewInvalidMethodError(name, "float")
+	}
+}
+
+func floatTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, error) {
+	r, ok := rhs.AsFloat()
+	if !ok {
+		return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+	}
+
+	l := toFloat(v)
+	switch op {
+	case token.Add:
+		return FloatValue(l + r), nil
+	case token.Sub:
+		return FloatValue(l - r), nil
+	case token.Mul:
+		return FloatValue(l * r), nil
+	case token.Quo:
+		return FloatValue(l / r), nil
+	case token.Less:
+		return BoolValue(l < r), nil
+	case token.Greater:
+		return BoolValue(l > r), nil
+	case token.LessEq:
+		return BoolValue(l <= r), nil
+	case token.GreaterEq:
+		return BoolValue(l >= r), nil
+	default:
+		return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
 }

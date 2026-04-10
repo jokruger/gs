@@ -47,3 +47,19 @@ func arrayIteratorTypeEqual(v Value, r Value) bool {
 	b := (*ArrayIterator)(r.Ptr)
 	return a == b
 }
+
+func arrayIteratorTypeNext(v *Value) bool {
+	i := (*ArrayIterator)(v.Ptr)
+	i.i++
+	return i.i <= i.l
+}
+
+func arrayIteratorTypeKey(v Value, alloc Allocator) Value {
+	i := (*ArrayIterator)(v.Ptr)
+	return IntValue(int64(i.i - 1))
+}
+
+func arrayIteratorTypeValue(v Value, alloc Allocator) Value {
+	i := (*ArrayIterator)(v.Ptr)
+	return i.v[i.i-1]
+}

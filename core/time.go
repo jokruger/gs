@@ -8,6 +8,7 @@ import (
 	"unsafe"
 
 	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/gs/token"
 )
 
 func TimeValue(v *time.Time) Value {
@@ -273,4 +274,43 @@ func timeTypeAsBool(v Value) (bool, bool) {
 func timeTypeAsTime(v Value) (time.Time, bool) {
 	o := (*time.Time)(v.Ptr)
 	return *o, true
+}
+
+func timeTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, error) {
+	if rhs.IsInt() {
+		r := rhs.Int()
+		switch op {
+		case token.Add: // time + int => time
+			o := (*time.Time)(v.Ptr)
+			return a.NewTimeValue(o.Add(time.Duration(r))), nil
+		case token.Sub: // time - int => time
+			o := (*time.Time)(v.Ptr)
+			return a.NewTimeValue(o.Add(time.Duration(-r))), nil
+		}
+	}
+
+	r, ok := rhs.AsTime()
+	if !ok {
+		return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+	}
+
+	switch op {
+	case token.Sub: // time - time => int (duration)
+		o := (*time.Time)(v.Ptr)
+		return IntValue(int64(o.Sub(r))), nil
+	case token.Less: // time < time => bool
+		o := (*time.Time)(v.Ptr)
+		return BoolValue(o.Before(r)), nil
+	case token.Greater:
+		o := (*time.Time)(v.Ptr)
+		return BoolValue(o.After(r)), nil
+	case token.LessEq:
+		o := (*time.Time)(v.Ptr)
+		return BoolValue(o.Equal(r) || o.Before(r)), nil
+	case token.GreaterEq:
+		o := (*time.Time)(v.Ptr)
+		return BoolValue(o.Equal(r) || o.After(r)), nil
+	}
+
+	return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 }

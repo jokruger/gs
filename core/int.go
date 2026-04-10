@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/gs/token"
 )
 
 func IntValue(i int64) Value {
@@ -53,6 +54,10 @@ func intTypeInterface(v Value) any {
 
 func intTypeIsTrue(v Value) bool {
 	return toInt(v) != 0
+}
+
+func intTypeAsInt(v Value) (int64, bool) {
+	return toInt(v), true
 }
 
 func intTypeAsString(v Value) (string, bool) {
@@ -128,5 +133,114 @@ func intTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error)
 
 	default:
 		return UndefinedValue(), errs.NewInvalidMethodError(name, "int")
+	}
+}
+
+func intTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, error) {
+	switch rhs.Type {
+	case VT_INT: // int op int => int
+		l := toInt(v)
+		r := toInt(rhs)
+		switch op {
+		case token.Add:
+			return IntValue(l + r), nil
+		case token.Sub:
+			return IntValue(l - r), nil
+		case token.Mul:
+			return IntValue(l * r), nil
+		case token.Quo:
+			return IntValue(l / r), nil
+		case token.Rem:
+			return IntValue(l % r), nil
+		case token.And:
+			return IntValue(l & r), nil
+		case token.Or:
+			return IntValue(l | r), nil
+		case token.Xor:
+			return IntValue(l ^ r), nil
+		case token.AndNot:
+			return IntValue(l &^ r), nil
+		case token.Shl:
+			return IntValue(l << uint64(r)), nil
+		case token.Shr:
+			return IntValue(l >> uint64(r)), nil
+		case token.Less:
+			return BoolValue(l < r), nil
+		case token.Greater:
+			return BoolValue(l > r), nil
+		case token.LessEq:
+			return BoolValue(l <= r), nil
+		case token.GreaterEq:
+			return BoolValue(l >= r), nil
+		default:
+			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		}
+
+	case VT_FLOAT: // int op float => float
+		l := float64(toInt(v))
+		r := toFloat(rhs)
+		switch op {
+		case token.Add:
+			return FloatValue(l + r), nil
+		case token.Sub:
+			return FloatValue(l - r), nil
+		case token.Mul:
+			return FloatValue(l * r), nil
+		case token.Quo:
+			return FloatValue(l / r), nil
+		case token.Less:
+			return BoolValue(l < r), nil
+		case token.Greater:
+			return BoolValue(l > r), nil
+		case token.LessEq:
+			return BoolValue(l <= r), nil
+		case token.GreaterEq:
+			return BoolValue(l >= r), nil
+		default:
+			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		}
+
+	default:
+		// int op any => int
+		r, ok := rhs.AsInt()
+		if !ok {
+			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		}
+
+		l := v.Int()
+		switch op {
+		case token.Add:
+			return IntValue(l + r), nil
+		case token.Sub:
+			return IntValue(l - r), nil
+		case token.Mul:
+			return IntValue(l * r), nil
+		case token.Quo:
+			return IntValue(l / r), nil
+		case token.Rem:
+			return IntValue(l % r), nil
+		case token.And:
+			return IntValue(l & r), nil
+		case token.Or:
+			return IntValue(l | r), nil
+		case token.Xor:
+			return IntValue(l ^ r), nil
+		case token.AndNot:
+			return IntValue(l &^ r), nil
+		case token.Shl:
+			return IntValue(l << uint64(r)), nil
+		case token.Shr:
+			return IntValue(l >> uint64(r)), nil
+		case token.Less:
+			return BoolValue(l < r), nil
+		case token.Greater:
+			return BoolValue(l > r), nil
+		case token.LessEq:
+			return BoolValue(l <= r), nil
+		case token.GreaterEq:
+			return BoolValue(l >= r), nil
+		default:
+			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		}
 	}
 }

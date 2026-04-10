@@ -56,3 +56,20 @@ func mapIteratorTypeEqual(v Value, r Value) bool {
 	b := (*MapIterator)(r.Ptr)
 	return a == b
 }
+
+func mapIteratorTypeNext(v *Value) bool {
+	i := (*MapIterator)(v.Ptr)
+	i.i++
+	return i.i <= i.l
+}
+
+func mapIteratorTypeKey(v Value, alloc Allocator) Value {
+	i := (*MapIterator)(v.Ptr)
+	return alloc.NewStringValue(i.k[i.i-1])
+}
+
+func mapIteratorTypeValue(v Value, alloc Allocator) Value {
+	i := (*MapIterator)(v.Ptr)
+	k := i.k[i.i-1]
+	return i.v[k]
+}

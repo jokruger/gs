@@ -5,7 +5,6 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/token"
 )
 
@@ -89,77 +88,15 @@ func (v *Value) GobDecode(data []byte) error {
 }
 
 func (v *Value) Next() bool {
-	switch v.Type {
-	case VT_STRING_ITERATOR:
-		i := (*StringIterator)(v.Ptr)
-		i.i++
-		return i.i <= i.l
-
-	case VT_BYTES_ITERATOR:
-		i := (*BytesIterator)(v.Ptr)
-		i.i++
-		return i.i <= i.l
-
-	case VT_ARRAY_ITERATOR:
-		i := (*ArrayIterator)(v.Ptr)
-		i.i++
-		return i.i <= i.l
-
-	case VT_MAP_ITERATOR:
-		i := (*MapIterator)(v.Ptr)
-		i.i++
-		return i.i <= i.l
-
-	default:
-		return TypeNext[v.Type](v)
-	}
+	return TypeNext[v.Type](v)
 }
 
 func (v Value) Key(alloc Allocator) Value {
-	switch v.Type {
-	case VT_STRING_ITERATOR:
-		i := (*StringIterator)(v.Ptr)
-		return IntValue(int64(i.i - 1))
-
-	case VT_BYTES_ITERATOR:
-		i := (*BytesIterator)(v.Ptr)
-		return IntValue(int64(i.i - 1))
-
-	case VT_ARRAY_ITERATOR:
-		i := (*ArrayIterator)(v.Ptr)
-		return IntValue(int64(i.i - 1))
-
-	case VT_MAP_ITERATOR:
-		i := (*MapIterator)(v.Ptr)
-		return alloc.NewStringValue(i.k[i.i-1])
-
-	default:
-		return TypeKey[v.Type](v, alloc)
-	}
+	return TypeKey[v.Type](v, alloc)
 }
 
 func (v Value) Value(alloc Allocator) Value {
-	switch v.Type {
-	case VT_STRING_ITERATOR:
-		i := (*StringIterator)(v.Ptr)
-		return CharValue(i.v[i.i-1])
-
-	case VT_BYTES_ITERATOR:
-		i := (*BytesIterator)(v.Ptr)
-		return IntValue(int64(i.v[i.i-1]))
-
-	case VT_ARRAY_ITERATOR:
-		i := (*ArrayIterator)(v.Ptr)
-		return i.v[i.i-1]
-
-	case VT_MAP_ITERATOR:
-		i := (*MapIterator)(v.Ptr)
-		k := i.k[i.i-1]
-		return i.v[k]
-
-	default:
-		return TypeValue[v.Type](v, alloc)
-	}
+	return TypeValue[v.Type](v, alloc)
 }
 
 func (v Value) TypeName() string {
@@ -175,15 +112,7 @@ func (v Value) Interface() any {
 }
 
 func (v Value) Arity() uint8 {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_BUILTIN_FUNCTION:
-		return builtinFunctionTypeArity(v)
-	case VT_COMPILED_FUNCTION:
-		return compiledFunctionTypeArity(v)
-	default:
-		return TypeArity[v.Type](v)
-	}
+	return TypeArity[v.Type](v)
 }
 
 func (v Value) IsUndefined() bool {
@@ -267,421 +196,59 @@ func (v Value) IsUserDefined() bool {
 }
 
 func (v Value) IsTrue() bool {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_UNDEFINED:
-		return false
-	case VT_ERROR:
-		return errorTypeIsTrue(v)
-	case VT_BOOL:
-		return boolTypeIsTrue(v)
-	default:
-		return TypeIsTrue[v.Type](v)
-	}
+	return TypeIsTrue[v.Type](v)
 }
 
 func (v Value) IsIterable() bool {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_STRING:
-		return stringTypeIsIterable(v)
-	case VT_BYTES:
-		return bytesTypeIsIterable(v)
-	case VT_ARRAY:
-		return arrayTypeIsIterable(v)
-	case VT_RECORD:
-		return recordTypeIsIterable(v)
-	case VT_MAP:
-		return mapTypeIsIterable(v)
-	default:
-		return TypeIsIterable[v.Type](v)
-	}
+	return TypeIsIterable[v.Type](v)
 }
 
 func (v Value) IsCallable() bool {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_BUILTIN_FUNCTION:
-		return builtinFunctionTypeIsCallable(v)
-	case VT_COMPILED_FUNCTION:
-		return compiledFunctionTypeIsCallable(v)
-	default:
-		return TypeIsCallable[v.Type](v)
-	}
+	return TypeIsCallable[v.Type](v)
 }
 
 func (v Value) IsVariadic() bool {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_BUILTIN_FUNCTION:
-		return builtinFunctionTypeIsVariadic(v)
-	case VT_COMPILED_FUNCTION:
-		return compiledFunctionTypeIsVariadic(v)
-	default:
-		return TypeIsVariadic[v.Type](v)
-	}
+	return TypeIsVariadic[v.Type](v)
 }
 
 func (v Value) IsImmutable() bool {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_ARRAY:
-		return arrayTypeIsImmutable(v)
-	case VT_RECORD:
-		return recordTypeIsImmutable(v)
-	case VT_MAP:
-		return mapTypeIsImmutable(v)
-	default:
-		return TypeIsImmutable[v.Type](v)
-	}
+	return TypeIsImmutable[v.Type](v)
 }
 
 func (v Value) AsString() (string, bool) {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_ERROR:
-		return errorTypeAsString(v)
-	case VT_STRING:
-		return stringTypeAsString(v)
-	case VT_BYTES:
-		return bytesTypeAsString(v)
-	default:
-		return TypeAsString[v.Type](v)
-	}
+	return TypeAsString[v.Type](v)
 }
 
 func (v Value) AsInt() (int64, bool) {
-	switch v.Type {
-	case VT_CHAR:
-		return int64(toChar(v)), true
-
-	case VT_INT:
-		return toInt(v), true
-
-	case VT_FLOAT:
-		return int64(toFloat(v)), true
-
-	default:
-		return TypeAsInt[v.Type](v)
-	}
+	return TypeAsInt[v.Type](v)
 }
 
 func (v Value) AsFloat() (float64, bool) {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_INT:
-		return intTypeAsFloat(v)
-	case VT_FLOAT:
-		return floatTypeAsFloat(v)
-	default:
-		return TypeAsFloat[v.Type](v)
-	}
+	return TypeAsFloat[v.Type](v)
 }
 
 func (v Value) AsBool() (bool, bool) {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_UNDEFINED:
-		return undefinedTypeAsBool(v)
-	case VT_ERROR:
-		return errorTypeAsBool(v)
-	case VT_BOOL:
-		return boolTypeAsBool(v)
-	default:
-		return TypeAsBool[v.Type](v)
-	}
+	return TypeAsBool[v.Type](v)
 }
 
 func (v Value) AsChar() (rune, bool) {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_CHAR:
-		return charTypeAsChar(v)
-	case VT_INT:
-		return intTypeAsChar(v)
-	default:
-		return TypeAsChar[v.Type](v)
-	}
+	return TypeAsChar[v.Type](v)
 }
 
 func (v Value) AsBytes() ([]byte, bool) {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_STRING:
-		return stringTypeAsBytes(v)
-	case VT_BYTES:
-		return bytesTypeAsBytes(v)
-	default:
-		return TypeAsBytes[v.Type](v)
-	}
+	return TypeAsBytes[v.Type](v)
 }
 
 func (v Value) AsTime() (time.Time, bool) {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_INT:
-		return intTypeAsTime(v)
-	case VT_TIME:
-		return timeTypeAsTime(v)
-	case VT_STRING:
-		return stringTypeAsTime(v)
-	default:
-		return TypeAsTime[v.Type](v)
-	}
+	return TypeAsTime[v.Type](v)
 }
 
 func (v Value) BinaryOp(a Allocator, op token.Token, rhs Value) (Value, error) {
-	switch v.Type {
-	case VT_CHAR:
-		switch rhs.Type {
-		case VT_INT: // char op int => int
-			l := int64(toChar(v))
-			r := toInt(rhs)
-			switch op {
-			case token.Add:
-				return IntValue(l + r), nil
-			case token.Sub:
-				return IntValue(l - r), nil
-			case token.Less:
-				return BoolValue(l < r), nil
-			case token.Greater:
-				return BoolValue(l > r), nil
-			case token.LessEq:
-				return BoolValue(l <= r), nil
-			case token.GreaterEq:
-				return BoolValue(l >= r), nil
-			default:
-				return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
-			}
-
-		case VT_STRING: // char op string => string
-			l := string(toChar(v))
-			r, _ := stringTypeAsString(rhs)
-			switch op {
-			case token.Add:
-				return a.NewStringValue(l + r), nil
-			default:
-				return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
-			}
-
-		default:
-			// char op any => char
-			r, ok := rhs.AsChar()
-			if !ok {
-				return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
-			}
-
-			l := toChar(v)
-			switch op {
-			case token.Add:
-				return CharValue(l + r), nil
-			case token.Sub:
-				return CharValue(l - r), nil
-			case token.Less:
-				return BoolValue(l < r), nil
-			case token.Greater:
-				return BoolValue(l > r), nil
-			case token.LessEq:
-				return BoolValue(l <= r), nil
-			case token.GreaterEq:
-				return BoolValue(l >= r), nil
-			default:
-				return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
-			}
-		}
-
-	case VT_INT:
-		switch rhs.Type {
-		case VT_INT: // int op int => int
-			l := toInt(v)
-			r := toInt(rhs)
-			switch op {
-			case token.Add:
-				return IntValue(l + r), nil
-			case token.Sub:
-				return IntValue(l - r), nil
-			case token.Mul:
-				return IntValue(l * r), nil
-			case token.Quo:
-				return IntValue(l / r), nil
-			case token.Rem:
-				return IntValue(l % r), nil
-			case token.And:
-				return IntValue(l & r), nil
-			case token.Or:
-				return IntValue(l | r), nil
-			case token.Xor:
-				return IntValue(l ^ r), nil
-			case token.AndNot:
-				return IntValue(l &^ r), nil
-			case token.Shl:
-				return IntValue(l << uint64(r)), nil
-			case token.Shr:
-				return IntValue(l >> uint64(r)), nil
-			case token.Less:
-				return BoolValue(l < r), nil
-			case token.Greater:
-				return BoolValue(l > r), nil
-			case token.LessEq:
-				return BoolValue(l <= r), nil
-			case token.GreaterEq:
-				return BoolValue(l >= r), nil
-			default:
-				return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
-			}
-
-		case VT_FLOAT: // int op float => float
-			l := float64(toInt(v))
-			r := toFloat(rhs)
-			switch op {
-			case token.Add:
-				return FloatValue(l + r), nil
-			case token.Sub:
-				return FloatValue(l - r), nil
-			case token.Mul:
-				return FloatValue(l * r), nil
-			case token.Quo:
-				return FloatValue(l / r), nil
-			case token.Less:
-				return BoolValue(l < r), nil
-			case token.Greater:
-				return BoolValue(l > r), nil
-			case token.LessEq:
-				return BoolValue(l <= r), nil
-			case token.GreaterEq:
-				return BoolValue(l >= r), nil
-			default:
-				return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
-			}
-
-		default:
-			// int op any => int
-			r, ok := rhs.AsInt()
-			if !ok {
-				return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
-			}
-
-			l := v.Int()
-			switch op {
-			case token.Add:
-				return IntValue(l + r), nil
-			case token.Sub:
-				return IntValue(l - r), nil
-			case token.Mul:
-				return IntValue(l * r), nil
-			case token.Quo:
-				return IntValue(l / r), nil
-			case token.Rem:
-				return IntValue(l % r), nil
-			case token.And:
-				return IntValue(l & r), nil
-			case token.Or:
-				return IntValue(l | r), nil
-			case token.Xor:
-				return IntValue(l ^ r), nil
-			case token.AndNot:
-				return IntValue(l &^ r), nil
-			case token.Shl:
-				return IntValue(l << uint64(r)), nil
-			case token.Shr:
-				return IntValue(l >> uint64(r)), nil
-			case token.Less:
-				return BoolValue(l < r), nil
-			case token.Greater:
-				return BoolValue(l > r), nil
-			case token.LessEq:
-				return BoolValue(l <= r), nil
-			case token.GreaterEq:
-				return BoolValue(l >= r), nil
-			default:
-				return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
-			}
-		}
-
-	case VT_FLOAT:
-		r, ok := rhs.AsFloat()
-		if !ok {
-			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
-		}
-
-		l := toFloat(v)
-		switch op {
-		case token.Add:
-			return FloatValue(l + r), nil
-		case token.Sub:
-			return FloatValue(l - r), nil
-		case token.Mul:
-			return FloatValue(l * r), nil
-		case token.Quo:
-			return FloatValue(l / r), nil
-		case token.Less:
-			return BoolValue(l < r), nil
-		case token.Greater:
-			return BoolValue(l > r), nil
-		case token.LessEq:
-			return BoolValue(l <= r), nil
-		case token.GreaterEq:
-			return BoolValue(l >= r), nil
-		default:
-			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
-		}
-
-	case VT_TIME:
-		if rhs.IsInt() {
-			r := rhs.Int()
-			switch op {
-			case token.Add: // time + int => time
-				o := (*time.Time)(v.Ptr)
-				return a.NewTimeValue(o.Add(time.Duration(r))), nil
-			case token.Sub: // time - int => time
-				o := (*time.Time)(v.Ptr)
-				return a.NewTimeValue(o.Add(time.Duration(-r))), nil
-			}
-		}
-
-		r, ok := rhs.AsTime()
-		if !ok {
-			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
-		}
-
-		switch op {
-		case token.Sub: // time - time => int (duration)
-			o := (*time.Time)(v.Ptr)
-			return IntValue(int64(o.Sub(r))), nil
-		case token.Less: // time < time => bool
-			o := (*time.Time)(v.Ptr)
-			return BoolValue(o.Before(r)), nil
-		case token.Greater:
-			o := (*time.Time)(v.Ptr)
-			return BoolValue(o.After(r)), nil
-		case token.LessEq:
-			o := (*time.Time)(v.Ptr)
-			return BoolValue(o.Equal(r) || o.Before(r)), nil
-		case token.GreaterEq:
-			o := (*time.Time)(v.Ptr)
-			return BoolValue(o.Equal(r) || o.After(r)), nil
-		}
-
-		return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
-	default:
-		return TypeBinaryOp[v.Type](v, a, op, rhs)
-	}
+	return TypeBinaryOp[v.Type](v, a, op, rhs)
 }
 
 func (v Value) Equal(rhs Value) bool {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_BOOL:
-		return boolTypeEqual(v, rhs)
-	case VT_CHAR:
-		return charTypeEqual(v, rhs)
-	case VT_INT:
-		return intTypeEqual(v, rhs)
-	case VT_FLOAT:
-		return floatTypeEqual(v, rhs)
-	default:
-		return TypeEqual[v.Type](v, rhs)
-	}
+	return TypeEqual[v.Type](v, rhs)
 }
 
 func (v *Value) Copy(alloc Allocator) Value {
@@ -689,84 +256,21 @@ func (v *Value) Copy(alloc Allocator) Value {
 }
 
 func (v Value) MethodCall(vm VM, name string, args []Value) (Value, error) {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_TIME:
-		return timeTypeMethodCall(v, vm, name, args)
-	case VT_STRING:
-		return stringTypeMethodCall(v, vm, name, args)
-	case VT_BYTES:
-		return bytesTypeMethodCall(v, vm, name, args)
-	case VT_ARRAY:
-		return arrayTypeMethodCall(v, vm, name, args)
-	case VT_RECORD:
-		return recordTypeMethodCall(v, vm, name, args)
-	case VT_MAP:
-		return mapTypeMethodCall(v, vm, name, args)
-	default:
-		return TypeMethodCall[v.Type](v, vm, name, args)
-	}
+	return TypeMethodCall[v.Type](v, vm, name, args)
 }
 
 func (v Value) Access(vm VM, index Value, mode Opcode) (Value, error) {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_STRING:
-		return stringTypeAccess(v, vm.Allocator(), index, mode)
-	case VT_BYTES:
-		return bytesTypeAccess(v, vm.Allocator(), index, mode)
-	case VT_ARRAY:
-		return arrayTypeAccess(v, vm.Allocator(), index, mode)
-	case VT_RECORD:
-		return recordTypeAccess(v, vm.Allocator(), index, mode)
-	case VT_MAP:
-		return mapTypeAccess(v, vm.Allocator(), index, mode)
-	default:
-		return TypeAccess[v.Type](v, vm.Allocator(), index, mode)
-	}
+	return TypeAccess[v.Type](v, vm.Allocator(), index, mode)
 }
 
 func (v Value) Assign(idx Value, val Value) error {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_ARRAY:
-		return arrayTypeAssign(v, idx, val)
-	case VT_RECORD:
-		return recordTypeAssign(v, idx, val)
-	case VT_MAP:
-		return mapTypeAssign(v, idx, val)
-	default:
-		return TypeAssign[v.Type](v, idx, val)
-	}
+	return TypeAssign[v.Type](v, idx, val)
 }
 
 func (v Value) Iterator(alloc Allocator) Value {
-	// Fast path, must be in sync with Function tables in init.go
-	switch v.Type {
-	case VT_STRING:
-		return stringTypeIterator(v, alloc)
-	case VT_BYTES:
-		return bytesTypeIterator(v, alloc)
-	case VT_ARRAY:
-		return arrayTypeIterator(v, alloc)
-	case VT_RECORD:
-		return recordTypeIterator(v, alloc)
-	case VT_MAP:
-		return mapTypeIterator(v, alloc)
-	default:
-		return TypeIterator[v.Type](v, alloc)
-	}
+	return TypeIterator[v.Type](v, alloc)
 }
 
 func (v Value) Call(vm VM, args []Value) (Value, error) {
-	switch v.Type {
-	case VT_BUILTIN_FUNCTION:
-		return (*BuiltinFunction)(v.Ptr).Func(vm, args)
-
-	case VT_COMPILED_FUNCTION:
-		return vm.Call((*CompiledFunction)(v.Ptr), args)
-
-	default:
-		return TypeCall[v.Type](v, vm, args)
-	}
+	return TypeCall[v.Type](v, vm, args)
 }

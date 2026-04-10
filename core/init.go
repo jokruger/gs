@@ -169,7 +169,7 @@ func init() {
 		TypeCall[i] = defaultTypeCall
 	}
 
-	// Undefined - list of functions must be in sync with switch-base fast path in Value methods
+	// Undefined
 	TypeName[VT_UNDEFINED] = undefinedTypeName
 	TypeEncodeJSON[VT_UNDEFINED] = undefinedTypeEncodeJSON
 	TypeEncodeBinary[VT_UNDEFINED] = undefinedTypeEncodeBinary
@@ -181,10 +181,10 @@ func init() {
 	TypeAccess[VT_UNDEFINED] = undefinedTypeAccess
 	TypeAsBool[VT_UNDEFINED] = undefinedTypeAsBool
 
-	// ValuePtr - list of functions must be in sync with switch-base fast path in Value methods
+	// ValuePtr
 	TypeName[VT_VALUE_PTR] = valuePtrTypeName
 
-	// BuiltinFunction - list of functions must be in sync with switch-base fast path in Value methods
+	// BuiltinFunction
 	TypeName[VT_BUILTIN_FUNCTION] = builtinFunctionTypeName
 	TypeEncodeBinary[VT_BUILTIN_FUNCTION] = builtinFunctionTypeEncodeBinary
 	TypeDecodeBinary[VT_BUILTIN_FUNCTION] = builtinFunctionTypeDecodeBinary
@@ -194,9 +194,9 @@ func init() {
 	TypeIsCallable[VT_BUILTIN_FUNCTION] = builtinFunctionTypeIsCallable
 	TypeIsVariadic[VT_BUILTIN_FUNCTION] = builtinFunctionTypeIsVariadic
 	TypeEqual[VT_BUILTIN_FUNCTION] = builtinFunctionTypeEqual
-	//TypeCall[VT_BUILTIN_FUNCTION] = builtinFunctionTypeCall 		// inlined in Value.Call for better performance
+	TypeCall[VT_BUILTIN_FUNCTION] = builtinFunctionTypeCall
 
-	// CompiledFunction - list of functions must be in sync with switch-base fast path in Value methods
+	// CompiledFunction
 	TypeName[VT_COMPILED_FUNCTION] = compiledFunctionTypeName
 	TypeEncodeBinary[VT_COMPILED_FUNCTION] = compiledFunctionTypeEncodeBinary
 	TypeDecodeBinary[VT_COMPILED_FUNCTION] = compiledFunctionTypeDecodeBinary
@@ -206,9 +206,9 @@ func init() {
 	TypeIsCallable[VT_COMPILED_FUNCTION] = compiledFunctionTypeIsCallable
 	TypeIsVariadic[VT_COMPILED_FUNCTION] = compiledFunctionTypeIsVariadic
 	TypeEqual[VT_COMPILED_FUNCTION] = compiledFunctionTypeEqual
-	//TypeCall[VT_COMPILED_FUNCTION] = compiledFunctionTypeCall 	// inlined in Value.Call for better performance
+	TypeCall[VT_COMPILED_FUNCTION] = compiledFunctionTypeCall
 
-	// Error - list of functions must be in sync with switch-base fast path in Value methods
+	// Error
 	TypeName[VT_ERROR] = errorTypeName
 	TypeEncodeJSON[VT_ERROR] = errorTypeEncodeJSON
 	TypeEncodeBinary[VT_ERROR] = errorTypeEncodeBinary
@@ -222,7 +222,7 @@ func init() {
 	TypeAsString[VT_ERROR] = errorTypeAsString
 	TypeAsBool[VT_ERROR] = errorTypeAsBool
 
-	// Bool - list of functions must be in sync with switch-base fast path in Value methods
+	// Bool
 	TypeName[VT_BOOL] = boolTypeName
 	TypeEncodeJSON[VT_BOOL] = boolTypeEncodeJSON
 	TypeEncodeBinary[VT_BOOL] = boolTypeEncodeBinary
@@ -236,7 +236,7 @@ func init() {
 	TypeEqual[VT_BOOL] = boolTypeEqual
 	TypeMethodCall[VT_BOOL] = boolTypeMethodCall
 
-	// Char - list of functions must be in sync with switch-base fast path in Value methods
+	// Char
 	TypeName[VT_CHAR] = charTypeName
 	TypeEncodeJSON[VT_CHAR] = charTypeEncodeJSON
 	TypeEncodeBinary[VT_CHAR] = charTypeEncodeBinary
@@ -245,14 +245,14 @@ func init() {
 	TypeInterface[VT_CHAR] = charTypeInterface
 	TypeIsTrue[VT_CHAR] = charTypeIsTrue
 	TypeAsString[VT_CHAR] = charTypeAsString
-	//TypeAsInt[VT_CHAR] = charTypeAsInt		// inlined in Value.AsInt for better performance
+	TypeAsInt[VT_CHAR] = charTypeAsInt
 	TypeAsBool[VT_CHAR] = charTypeAsBool
 	TypeAsChar[VT_CHAR] = charTypeAsChar
-	//TypeBinaryOp[VT_CHAR] = charTypeBinaryOp	// inlined in Value.BinaryOp for better performance
+	TypeBinaryOp[VT_CHAR] = charTypeBinaryOp
 	TypeEqual[VT_CHAR] = charTypeEqual
 	TypeMethodCall[VT_CHAR] = charTypeMethodCall
 
-	// Int - list of functions must be in sync with switch-base fast path in Value methods
+	// Int
 	TypeName[VT_INT] = intTypeName
 	TypeEncodeJSON[VT_INT] = intTypeEncodeJSON
 	TypeEncodeBinary[VT_INT] = intTypeEncodeBinary
@@ -261,16 +261,16 @@ func init() {
 	TypeInterface[VT_INT] = intTypeInterface
 	TypeIsTrue[VT_INT] = intTypeIsTrue
 	TypeAsString[VT_INT] = intTypeAsString
-	//TypeAsInt[VT_INT] = intTypeAsInt			// inlined in Value.AsInt for better performance
+	TypeAsInt[VT_INT] = intTypeAsInt
 	TypeAsFloat[VT_INT] = intTypeAsFloat
 	TypeAsBool[VT_INT] = intTypeAsBool
 	TypeAsChar[VT_INT] = intTypeAsChar
 	TypeAsTime[VT_INT] = intTypeAsTime
-	//TypeBinaryOp[VT_INT] = intTypeBinaryOp	// inlined in Value.BinaryOp for better performance
+	TypeBinaryOp[VT_INT] = intTypeBinaryOp
 	TypeEqual[VT_INT] = intTypeEqual
 	TypeMethodCall[VT_INT] = intTypeMethodCall
 
-	// Float - list of functions must be in sync with switch-base fast path in Value methods
+	// Float
 	TypeName[VT_FLOAT] = floatTypeName
 	TypeEncodeJSON[VT_FLOAT] = floatTypeEncodeJSON
 	TypeEncodeBinary[VT_FLOAT] = floatTypeEncodeBinary
@@ -279,21 +279,21 @@ func init() {
 	TypeInterface[VT_FLOAT] = floatTypeInterface
 	TypeIsTrue[VT_FLOAT] = floatTypeIsTrue
 	TypeAsString[VT_FLOAT] = floatTypeAsString
-	//TypeAsInt[VT_FLOAT] = floatTypeAsInt 		// inlined in Value.AsInt for better performance
+	TypeAsInt[VT_FLOAT] = floatTypeAsInt
 	TypeAsFloat[VT_FLOAT] = floatTypeAsFloat
 	TypeAsBool[VT_FLOAT] = floatTypeAsBool
-	//TypeBinaryOp[VT_FLOAT] = floatTypeBinaryOp	// inlined in Value.BinaryOp for better performance
+	TypeBinaryOp[VT_FLOAT] = floatTypeBinaryOp
 	TypeEqual[VT_FLOAT] = floatTypeEqual
 	TypeMethodCall[VT_FLOAT] = floatTypeMethodCall
 
-	// Time - list of functions must be in sync with switch-base fast path in Value methods
+	// Time
 	TypeName[VT_TIME] = timeTypeName
 	TypeEncodeJSON[VT_TIME] = timeTypeEncodeJSON
 	TypeEncodeBinary[VT_TIME] = timeTypeEncodeBinary
 	TypeDecodeBinary[VT_TIME] = timeTypeDecodeBinary
 	TypeString[VT_TIME] = timeTypeString
 	TypeInterface[VT_TIME] = timeTypeInterface
-	//TypeBinaryOp[VT_TIME] = timeTypeBinaryOp	// inlined in Value.BinaryOp for better performance
+	TypeBinaryOp[VT_TIME] = timeTypeBinaryOp
 	TypeEqual[VT_TIME] = timeTypeEqual
 	TypeCopy[VT_TIME] = timeTypeCopy
 	TypeMethodCall[VT_TIME] = timeTypeMethodCall
@@ -303,7 +303,7 @@ func init() {
 	TypeAsBool[VT_TIME] = timeTypeAsBool
 	TypeAsTime[VT_TIME] = timeTypeAsTime
 
-	// String - list of functions must be in sync with switch-base fast path in Value methods
+	// String
 	TypeName[VT_STRING] = stringTypeName
 	TypeEncodeJSON[VT_STRING] = stringTypeEncodeJSON
 	TypeEncodeBinary[VT_STRING] = stringTypeEncodeBinary
@@ -326,7 +326,7 @@ func init() {
 	TypeAsBytes[VT_STRING] = stringTypeAsBytes
 	TypeAsTime[VT_STRING] = stringTypeAsTime
 
-	// Bytes - list of functions must be in sync with switch-base fast path in Value methods
+	// Bytes
 	TypeName[VT_BYTES] = bytesTypeName
 	TypeEncodeJSON[VT_BYTES] = bytesTypeEncodeJSON
 	TypeEncodeBinary[VT_BYTES] = bytesTypeEncodeBinary
@@ -345,7 +345,7 @@ func init() {
 	TypeAsBool[VT_BYTES] = bytesTypeAsBool
 	TypeAsBytes[VT_BYTES] = bytesTypeAsBytes
 
-	// Array - list of functions must be in sync with switch-base fast path in Value methods
+	// Array
 	TypeName[VT_ARRAY] = arrayTypeName
 	TypeEncodeJSON[VT_ARRAY] = arrayTypeEncodeJSON
 	TypeEncodeBinary[VT_ARRAY] = arrayTypeEncodeBinary
@@ -366,7 +366,7 @@ func init() {
 	TypeAsBool[VT_ARRAY] = arrayTypeAsBool
 	TypeAsBytes[VT_ARRAY] = arrayTypeAsBytes
 
-	// Record - list of functions must be in sync with switch-base fast path in Value methods
+	// Record
 	TypeName[VT_RECORD] = recordTypeName
 	TypeEncodeJSON[VT_RECORD] = recordTypeEncodeJSON
 	TypeEncodeBinary[VT_RECORD] = recordTypeEncodeBinary
@@ -385,7 +385,7 @@ func init() {
 	TypeAsString[VT_RECORD] = recordTypeAsString
 	TypeAsBool[VT_RECORD] = recordTypeAsBool
 
-	// Map - list of functions must be in sync with switch-base fast path in Value methods
+	// Map
 	TypeName[VT_MAP] = mapTypeName
 	TypeEncodeJSON[VT_MAP] = mapTypeEncodeJSON
 	TypeEncodeBinary[VT_MAP] = mapTypeEncodeBinary
@@ -404,35 +404,35 @@ func init() {
 	TypeAsString[VT_MAP] = mapTypeAsString
 	TypeAsBool[VT_MAP] = mapTypeAsBool
 
-	// StringIterator - list of functions must be in sync with switch-base fast path in Value methods
+	// StringIterator
 	TypeName[VT_STRING_ITERATOR] = stringIteratorTypeName
 	TypeString[VT_STRING_ITERATOR] = stringIteratorTypeString
-	//TypeNext[VT_STRING_ITERATOR] = stringIteratorTypeNext 	// inlined in Value.Next for better performance
-	//TypeKey[VT_STRING_ITERATOR] = stringIteratorTypeKey 		// inlined in Value.Key for better performance
-	//TypeValue[VT_STRING_ITERATOR] = stringIteratorTypeValue 	// inlined in Value.Value for better performance
+	TypeNext[VT_STRING_ITERATOR] = stringIteratorTypeNext
+	TypeKey[VT_STRING_ITERATOR] = stringIteratorTypeKey
+	TypeValue[VT_STRING_ITERATOR] = stringIteratorTypeValue
 	TypeEqual[VT_STRING_ITERATOR] = stringIteratorTypeEqual
 
-	// BytesIterator - list of functions must be in sync with switch-base fast path in Value methods
+	// BytesIterator
 	TypeName[VT_BYTES_ITERATOR] = bytesIteratorTypeName
 	TypeString[VT_BYTES_ITERATOR] = bytesIteratorTypeString
-	//TypeNext[VT_BYTES_ITERATOR] = bytesIteratorTypeNext 		// inlined in Value.Next for better performance
-	//TypeKey[VT_BYTES_ITERATOR] = bytesIteratorTypeKey 		// inlined in Value.Key for better performance
-	// TypeValue[VT_BYTES_ITERATOR] = bytesIteratorTypeValue 	// inlined in Value.Value for better performance
+	TypeNext[VT_BYTES_ITERATOR] = bytesIteratorTypeNext
+	TypeKey[VT_BYTES_ITERATOR] = bytesIteratorTypeKey
+	TypeValue[VT_BYTES_ITERATOR] = bytesIteratorTypeValue
 	TypeEqual[VT_BYTES_ITERATOR] = bytesIteratorTypeEqual
 
-	// ArrayIterator - list of functions must be in sync with switch-base fast path in Value methods
+	// ArrayIterator
 	TypeName[VT_ARRAY_ITERATOR] = arrayIteratorTypeName
 	TypeString[VT_ARRAY_ITERATOR] = arrayIteratorTypeString
-	//TypeNext[VT_ARRAY_ITERATOR] = arrayIteratorTypeNext		// inlined in Value.Next for better performance
-	//TypeKey[VT_ARRAY_ITERATOR] = arrayIteratorTypeKey			// inlined in Value.Key for better performance
-	//TypeValue[VT_ARRAY_ITERATOR] = arrayIteratorTypeValue		// inlined in Value.Value for better performance
+	TypeNext[VT_ARRAY_ITERATOR] = arrayIteratorTypeNext
+	TypeKey[VT_ARRAY_ITERATOR] = arrayIteratorTypeKey
+	TypeValue[VT_ARRAY_ITERATOR] = arrayIteratorTypeValue
 	TypeEqual[VT_ARRAY_ITERATOR] = arrayIteratorTypeEqual
 
-	// MapIterator - list of functions must be in sync with switch-base fast path in Value methods
+	// MapIterator
 	TypeName[VT_MAP_ITERATOR] = mapIteratorTypeName
 	TypeString[VT_MAP_ITERATOR] = mapIteratorTypeString
-	//TypeNext[VT_MAP_ITERATOR] = mapIteratorTypeNext 			// inlined in Value.Next for better performance
-	//TypeKey[VT_MAP_ITERATOR] = mapIteratorTypeKey				// inlined in Value.Key for better performance
-	//TypeValue[VT_MAP_ITERATOR] = mapIteratorTypeValue			// inlined in Value.Value for better performance
+	TypeNext[VT_MAP_ITERATOR] = mapIteratorTypeNext
+	TypeKey[VT_MAP_ITERATOR] = mapIteratorTypeKey
+	TypeValue[VT_MAP_ITERATOR] = mapIteratorTypeValue
 	TypeEqual[VT_MAP_ITERATOR] = mapIteratorTypeEqual
 }

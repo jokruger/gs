@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/gs/token"
 )
 
 func CharValue(c rune) Value {
@@ -53,6 +54,10 @@ func charTypeInterface(v Value) any {
 
 func charTypeIsTrue(v Value) bool {
 	return toChar(v) != 0
+}
+
+func charTypeAsInt(v Value) (int64, bool) {
+	return int64(toChar(v)), true
 }
 
 func charTypeAsString(v Value) (string, bool) {
@@ -106,5 +111,64 @@ func charTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 
 	default:
 		return UndefinedValue(), errs.NewInvalidMethodError(name, "char")
+	}
+}
+
+func charTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, error) {
+	switch rhs.Type {
+	case VT_INT: // char op int => int
+		l := int64(toChar(v))
+		r := toInt(rhs)
+		switch op {
+		case token.Add:
+			return IntValue(l + r), nil
+		case token.Sub:
+			return IntValue(l - r), nil
+		case token.Less:
+			return BoolValue(l < r), nil
+		case token.Greater:
+			return BoolValue(l > r), nil
+		case token.LessEq:
+			return BoolValue(l <= r), nil
+		case token.GreaterEq:
+			return BoolValue(l >= r), nil
+		default:
+			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		}
+
+	case VT_STRING: // char op string => string
+		l := string(toChar(v))
+		r, _ := stringTypeAsString(rhs)
+		switch op {
+		case token.Add:
+			return a.NewStringValue(l + r), nil
+		default:
+			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		}
+
+	default:
+		// char op any => char
+		r, ok := rhs.AsChar()
+		if !ok {
+			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		}
+
+		l := toChar(v)
+		switch op {
+		case token.Add:
+			return CharValue(l + r), nil
+		case token.Sub:
+			return CharValue(l - r), nil
+		case token.Less:
+			return BoolValue(l < r), nil
+		case token.Greater:
+			return BoolValue(l > r), nil
+		case token.LessEq:
+			return BoolValue(l <= r), nil
+		case token.GreaterEq:
+			return BoolValue(l >= r), nil
+		default:
+			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		}
 	}
 }

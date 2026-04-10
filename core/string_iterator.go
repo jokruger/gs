@@ -47,3 +47,19 @@ func stringIteratorTypeEqual(v Value, r Value) bool {
 	b := (*StringIterator)(r.Ptr)
 	return a == b
 }
+
+func stringIteratorTypeNext(v *Value) bool {
+	i := (*StringIterator)(v.Ptr)
+	i.i++
+	return i.i <= i.l
+}
+
+func stringIteratorTypeKey(v Value, alloc Allocator) Value {
+	i := (*StringIterator)(v.Ptr)
+	return IntValue(int64(i.i - 1))
+}
+
+func stringIteratorTypeValue(v Value, alloc Allocator) Value {
+	i := (*StringIterator)(v.Ptr)
+	return CharValue(i.v[i.i-1])
+}

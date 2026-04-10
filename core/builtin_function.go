@@ -92,3 +92,7 @@ func builtinFunctionTypeIsTrue(v Value) bool {
 func builtinFunctionTypeIsCallable(v Value) bool {
 	return true
 }
+
+func builtinFunctionTypeCall(v Value, vm VM, args []Value) (Value, error) {
+	return (*BuiltinFunction)(v.Ptr).Func(vm, args)
+}

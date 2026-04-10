@@ -47,3 +47,19 @@ func bytesIteratorTypeEqual(v Value, r Value) bool {
 	b := (*BytesIterator)(r.Ptr)
 	return a == b
 }
+
+func bytesIteratorTypeNext(v *Value) bool {
+	i := (*BytesIterator)(v.Ptr)
+	i.i++
+	return i.i <= i.l
+}
+
+func bytesIteratorTypeKey(v Value, alloc Allocator) Value {
+	i := (*BytesIterator)(v.Ptr)
+	return IntValue(int64(i.i - 1))
+}
+
+func bytesIteratorTypeValue(v Value, alloc Allocator) Value {
+	i := (*BytesIterator)(v.Ptr)
+	return IntValue(int64(i.v[i.i-1]))
+}

@@ -115,3 +115,7 @@ func compiledFunctionTypeIsVariadic(v Value) bool {
 	f := (*CompiledFunction)(v.Ptr)
 	return f.VarArgs
 }
+
+func compiledFunctionTypeCall(v Value, vm VM, args []Value) (Value, error) {
+	return vm.Call((*CompiledFunction)(v.Ptr), args)
+}

@@ -9,7 +9,6 @@ type MapIterator struct {
 	v map[string]Value
 	k []string
 	i int
-	l int
 }
 
 func (o *MapIterator) Set(m map[string]Value) {
@@ -19,7 +18,6 @@ func (o *MapIterator) Set(m map[string]Value) {
 		o.k = append(o.k, k)
 	}
 	o.i = 0
-	o.l = len(o.k)
 }
 
 func MapIteratorValue(v *MapIterator) Value {
@@ -42,10 +40,10 @@ func mapIteratorTypeName(v Value) string {
 func mapIteratorTypeString(v Value) string {
 	i := (*MapIterator)(v.Ptr)
 	k := "<nil>"
-	if i.i > 0 && i.i <= i.l {
+	if i.i > 0 && i.i <= len(i.k) {
 		k = i.k[i.i-1]
 	}
-	return fmt.Sprintf("MapIterator{%s, %d/%d}", k, i.i, i.l)
+	return fmt.Sprintf("MapIterator{%s, %d/%d}", k, i.i, len(i.k))
 }
 
 func mapIteratorTypeEqual(v Value, r Value) bool {
@@ -60,7 +58,7 @@ func mapIteratorTypeEqual(v Value, r Value) bool {
 func mapIteratorTypeNext(v *Value) bool {
 	i := (*MapIterator)(v.Ptr)
 	i.i++
-	return i.i <= i.l
+	return i.i <= len(i.k)
 }
 
 func mapIteratorTypeKey(v Value, alloc Allocator) Value {

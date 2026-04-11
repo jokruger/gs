@@ -8,13 +8,11 @@ import (
 type BytesIterator struct {
 	v []byte
 	i int
-	l int
 }
 
 func (o *BytesIterator) Set(vals []byte) {
 	o.v = vals
 	o.i = 0
-	o.l = len(vals)
 }
 
 func BytesIteratorValue(v *BytesIterator) Value {
@@ -36,7 +34,7 @@ func bytesIteratorTypeName(v Value) string {
 
 func bytesIteratorTypeString(v Value) string {
 	i := (*BytesIterator)(v.Ptr)
-	return fmt.Sprintf("BytesIterator{%d/%d}", i.i, i.l)
+	return fmt.Sprintf("BytesIterator{%d/%d}", i.i, len(i.v))
 }
 
 func bytesIteratorTypeEqual(v Value, r Value) bool {
@@ -51,7 +49,7 @@ func bytesIteratorTypeEqual(v Value, r Value) bool {
 func bytesIteratorTypeNext(v *Value) bool {
 	i := (*BytesIterator)(v.Ptr)
 	i.i++
-	return i.i <= i.l
+	return i.i <= len(i.v)
 }
 
 func bytesIteratorTypeKey(v Value, alloc Allocator) Value {

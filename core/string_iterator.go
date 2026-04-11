@@ -8,13 +8,11 @@ import (
 type StringIterator struct {
 	v []rune
 	i int
-	l int
 }
 
 func (i *StringIterator) Set(v []rune) {
 	i.v = v
 	i.i = 0
-	i.l = len(v)
 }
 
 func StringIteratorValue(v *StringIterator) Value {
@@ -36,7 +34,7 @@ func stringIteratorTypeName(v Value) string {
 
 func stringIteratorTypeString(v Value) string {
 	i := (*StringIterator)(v.Ptr)
-	return fmt.Sprintf("StringIterator{%d/%d}", i.i, i.l)
+	return fmt.Sprintf("StringIterator{%d/%d}", i.i, len(i.v))
 }
 
 func stringIteratorTypeEqual(v Value, r Value) bool {
@@ -51,7 +49,7 @@ func stringIteratorTypeEqual(v Value, r Value) bool {
 func stringIteratorTypeNext(v *Value) bool {
 	i := (*StringIterator)(v.Ptr)
 	i.i++
-	return i.i <= i.l
+	return i.i <= len(i.v)
 }
 
 func stringIteratorTypeKey(v Value, alloc Allocator) Value {

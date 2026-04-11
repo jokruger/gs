@@ -8,13 +8,11 @@ import (
 type ArrayIterator struct {
 	v []Value
 	i int
-	l int
 }
 
 func (i *ArrayIterator) Set(v []Value) {
 	i.v = v
 	i.i = 0
-	i.l = len(v)
 }
 
 func ArrayIteratorValue(v *ArrayIterator) Value {
@@ -36,7 +34,7 @@ func arrayIteratorTypeName(v Value) string {
 
 func arrayIteratorTypeString(v Value) string {
 	i := (*ArrayIterator)(v.Ptr)
-	return fmt.Sprintf("ArrayIterator{%d/%d}", i.i, i.l)
+	return fmt.Sprintf("ArrayIterator{%d/%d}", i.i, len(i.v))
 }
 
 func arrayIteratorTypeEqual(v Value, r Value) bool {
@@ -51,7 +49,7 @@ func arrayIteratorTypeEqual(v Value, r Value) bool {
 func arrayIteratorTypeNext(v *Value) bool {
 	i := (*ArrayIterator)(v.Ptr)
 	i.i++
-	return i.i <= i.l
+	return i.i <= len(i.v)
 }
 
 func arrayIteratorTypeKey(v Value, alloc Allocator) Value {

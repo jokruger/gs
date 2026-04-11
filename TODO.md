@@ -43,8 +43,6 @@
 - Move strings package functions to the string type member functions
 - typed vectors, J core operators
 - add Set data type
-- add "x in y" syntax
-- map.has / .contains
 - merge(r1, r2) → new record, map.merge
 - optimization for "modify and assign" pattern (reuse variable, pass argument to inform type logic)
 - array.append (array) => new array
@@ -62,14 +60,14 @@
 - enumerate() → array[(index, value)] (or map-like pairs)
 - string.split(sep) → array[string]
 - array.join
-- string trim(), lower(), upper(), replace(old, new), contains(sub), startsWith, endsWith
+- string trim(), lower(), upper(), replace(old, new), startsWith, endsWith
 - bytes.hex()
 - bytes.base64()
 - move type related functions to type member functions; remove duplicates from stdlib (i.e. stdlib must be complimentary extension of type member functions)
 - make Len/Append/Delete a Value function, so len() can be used for user defined types too
-- Arrays: `map`, `filter`, `reduce`, `sum`, `avg`, `min`, `max`, `len`, `is_empty`, `sort`, `sort_by`
-- Strings: `len`, `is_empty`, `upper`, `lower`, `trim`, `contains`, `has_prefix`, `has_suffix`, `to_int`, `to_float`
-- Int/Float: `abs`, `pow`, `is_zero`, `to_string`, `to_int`, `to_float`
+- Arrays: `sort_by`
+- Strings: `has_prefix`, `has_suffix`
+- Int/Float: `abs`, `pow`, `is_zero`
 - add time.is_leap_year(), time.is_weekend(), time.is_weekday(), time.is_holiday() (with holiday calendar)
 - map/array/record/string/bytes -> value level?
 - string-iterator, array-iterator, etc -> value level?

@@ -116,6 +116,7 @@ func TestScanner_Scan(t *testing.T) {
 		{token.If, "if"},
 		{token.Return, "return"},
 		{token.Export, "export"},
+		{token.Var, "var"},
 	}
 
 	// combine

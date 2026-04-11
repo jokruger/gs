@@ -3226,6 +3226,14 @@ for i:=0;i<3;i++ {
 }
 out = a`, nil, 2)
 
+	// shadowing inside for statement with var init
+	expectRun(t, `
+a := 0
+for var i = 0; i < 3; i++ {
+	a += i
+}
+out = a`, nil, 3)
+
 	// shadowing variable declared in init statement
 	expectRun(t, `
 if a := 5; a {
@@ -3251,6 +3259,21 @@ if a := 0; a {
 a := 4
 if a := 0; a {
 	out = a
+} else {
+	out = a
+}`, nil, 0)
+
+	// shadowing variable declared in init statement using var
+	expectRun(t, `
+a := 4
+if var a = 5; a {
+	a := 6
+	out = a
+}`, nil, 6)
+	expectRun(t, `
+a := 4
+if var a = 0; a {
+	out = 1
 } else {
 	out = a
 }`, nil, 0)
@@ -3849,6 +3872,53 @@ func TestInSyntax(t *testing.T) {
 			out = 0
 		}
 	`, nil, 0)
+}
+
+func TestVarSyntax(t *testing.T) {
+	expectRun(t, `
+		var x = 1
+		var y = 2
+		out = x + y
+	`, nil, 3)
+
+	expectRun(t, `
+		var x = 1
+		x = 2
+		out = x
+	`, nil, 2)
+
+	expectRun(t, `
+		var x
+		x = 2
+		out = x
+	`, nil, 2)
+
+	expectRun(t, `
+		var x = 1
+		func() {
+			x = 2
+		}()
+		out = x
+	`, nil, 2)
+
+	expectRun(t, `
+		var x = 1
+		func() {
+			var x = 2
+			out = x
+		}()
+	`, nil, 2)
+
+	expectRun(t, `
+		var x = 1
+		func() {
+			var x = 2
+			func() {
+				x = 3
+			}()
+			out = x
+		}()
+	`, nil, 3)
 }
 
 func expectRun(t *testing.T, input string, opts *testopts, expected any) {

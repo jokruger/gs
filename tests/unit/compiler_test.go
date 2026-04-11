@@ -268,6 +268,23 @@ func TestCompiler_Compile(t *testing.T) {
 				stringObject("ka"),
 				stringObject("mi"))))
 
+	expectCompile(t, `var a`,
+		bytecode(
+			concatInsts(
+				vm.MakeInstruction(core.OpNull),
+				vm.MakeInstruction(core.OpSetGlobal, 0),
+				vm.MakeInstruction(core.OpSuspend)),
+			objectsArray()))
+
+	expectCompile(t, `var a = 1`,
+		bytecode(
+			concatInsts(
+				vm.MakeInstruction(core.OpConstant, 0),
+				vm.MakeInstruction(core.OpSetGlobal, 0),
+				vm.MakeInstruction(core.OpSuspend)),
+			objectsArray(
+				intObject(1))))
+
 	expectCompile(t, `a := 1; b := 2; a += b`,
 		bytecode(
 			concatInsts(
@@ -958,6 +975,26 @@ func() {
 				intObject(10),
 				intObject(1))))
 
+	expectCompile(t, `for var i = 0; i<10; i++ {}`,
+		bytecode(
+			concatInsts(
+				vm.MakeInstruction(core.OpConstant, 0),
+				vm.MakeInstruction(core.OpSetGlobal, 0),
+				vm.MakeInstruction(core.OpGetGlobal, 0),
+				vm.MakeInstruction(core.OpConstant, 1),
+				vm.MakeInstruction(core.OpBinaryOp, 38),
+				vm.MakeInstruction(core.OpJumpFalsy, 35),
+				vm.MakeInstruction(core.OpGetGlobal, 0),
+				vm.MakeInstruction(core.OpConstant, 2),
+				vm.MakeInstruction(core.OpBinaryOp, 11),
+				vm.MakeInstruction(core.OpSetGlobal, 0),
+				vm.MakeInstruction(core.OpJump, 6),
+				vm.MakeInstruction(core.OpSuspend)),
+			objectsArray(
+				intObject(0),
+				intObject(10),
+				intObject(1))))
+
 	expectCompile(t, `m := {}; for k, v in m {}`,
 		bytecode(
 			concatInsts(
@@ -1044,6 +1081,8 @@ func TestCompilerErrorReport(t *testing.T) {
 		"not allowed with selector")
 	expectCompileError(t, `a:=1; a:=3`,
 		"Compile Error: 'a' redeclared in this block\n\tat test:1:7")
+	expectCompileError(t, `var a = 1; var a = 3`,
+		"Compile Error: 'a' redeclared in this block\n\tat test:1:16")
 
 	expectCompileError(t, `return 5`,
 		"Compile Error: return not allowed outside function\n\tat test:1:1")
@@ -1203,6 +1242,34 @@ func() {
 func TestCompilerScopes(t *testing.T) {
 	expectCompile(t, `
 if a := 1; a {
+    a = 2
+	b := a
+} else {
+    a = 3
+	b := a
+}`, bytecode(
+		concatInsts(
+			vm.MakeInstruction(core.OpConstant, 0),
+			vm.MakeInstruction(core.OpSetGlobal, 0),
+			vm.MakeInstruction(core.OpGetGlobal, 0),
+			vm.MakeInstruction(core.OpJumpFalsy, 31),
+			vm.MakeInstruction(core.OpConstant, 1),
+			vm.MakeInstruction(core.OpSetGlobal, 0),
+			vm.MakeInstruction(core.OpGetGlobal, 0),
+			vm.MakeInstruction(core.OpSetGlobal, 1),
+			vm.MakeInstruction(core.OpJump, 43),
+			vm.MakeInstruction(core.OpConstant, 2),
+			vm.MakeInstruction(core.OpSetGlobal, 0),
+			vm.MakeInstruction(core.OpGetGlobal, 0),
+			vm.MakeInstruction(core.OpSetGlobal, 2),
+			vm.MakeInstruction(core.OpSuspend)),
+		objectsArray(
+			intObject(1),
+			intObject(2),
+			intObject(3))))
+
+	expectCompile(t, `
+if var a = 1; a {
     a = 2
 	b := a
 } else {

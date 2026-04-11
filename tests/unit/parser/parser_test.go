@@ -148,6 +148,24 @@ func TestParseAssignment(t *testing.T) {
 				p(1, 3)))
 	})
 
+	expectParse(t, "var a", func(p pfn) []Stmt {
+		return stmts(
+			assignStmt(
+				exprs(ident("a", p(1, 5))),
+				exprs(undefinedLit(p(1, 1))),
+				token.Define,
+				p(1, 1)))
+	})
+
+	expectParse(t, "var a = 5", func(p pfn) []Stmt {
+		return stmts(
+			assignStmt(
+				exprs(ident("a", p(1, 5))),
+				exprs(intLit(5, p(1, 9))),
+				token.Define,
+				p(1, 1)))
+	})
+
 	expectParse(t, "a, b = 5, 10", func(p pfn) []Stmt {
 		return stmts(
 			assignStmt(
@@ -660,6 +678,25 @@ func TestParseFor(t *testing.T) {
 				p(1, 1)))
 	})
 
+	expectParse(t, "for var i = 0; i < 2; i++ {}", func(p pfn) []Stmt {
+		return stmts(
+			forStmt(
+				assignStmt(
+					exprs(ident("i", p(1, 9))),
+					exprs(intLit(0, p(1, 13))),
+					token.Define, p(1, 5)),
+				binaryExpr(
+					ident("i", p(1, 16)),
+					intLit(2, p(1, 20)),
+					token.Less,
+					p(1, 18)),
+				incDecStmt(
+					ident("i", p(1, 23)),
+					token.Inc, p(1, 24)),
+				blockStmt(p(1, 27), p(1, 28)),
+				p(1, 1)))
+	})
+
 	expectParse(t, "for ; a < 5; a++ {}", func(p pfn) []Stmt {
 		return stmts(
 			forStmt(
@@ -844,6 +881,21 @@ func TestParseIf(t *testing.T) {
 					p(1, 11)),
 				blockStmt(
 					p(1, 21), p(1, 22)),
+				nil,
+				p(1, 1)))
+	})
+
+	expectParse(t, "if var a = 5; a {}", func(p pfn) []Stmt {
+		return stmts(
+			ifStmt(
+				assignStmt(
+					exprs(ident("a", p(1, 8))),
+					exprs(intLit(5, p(1, 12))),
+					token.Define,
+					p(1, 4)),
+				ident("a", p(1, 15)),
+				blockStmt(
+					p(1, 17), p(1, 18)),
 				nil,
 				p(1, 1)))
 	})
@@ -1923,6 +1975,10 @@ func boolLit(value bool, pos core.Pos) *BoolLit {
 	return &BoolLit{Value: value, ValuePos: pos}
 }
 
+func undefinedLit(pos core.Pos) *UndefinedLit {
+	return &UndefinedLit{TokenPos: pos}
+}
+
 func arrayLit(lbracket, rbracket core.Pos, list ...Expr) *ArrayLit {
 	return &ArrayLit{LBrack: lbracket, RBrack: rbracket, Elements: list}
 }
@@ -2077,6 +2133,9 @@ func equalExpr(t *testing.T, expected, actual Expr) {
 			actual.(*BoolLit).Value)
 		require.Equal(t, int(expected.ValuePos),
 			int(actual.(*BoolLit).ValuePos))
+	case *UndefinedLit:
+		require.Equal(t, int(expected.TokenPos),
+			int(actual.(*UndefinedLit).TokenPos))
 	case *CharLit:
 		require.Equal(t, expected.Value,
 			actual.(*CharLit).Value)

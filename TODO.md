@@ -35,7 +35,6 @@
     - map/record to array of tuples
     - map/record from array of tuples
 
-- replace "x := y" with "var x" and "var x = y" syntax
 - add "decimal" type
 - check if we still need enums package - move missing functions to type properties
 - function property "arity" and "variadic"

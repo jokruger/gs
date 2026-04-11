@@ -88,8 +88,9 @@ const (
 	In          = Token(167)
 	Undefined   = Token(168)
 	Import      = Token(169)
-	Arrow       = Token(170) // => (behaves as a keyword)
-	// 171..254 are reserved for future keywords
+	Var         = Token(170)
+	Arrow       = Token(171) // => (behaves as a keyword)
+	// 172..254 are reserved for future keywords
 	_keywordEnd = Token(255) // Keywords block end
 )
 
@@ -172,6 +173,7 @@ var tokens = [...]string{
 	In:          "in",
 	Undefined:   "undefined",
 	Import:      "import",
+	Var:         "var",
 	Arrow:       "=>",
 	_keywordEnd: "",
 }

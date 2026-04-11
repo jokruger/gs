@@ -19,6 +19,7 @@ var stmtStart = map[token.Token]bool{
 	token.If:       true,
 	token.Return:   true,
 	token.Export:   true,
+	token.Var:      true,
 }
 
 // Error represents a parser error.
@@ -739,7 +740,7 @@ func (p *Parser) parseStmt() (stmt Stmt) {
 	case // simple statements
 		token.Func, token.Error, token.Immutable, token.Ident, token.Int,
 		token.Float, token.Char, token.String, token.True, token.False,
-		token.Undefined, token.Import, token.LParen, token.LBrace,
+		token.Undefined, token.Import, token.Var, token.LParen, token.LBrace,
 		token.LBrack, token.Add, token.Sub, token.Mul, token.And, token.Xor,
 		token.Not:
 		s := p.parseSimpleStmt(false)
@@ -995,9 +996,35 @@ func (p *Parser) parseExportStmt() Stmt {
 	}
 }
 
+func (p *Parser) parseVarStmt() Stmt {
+	if p.trace {
+		defer untracep(tracep(p, "VarStmt"))
+	}
+
+	pos := p.expect(token.Var)
+	ident := p.parseIdent()
+
+	rhs := Expr(&UndefinedLit{TokenPos: pos})
+	if p.token == token.Assign {
+		p.next()
+		rhs = p.parseExpr()
+	}
+
+	return &AssignStmt{
+		LHS:      []Expr{ident},
+		RHS:      []Expr{rhs},
+		Token:    token.Define,
+		TokenPos: pos,
+	}
+}
+
 func (p *Parser) parseSimpleStmt(forIn bool) Stmt {
 	if p.trace {
 		defer untracep(tracep(p, "SimpleStmt"))
+	}
+
+	if p.token == token.Var {
+		return p.parseVarStmt()
 	}
 
 	prevForInLHS := p.forInLHS

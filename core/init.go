@@ -48,6 +48,10 @@ func defaultTypeIsCallable(v Value) bool {
 	return false
 }
 
+func defaultTypeContains(v Value, e Value) bool {
+	return false
+}
+
 func defaultTypeAsBool(v Value) (bool, bool) {
 	return false, false
 }
@@ -142,6 +146,7 @@ func init() {
 		TypeIsImmutable[i] = defaultTypeIsImmutable
 		TypeIsIterable[i] = defaultTypeIsIterable
 		TypeIsCallable[i] = defaultTypeIsCallable
+		TypeContains[i] = defaultTypeContains
 
 		TypeAsBool[i] = defaultTypeAsBool
 		TypeAsChar[i] = defaultTypeAsChar
@@ -325,6 +330,7 @@ func init() {
 	TypeAsChar[VT_STRING] = stringTypeAsChar
 	TypeAsBytes[VT_STRING] = stringTypeAsBytes
 	TypeAsTime[VT_STRING] = stringTypeAsTime
+	TypeContains[VT_STRING] = stringTypeContains
 
 	// Bytes
 	TypeName[VT_BYTES] = bytesTypeName
@@ -344,6 +350,7 @@ func init() {
 	TypeAsString[VT_BYTES] = bytesTypeAsString
 	TypeAsBool[VT_BYTES] = bytesTypeAsBool
 	TypeAsBytes[VT_BYTES] = bytesTypeAsBytes
+	TypeContains[VT_BYTES] = bytesTypeContains
 
 	// Array
 	TypeName[VT_ARRAY] = arrayTypeName
@@ -365,6 +372,7 @@ func init() {
 	TypeAsString[VT_ARRAY] = arrayTypeAsString
 	TypeAsBool[VT_ARRAY] = arrayTypeAsBool
 	TypeAsBytes[VT_ARRAY] = arrayTypeAsBytes
+	TypeContains[VT_ARRAY] = arrayTypeContains
 
 	// Record
 	TypeName[VT_RECORD] = recordTypeName
@@ -384,6 +392,7 @@ func init() {
 	TypeIsTrue[VT_RECORD] = recordTypeIsTrue
 	TypeAsString[VT_RECORD] = recordTypeAsString
 	TypeAsBool[VT_RECORD] = recordTypeAsBool
+	TypeContains[VT_RECORD] = recordTypeContains
 
 	// Map
 	TypeName[VT_MAP] = mapTypeName
@@ -403,6 +412,7 @@ func init() {
 	TypeIsTrue[VT_MAP] = mapTypeIsTrue
 	TypeAsString[VT_MAP] = mapTypeAsString
 	TypeAsBool[VT_MAP] = mapTypeAsBool
+	TypeContains[VT_MAP] = mapTypeContains
 
 	// StringIterator
 	TypeName[VT_STRING_ITERATOR] = stringIteratorTypeName

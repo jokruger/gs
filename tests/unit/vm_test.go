@@ -332,6 +332,12 @@ func TestString(t *testing.T) {
 	expectRun(t, `out = "Hello" <= "World"`, nil, true)
 	expectRun(t, `out = "Hello" >= "Hello"`, nil, true)
 	expectRun(t, `out = "World" <= "World"`, nil, true)
+	expectRun(t, `out = "el" in "Hello"`, nil, true)
+	expectRun(t, `out = "Hello".contains("el")`, nil, true)
+	expectRun(t, `out = 'e' in "Hello"`, nil, true)
+	expectRun(t, `out = "Hello".contains('e')`, nil, true)
+	expectRun(t, `out = "z" in "Hello"`, nil, false)
+	expectRun(t, `out = "Hello".contains("z")`, nil, false)
 
 	// index operator
 	str := "abcdef"
@@ -586,6 +592,19 @@ func TestArray(t *testing.T) {
 	expectRun(t, `out = [48, 49, -1].to_bytes()`, nil, alloc.NewBytesValue([]byte{48, 49, 0}))
 	expectRun(t, `out = [48, 49, -1].to_record()`, nil, MAP{"0": 48, "1": 49, "2": -1})
 	expectRun(t, `out = [48, 49, 50].to_string()`, nil, "012")
+
+	expectRun(t, `out = 2 in [1, 2, 3]`, nil, true)
+	expectRun(t, `out = [1, 2, 3].contains(2)`, nil, true)
+	expectRun(t, `out = "2" in [1, 2, 3]`, nil, true)
+	expectRun(t, `out = [1, 2, 3].contains("2")`, nil, true)
+	expectRun(t, `out = "z" in [1, 2, 3]`, nil, false)
+	expectRun(t, `out = [1, 2, 3].contains("z")`, nil, false)
+	expectRun(t, `out = [2, 3] in [1, 2, 3]`, nil, true)
+	expectRun(t, `out = [1, 2, 3].contains([2, 3])`, nil, true)
+	expectRun(t, `out = [] in [1, 2, 3]`, nil, true)
+	expectRun(t, `out = [1, 2, 3].contains([])`, nil, true)
+	expectRun(t, `out = [1, 3] in [1, 2, 3]`, nil, false)
+	expectRun(t, `out = [1, 2, 3].contains([1, 3])`, nil, false)
 }
 
 func TestRecord(t *testing.T) {
@@ -638,6 +657,8 @@ out = m["foo"](2) + m["foo"](3)
 	expectRun(t, `out = {a: 1, b: 2}["q"]`, nil, core.UndefinedValue())
 	expectRun(t, `out = {a: 1, b: 2}.b`, nil, 2)
 	expectRun(t, `out = {a: 1, b: 2}.q`, nil, core.UndefinedValue())
+	expectRun(t, `out = "a" in {a: 1, b: 2}`, nil, true)
+	expectRun(t, `out = "q" in {a: 1, b: 2}`, nil, false)
 	expectRun(t, `t := {a: 1, b: 2}; t["a"] = 3; out = t.a`, nil, 3)
 	expectRun(t, `t := {a: 1, b: 2}; t.a = 3; out = t["a"]`, nil, 3)
 }
@@ -654,6 +675,8 @@ func TestMap(t *testing.T) {
 
 	expectRun(t, `out = map({a: 1, b: 2})["b"]`, nil, 2)
 	expectRun(t, `out = map({a: 1, b: 2})["q"]`, nil, core.UndefinedValue())
+	expectRun(t, `out = "a" in map({a: 1, b: 2})`, nil, true)
+	expectRun(t, `out = "q" in map({a: 1, b: 2})`, nil, false)
 	expectRun(t, `t := map({a: 1, b: 2}); t["a"] = 3; out = t["a"]`, nil, 3)
 	expectError(t, `map({a: 1, b: 2}).q`, nil, "Runtime Error: invalid selector: type map has no property q\n\tat test:1:19")
 
@@ -681,6 +704,11 @@ func TestMap(t *testing.T) {
 	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = t.any(k => k == "q")`, nil, false)
 	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = t.any((k, v) => v > 1)`, nil, true)
 	expectRun(t, `t := map({a: 1, b: 2, c: 3}); out = t.any((k, v) => v > 10)`, nil, false)
+
+	expectRun(t, `out = "a" in map({a: 1, b: 2, c: 3})`, nil, true)
+	expectRun(t, `out = map({a: 1, b: 2, c: 3}).contains("a")`, nil, true)
+	expectRun(t, `out = "q" in map({a: 1, b: 2, c: 3})`, nil, false)
+	expectRun(t, `out = map({a: 1, b: 2, c: 3}).contains("q")`, nil, false)
 }
 
 func TestTime(t *testing.T) {
@@ -743,6 +771,15 @@ func TestBytes(t *testing.T) {
 	expectRun(t, `out = bytes("abc").to_record()`, nil, MAP{"0": 97, "1": 98, "2": 99})
 	expectRun(t, `out = bytes("abc").to_string()`, nil, "abc")
 	expectRun(t, `out = "abc".to_bytes().to_array().to_string()`, nil, "abc")
+
+	expectRun(t, `out = 98 in bytes("abc")`, nil, true)
+	expectRun(t, `out = bytes("abc").contains(98)`, nil, true)
+	expectRun(t, `out = 255 in bytes("abc")`, nil, false)
+	expectRun(t, `out = bytes("abc").contains(255)`, nil, false)
+	expectRun(t, `out = bytes("bc") in bytes("abc")`, nil, true)
+	expectRun(t, `out = bytes("abc").contains(bytes("bc"))`, nil, true)
+	expectRun(t, `out = bytes("bd") in bytes("abc")`, nil, false)
+	expectRun(t, `out = bytes("abc").contains(bytes("bd"))`, nil, false)
 }
 
 func TestArrayIterator(t *testing.T) {
@@ -3730,6 +3767,88 @@ func TestIntegrity(t *testing.T) {
 
 		out = string([r1, r2])
 	`, nil, "[8, 2]")
+}
+
+func TestInSyntax(t *testing.T) {
+	// element iterator
+	expectRun(t, `
+		y := [1, 2, 3]
+		out = 0
+		for x in y {
+			out += x
+		}
+	`, nil, 6)
+
+	// index and element iterator
+	expectRun(t, `
+		y := [1, 2, 3]
+		s1 := 0
+		s2 := 0
+		for i, x in y {
+			s1 += i
+			s2 += x
+		}
+		out = [s1, s2]
+	`, nil, ARR{3, 6})
+
+	// loop with condition
+	expectRun(t, `
+		y := {a: 1, b: 2, c: 3}
+		c := 0
+		s := 0
+		i := 0
+		ks := ["a", "b", "c"]
+		x := ks[0]
+		for (x in y) {
+			c += 1
+			s += y[x]
+			delete(y, x)
+			i += 1
+			x = ks[i]
+		}
+		out = [c, s]
+	`, nil, ARR{3, 6})
+
+	// condition
+	expectRun(t, `
+		y := {a: 1, b: 2, c: 3}
+		x := "a"
+		if x in y {
+			out = 1
+		} else {
+			out = 0
+		}
+	`, nil, 1)
+
+	expectRun(t, `
+		y := {a: 1, b: 2, c: 3}
+		x := "a"
+		if (x in y) {
+			out = 1
+		} else {
+			out = 0
+		}
+	`, nil, 1)
+
+	expectRun(t, `
+		y := {a: 1, b: 2, c: 3}
+		x := "a"
+		if !(x in y) {
+			out = 1
+		} else {
+			out = 0
+		}
+	`, nil, 0)
+
+	expectRun(t, `
+		y := {a: 1, b: 2, c: 3}
+		x := "z"
+		if (x in y) {
+			out = 1
+		} else {
+			out = 0
+		}
+	`, nil, 0)
 }
 
 func expectRun(t *testing.T, input string, opts *testopts, expected any) {

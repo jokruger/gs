@@ -712,6 +712,23 @@ func TestParseFor(t *testing.T) {
 				blockStmt(p(1, 22), p(1, 23)),
 				p(1, 1)))
 	})
+
+	expectParse(t, "for (x in y) {}", func(p pfn) []Stmt {
+		return stmts(
+			forStmt(
+				nil,
+				parenExpr(
+					binaryExpr(
+						ident("x", p(1, 6)),
+						ident("y", p(1, 11)),
+						token.In,
+						p(1, 8)),
+					p(1, 5),
+					p(1, 12)),
+				nil,
+				blockStmt(p(1, 14), p(1, 15)),
+				p(1, 1)))
+	})
 }
 
 func TestParseFunction(t *testing.T) {
@@ -1269,6 +1286,8 @@ func TestParsePrecedence(t *testing.T) {
 	expectParseString(t, `a + b + c`, `((a + b) + c)`)
 	expectParseString(t, `a + b * c`, `(a + (b * c))`)
 	expectParseString(t, `x = 2 * 1 + 3 / 4`, `x = ((2 * 1) + (3 / 4))`)
+	expectParseString(t, `a + b in c + d`, `((a + b) in (c + d))`)
+	expectParseString(t, `a || b in c`, `(a || (b in c))`)
 }
 
 func TestParseSelector(t *testing.T) {

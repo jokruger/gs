@@ -255,6 +255,13 @@ func (v *VM) run() {
 			v.stack[v.sp-2] = res
 			v.sp--
 
+		case core.OpContains:
+			right := v.stack[v.sp-1]
+			left := v.stack[v.sp-2]
+			res := core.BoolValue(right.Contains(left))
+			v.stack[v.sp-2] = res
+			v.sp--
+
 		case core.OpEqual:
 			right := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]

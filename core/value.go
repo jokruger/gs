@@ -187,6 +187,10 @@ func (v Value) IsImmutable() bool {
 	return TypeIsImmutable[v.Type](v)
 }
 
+func (v Value) Contains(e Value) bool {
+	return TypeContains[v.Type](v, e)
+}
+
 func (v Value) AsString() (string, bool) {
 	return TypeAsString[v.Type](v)
 }

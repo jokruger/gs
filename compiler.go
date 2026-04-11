@@ -192,9 +192,10 @@ func (c *Compiler) Compile(node parser.Node) error {
 			c.emit(node, core.OpBinaryOp, int(token.Shl))
 		case token.Shr:
 			c.emit(node, core.OpBinaryOp, int(token.Shr))
+		case token.In:
+			c.emit(node, core.OpContains)
 		default:
-			return c.errorf(node, "invalid binary operator: %s",
-				node.Token.String())
+			return c.errorf(node, "invalid binary operator: %s", node.Token.String())
 		}
 
 	case *parser.IntLit:

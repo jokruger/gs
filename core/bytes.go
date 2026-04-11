@@ -203,6 +203,12 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		}
 		return IntValue(int64(o.Elements[len(o.Elements)-1])), nil
 
+	case "contains":
+		if len(args) != 1 {
+			return UndefinedValue(), errs.NewWrongNumArgumentsError("bytes.contains", "1", len(args))
+		}
+		return BoolValue(bytesTypeContains(v, args[0])), nil
+
 	default:
 		return UndefinedValue(), errs.NewInvalidMethodError(name, v.TypeName())
 	}
@@ -255,4 +261,27 @@ func bytesTypeAsBool(v Value) (bool, bool) {
 func bytesTypeAsBytes(v Value) ([]byte, bool) {
 	o := (*Bytes)(v.Ptr)
 	return o.Elements, true
+}
+
+func bytesTypeContains(v Value, e Value) bool {
+	o := (*Bytes)(v.Ptr)
+	switch e.Type {
+	case VT_INT:
+		b := ToInt(e)
+		if b < 0 || b > 255 {
+			return false
+		}
+		return bytes.Contains(o.Elements, []byte{byte(b)})
+
+	case VT_BYTES:
+		t := ToBytes(e)
+		return bytes.Contains(o.Elements, t.Elements)
+
+	default:
+		b, ok := e.AsInt()
+		if !ok || b < 0 || b > 255 {
+			return false
+		}
+		return bytes.Contains(o.Elements, []byte{byte(b)})
+	}
 }

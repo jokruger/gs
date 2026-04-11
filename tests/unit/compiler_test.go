@@ -76,6 +76,18 @@ func TestCompiler_Compile(t *testing.T) {
 				intObject(2),
 				intObject(1))))
 
+	expectCompile(t, `1 in 2`,
+		bytecode(
+			concatInsts(
+				vm.MakeInstruction(core.OpConstant, 0),
+				vm.MakeInstruction(core.OpConstant, 1),
+				vm.MakeInstruction(core.OpContains),
+				vm.MakeInstruction(core.OpPop),
+				vm.MakeInstruction(core.OpSuspend)),
+			objectsArray(
+				intObject(1),
+				intObject(2))))
+
 	expectCompile(t, `true`,
 		bytecode(
 			concatInsts(

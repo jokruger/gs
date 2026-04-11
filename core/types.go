@@ -84,6 +84,7 @@ var (
 	TypeIsImmutable [256]func(v Value) bool
 	TypeIsIterable  [256]func(v Value) bool
 	TypeIsCallable  [256]func(v Value) bool
+	TypeContains    [256]func(v Value, e Value) bool
 
 	TypeAsBool   [256]func(v Value) (bool, bool)
 	TypeAsChar   [256]func(v Value) (rune, bool)
@@ -157,7 +158,8 @@ const (
 	OpSuspend       = Opcode(41) // Suspend VM
 	OpSelect        = Opcode(42) // Select operation
 	OpMethodCall    = Opcode(43) // Call method on object
-	// 44...255 are reserved for future use
+	OpContains      = Opcode(44) // Contains operation (x in y)
+	// 45...255 are reserved for future use
 )
 
 // OpcodeNames are string representation of opcodes.
@@ -206,6 +208,7 @@ var OpcodeNames = [...]string{
 	OpSuspend:       "SUSPEND",
 	OpSelect:        "SELECT",
 	OpMethodCall:    "MCALL",
+	OpContains:      "CONTAINS",
 }
 
 // OpcodeOperands is the number of operands.
@@ -254,6 +257,7 @@ var OpcodeOperands = [...][]int{
 	OpSuspend:       {},
 	OpSelect:        {},
 	OpMethodCall:    {2, 1, 1}, // method const index, numArgs, spread
+	OpContains:      {},
 }
 
 // ReadOperands reads operands from the bytecode.

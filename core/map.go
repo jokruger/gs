@@ -219,6 +219,12 @@ func mapTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error)
 		}
 		return mapValues(v, vm.Allocator())
 
+	case "contains":
+		if len(args) != 1 {
+			return UndefinedValue(), errs.NewWrongNumArgumentsError("map.contains", "1", len(args))
+		}
+		return BoolValue(mapTypeContains(v, args[0])), nil
+
 	default:
 		return UndefinedValue(), errs.NewInvalidMethodError(name, v.TypeName())
 	}
@@ -492,4 +498,14 @@ func mapFnAny(v Value, vm VM, name string, args []Value) (Value, error) {
 	default:
 		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
+}
+
+func mapTypeContains(v Value, e Value) bool {
+	o := (*Record)(v.Ptr)
+	s, ok := e.AsString()
+	if !ok {
+		return false
+	}
+	_, ok = o.Elements[s]
+	return ok
 }

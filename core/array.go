@@ -233,6 +233,12 @@ func arrayTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 	case "avg":
 		return arrayFnAvg(v, vm, "array.avg", args)
 
+	case "contains":
+		if len(args) != 1 {
+			return UndefinedValue(), errs.NewWrongNumArgumentsError("array.contains", "1", len(args))
+		}
+		return BoolValue(arrayTypeContains(v, args[0])), nil
+
 	default:
 		return UndefinedValue(), errs.NewInvalidMethodError(name, v.TypeName())
 	}
@@ -807,4 +813,41 @@ func arrayFnAvg(v Value, vm VM, name string, args []Value) (Value, error) {
 	}
 
 	return avg, nil
+}
+
+func arrayTypeContains(v Value, e Value) bool {
+	o := (*Array)(v.Ptr)
+	switch e.Type {
+	case VT_ARRAY:
+		t := ToArray(e)
+		if len(t.Elements) == 0 {
+			return true
+		}
+		if len(o.Elements) < len(t.Elements) {
+			return false
+		}
+		for i := range o.Elements {
+			if o.Elements[i].Equal(t.Elements[0]) {
+				match := true
+				for j := 1; j < len(t.Elements); j++ {
+					if i+j >= len(o.Elements) || !o.Elements[i+j].Equal(t.Elements[j]) {
+						match = false
+						break
+					}
+				}
+				if match {
+					return true
+				}
+			}
+		}
+		return false
+
+	default:
+		for i := range o.Elements {
+			if o.Elements[i].Equal(e) {
+				return true
+			}
+		}
+		return false
+	}
 }

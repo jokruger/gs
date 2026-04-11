@@ -99,6 +99,8 @@ type Parser struct {
 	token     token.Token
 	tokenLit  string
 	exprLevel int      // < 0: in control clause, >= 0: in expression
+	forInLHS  bool     // parsing potential for-in lhs; keep `in` for stmt parsing
+	forInNest int      // parentheses nesting while parsing potential for-in lhs
 	syncPos   core.Pos // last sync position
 	syncCount int      // number of advance calls without progress
 	trace     bool
@@ -178,6 +180,9 @@ func (p *Parser) parseBinaryExpr(prec1 int) Expr {
 
 	for {
 		op, prec := p.token, p.token.Precedence()
+		if p.forInLHS && p.forInNest == 0 && op == token.In {
+			return x
+		}
 		if prec < prec1 {
 			return x
 		}
@@ -479,9 +484,15 @@ func (p *Parser) parseOperand() Expr {
 		// default to parenthesized expression
 		lparen := p.pos
 		p.next()
+		if p.forInLHS {
+			p.forInNest++
+		}
 		p.exprLevel++
 		x := p.parseExpr()
 		p.exprLevel--
+		if p.forInLHS {
+			p.forInNest--
+		}
 		rparen := p.expect(token.RParen)
 		return &ParenExpr{
 			LParen: lparen,
@@ -989,7 +1000,16 @@ func (p *Parser) parseSimpleStmt(forIn bool) Stmt {
 		defer untracep(tracep(p, "SimpleStmt"))
 	}
 
+	prevForInLHS := p.forInLHS
+	if forIn {
+		p.forInLHS = true
+		p.forInNest = 0
+	}
 	x := p.parseExprList()
+	p.forInLHS = prevForInLHS
+	if !p.forInLHS {
+		p.forInNest = 0
+	}
 
 	switch p.token {
 	case token.Assign, token.Define: // assignment statement

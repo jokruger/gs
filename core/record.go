@@ -240,3 +240,13 @@ func recordTypeAsString(v Value) (string, bool) {
 func recordTypeAsBool(v Value) (bool, bool) {
 	return recordTypeIsTrue(v), true
 }
+
+func recordTypeContains(v Value, e Value) bool {
+	o := (*Record)(v.Ptr)
+	s, ok := e.AsString()
+	if !ok {
+		return false
+	}
+	_, ok = o.Elements[s]
+	return ok
+}

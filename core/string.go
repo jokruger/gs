@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -264,6 +265,12 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 	case "trim":
 		return stringFnTrim(v, vm.Allocator(), "string.trim", args)
 
+	case "contains":
+		if len(args) != 1 {
+			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.contains", "1", len(args))
+		}
+		return BoolValue(stringTypeContains(v, args[0])), nil
+
 	default:
 		return UndefinedValue(), errs.NewInvalidMethodError(name, v.TypeName())
 	}
@@ -370,4 +377,24 @@ func stringFnTrim(v Value, a Allocator, name string, args []Value) (Value, error
 	}
 
 	return a.NewStringValue(strings.Trim(string(o.Elements), s)), nil
+}
+
+func stringTypeContains(v Value, e Value) bool {
+	o := (*String)(v.Ptr)
+	switch e.Type {
+	case VT_CHAR:
+		c := ToChar(e)
+		return strings.ContainsRune(string(o.Elements), c)
+
+	case VT_STRING:
+		s := ToString(e)
+		return strings.Contains(string(o.Elements), string(s.Elements))
+
+	default:
+		c, ok := e.AsChar()
+		if !ok {
+			return false
+		}
+		return slices.Contains(o.Elements, c)
+	}
 }

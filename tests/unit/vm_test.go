@@ -891,6 +891,60 @@ out = [sum1, sum2]
 `, nil, ARR{45, 55})
 }
 
+func TestRange(t *testing.T) {
+	expectRun(t, `r := range(0, 100, 1); out = len(r)`, nil, 100)
+	expectRun(t, `r := range(0, 100, 2); out = len(r)`, nil, 50)
+	expectRun(t, `r := range(0, 100, 3); out = len(r)`, nil, 34)
+	expectRun(t, `r := range(0, 100, 5); out = len(r)`, nil, 20)
+	expectRun(t, `r := range(0, 100, 10); out = len(r)`, nil, 10)
+
+	expectRun(t, `r := range(0, 100, 1); out = r[0]`, nil, 0)
+	expectRun(t, `r := range(0, 100, 1); out = r[1]`, nil, 1)
+	expectRun(t, `r := range(0, 100, 1); out = r[2]`, nil, 2)
+	expectRun(t, `r := range(0, 100, 1); out = r[3]`, nil, 3)
+	expectRun(t, `r := range(0, 100, 1); out = r[10]`, nil, 10)
+
+	expectRun(t, `r := range(0, 100, 2); out = r[0]`, nil, 0)
+	expectRun(t, `r := range(0, 100, 2); out = r[1]`, nil, 2)
+	expectRun(t, `r := range(0, 100, 2); out = r[2]`, nil, 4)
+	expectRun(t, `r := range(0, 100, 2); out = r[3]`, nil, 6)
+	expectRun(t, `r := range(0, 100, 2); out = r[10]`, nil, 20)
+
+	expectRun(t, `r := range(0, 100, 3); out = r[0]`, nil, 0)
+	expectRun(t, `r := range(0, 100, 3); out = r[1]`, nil, 3)
+	expectRun(t, `r := range(0, 100, 3); out = r[2]`, nil, 6)
+	expectRun(t, `r := range(0, 100, 3); out = r[3]`, nil, 9)
+	expectRun(t, `r := range(0, 100, 3); out = r[10]`, nil, 30)
+
+	expectRun(t, `
+out = 0
+for e in range(1, 10, 1) {
+	out += e
+}
+`, nil, 45)
+
+	expectRun(t, `
+out = 0
+for i, e in range(1, 10, 1) {
+	out += i
+}
+`, nil, 36)
+
+	expectRun(t, `
+out = 0
+for e in range(1, 10, 2) {
+	out += e
+}
+`, nil, 25)
+
+	expectRun(t, `
+out = 0
+for i, e in range(1, 10, 2) {
+	out += i
+}
+`, nil, 10)
+}
+
 func TestAssignment(t *testing.T) {
 	expectRun(t, `a := 1; a = 2; out = a`, nil, 2)
 	expectRun(t, `a := 1; a = 2; out = a`, nil, 2)

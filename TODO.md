@@ -63,7 +63,6 @@
 - bytes.hex()
 - bytes.base64()
 - move type related functions to type member functions; remove duplicates from stdlib (i.e. stdlib must be complimentary extension of type member functions)
-- make Len/Append/Delete a Value function, so len() can be used for user defined types too
 - Arrays: `sort_by`
 - Strings: `has_prefix`, `has_suffix`
 - Int/Float: `abs`, `pow`, `is_zero`
@@ -73,9 +72,7 @@
 - char - implement methods from https://pkg.go.dev/unicode
 - add Hash function for Value (and all types)
 
-- remove copy function - type.copy can be used instead (add to each type which needs it)
-- remove append function - type.append can be used instead (add to each type which needs it)
-- remove delete function - type.delete can be used instead (add to each type which needs it)
+- make append/delete a Value function, so append() and delete() can be used for user defined types too
 - move splice function to contained types (methods)
 - missing ctors(0/1/2): array, record
 - missing AsX functions (also extend ctor and equal to use AsX): array, map, record

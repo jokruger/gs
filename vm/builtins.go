@@ -226,30 +226,7 @@ func builtinLen(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
 		return core.Undefined, errs.NewWrongNumArgumentsError("len", "1", len(args))
 	}
-
-	arg := args[0]
-	switch arg.Type {
-	case core.VT_ARRAY:
-		o := (*core.Array)(arg.Ptr)
-		return core.IntValue(int64(len(o.Elements))), nil
-	case core.VT_STRING:
-		o := (*core.String)(arg.Ptr)
-		return core.IntValue(int64(o.Len())), nil
-	case core.VT_BYTES:
-		o := (*core.Bytes)(arg.Ptr)
-		return core.IntValue(int64(len(o.Elements))), nil
-	case core.VT_RECORD:
-		o := (*core.Record)(arg.Ptr)
-		return core.IntValue(int64(len(o.Elements))), nil
-	case core.VT_MAP:
-		o := (*core.Map)(arg.Ptr)
-		return core.IntValue(int64(len(o.Elements))), nil
-	case core.VT_INT_RANGE:
-		o := (*core.IntRange)(arg.Ptr)
-		return core.IntValue(o.Len()), nil
-	default:
-		return core.Undefined, errs.NewInvalidArgumentTypeError("len", "first", "record/map/array/string/bytes", arg.TypeName())
-	}
+	return core.IntValue(args[0].Len()), nil
 }
 
 // range(start, stop[, step])

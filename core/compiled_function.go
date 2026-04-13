@@ -12,11 +12,11 @@ type CompiledFunction struct {
 	Free          []*Value
 	SourceMap     map[int]Pos
 	NumLocals     int // number of local variables (including function parameters)
-	NumParameters int
+	NumParameters int8
 	VarArgs       bool
 }
 
-func (o *CompiledFunction) Set(instructions []byte, free []*Value, sourceMap map[int]Pos, numLocals, numParameters int, varArgs bool) {
+func (o *CompiledFunction) Set(instructions []byte, free []*Value, sourceMap map[int]Pos, numLocals int, numParameters int8, varArgs bool) {
 	o.Instructions = instructions
 	o.Free = free
 	o.SourceMap = sourceMap
@@ -48,7 +48,7 @@ func CompiledFunctionValue(f *CompiledFunction) Value {
 }
 
 // NewCompiledFunctionValue creates new (heap-allocated) compiled function value.
-func NewCompiledFunctionValue(instructions []byte, free []*Value, sourceMap map[int]Pos, numLocals, numParameters int, varArgs bool) Value {
+func NewCompiledFunctionValue(instructions []byte, free []*Value, sourceMap map[int]Pos, numLocals int, numParameters int8, varArgs bool) Value {
 	f := &CompiledFunction{}
 	f.Set(instructions, free, sourceMap, numLocals, numParameters, varArgs)
 	return CompiledFunctionValue(f)
@@ -103,17 +103,9 @@ func compiledFunctionTypeString(v Value) string {
 	return compiledFunctionTypeName(v)
 }
 
-func compiledFunctionTypeArity(v Value) int {
+func compiledFunctionTypeArity(v Value) int8 {
 	f := (*CompiledFunction)(v.Ptr)
 	return f.NumParameters
-}
-
-func compiledFunctionTypeIsTrue(v Value) bool {
-	return true
-}
-
-func compiledFunctionTypeIsCallable(v Value) bool {
-	return true
 }
 
 func compiledFunctionTypeIsVariadic(v Value) bool {

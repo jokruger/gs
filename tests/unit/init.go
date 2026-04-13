@@ -395,8 +395,8 @@ func init() {
 	core.TypeString[VT_STRING_ARRAY_ITERATOR] = func(v core.Value) string {
 		return ""
 	}
-	core.TypeNext[VT_STRING_ARRAY_ITERATOR] = func(v *core.Value) bool {
-		i := toStringArrayIterator(*v)
+	core.TypeNext[VT_STRING_ARRAY_ITERATOR] = func(v core.Value) bool {
+		i := toStringArrayIterator(v)
 		i.idx++
 		return i.idx <= len(i.strArr.Value)
 	}

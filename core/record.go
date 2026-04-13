@@ -250,3 +250,8 @@ func recordTypeContains(v Value, e Value) bool {
 	_, ok = o.Elements[s]
 	return ok
 }
+
+func recordTypeLen(v Value) int64 {
+	o := (*Record)(v.Ptr)
+	return int64(len(o.Elements))
+}

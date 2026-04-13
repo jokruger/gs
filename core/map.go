@@ -509,3 +509,8 @@ func mapTypeContains(v Value, e Value) bool {
 	_, ok = o.Elements[s]
 	return ok
 }
+
+func mapTypeLen(v Value) int64 {
+	o := (*Map)(v.Ptr)
+	return int64(len(o.Elements))
+}

@@ -1530,7 +1530,7 @@ func stringObject(v string) core.Value {
 	return alloc.NewStringValue(v)
 }
 
-func compiledFunction(numLocals, numParams int, insts ...[]byte) core.Value {
+func compiledFunction(numLocals int, numParams int8, insts ...[]byte) core.Value {
 	t := &core.CompiledFunction{
 		Instructions:  concatInsts(insts...),
 		NumLocals:     numLocals,

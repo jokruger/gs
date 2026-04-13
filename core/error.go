@@ -120,10 +120,6 @@ func errorTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 	}
 }
 
-func errorTypeIsTrue(v Value) bool {
-	return false // error must be always false.
-}
-
 func errorTypeAsString(v Value) (string, bool) {
 	o := (*Error)(v.Ptr)
 	s, ok := o.Payload.AsString()
@@ -133,6 +129,7 @@ func errorTypeAsString(v Value) (string, bool) {
 	return "runtime error", true
 }
 
+// error is always false
 func errorTypeAsBool(v Value) (bool, bool) {
-	return errorTypeIsTrue(v), true
+	return false, true
 }

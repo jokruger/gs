@@ -46,7 +46,7 @@ func bytesIteratorTypeEqual(v Value, r Value) bool {
 	return a == b
 }
 
-func bytesIteratorTypeNext(v *Value) bool {
+func bytesIteratorTypeNext(v Value) bool {
 	i := (*BytesIterator)(v.Ptr)
 	i.i++
 	return i.i < len(i.v)

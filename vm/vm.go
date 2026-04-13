@@ -94,10 +94,10 @@ func (v *VM) Call(fn *core.CompiledFunction, args []core.Value) (core.Value, err
 	// Check argument count and roll up variadic args if needed
 	numArgs := len(args)
 	if fn.VarArgs {
-		if numArgs < fn.NumParameters-1 {
+		if numArgs < int(fn.NumParameters)-1 {
 			return core.Undefined, errs.NewWrongNumArgumentsError("call", fmt.Sprintf("at least %d", fn.NumParameters-1), numArgs)
 		}
-		realArgs := fn.NumParameters - 1
+		realArgs := int(fn.NumParameters) - 1
 		varArgs := numArgs - realArgs
 		if varArgs >= 0 {
 			newArgs := make([]core.Value, realArgs+1)
@@ -106,7 +106,7 @@ func (v *VM) Call(fn *core.CompiledFunction, args []core.Value) (core.Value, err
 			args = newArgs
 			numArgs = realArgs + 1
 		}
-	} else if numArgs != fn.NumParameters {
+	} else if numArgs != int(fn.NumParameters) {
 		return core.Undefined, errs.NewWrongNumArgumentsError("call", fmt.Sprintf("%d", fn.NumParameters), numArgs)
 	}
 
@@ -655,7 +655,7 @@ func (v *VM) run() {
 
 				if callee.VarArgs {
 					// if the closure is variadic, roll up all variadic parameters into an array
-					realArgs := callee.NumParameters - 1
+					realArgs := int(callee.NumParameters) - 1
 					varArgs := numArgs - realArgs
 					if varArgs >= 0 {
 						numArgs = realArgs + 1
@@ -668,7 +668,7 @@ func (v *VM) run() {
 						v.sp = spStart + 1
 					}
 				}
-				if numArgs != callee.NumParameters {
+				if numArgs != int(callee.NumParameters) {
 					if callee.VarArgs {
 						v.err = fmt.Errorf("wrong number of arguments: want>=%d, got=%d", callee.NumParameters-1, numArgs)
 					} else {

@@ -482,10 +482,14 @@ func (c *Compiler) Compile(node parser.Node) error {
 			}
 		}
 
+		l := len(node.Type.Params.List)
+		if l > 127 {
+			return c.errorf(node, "too many function parameters: %d (max: 127)", l)
+		}
 		compiledFunction := &core.CompiledFunction{
 			Instructions:  instructions,
 			NumLocals:     numLocals,
-			NumParameters: len(node.Type.Params.List),
+			NumParameters: int8(l),
 			VarArgs:       node.Type.Params.VarArgs,
 			SourceMap:     sourceMap,
 		}

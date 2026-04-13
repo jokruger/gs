@@ -1408,7 +1408,9 @@ func TestBuiltinFunctionLen(t *testing.T) {
 	expectRun(t, `out = len(immutable([1, 2, 3]))`, nil, 3)
 	expectRun(t, `out = len(immutable({}))`, nil, 0)
 	expectRun(t, `out = len(immutable({a:1, b:2}))`, nil, 2)
-	expectError(t, `len(1)`, nil, "invalid argument type: (len) argument first expects type record/map/array/string/bytes, got int")
+	expectRun(t, `out = len(undefined)`, nil, 0)
+	expectRun(t, `out = len(0)`, nil, 1)
+	expectRun(t, `out = len(1)`, nil, 1)
 	expectError(t, `len("one", "two")`, nil, "wrong number of arguments")
 }
 

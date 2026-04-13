@@ -10,11 +10,11 @@ import (
 type BuiltinFunction struct {
 	Func     NativeFunc
 	Name     string
-	Arity    int
+	Arity    int8
 	Variadic bool
 }
 
-func (f *BuiltinFunction) Set(fn NativeFunc, name string, arity int, variadic bool) {
+func (f *BuiltinFunction) Set(fn NativeFunc, name string, arity int8, variadic bool) {
 	f.Func = fn
 	f.Name = name
 	f.Arity = arity
@@ -30,7 +30,7 @@ func BuiltinFunctionValue(f *BuiltinFunction) Value {
 }
 
 // NewBuiltinFunctionValue creates new (heap-allocated) builtin function value.
-func NewBuiltinFunctionValue(name string, fn NativeFunc, arity int, variadic bool) Value {
+func NewBuiltinFunctionValue(name string, fn NativeFunc, arity int8, variadic bool) Value {
 	t := &BuiltinFunction{}
 	t.Set(fn, name, arity, variadic)
 	return BuiltinFunctionValue(t)
@@ -47,7 +47,7 @@ func builtinFunctionTypeEqual(v Value, r Value) bool {
 	return v == r
 }
 
-func builtinFunctionTypeArity(v Value) int {
+func builtinFunctionTypeArity(v Value) int8 {
 	o := (*BuiltinFunction)(v.Ptr)
 	return o.Arity
 }
@@ -88,14 +88,6 @@ func builtinFunctionTypeDecodeBinary(v *Value, data []byte) error {
 
 func builtinFunctionTypeString(v Value) string {
 	return builtinFunctionTypeName(v)
-}
-
-func builtinFunctionTypeIsTrue(v Value) bool {
-	return true
-}
-
-func builtinFunctionTypeIsCallable(v Value) bool {
-	return true
 }
 
 func builtinFunctionTypeCall(v Value, vm VM, args []Value) (Value, error) {

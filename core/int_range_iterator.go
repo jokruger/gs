@@ -55,7 +55,7 @@ func intRangeIteratorTypeEqual(v Value, r Value) bool {
 	return *a == *b
 }
 
-func intRangeIteratorTypeNext(v *Value) bool {
+func intRangeIteratorTypeNext(v Value) bool {
 	i := (*IntRangeIterator)(v.Ptr)
 	i.i++
 	i.v += i.s

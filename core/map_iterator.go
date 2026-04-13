@@ -55,7 +55,7 @@ func mapIteratorTypeEqual(v Value, r Value) bool {
 	return a == b
 }
 
-func mapIteratorTypeNext(v *Value) bool {
+func mapIteratorTypeNext(v Value) bool {
 	i := (*MapIterator)(v.Ptr)
 	i.i++
 	return i.i < len(i.k)

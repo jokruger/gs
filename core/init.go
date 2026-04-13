@@ -8,6 +8,26 @@ import (
 	"github.com/jokruger/gs/token"
 )
 
+func default0(v Value) int64 {
+	return 0
+}
+
+func default1(v Value) int64 {
+	return 1
+}
+
+func defaultTrue(v Value) bool {
+	return true
+}
+
+func defaultFalse(v Value) bool {
+	return false
+}
+
+func defaultUndefined(v Value, a Allocator) Value {
+	return Undefined
+}
+
 func defaultTypeName(v Value) string {
 	return fmt.Sprintf("<unknown:%d>", v.Type)
 }
@@ -30,26 +50,6 @@ func defaultTypeString(v Value) string {
 
 func defaultTypeInterface(v Value) any {
 	return nil
-}
-
-func defaultTypeIsTrue(v Value) bool {
-	return false
-}
-
-func defaultTypeIsImmutable(v Value) bool {
-	return false
-}
-
-func defaultTypeIsIterable(v Value) bool {
-	return false
-}
-
-func defaultTypeIsCallable(v Value) bool {
-	return false
-}
-
-func defaultTypeContains(v Value, e Value) bool {
-	return false
 }
 
 func defaultTypeAsBool(v Value) (bool, bool) {
@@ -85,7 +85,7 @@ func defaultTypeCopy(v Value, a Allocator) Value {
 	return v
 }
 
-func defaultTypeEqual(v Value, r Value) bool {
+func defaultTypeEqualPrimitive(v Value, r Value) bool {
 	return v == r
 }
 
@@ -105,32 +105,16 @@ func defaultTypeAssign(v Value, index Value, r Value) error {
 	return errs.NewNotAssignableError(v.TypeName())
 }
 
-func defaultTypeIterator(v Value, a Allocator) Value {
-	return UndefinedValue()
-}
-
-func defaultTypeNext(v *Value) bool {
-	return false
-}
-
-func defaultTypeKey(v Value, a Allocator) Value {
-	return UndefinedValue()
-}
-
-func defaultTypeValue(v Value, a Allocator) Value {
-	return UndefinedValue()
-}
-
-func defaultTypeArity(v Value) int {
+func defaultTypeArity(v Value) int8 {
 	return 0
-}
-
-func defaultTypeIsVariadic(v Value) bool {
-	return false
 }
 
 func defaultTypeCall(v Value, vm VM, args []Value) (Value, error) {
 	return UndefinedValue(), errs.NewNotCallableError(v.TypeName())
+}
+
+func defaultTypeContains(v Value, item Value) bool {
+	return false
 }
 
 func init() {
@@ -142,10 +126,10 @@ func init() {
 		TypeString[i] = defaultTypeString
 		TypeInterface[i] = defaultTypeInterface
 
-		TypeIsTrue[i] = defaultTypeIsTrue
-		TypeIsImmutable[i] = defaultTypeIsImmutable
-		TypeIsIterable[i] = defaultTypeIsIterable
-		TypeIsCallable[i] = defaultTypeIsCallable
+		TypeIsTrue[i] = defaultFalse
+		TypeIsImmutable[i] = defaultFalse
+		TypeIsIterable[i] = defaultFalse
+		TypeIsCallable[i] = defaultFalse
 		TypeContains[i] = defaultTypeContains
 
 		TypeAsBool[i] = defaultTypeAsBool
@@ -156,21 +140,22 @@ func init() {
 		TypeAsString[i] = defaultTypeAsString
 		TypeAsBytes[i] = defaultTypeAsBytes
 
+		TypeLen[i] = default0
 		TypeCopy[i] = defaultTypeCopy
-		TypeEqual[i] = defaultTypeEqual
+		TypeEqual[i] = defaultTypeEqualPrimitive
 		TypeBinaryOp[i] = defaultTypeBinaryOp
 		TypeMethodCall[i] = defaultTypeMethodCall
 
 		TypeAccess[i] = defaultTypeAccess
 		TypeAssign[i] = defaultTypeAssign
-		TypeIterator[i] = defaultTypeIterator
+		TypeIterator[i] = defaultUndefined
 
-		TypeNext[i] = defaultTypeNext
-		TypeKey[i] = defaultTypeKey
-		TypeValue[i] = defaultTypeValue
+		TypeNext[i] = defaultFalse
+		TypeKey[i] = defaultUndefined
+		TypeValue[i] = defaultUndefined
 
 		TypeArity[i] = defaultTypeArity
-		TypeIsVariadic[i] = defaultTypeIsVariadic
+		TypeIsVariadic[i] = defaultFalse
 		TypeCall[i] = defaultTypeCall
 	}
 
@@ -181,9 +166,10 @@ func init() {
 	TypeDecodeBinary[VT_UNDEFINED] = undefinedTypeDecodeBinary
 	TypeString[VT_UNDEFINED] = undefinedTypeString
 	TypeInterface[VT_UNDEFINED] = undefinedTypeInterface
-	TypeIsIterable[VT_UNDEFINED] = undefinedTypeIsIterable
-	TypeEqual[VT_UNDEFINED] = undefinedTypeEqual
+	TypeIsIterable[VT_UNDEFINED] = defaultTrue
+	TypeEqual[VT_UNDEFINED] = defaultTypeEqualPrimitive
 	TypeAccess[VT_UNDEFINED] = undefinedTypeAccess
+	TypeIsTrue[VT_UNDEFINED] = defaultFalse // undefined is always false
 	TypeAsBool[VT_UNDEFINED] = undefinedTypeAsBool
 
 	// ValuePtr
@@ -195,8 +181,8 @@ func init() {
 	TypeDecodeBinary[VT_BUILTIN_FUNCTION] = builtinFunctionTypeDecodeBinary
 	TypeString[VT_BUILTIN_FUNCTION] = builtinFunctionTypeString
 	TypeArity[VT_BUILTIN_FUNCTION] = builtinFunctionTypeArity
-	TypeIsTrue[VT_BUILTIN_FUNCTION] = builtinFunctionTypeIsTrue
-	TypeIsCallable[VT_BUILTIN_FUNCTION] = builtinFunctionTypeIsCallable
+	TypeIsTrue[VT_BUILTIN_FUNCTION] = defaultTrue
+	TypeIsCallable[VT_BUILTIN_FUNCTION] = defaultTrue
 	TypeIsVariadic[VT_BUILTIN_FUNCTION] = builtinFunctionTypeIsVariadic
 	TypeEqual[VT_BUILTIN_FUNCTION] = builtinFunctionTypeEqual
 	TypeCall[VT_BUILTIN_FUNCTION] = builtinFunctionTypeCall
@@ -207,8 +193,8 @@ func init() {
 	TypeDecodeBinary[VT_COMPILED_FUNCTION] = compiledFunctionTypeDecodeBinary
 	TypeString[VT_COMPILED_FUNCTION] = compiledFunctionTypeString
 	TypeArity[VT_COMPILED_FUNCTION] = compiledFunctionTypeArity
-	TypeIsTrue[VT_COMPILED_FUNCTION] = compiledFunctionTypeIsTrue
-	TypeIsCallable[VT_COMPILED_FUNCTION] = compiledFunctionTypeIsCallable
+	TypeIsTrue[VT_COMPILED_FUNCTION] = defaultTrue
+	TypeIsCallable[VT_COMPILED_FUNCTION] = defaultTrue
 	TypeIsVariadic[VT_COMPILED_FUNCTION] = compiledFunctionTypeIsVariadic
 	TypeEqual[VT_COMPILED_FUNCTION] = compiledFunctionTypeEqual
 	TypeCall[VT_COMPILED_FUNCTION] = compiledFunctionTypeCall
@@ -223,7 +209,7 @@ func init() {
 	TypeEqual[VT_ERROR] = errorTypeEqual
 	TypeCopy[VT_ERROR] = errorTypeCopy
 	TypeMethodCall[VT_ERROR] = errorTypeMethodCall
-	TypeIsTrue[VT_ERROR] = errorTypeIsTrue
+	TypeIsTrue[VT_ERROR] = defaultFalse // error is always false
 	TypeAsString[VT_ERROR] = errorTypeAsString
 	TypeAsBool[VT_ERROR] = errorTypeAsBool
 
@@ -240,6 +226,7 @@ func init() {
 	TypeAsBool[VT_BOOL] = boolTypeAsBool
 	TypeEqual[VT_BOOL] = boolTypeEqual
 	TypeMethodCall[VT_BOOL] = boolTypeMethodCall
+	TypeLen[VT_BOOL] = default1
 
 	// Char
 	TypeName[VT_CHAR] = charTypeName
@@ -256,6 +243,7 @@ func init() {
 	TypeBinaryOp[VT_CHAR] = charTypeBinaryOp
 	TypeEqual[VT_CHAR] = charTypeEqual
 	TypeMethodCall[VT_CHAR] = charTypeMethodCall
+	TypeLen[VT_CHAR] = default1
 
 	// Int
 	TypeName[VT_INT] = intTypeName
@@ -274,6 +262,7 @@ func init() {
 	TypeBinaryOp[VT_INT] = intTypeBinaryOp
 	TypeEqual[VT_INT] = intTypeEqual
 	TypeMethodCall[VT_INT] = intTypeMethodCall
+	TypeLen[VT_INT] = default1
 
 	// Float
 	TypeName[VT_FLOAT] = floatTypeName
@@ -290,6 +279,7 @@ func init() {
 	TypeBinaryOp[VT_FLOAT] = floatTypeBinaryOp
 	TypeEqual[VT_FLOAT] = floatTypeEqual
 	TypeMethodCall[VT_FLOAT] = floatTypeMethodCall
+	TypeLen[VT_FLOAT] = default1
 
 	// Time
 	TypeName[VT_TIME] = timeTypeName
@@ -307,6 +297,7 @@ func init() {
 	TypeAsInt[VT_TIME] = timeTypeAsInt
 	TypeAsBool[VT_TIME] = timeTypeAsBool
 	TypeAsTime[VT_TIME] = timeTypeAsTime
+	TypeLen[VT_TIME] = default1
 
 	// String
 	TypeName[VT_STRING] = stringTypeName
@@ -331,6 +322,7 @@ func init() {
 	TypeAsBytes[VT_STRING] = stringTypeAsBytes
 	TypeAsTime[VT_STRING] = stringTypeAsTime
 	TypeContains[VT_STRING] = stringTypeContains
+	TypeLen[VT_STRING] = stringTypeLen
 
 	// Bytes
 	TypeName[VT_BYTES] = bytesTypeName
@@ -351,6 +343,7 @@ func init() {
 	TypeAsBool[VT_BYTES] = bytesTypeAsBool
 	TypeAsBytes[VT_BYTES] = bytesTypeAsBytes
 	TypeContains[VT_BYTES] = bytesTypeContains
+	TypeLen[VT_BYTES] = bytesTypeLen
 
 	// Array
 	TypeName[VT_ARRAY] = arrayTypeName
@@ -373,6 +366,7 @@ func init() {
 	TypeAsBool[VT_ARRAY] = arrayTypeAsBool
 	TypeAsBytes[VT_ARRAY] = arrayTypeAsBytes
 	TypeContains[VT_ARRAY] = arrayTypeContains
+	TypeLen[VT_ARRAY] = arrayTypeLen
 
 	// Record
 	TypeName[VT_RECORD] = recordTypeName
@@ -393,6 +387,7 @@ func init() {
 	TypeAsString[VT_RECORD] = recordTypeAsString
 	TypeAsBool[VT_RECORD] = recordTypeAsBool
 	TypeContains[VT_RECORD] = recordTypeContains
+	TypeLen[VT_RECORD] = recordTypeLen
 
 	// Map
 	TypeName[VT_MAP] = mapTypeName
@@ -413,6 +408,7 @@ func init() {
 	TypeAsString[VT_MAP] = mapTypeAsString
 	TypeAsBool[VT_MAP] = mapTypeAsBool
 	TypeContains[VT_MAP] = mapTypeContains
+	TypeLen[VT_MAP] = mapTypeLen
 
 	// IntRange
 	TypeName[VT_INT_RANGE] = intRangeTypeName
@@ -428,6 +424,7 @@ func init() {
 	TypeIsTrue[VT_INT_RANGE] = intRangeTypeIsTrue
 	TypeAsBool[VT_INT_RANGE] = intRangeTypeAsBool
 	TypeContains[VT_INT_RANGE] = intRangeTypeContains
+	TypeLen[VT_INT_RANGE] = intRangeTypeLen
 
 	// StringIterator
 	TypeName[VT_STRING_ITERATOR] = stringIteratorTypeName

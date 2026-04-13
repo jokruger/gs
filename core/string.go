@@ -414,3 +414,8 @@ func stringTypeContains(v Value, e Value) bool {
 		return slices.Contains(o.Runes(), c)
 	}
 }
+
+func stringTypeLen(v Value) int64 {
+	o := (*String)(v.Ptr)
+	return int64(o.Len())
+}

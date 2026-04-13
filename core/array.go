@@ -851,3 +851,8 @@ func arrayTypeContains(v Value, e Value) bool {
 		return false
 	}
 }
+
+func arrayTypeLen(v Value) int64 {
+	o := (*Array)(v.Ptr)
+	return int64(len(o.Elements))
+}

@@ -285,3 +285,8 @@ func bytesTypeContains(v Value, e Value) bool {
 		return bytes.Contains(o.Elements, []byte{byte(b)})
 	}
 }
+
+func bytesTypeLen(v Value) int64 {
+	o := (*Bytes)(v.Ptr)
+	return int64(len(o.Elements))
+}

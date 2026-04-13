@@ -46,7 +46,7 @@ func arrayIteratorTypeEqual(v Value, r Value) bool {
 	return a == b
 }
 
-func arrayIteratorTypeNext(v *Value) bool {
+func arrayIteratorTypeNext(v Value) bool {
 	i := (*ArrayIterator)(v.Ptr)
 	i.i++
 	return i.i < len(i.v)

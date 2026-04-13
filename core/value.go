@@ -59,7 +59,7 @@ func (v *Value) GobDecode(data []byte) error {
 	return v.DecodeBinary(data)
 }
 
-func (v *Value) Next() bool {
+func (v Value) Next() bool {
 	return TypeNext[v.Type](v)
 }
 
@@ -83,7 +83,7 @@ func (v Value) Interface() any {
 	return TypeInterface[v.Type](v)
 }
 
-func (v Value) Arity() int {
+func (v Value) Arity() int8 {
 	return TypeArity[v.Type](v)
 }
 
@@ -173,4 +173,8 @@ func (v Value) Iterator(alloc Allocator) Value {
 
 func (v Value) Call(vm VM, args []Value) (Value, error) {
 	return TypeCall[v.Type](v, vm, args)
+}
+
+func (v Value) Len() int64 {
+	return TypeLen[v.Type](v)
 }

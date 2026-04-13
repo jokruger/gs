@@ -46,7 +46,7 @@ func stringIteratorTypeEqual(v Value, r Value) bool {
 	return a == b
 }
 
-func stringIteratorTypeNext(v *Value) bool {
+func stringIteratorTypeNext(v Value) bool {
 	i := (*StringIterator)(v.Ptr)
 	i.i++
 	return i.i < len(i.v)

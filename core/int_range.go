@@ -246,3 +246,8 @@ func intRangeTypeContains(v Value, e Value) bool {
 	}
 	return o.Contains(i)
 }
+
+func intRangeTypeLen(v Value) int64 {
+	o := (*IntRange)(v.Ptr)
+	return o.Len()
+}

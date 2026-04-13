@@ -31,14 +31,6 @@ func undefinedTypeInterface(v Value) any {
 	return nil
 }
 
-func undefinedTypeIsIterable(v Value) bool {
-	return true
-}
-
-func undefinedTypeEqual(v Value, r Value) bool {
-	return r.Type == VT_UNDEFINED
-}
-
 func undefinedTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, error) {
 	return UndefinedValue(), nil
 }

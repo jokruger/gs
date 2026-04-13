@@ -131,7 +131,7 @@ func arrayTypeInterface(v Value) any {
 
 func arrayTypeBinaryOp(v Value, a Allocator, op token.Token, r Value) (Value, error) {
 	if r.Type != VT_ARRAY {
-		return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), r.TypeName())
+		return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), r.TypeName())
 	}
 
 	la := (*Array)(v.Ptr)
@@ -141,7 +141,7 @@ func arrayTypeBinaryOp(v Value, a Allocator, op token.Token, r Value) (Value, er
 		return a.NewArrayValue(append(la.Elements, ra.Elements...), false), nil
 	}
 
-	return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), r.TypeName())
+	return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), r.TypeName())
 }
 
 func arrayTypeEqual(v Value, r Value) bool {
@@ -235,12 +235,12 @@ func arrayTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 
 	case "contains":
 		if len(args) != 1 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("array.contains", "1", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("array.contains", "1", len(args))
 		}
 		return BoolValue(arrayTypeContains(v, args[0])), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidMethodError(name, v.TypeName())
+		return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
 	}
 }
 
@@ -250,20 +250,20 @@ func arrayTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, err
 	if mode == OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
-			return UndefinedValue(), errs.NewInvalidIndexTypeError("array access", "int", index.TypeName())
+			return Undefined, errs.NewInvalidIndexTypeError("array access", "int", index.TypeName())
 		}
 		if i < 0 || i >= int64(len(o.Elements)) {
-			return UndefinedValue(), nil
+			return Undefined, nil
 		}
 		return o.Elements[i], nil
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return UndefinedValue(), errs.NewInvalidIndexTypeError("array selector access", "string", index.TypeName())
+		return Undefined, errs.NewInvalidIndexTypeError("array selector access", "string", index.TypeName())
 	}
 
-	return UndefinedValue(), errs.NewInvalidSelectorError(v.TypeName(), k)
+	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), k)
 }
 
 func arrayTypeAssign(v Value, index Value, r Value) (err error) {
@@ -327,7 +327,7 @@ func arrayTypeAsBytes(v Value) ([]byte, bool) {
 
 func arrayFnSort(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 
 	alloc := vm.Allocator()
@@ -353,12 +353,12 @@ func arrayFnSort(v Value, vm VM, name string, args []Value) (Value, error) {
 
 func arrayFnFilter(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 1 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	o := (*Array)(v.Ptr)
@@ -371,7 +371,7 @@ func arrayFnFilter(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[0] = v
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if res.IsTrue() {
 				filtered = append(filtered, v)
@@ -386,7 +386,7 @@ func arrayFnFilter(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[1] = v
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if res.IsTrue() {
 				filtered = append(filtered, v)
@@ -395,18 +395,18 @@ func arrayFnFilter(v Value, vm VM, name string, args []Value) (Value, error) {
 		return alloc.NewArrayValue(filtered, false), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func arrayFnCount(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 1 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	o := (*Array)(v.Ptr)
@@ -418,7 +418,7 @@ func arrayFnCount(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[0] = v
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if res.IsTrue() {
 				count++
@@ -433,7 +433,7 @@ func arrayFnCount(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[1] = v
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if res.IsTrue() {
 				count++
@@ -442,18 +442,18 @@ func arrayFnCount(v Value, vm VM, name string, args []Value) (Value, error) {
 		return IntValue(count), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func arrayFnAll(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 1 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	o := (*Array)(v.Ptr)
@@ -464,7 +464,7 @@ func arrayFnAll(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[0] = v
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if !res.IsTrue() {
 				return BoolValue(false), nil
@@ -478,7 +478,7 @@ func arrayFnAll(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[1] = v
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if !res.IsTrue() {
 				return BoolValue(false), nil
@@ -487,18 +487,18 @@ func arrayFnAll(v Value, vm VM, name string, args []Value) (Value, error) {
 		return BoolValue(true), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func arrayFnAny(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 1 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	o := (*Array)(v.Ptr)
@@ -509,7 +509,7 @@ func arrayFnAny(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[0] = v
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if res.IsTrue() {
 				return BoolValue(true), nil
@@ -523,7 +523,7 @@ func arrayFnAny(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[1] = v
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if res.IsTrue() {
 				return BoolValue(true), nil
@@ -532,18 +532,18 @@ func arrayFnAny(v Value, vm VM, name string, args []Value) (Value, error) {
 		return BoolValue(false), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func arrayFnMap(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 1 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	o := (*Array)(v.Ptr)
@@ -556,7 +556,7 @@ func arrayFnMap(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[0] = v
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			mapped = append(mapped, res)
 		}
@@ -569,26 +569,26 @@ func arrayFnMap(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[1] = v
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			mapped = append(mapped, res)
 		}
 		return alloc.NewArrayValue(mapped, false), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func arrayFnReduce(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 2 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "2", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "2", len(args))
 	}
 
 	acc := args[0]
 	fn := args[1]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "second", "non-variadic function", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "second", "non-variadic function", fn.TypeName())
 	}
 
 	o := (*Array)(v.Ptr)
@@ -600,7 +600,7 @@ func arrayFnReduce(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[1] = v
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			acc = res
 		}
@@ -613,27 +613,27 @@ func arrayFnReduce(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[2] = v
 			res, err := fn.Call(vm, buf[:3])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			acc = res
 		}
 		return acc, nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "second", "f/2 or f/3", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "second", "f/2 or f/3", fn.TypeName())
 	}
 }
 
 func arrayFnToArray(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	return v, nil
 }
 
 func arrayFnToBytes(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	o := (*Array)(v.Ptr)
 	bs := make([]byte, len(o.Elements))
@@ -649,7 +649,7 @@ func arrayFnToBytes(v Value, vm VM, name string, args []Value) (Value, error) {
 
 func arrayFnToString(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	o := (*Array)(v.Ptr)
 	r := make([]rune, len(o.Elements))
@@ -665,7 +665,7 @@ func arrayFnToString(v Value, vm VM, name string, args []Value) (Value, error) {
 
 func arrayFnToRecord(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	o := (*Array)(v.Ptr)
 	r := make(map[string]Value, len(o.Elements))
@@ -677,7 +677,7 @@ func arrayFnToRecord(v Value, vm VM, name string, args []Value) (Value, error) {
 
 func arrayFnIsEmpty(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	o := (*Array)(v.Ptr)
 	return BoolValue(len(o.Elements) == 0), nil
@@ -685,7 +685,7 @@ func arrayFnIsEmpty(v Value, vm VM, name string, args []Value) (Value, error) {
 
 func arrayFnLen(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	o := (*Array)(v.Ptr)
 	return IntValue(int64(len(o.Elements))), nil
@@ -693,34 +693,34 @@ func arrayFnLen(v Value, vm VM, name string, args []Value) (Value, error) {
 
 func arrayFnFirst(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	o := (*Array)(v.Ptr)
 	if len(o.Elements) == 0 {
-		return UndefinedValue(), nil
+		return Undefined, nil
 	}
 	return o.Elements[0], nil
 }
 
 func arrayFnLast(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 	o := (*Array)(v.Ptr)
 	if len(o.Elements) == 0 {
-		return UndefinedValue(), nil
+		return Undefined, nil
 	}
 	return o.Elements[len(o.Elements)-1], nil
 }
 
 func arrayFnMin(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 
 	o := (*Array)(v.Ptr)
 	if len(o.Elements) == 0 {
-		return UndefinedValue(), nil
+		return Undefined, nil
 	}
 
 	alloc := vm.Allocator()
@@ -728,7 +728,7 @@ func arrayFnMin(v Value, vm VM, name string, args []Value) (Value, error) {
 	for i := 1; i < len(o.Elements); i++ {
 		less, err := o.Elements[i].BinaryOp(alloc, token.Less, e)
 		if err != nil {
-			return UndefinedValue(), err
+			return Undefined, err
 		}
 		if less.IsTrue() {
 			e = o.Elements[i]
@@ -740,12 +740,12 @@ func arrayFnMin(v Value, vm VM, name string, args []Value) (Value, error) {
 
 func arrayFnMax(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 
 	o := (*Array)(v.Ptr)
 	if len(o.Elements) == 0 {
-		return UndefinedValue(), nil
+		return Undefined, nil
 	}
 
 	alloc := vm.Allocator()
@@ -753,7 +753,7 @@ func arrayFnMax(v Value, vm VM, name string, args []Value) (Value, error) {
 	for i := 1; i < len(o.Elements); i++ {
 		greater, err := o.Elements[i].BinaryOp(alloc, token.Greater, e)
 		if err != nil {
-			return UndefinedValue(), err
+			return Undefined, err
 		}
 		if greater.IsTrue() {
 			e = o.Elements[i]
@@ -765,12 +765,12 @@ func arrayFnMax(v Value, vm VM, name string, args []Value) (Value, error) {
 
 func arrayFnSum(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 
 	o := (*Array)(v.Ptr)
 	if len(o.Elements) == 0 {
-		return UndefinedValue(), nil
+		return Undefined, nil
 	}
 
 	alloc := vm.Allocator()
@@ -779,7 +779,7 @@ func arrayFnSum(v Value, vm VM, name string, args []Value) (Value, error) {
 	for i := 1; i < len(o.Elements); i++ {
 		s, err = s.BinaryOp(alloc, token.Add, o.Elements[i])
 		if err != nil {
-			return UndefinedValue(), err
+			return Undefined, err
 		}
 	}
 
@@ -788,12 +788,12 @@ func arrayFnSum(v Value, vm VM, name string, args []Value) (Value, error) {
 
 func arrayFnAvg(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 	}
 
 	o := (*Array)(v.Ptr)
 	if len(o.Elements) == 0 {
-		return UndefinedValue(), nil
+		return Undefined, nil
 	}
 
 	alloc := vm.Allocator()
@@ -802,14 +802,14 @@ func arrayFnAvg(v Value, vm VM, name string, args []Value) (Value, error) {
 	for i := 1; i < len(o.Elements); i++ {
 		sum, err = sum.BinaryOp(alloc, token.Add, o.Elements[i])
 		if err != nil {
-			return UndefinedValue(), err
+			return Undefined, err
 		}
 	}
 
 	length := IntValue(int64(len(o.Elements)))
 	avg, err := sum.BinaryOp(alloc, token.Quo, length)
 	if err != nil {
-		return UndefinedValue(), err
+		return Undefined, err
 	}
 
 	return avg, nil
@@ -855,4 +855,9 @@ func arrayTypeContains(v Value, e Value) bool {
 func arrayTypeLen(v Value) int64 {
 	o := (*Array)(v.Ptr)
 	return int64(len(o.Elements))
+}
+
+func arrayTypeAppend(v Value, a Allocator, args []Value) (Value, error) {
+	o := (*Array)(v.Ptr)
+	return a.NewArrayValue(append(o.Elements, args...), false), nil
 }

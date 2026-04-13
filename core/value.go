@@ -178,3 +178,11 @@ func (v Value) Call(vm VM, args []Value) (Value, error) {
 func (v Value) Len() int64 {
 	return TypeLen[v.Type](v)
 }
+
+func (v Value) Append(a Allocator, args []Value) (Value, error) {
+	return TypeAppend[v.Type](v, a, args)
+}
+
+func (v Value) Delete(key Value) (Value, error) {
+	return TypeDelete[v.Type](v, key)
+}

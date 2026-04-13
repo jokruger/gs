@@ -23,6 +23,8 @@ var (
 	ErrNotImplemented        = errors.New("not implemented")
 	ErrInvalidBinaryOperator = errors.New("invalid binary operator")
 	ErrInvalidMethod         = errors.New("invalid method error")
+	ErrInvalidAppend         = errors.New("invalid append error")
+	ErrInvalidDelete         = errors.New("invalid delete error")
 )
 
 func NewLogicError(context string) error {
@@ -91,4 +93,12 @@ func NewInvalidBinaryOperatorError(op string, left string, right string) error {
 
 func NewInvalidMethodError(method string, valType string) error {
 	return fmt.Errorf("%w: type %s has no method %s", ErrInvalidMethod, valType, method)
+}
+
+func NewInvalidAppendError(valType string) error {
+	return fmt.Errorf("%w: type %s does not support append", ErrInvalidAppend, valType)
+}
+
+func NewInvalidDeleteError(valType string) error {
+	return fmt.Errorf("%w: type %s does not support delete", ErrInvalidDelete, valType)
 }

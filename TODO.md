@@ -72,7 +72,6 @@
 - char - implement methods from https://pkg.go.dev/unicode
 - add Hash function for Value (and all types)
 
-- make append/delete a Value function, so append() and delete() can be used for user defined types too
 - move splice function to contained types (methods)
 - missing ctors(0/1/2): array, record
 - missing AsX functions (also extend ctor and equal to use AsX): array, map, record

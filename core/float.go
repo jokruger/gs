@@ -117,33 +117,33 @@ func floatTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 	switch name {
 	case "to_float":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("float.to_float", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("float.to_float", "0", len(args))
 		}
 		return v, nil
 
 	case "to_int":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("float.to_int", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("float.to_int", "0", len(args))
 		}
 		i, _ := v.AsInt()
 		return IntValue(i), nil
 
 	case "to_string":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("float.to_string", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("float.to_string", "0", len(args))
 		}
 		s, _ := v.AsString()
 		return vm.Allocator().NewStringValue(s), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidMethodError(name, "float")
+		return Undefined, errs.NewInvalidMethodError(name, "float")
 	}
 }
 
 func floatTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, error) {
 	r, ok := rhs.AsFloat()
 	if !ok {
-		return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
 
 	l := ToFloat(v)
@@ -165,6 +165,6 @@ func floatTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, 
 	case token.GreaterEq:
 		return BoolValue(l >= r), nil
 	default:
-		return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
 }

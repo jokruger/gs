@@ -30,7 +30,7 @@ func Test_builtinDelete(t *testing.T) {
 		target    core.Value
 	}{
 		{name: "invalid-arg", args: args{[]core.Value{alloc.NewStringValue(""), alloc.NewStringValue("")}},
-			wantedErr: "invalid argument type: (delete) argument first expects type record or map, got string"},
+			wantedErr: "invalid delete error: type string does not support delete"},
 
 		{name: "no-args",
 			wantedErr: "wrong number of arguments: (delete) expected 2 argument(s), got 0"},
@@ -51,10 +51,8 @@ func Test_builtinDelete(t *testing.T) {
 						"key": alloc.NewStringValue("value"),
 					}, false),
 					alloc.NewStringValue("key1")}},
-			want: core.Undefined,
-			target: alloc.NewRecordValue(map[string]core.Value{
-				"key": alloc.NewStringValue("value"),
-			}, false),
+			want:   alloc.NewRecordValue(map[string]core.Value{"key": alloc.NewStringValue("value")}, false),
+			target: alloc.NewRecordValue(map[string]core.Value{"key": alloc.NewStringValue("value")}, false),
 		},
 
 		{name: "record-emptied",
@@ -64,7 +62,7 @@ func Test_builtinDelete(t *testing.T) {
 						"key": alloc.NewStringValue("value"),
 					}, false),
 					alloc.NewStringValue("key")}},
-			want:   core.Undefined,
+			want:   alloc.NewRecordValue(map[string]core.Value{}, false),
 			target: alloc.NewRecordValue(map[string]core.Value{}, false),
 		},
 
@@ -76,9 +74,8 @@ func Test_builtinDelete(t *testing.T) {
 						"key2": core.IntValue(10),
 					}, false),
 					alloc.NewStringValue("key1")}},
-			want: core.Undefined,
-			target: alloc.NewRecordValue(map[string]core.Value{
-				"key2": core.IntValue(10)}, false),
+			want:   alloc.NewRecordValue(map[string]core.Value{"key2": core.IntValue(10)}, false),
+			target: alloc.NewRecordValue(map[string]core.Value{"key2": core.IntValue(10)}, false),
 		},
 	}
 

@@ -88,33 +88,33 @@ func charTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 	switch name {
 	case "to_char":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("char.to_char", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("char.to_char", "0", len(args))
 		}
 		return v, nil
 
 	case "to_bool":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("char.to_bool", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("char.to_bool", "0", len(args))
 		}
 		b, _ := charTypeAsBool(v)
 		return BoolValue(b), nil
 
 	case "to_int":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("char.to_int", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("char.to_int", "0", len(args))
 		}
 		i, _ := int64(ToChar(v)), true
 		return IntValue(i), nil
 
 	case "to_string":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("char.to_string", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("char.to_string", "0", len(args))
 		}
 		s, _ := charTypeAsString(v)
 		return vm.Allocator().NewStringValue(s), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidMethodError(name, "char")
+		return Undefined, errs.NewInvalidMethodError(name, "char")
 	}
 }
 
@@ -137,7 +137,7 @@ func charTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, e
 		case token.GreaterEq:
 			return BoolValue(l >= r), nil
 		default:
-			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+			return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 		}
 
 	case VT_STRING: // char op string => string
@@ -147,14 +147,14 @@ func charTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, e
 		case token.Add:
 			return a.NewStringValue(l + r), nil
 		default:
-			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+			return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 		}
 
 	default:
 		// char op any => char
 		r, ok := rhs.AsChar()
 		if !ok {
-			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+			return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 		}
 
 		l := ToChar(v)
@@ -172,7 +172,7 @@ func charTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, e
 		case token.GreaterEq:
 			return BoolValue(l >= r), nil
 		default:
-			return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+			return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 		}
 	}
 }

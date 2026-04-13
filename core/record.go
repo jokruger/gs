@@ -178,10 +178,10 @@ func recordTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 	o := (*Record)(v.Ptr)
 	e, ok := o.Elements[name]
 	if !ok {
-		return UndefinedValue(), errs.NewInvalidMethodError(name, v.TypeName())
+		return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
 	}
 	if !e.IsCallable() {
-		return UndefinedValue(), fmt.Errorf("%s.%s is not callable, got %s", v.TypeName(), name, e.TypeName())
+		return Undefined, fmt.Errorf("%s.%s is not callable, got %s", v.TypeName(), name, e.TypeName())
 	}
 	return e.Call(vm, args)
 }
@@ -189,12 +189,12 @@ func recordTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 func recordTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return UndefinedValue(), errs.NewInvalidIndexTypeError("record access", "string", index.TypeName())
+		return Undefined, errs.NewInvalidIndexTypeError("record access", "string", index.TypeName())
 	}
 	o := (*Record)(v.Ptr)
 	r, ok := o.Elements[k]
 	if !ok {
-		return UndefinedValue(), nil
+		return Undefined, nil
 	}
 	return r, nil
 }
@@ -254,4 +254,17 @@ func recordTypeContains(v Value, e Value) bool {
 func recordTypeLen(v Value) int64 {
 	o := (*Record)(v.Ptr)
 	return int64(len(o.Elements))
+}
+
+func recordTypeDelete(v Value, key Value) (Value, error) {
+	o := (*Record)(v.Ptr)
+	if o.Immutable {
+		return Undefined, errs.NewInvalidDeleteError(v.TypeName())
+	}
+	s, ok := key.AsString()
+	if !ok {
+		return Undefined, errs.NewInvalidIndexTypeError("record delete", "string", key.TypeName())
+	}
+	delete(o.Elements, s)
+	return v, nil
 }

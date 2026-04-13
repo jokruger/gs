@@ -177,13 +177,13 @@ func mapTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error)
 	switch name {
 	case "to_record":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("map.to_record", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("map.to_record", "0", len(args))
 		}
 		return v, nil
 
 	case "is_empty":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("map.is_empty", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("map.is_empty", "0", len(args))
 		}
 		o := (*Map)(v.Ptr)
 		return BoolValue(len(o.Elements) == 0), nil
@@ -202,50 +202,50 @@ func mapTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error)
 
 	case "len":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("map.len", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("map.len", "0", len(args))
 		}
 		o := (*Map)(v.Ptr)
 		return IntValue(int64(len(o.Elements))), nil
 
 	case "keys":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("map.keys", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("map.keys", "0", len(args))
 		}
 		return mapKeys(v, vm.Allocator())
 
 	case "values":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("map.values", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("map.values", "0", len(args))
 		}
 		return mapValues(v, vm.Allocator())
 
 	case "contains":
 		if len(args) != 1 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("map.contains", "1", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("map.contains", "1", len(args))
 		}
 		return BoolValue(mapTypeContains(v, args[0])), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidMethodError(name, v.TypeName())
+		return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
 	}
 }
 
 func mapTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, error) {
 	k, ok := index.AsString()
 	if !ok {
-		return UndefinedValue(), errs.NewInvalidIndexTypeError("map access", "string", index.TypeName())
+		return Undefined, errs.NewInvalidIndexTypeError("map access", "string", index.TypeName())
 	}
 
 	if mode == OpIndex {
 		o := (*Map)(v.Ptr)
 		r, ok := o.Elements[k]
 		if !ok {
-			return UndefinedValue(), nil
+			return Undefined, nil
 		}
 		return r, nil
 	}
 
-	return UndefinedValue(), errs.NewInvalidSelectorError(v.TypeName(), k)
+	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), k)
 }
 
 func mapTypeAssign(v Value, index Value, r Value) error {
@@ -310,12 +310,12 @@ func mapValues(v Value, a Allocator) (Value, error) {
 
 func mapFnFilter(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 1 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	alloc := vm.Allocator()
@@ -328,7 +328,7 @@ func mapFnFilter(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[0] = alloc.NewStringValue(k)
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if res.IsTrue() {
 				filtered[k] = v
@@ -344,7 +344,7 @@ func mapFnFilter(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[1] = v
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if res.IsTrue() {
 				filtered[k] = v
@@ -353,18 +353,18 @@ func mapFnFilter(v Value, vm VM, name string, args []Value) (Value, error) {
 		return alloc.NewMapValue(filtered, false), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func mapFnCount(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 1 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	alloc := vm.Allocator()
@@ -377,7 +377,7 @@ func mapFnCount(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[0] = alloc.NewStringValue(k)
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if res.IsTrue() {
 				count++
@@ -393,7 +393,7 @@ func mapFnCount(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[1] = v
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if res.IsTrue() {
 				count++
@@ -402,18 +402,18 @@ func mapFnCount(v Value, vm VM, name string, args []Value) (Value, error) {
 		return IntValue(count), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func mapFnAll(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 1 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	alloc := vm.Allocator()
@@ -425,7 +425,7 @@ func mapFnAll(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[0] = alloc.NewStringValue(k)
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if !res.IsTrue() {
 				return BoolValue(false), nil
@@ -440,7 +440,7 @@ func mapFnAll(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[1] = v
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if !res.IsTrue() {
 				return BoolValue(false), nil
@@ -449,18 +449,18 @@ func mapFnAll(v Value, vm VM, name string, args []Value) (Value, error) {
 		return BoolValue(true), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
 func mapFnAny(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 1 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "1", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
 	}
 
 	fn := args[0]
 	if !fn.IsCallable() || fn.IsVariadic() {
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
 	}
 
 	alloc := vm.Allocator()
@@ -472,7 +472,7 @@ func mapFnAny(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[0] = alloc.NewStringValue(k)
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if res.IsTrue() {
 				return BoolValue(true), nil
@@ -487,7 +487,7 @@ func mapFnAny(v Value, vm VM, name string, args []Value) (Value, error) {
 			buf[1] = v
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
-				return UndefinedValue(), err
+				return Undefined, err
 			}
 			if res.IsTrue() {
 				return BoolValue(true), nil
@@ -496,7 +496,7 @@ func mapFnAny(v Value, vm VM, name string, args []Value) (Value, error) {
 		return BoolValue(false), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
 }
 
@@ -513,4 +513,17 @@ func mapTypeContains(v Value, e Value) bool {
 func mapTypeLen(v Value) int64 {
 	o := (*Map)(v.Ptr)
 	return int64(len(o.Elements))
+}
+
+func mapTypeDelete(v Value, key Value) (Value, error) {
+	o := (*Map)(v.Ptr)
+	if o.Immutable {
+		return Undefined, errs.NewInvalidDeleteError(v.TypeName())
+	}
+	s, ok := key.AsString()
+	if !ok {
+		return Undefined, errs.NewInvalidIndexTypeError("map delete", "string", key.TypeName())
+	}
+	delete(o.Elements, s)
+	return v, nil
 }

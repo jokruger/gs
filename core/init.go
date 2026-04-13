@@ -90,15 +90,15 @@ func defaultTypeEqualPrimitive(v Value, r Value) bool {
 }
 
 func defaultTypeBinaryOp(v Value, a Allocator, op token.Token, r Value) (Value, error) {
-	return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), r.TypeName())
+	return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), r.TypeName())
 }
 
 func defaultTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
-	return UndefinedValue(), errs.NewInvalidMethodError(name, v.TypeName())
+	return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
 }
 
 func defaultTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, error) {
-	return UndefinedValue(), errs.NewNotAccessibleError(v.TypeName())
+	return Undefined, errs.NewNotAccessibleError(v.TypeName())
 }
 
 func defaultTypeAssign(v Value, index Value, r Value) error {
@@ -110,11 +110,19 @@ func defaultTypeArity(v Value) int8 {
 }
 
 func defaultTypeCall(v Value, vm VM, args []Value) (Value, error) {
-	return UndefinedValue(), errs.NewNotCallableError(v.TypeName())
+	return Undefined, errs.NewNotCallableError(v.TypeName())
 }
 
 func defaultTypeContains(v Value, item Value) bool {
 	return false
+}
+
+func defaultTypeAppend(v Value, a Allocator, args []Value) (Value, error) {
+	return Undefined, errs.NewInvalidAppendError(v.TypeName())
+}
+
+func defaultTypeDelete(v Value, key Value) (Value, error) {
+	return Undefined, errs.NewInvalidDeleteError(v.TypeName())
 }
 
 func init() {
@@ -149,6 +157,8 @@ func init() {
 		TypeAccess[i] = defaultTypeAccess
 		TypeAssign[i] = defaultTypeAssign
 		TypeIterator[i] = defaultUndefined
+		TypeAppend[i] = defaultTypeAppend
+		TypeDelete[i] = defaultTypeDelete
 
 		TypeNext[i] = defaultFalse
 		TypeKey[i] = defaultUndefined
@@ -367,6 +377,7 @@ func init() {
 	TypeAsBytes[VT_ARRAY] = arrayTypeAsBytes
 	TypeContains[VT_ARRAY] = arrayTypeContains
 	TypeLen[VT_ARRAY] = arrayTypeLen
+	TypeAppend[VT_ARRAY] = arrayTypeAppend
 
 	// Record
 	TypeName[VT_RECORD] = recordTypeName
@@ -388,6 +399,7 @@ func init() {
 	TypeAsBool[VT_RECORD] = recordTypeAsBool
 	TypeContains[VT_RECORD] = recordTypeContains
 	TypeLen[VT_RECORD] = recordTypeLen
+	TypeDelete[VT_RECORD] = recordTypeDelete
 
 	// Map
 	TypeName[VT_MAP] = mapTypeName
@@ -409,6 +421,7 @@ func init() {
 	TypeAsBool[VT_MAP] = mapTypeAsBool
 	TypeContains[VT_MAP] = mapTypeContains
 	TypeLen[VT_MAP] = mapTypeLen
+	TypeDelete[VT_MAP] = mapTypeDelete
 
 	// IntRange
 	TypeName[VT_INT_RANGE] = intRangeTypeName

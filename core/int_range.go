@@ -147,7 +147,7 @@ func intRangeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, e
 	switch name {
 	case "to_array":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("range.to_array", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("range.to_array", "0", len(args))
 		}
 		o := (*IntRange)(v.Ptr)
 		l := o.Len()
@@ -174,26 +174,26 @@ func intRangeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, e
 
 	case "is_empty":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("range.is_empty", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("range.is_empty", "0", len(args))
 		}
 		o := (*IntRange)(v.Ptr)
 		return BoolValue(o.Start == o.Stop), nil
 
 	case "len":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("range.len", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("range.len", "0", len(args))
 		}
 		o := (*IntRange)(v.Ptr)
 		return IntValue(o.Len()), nil
 
 	case "contains":
 		if len(args) != 1 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("range.contains", "1", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("range.contains", "1", len(args))
 		}
 		return BoolValue(intRangeTypeContains(v, args[0])), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidMethodError(name, v.TypeName())
+		return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
 	}
 }
 
@@ -203,21 +203,21 @@ func intRangeTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, 
 	if mode == OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
-			return UndefinedValue(), errs.NewInvalidIndexTypeError("range access", "int", index.TypeName())
+			return Undefined, errs.NewInvalidIndexTypeError("range access", "int", index.TypeName())
 		}
 		t, ok := o.Get(i)
 		if !ok {
-			return UndefinedValue(), nil
+			return Undefined, nil
 		}
 		return IntValue(t), nil
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return UndefinedValue(), errs.NewInvalidIndexTypeError("range selector access", "string", index.TypeName())
+		return Undefined, errs.NewInvalidIndexTypeError("range selector access", "string", index.TypeName())
 	}
 
-	return UndefinedValue(), errs.NewInvalidSelectorError(v.TypeName(), k)
+	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), k)
 }
 
 func intRangeTypeIsIterable(v Value) bool {

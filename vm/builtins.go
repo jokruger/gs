@@ -494,19 +494,10 @@ func builtinAppend(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) < 2 {
 		return core.Undefined, errs.NewWrongNumArgumentsError("append", "at least 2", len(args))
 	}
-
-	arg := args[0]
-	switch arg.Type {
-	case core.VT_ARRAY:
-		o := (*core.Array)(arg.Ptr)
-		return vm.Allocator().NewArrayValue(append(o.Elements, args[1:]...), false), nil
-
-	default:
-		return core.Undefined, errs.NewInvalidArgumentTypeError("append", "first", "array", arg.TypeName())
-	}
+	return args[0].Append(vm.Allocator(), args[1:])
 }
 
-// builtinDelete deletes Map keys
+// builtinDelete deletes Map keys inplace
 // usage: delete(map, "key")
 // key must be a string
 func builtinDelete(vm core.VM, args []core.Value) (core.Value, error) {
@@ -514,32 +505,7 @@ func builtinDelete(vm core.VM, args []core.Value) (core.Value, error) {
 	if argsLen != 2 {
 		return core.Undefined, errs.NewWrongNumArgumentsError("delete", "2", argsLen)
 	}
-
-	if args[0].IsImmutable() {
-		return core.Undefined, errs.NewInvalidArgumentTypeError("delete", "first", "mutable record or map", args[0].TypeName())
-	}
-
-	arg := args[0]
-	switch arg.Type {
-	case core.VT_RECORD:
-		if key, ok := args[1].AsString(); ok {
-			o := (*core.Record)(arg.Ptr)
-			delete(o.Elements, key)
-			return core.Undefined, nil
-		}
-		return core.Undefined, errs.NewInvalidArgumentTypeError("delete", "second", "string", args[1].TypeName())
-
-	case core.VT_MAP:
-		if key, ok := args[1].AsString(); ok {
-			o := (*core.Map)(arg.Ptr)
-			delete(o.Elements, key)
-			return core.Undefined, nil
-		}
-		return core.Undefined, errs.NewInvalidArgumentTypeError("delete", "second", "string", args[1].TypeName())
-
-	default:
-		return core.Undefined, errs.NewInvalidArgumentTypeError("delete", "first", "record or map", arg.TypeName())
-	}
+	return args[0].Delete(args[1])
 }
 
 // builtinSplice deletes and changes given Array, returns deleted items.

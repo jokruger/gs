@@ -105,7 +105,7 @@ func bytesTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, 
 	o := (*Bytes)(v.Ptr)
 	r, ok := rhs.AsBytes()
 	if !ok {
-		return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
 
 	switch op {
@@ -113,7 +113,7 @@ func bytesTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, 
 		return a.NewBytesValue(append(o.Elements, r...)), nil
 	}
 
-	return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+	return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 }
 
 func bytesTypeEqual(v Value, r Value) bool {
@@ -136,13 +136,13 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 	switch name {
 	case "to_bytes":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("to_bytes", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("to_bytes", "0", len(args))
 		}
 		return v, nil
 
 	case "to_array":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("bytes.to_array", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("bytes.to_array", "0", len(args))
 		}
 		o := (*Bytes)(v.Ptr)
 		arr := make([]Value, len(o.Elements))
@@ -153,7 +153,7 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 
 	case "to_record":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("bytes.to_record", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("bytes.to_record", "0", len(args))
 		}
 		o := (*Bytes)(v.Ptr)
 		m := make(map[string]Value, len(o.Elements))
@@ -164,53 +164,53 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 
 	case "to_string":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("bytes.to_string", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("bytes.to_string", "0", len(args))
 		}
 		o := (*Bytes)(v.Ptr)
 		return vm.Allocator().NewStringValue(string(o.Elements)), nil
 
 	case "is_empty":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("bytes.is_empty", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("bytes.is_empty", "0", len(args))
 		}
 		o := (*Bytes)(v.Ptr)
 		return BoolValue(len(o.Elements) == 0), nil
 
 	case "len":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("bytes.len", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("bytes.len", "0", len(args))
 		}
 		o := (*Bytes)(v.Ptr)
 		return IntValue(int64(len(o.Elements))), nil
 
 	case "first":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewInvalidMethodError("bytes.first", v.TypeName())
+			return Undefined, errs.NewInvalidMethodError("bytes.first", v.TypeName())
 		}
 		o := (*Bytes)(v.Ptr)
 		if len(o.Elements) == 0 {
-			return UndefinedValue(), nil
+			return Undefined, nil
 		}
 		return IntValue(int64(o.Elements[0])), nil
 
 	case "last":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewInvalidMethodError("bytes.last", v.TypeName())
+			return Undefined, errs.NewInvalidMethodError("bytes.last", v.TypeName())
 		}
 		o := (*Bytes)(v.Ptr)
 		if len(o.Elements) == 0 {
-			return UndefinedValue(), nil
+			return Undefined, nil
 		}
 		return IntValue(int64(o.Elements[len(o.Elements)-1])), nil
 
 	case "contains":
 		if len(args) != 1 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("bytes.contains", "1", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("bytes.contains", "1", len(args))
 		}
 		return BoolValue(bytesTypeContains(v, args[0])), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidMethodError(name, v.TypeName())
+		return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
 	}
 }
 
@@ -218,21 +218,21 @@ func bytesTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, err
 	if mode == OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
-			return UndefinedValue(), errs.NewInvalidIndexTypeError("bytes index", "int", index.TypeName())
+			return Undefined, errs.NewInvalidIndexTypeError("bytes index", "int", index.TypeName())
 		}
 		o := (*Bytes)(v.Ptr)
 		if i < 0 || i >= int64(len(o.Elements)) {
-			return UndefinedValue(), nil
+			return Undefined, nil
 		}
 		return IntValue(int64(o.Elements[i])), nil
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return UndefinedValue(), errs.NewInvalidIndexTypeError("bytes selector access", "string", index.TypeName())
+		return Undefined, errs.NewInvalidIndexTypeError("bytes selector access", "string", index.TypeName())
 	}
 
-	return UndefinedValue(), errs.NewInvalidSelectorError(v.TypeName(), k)
+	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), k)
 }
 
 func bytesTypeIsIterable(v Value) bool {

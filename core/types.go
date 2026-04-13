@@ -112,6 +112,8 @@ var (
 	TypeAccess   [256]func(v Value, a Allocator, index Value, mode Opcode) (Value, error)
 	TypeAssign   [256]func(v Value, index Value, r Value) error
 	TypeIterator [256]func(v Value, a Allocator) Value
+	TypeAppend   [256]func(v Value, a Allocator, args []Value) (Value, error)
+	TypeDelete   [256]func(v Value, key Value) (Value, error)
 
 	TypeNext  [256]func(v Value) bool
 	TypeKey   [256]func(v Value, a Allocator) Value

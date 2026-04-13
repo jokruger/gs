@@ -116,7 +116,7 @@ func stringTypeInterface(v Value) any {
 func stringTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, error) {
 	r, ok := rhs.AsString()
 	if !ok {
-		return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
 
 	o := (*String)(v.Ptr)
@@ -133,7 +133,7 @@ func stringTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value,
 		return BoolValue(o.Value >= r), nil
 	}
 
-	return UndefinedValue(), errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+	return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 }
 
 func stringTypeEqual(v Value, r Value) bool {
@@ -154,13 +154,13 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 	switch name {
 	case "to_string":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.to_string", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.to_string", "0", len(args))
 		}
 		return v, nil
 
 	case "to_array":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.to_array", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.to_array", "0", len(args))
 		}
 		o := (*String)(v.Ptr)
 		rs := o.Runes()
@@ -172,21 +172,21 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 
 	case "to_bool":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.to_bool", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.to_bool", "0", len(args))
 		}
 		b, _ := stringTypeAsBool(v)
 		return BoolValue(b), nil
 
 	case "to_bytes":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.to_bytes", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.to_bytes", "0", len(args))
 		}
 		o := (*String)(v.Ptr)
 		return vm.Allocator().NewBytesValue([]byte(o.Value)), nil
 
 	case "to_char":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.to_char", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.to_char", "0", len(args))
 		}
 		o := (*String)(v.Ptr)
 		rs := o.Runes()
@@ -197,28 +197,28 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 
 	case "to_float":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.to_float", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.to_float", "0", len(args))
 		}
 		f, _ := stringTypeAsFloat(v)
 		return FloatValue(f), nil
 
 	case "to_int":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.to_int", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.to_int", "0", len(args))
 		}
 		i, _ := stringTypeAsInt(v)
 		return IntValue(i), nil
 
 	case "to_time":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.to_time", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.to_time", "0", len(args))
 		}
 		t, _ := stringTypeAsTime(v)
 		return vm.Allocator().NewTimeValue(t), nil
 
 	case "to_record":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.to_record", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.to_record", "0", len(args))
 		}
 		o := (*String)(v.Ptr)
 		rs := o.Runes()
@@ -230,48 +230,48 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 
 	case "is_empty":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.is_empty", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.is_empty", "0", len(args))
 		}
 		o := (*String)(v.Ptr)
 		return BoolValue(len(o.Value) == 0), nil
 
 	case "len":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.len", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.len", "0", len(args))
 		}
 		o := (*String)(v.Ptr)
 		return IntValue(int64(o.Len())), nil
 
 	case "first":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.first", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.first", "0", len(args))
 		}
 		o := (*String)(v.Ptr)
 		if len(o.Value) == 0 {
-			return UndefinedValue(), nil
+			return Undefined, nil
 		}
 		return CharValue(o.At(0)), nil
 
 	case "last":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.last", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.last", "0", len(args))
 		}
 		o := (*String)(v.Ptr)
 		if len(o.Value) == 0 {
-			return UndefinedValue(), nil
+			return Undefined, nil
 		}
 		return CharValue(o.At(o.Len() - 1)), nil
 
 	case "lower":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.lower", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.lower", "0", len(args))
 		}
 		o := (*String)(v.Ptr)
 		return vm.Allocator().NewStringValue(strings.ToLower(o.Value)), nil
 
 	case "upper":
 		if len(args) != 0 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.upper", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.upper", "0", len(args))
 		}
 		o := (*String)(v.Ptr)
 		return vm.Allocator().NewStringValue(strings.ToUpper(o.Value)), nil
@@ -281,12 +281,12 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 
 	case "contains":
 		if len(args) != 1 {
-			return UndefinedValue(), errs.NewWrongNumArgumentsError("string.contains", "1", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("string.contains", "1", len(args))
 		}
 		return BoolValue(stringTypeContains(v, args[0])), nil
 
 	default:
-		return UndefinedValue(), errs.NewInvalidMethodError(name, v.TypeName())
+		return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
 	}
 }
 
@@ -294,22 +294,22 @@ func stringTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, er
 	if mode == OpIndex {
 		i, ok := index.AsInt()
 		if !ok {
-			return UndefinedValue(), errs.NewInvalidIndexTypeError("string access", "int", index.TypeName())
+			return Undefined, errs.NewInvalidIndexTypeError("string access", "int", index.TypeName())
 		}
 		o := (*String)(v.Ptr)
 		rs := o.Runes()
 		if i < 0 || i >= int64(len(rs)) {
-			return UndefinedValue(), nil
+			return Undefined, nil
 		}
 		return CharValue(rs[i]), nil
 	}
 
 	k, ok := index.AsString()
 	if !ok {
-		return UndefinedValue(), errs.NewInvalidIndexTypeError("string selector access", "string", index.TypeName())
+		return Undefined, errs.NewInvalidIndexTypeError("string selector access", "string", index.TypeName())
 	}
 
-	return UndefinedValue(), errs.NewInvalidSelectorError(v.TypeName(), k)
+	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), k)
 }
 
 func stringTypeIsIterable(v Value) bool {
@@ -379,7 +379,7 @@ func stringTypeAsTime(v Value) (time.Time, bool) {
 
 func stringFnTrim(v Value, a Allocator, name string, args []Value) (Value, error) {
 	if len(args) > 1 {
-		return UndefinedValue(), errs.NewWrongNumArgumentsError(name, "0 or 1", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0 or 1", len(args))
 	}
 
 	o := (*String)(v.Ptr)
@@ -389,7 +389,7 @@ func stringFnTrim(v Value, a Allocator, name string, args []Value) (Value, error
 
 	s, ok := args[0].AsString()
 	if !ok {
-		return UndefinedValue(), errs.NewInvalidArgumentTypeError(name, "first", "string", args[0].TypeName())
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "string", args[0].TypeName())
 	}
 
 	return a.NewStringValue(strings.Trim(o.Value, s)), nil

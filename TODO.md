@@ -81,3 +81,5 @@
 - splice - use AsArray
 
 - in VM slice logic, use fast path for VT_INT
+  
+- create a separate type containing core configuration (including user defined) such as types, functions, limits, allocator, etc. Parser, compiler and VM should use it.

@@ -21,7 +21,7 @@ func (v *Value) Set(val Value) {
 }
 
 func (v Value) EncodeJSON() ([]byte, error) {
-	b, err := TypeEncodeJSON[v.Type](v)
+	b, err := ValueTypes[v.Type].TypeEncodeJSON(v)
 	if err != nil {
 		return nil, fmt.Errorf("json encoding failed for type %s: %w", v.TypeName(), err)
 	}
@@ -29,7 +29,7 @@ func (v Value) EncodeJSON() ([]byte, error) {
 }
 
 func (v Value) EncodeBinary() ([]byte, error) {
-	b, err := TypeEncodeBinary[v.Type](v)
+	b, err := ValueTypes[v.Type].TypeEncodeBinary(v)
 	if err != nil {
 		return nil, fmt.Errorf("binary encoding failed for type %s: %w", v.TypeName(), err)
 	}
@@ -47,7 +47,7 @@ func (v *Value) DecodeBinary(data []byte) error {
 
 	var t Value
 	t.Type = data[0]
-	if err := TypeDecodeBinary[t.Type](&t, data[1:]); err != nil {
+	if err := ValueTypes[t.Type].TypeDecodeBinary(&t, data[1:]); err != nil {
 		return fmt.Errorf("binary decoding failed for type %d: %w", t.Type, err)
 	}
 	*v = t
@@ -60,31 +60,31 @@ func (v *Value) GobDecode(data []byte) error {
 }
 
 func (v Value) Next() bool {
-	return TypeNext[v.Type](v)
+	return ValueTypes[v.Type].TypeNext(v)
 }
 
 func (v Value) Key(alloc Allocator) Value {
-	return TypeKey[v.Type](v, alloc)
+	return ValueTypes[v.Type].TypeKey(v, alloc)
 }
 
 func (v Value) Value(alloc Allocator) Value {
-	return TypeValue[v.Type](v, alloc)
+	return ValueTypes[v.Type].TypeValue(v, alloc)
 }
 
 func (v Value) TypeName() string {
-	return TypeName[v.Type](v)
+	return ValueTypes[v.Type].TypeName(v)
 }
 
 func (v Value) String() string {
-	return TypeString[v.Type](v)
+	return ValueTypes[v.Type].TypeString(v)
 }
 
 func (v Value) Interface() any {
-	return TypeInterface[v.Type](v)
+	return ValueTypes[v.Type].TypeInterface(v)
 }
 
 func (v Value) Arity() int8 {
-	return TypeArity[v.Type](v)
+	return ValueTypes[v.Type].TypeArity(v)
 }
 
 func (v Value) IsUserDefined() bool {
@@ -92,97 +92,97 @@ func (v Value) IsUserDefined() bool {
 }
 
 func (v Value) IsTrue() bool {
-	return TypeIsTrue[v.Type](v)
+	return ValueTypes[v.Type].TypeIsTrue(v)
 }
 
 func (v Value) IsIterable() bool {
-	return TypeIsIterable[v.Type](v)
+	return ValueTypes[v.Type].TypeIsIterable(v)
 }
 
 func (v Value) IsCallable() bool {
-	return TypeIsCallable[v.Type](v)
+	return ValueTypes[v.Type].TypeIsCallable(v)
 }
 
 func (v Value) IsVariadic() bool {
-	return TypeIsVariadic[v.Type](v)
+	return ValueTypes[v.Type].TypeIsVariadic(v)
 }
 
 func (v Value) IsImmutable() bool {
-	return TypeIsImmutable[v.Type](v)
+	return ValueTypes[v.Type].TypeIsImmutable(v)
 }
 
 func (v Value) Contains(e Value) bool {
-	return TypeContains[v.Type](v, e)
+	return ValueTypes[v.Type].TypeContains(v, e)
 }
 
 func (v Value) AsBool() (bool, bool) {
-	return TypeAsBool[v.Type](v)
+	return ValueTypes[v.Type].TypeAsBool(v)
 }
 
 func (v Value) AsChar() (rune, bool) {
-	return TypeAsChar[v.Type](v)
+	return ValueTypes[v.Type].TypeAsChar(v)
 }
 
 func (v Value) AsInt() (int64, bool) {
-	return TypeAsInt[v.Type](v)
+	return ValueTypes[v.Type].TypeAsInt(v)
 }
 
 func (v Value) AsFloat() (float64, bool) {
-	return TypeAsFloat[v.Type](v)
+	return ValueTypes[v.Type].TypeAsFloat(v)
 }
 
 func (v Value) AsTime() (time.Time, bool) {
-	return TypeAsTime[v.Type](v)
+	return ValueTypes[v.Type].TypeAsTime(v)
 }
 
 func (v Value) AsString() (string, bool) {
-	return TypeAsString[v.Type](v)
+	return ValueTypes[v.Type].TypeAsString(v)
 }
 
 func (v Value) AsBytes() ([]byte, bool) {
-	return TypeAsBytes[v.Type](v)
+	return ValueTypes[v.Type].TypeAsBytes(v)
 }
 
 func (v Value) BinaryOp(a Allocator, op token.Token, rhs Value) (Value, error) {
-	return TypeBinaryOp[v.Type](v, a, op, rhs)
+	return ValueTypes[v.Type].TypeBinaryOp(v, a, op, rhs)
 }
 
 func (v Value) Equal(rhs Value) bool {
-	return TypeEqual[v.Type](v, rhs)
+	return ValueTypes[v.Type].TypeEqual(v, rhs)
 }
 
 func (v *Value) Copy(alloc Allocator) Value {
-	return TypeCopy[v.Type](*v, alloc)
+	return ValueTypes[v.Type].TypeCopy(*v, alloc)
 }
 
 func (v Value) MethodCall(vm VM, name string, args []Value) (Value, error) {
-	return TypeMethodCall[v.Type](v, vm, name, args)
+	return ValueTypes[v.Type].TypeMethodCall(v, vm, name, args)
 }
 
 func (v Value) Access(vm VM, index Value, mode Opcode) (Value, error) {
-	return TypeAccess[v.Type](v, vm.Allocator(), index, mode)
+	return ValueTypes[v.Type].TypeAccess(v, vm.Allocator(), index, mode)
 }
 
 func (v Value) Assign(idx Value, val Value) error {
-	return TypeAssign[v.Type](v, idx, val)
+	return ValueTypes[v.Type].TypeAssign(v, idx, val)
 }
 
 func (v Value) Iterator(alloc Allocator) Value {
-	return TypeIterator[v.Type](v, alloc)
+	return ValueTypes[v.Type].TypeIterator(v, alloc)
 }
 
 func (v Value) Call(vm VM, args []Value) (Value, error) {
-	return TypeCall[v.Type](v, vm, args)
+	return ValueTypes[v.Type].TypeCall(v, vm, args)
 }
 
 func (v Value) Len() int64 {
-	return TypeLen[v.Type](v)
+	return ValueTypes[v.Type].TypeLen(v)
 }
 
 func (v Value) Append(a Allocator, args []Value) (Value, error) {
-	return TypeAppend[v.Type](v, a, args)
+	return ValueTypes[v.Type].TypeAppend(v, a, args)
 }
 
 func (v Value) Delete(key Value) (Value, error) {
-	return TypeDelete[v.Type](v, key)
+	return ValueTypes[v.Type].TypeDelete(v, key)
 }

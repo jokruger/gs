@@ -1,8 +1,11 @@
 package core
 
 import (
+	"fmt"
+	"reflect"
 	"time"
 
+	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/token"
 )
 
@@ -69,6 +72,108 @@ const (
 	VT_USER_DEFINED       = uint8(21) // must be last
 )
 
+type ValueType struct {
+	TypeName         func(v Value) string
+	TypeEncodeJSON   func(v Value) ([]byte, error)
+	TypeEncodeBinary func(v Value) ([]byte, error)
+	TypeDecodeBinary func(v *Value, data []byte) error
+	TypeString       func(v Value) string
+	TypeInterface    func(v Value) any
+
+	TypeIsTrue      func(v Value) bool
+	TypeIsImmutable func(v Value) bool
+	TypeIsIterable  func(v Value) bool
+	TypeIsCallable  func(v Value) bool
+	TypeContains    func(v Value, e Value) bool
+
+	TypeAsBool   func(v Value) (bool, bool)
+	TypeAsChar   func(v Value) (rune, bool)
+	TypeAsInt    func(v Value) (int64, bool)
+	TypeAsFloat  func(v Value) (float64, bool)
+	TypeAsTime   func(v Value) (time.Time, bool)
+	TypeAsString func(v Value) (string, bool)
+	TypeAsBytes  func(v Value) ([]byte, bool)
+
+	TypeLen        func(v Value) int64
+	TypeCopy       func(v Value, a Allocator) Value
+	TypeEqual      func(v Value, r Value) bool
+	TypeBinaryOp   func(v Value, a Allocator, op token.Token, r Value) (Value, error)
+	TypeMethodCall func(v Value, vm VM, name string, args []Value) (Value, error)
+
+	TypeAccess   func(v Value, a Allocator, index Value, mode Opcode) (Value, error)
+	TypeAssign   func(v Value, index Value, r Value) error
+	TypeIterator func(v Value, a Allocator) Value
+	TypeAppend   func(v Value, a Allocator, args []Value) (Value, error)
+	TypeDelete   func(v Value, key Value) (Value, error)
+
+	TypeNext  func(v Value) bool
+	TypeKey   func(v Value, a Allocator) Value
+	TypeValue func(v Value, a Allocator) Value
+
+	TypeArity      func(v Value) int8
+	TypeIsVariadic func(v Value) bool
+	TypeCall       func(v Value, vm VM, args []Value) (Value, error)
+}
+
+var ValueTypeDefaults = ValueType{
+	TypeName:         defaultTypeName,
+	TypeEncodeJSON:   defaultTypeEncodeJSON,
+	TypeEncodeBinary: defaultTypeEncodeBinary,
+	TypeDecodeBinary: defaultTypeDecodeBinary,
+	TypeString:       defaultTypeString,
+	TypeInterface:    defaultTypeInterface,
+
+	TypeIsTrue:      defaultFalse,
+	TypeIsImmutable: defaultFalse,
+	TypeIsIterable:  defaultFalse,
+	TypeIsCallable:  defaultFalse,
+	TypeContains:    defaultTypeContains,
+
+	TypeAsBool:   defaultTypeAsBool,
+	TypeAsChar:   defaultTypeAsChar,
+	TypeAsInt:    defaultTypeAsInt,
+	TypeAsFloat:  defaultTypeAsFloat,
+	TypeAsTime:   defaultTypeAsTime,
+	TypeAsString: defaultTypeAsString,
+	TypeAsBytes:  defaultTypeAsBytes,
+
+	TypeLen:        default0,
+	TypeCopy:       defaultTypeCopy,
+	TypeEqual:      defaultTypeEqualPrimitive,
+	TypeBinaryOp:   defaultTypeBinaryOp,
+	TypeMethodCall: defaultTypeMethodCall,
+
+	TypeAccess:   defaultTypeAccess,
+	TypeAssign:   defaultTypeAssign,
+	TypeIterator: defaultUndefined,
+	TypeAppend:   defaultTypeAppend,
+	TypeDelete:   defaultTypeDelete,
+
+	TypeNext:  defaultFalse,
+	TypeKey:   defaultUndefined,
+	TypeValue: defaultUndefined,
+
+	TypeArity:      defaultTypeArity,
+	TypeIsVariadic: defaultFalse,
+	TypeCall:       defaultTypeCall,
+}
+
+var ValueTypes [256]ValueType
+
+func SetValueType(t uint8, f ValueType) {
+	fv := reflect.ValueOf(&f).Elem()
+	dv := reflect.ValueOf(ValueTypeDefaults)
+
+	for i := 0; i < fv.NumField(); i++ {
+		field := fv.Field(i)
+		if field.IsNil() {
+			field.Set(dv.Field(i))
+		}
+	}
+
+	ValueTypes[t] = f
+}
+
 var (
 	// Value shortcuts
 	True      = BoolValue(true)
@@ -80,48 +185,6 @@ var (
 
 	// MaxBytesLen is the maximum length for bytes value. Note this limit applies to all compiler/VM instances in the process.
 	MaxBytesLen = 2147483647
-
-	// Type function tables
-	TypeName         [256]func(v Value) string
-	TypeEncodeJSON   [256]func(v Value) ([]byte, error)
-	TypeEncodeBinary [256]func(v Value) ([]byte, error)
-	TypeDecodeBinary [256]func(v *Value, data []byte) error
-	TypeString       [256]func(v Value) string
-	TypeInterface    [256]func(v Value) any
-
-	TypeIsTrue      [256]func(v Value) bool
-	TypeIsImmutable [256]func(v Value) bool
-	TypeIsIterable  [256]func(v Value) bool
-	TypeIsCallable  [256]func(v Value) bool
-	TypeContains    [256]func(v Value, e Value) bool
-
-	TypeAsBool   [256]func(v Value) (bool, bool)
-	TypeAsChar   [256]func(v Value) (rune, bool)
-	TypeAsInt    [256]func(v Value) (int64, bool)
-	TypeAsFloat  [256]func(v Value) (float64, bool)
-	TypeAsTime   [256]func(v Value) (time.Time, bool)
-	TypeAsString [256]func(v Value) (string, bool)
-	TypeAsBytes  [256]func(v Value) ([]byte, bool)
-
-	TypeLen        [256]func(v Value) int64
-	TypeCopy       [256]func(v Value, a Allocator) Value
-	TypeEqual      [256]func(v Value, r Value) bool
-	TypeBinaryOp   [256]func(v Value, a Allocator, op token.Token, r Value) (Value, error)
-	TypeMethodCall [256]func(v Value, vm VM, name string, args []Value) (Value, error)
-
-	TypeAccess   [256]func(v Value, a Allocator, index Value, mode Opcode) (Value, error)
-	TypeAssign   [256]func(v Value, index Value, r Value) error
-	TypeIterator [256]func(v Value, a Allocator) Value
-	TypeAppend   [256]func(v Value, a Allocator, args []Value) (Value, error)
-	TypeDelete   [256]func(v Value, key Value) (Value, error)
-
-	TypeNext  [256]func(v Value) bool
-	TypeKey   [256]func(v Value, a Allocator) Value
-	TypeValue [256]func(v Value, a Allocator) Value
-
-	TypeArity      [256]func(v Value) int8
-	TypeIsVariadic [256]func(v Value) bool
-	TypeCall       [256]func(v Value, vm VM, args []Value) (Value, error)
 )
 
 // List of opcodes
@@ -288,4 +351,121 @@ func ReadOperands(numOperands []int, ins []byte) ([]int, int) {
 		offset += width
 	}
 	return operands, offset
+}
+
+func default0(v Value) int64 {
+	return 0
+}
+
+func default1(v Value) int64 {
+	return 1
+}
+
+func defaultTrue(v Value) bool {
+	return true
+}
+
+func defaultFalse(v Value) bool {
+	return false
+}
+
+func defaultUndefined(v Value, a Allocator) Value {
+	return Undefined
+}
+
+func defaultTypeName(v Value) string {
+	return fmt.Sprintf("<unknown:%d>", v.Type)
+}
+
+func defaultTypeEncodeJSON(v Value) ([]byte, error) {
+	return nil, fmt.Errorf("value type %s does not support JSON encoding", v.TypeName())
+}
+
+func defaultTypeEncodeBinary(v Value) ([]byte, error) {
+	return nil, fmt.Errorf("value type %s does not support binary encoding", v.TypeName())
+}
+
+func defaultTypeDecodeBinary(v *Value, data []byte) error {
+	return fmt.Errorf("value type %s does not support binary decoding", v.TypeName())
+}
+
+func defaultTypeString(v Value) string {
+	return v.TypeName()
+}
+
+func defaultTypeInterface(v Value) any {
+	return nil
+}
+
+func defaultTypeAsBool(v Value) (bool, bool) {
+	return false, false
+}
+
+func defaultTypeAsChar(v Value) (rune, bool) {
+	return 0, false
+}
+
+func defaultTypeAsInt(v Value) (int64, bool) {
+	return 0, false
+}
+
+func defaultTypeAsFloat(v Value) (float64, bool) {
+	return 0, false
+}
+
+func defaultTypeAsTime(v Value) (time.Time, bool) {
+	return time.Time{}, false
+}
+
+func defaultTypeAsString(v Value) (string, bool) {
+	return "", false
+}
+
+func defaultTypeAsBytes(v Value) ([]byte, bool) {
+	return nil, false
+}
+
+func defaultTypeCopy(v Value, a Allocator) Value {
+	// by default copy as primitive value (used by Int, Float, etc)
+	return v
+}
+
+func defaultTypeEqualPrimitive(v Value, r Value) bool {
+	return v == r
+}
+
+func defaultTypeBinaryOp(v Value, a Allocator, op token.Token, r Value) (Value, error) {
+	return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), r.TypeName())
+}
+
+func defaultTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
+	return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
+}
+
+func defaultTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, error) {
+	return Undefined, errs.NewNotAccessibleError(v.TypeName())
+}
+
+func defaultTypeAssign(v Value, index Value, r Value) error {
+	return errs.NewNotAssignableError(v.TypeName())
+}
+
+func defaultTypeArity(v Value) int8 {
+	return 0
+}
+
+func defaultTypeCall(v Value, vm VM, args []Value) (Value, error) {
+	return Undefined, errs.NewNotCallableError(v.TypeName())
+}
+
+func defaultTypeContains(v Value, item Value) bool {
+	return false
+}
+
+func defaultTypeAppend(v Value, a Allocator, args []Value) (Value, error) {
+	return Undefined, errs.NewInvalidAppendError(v.TypeName())
+}
+
+func defaultTypeDelete(v Value, key Value) (Value, error) {
+	return Undefined, errs.NewInvalidDeleteError(v.TypeName())
 }

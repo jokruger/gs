@@ -40,8 +40,6 @@ type VM struct {
 	constants   []core.Value   // constant pool used by OpConstant, method dispatch, closures, and other opcode operands
 	globals     []core.Value   // global variable storage used by global load/store/select opcodes
 	alloc       core.Allocator // object allocator used by arrays, records, iterators, errors, closures, and call helpers
-	allocs      int64          // remaining allocation budget; decremented whenever a new object-like value is created
-	maxAllocs   int64          // configured allocation budget; copied into allocs at the start of Run
 	framesIndex int            // number of active frames; updated on calls, returns, and synthetic callback frames
 
 	// Cold diagnostic state: only used when execution aborts or a stack trace is formatted.
@@ -54,7 +52,7 @@ type VM struct {
 }
 
 // NewVM creates a VM.
-func NewVM(alloc core.Allocator, bytecode *Bytecode, globals []core.Value, maxAllocs int64) *VM {
+func NewVM(alloc core.Allocator, bytecode *Bytecode, globals []core.Value) *VM {
 	if globals == nil {
 		globals = make([]core.Value, GlobalsSize)
 	}
@@ -66,7 +64,6 @@ func NewVM(alloc core.Allocator, bytecode *Bytecode, globals []core.Value, maxAl
 		fileSet:     bytecode.FileSet,
 		framesIndex: 1,
 		ip:          -1,
-		maxAllocs:   maxAllocs,
 	}
 	v.frames[0].fn = bytecode.MainFunction
 	v.frames[0].ip = -1
@@ -202,7 +199,6 @@ func (v *VM) Run() (err error) {
 	v.curInsts = v.curFrame.fn.Instructions
 	v.framesIndex = 1
 	v.ip = -1
-	v.allocs = v.maxAllocs + 1
 
 	v.run()
 	atomic.StoreInt64(&v.aborting, 0)
@@ -250,13 +246,6 @@ func (v *VM) run() {
 				v.err = e
 				return
 			}
-
-			v.allocs--
-			if v.allocs == 0 {
-				v.err = errs.ErrObjectAllocLimit
-				return
-			}
-
 			v.stack[v.sp-2] = res
 			v.sp--
 
@@ -305,11 +294,6 @@ func (v *VM) run() {
 			switch operand.Type {
 			case core.VT_INT:
 				res := core.IntValue(^core.ToInt(operand))
-				v.allocs--
-				if v.allocs == 0 {
-					v.err = errs.ErrObjectAllocLimit
-					return
-				}
 				v.stack[v.sp] = res
 				v.sp++
 			default:
@@ -324,20 +308,10 @@ func (v *VM) run() {
 			switch operand.Type {
 			case core.VT_INT:
 				res := core.IntValue(-core.ToInt(operand))
-				v.allocs--
-				if v.allocs == 0 {
-					v.err = errs.ErrObjectAllocLimit
-					return
-				}
 				v.stack[v.sp] = res
 				v.sp++
 			case core.VT_FLOAT:
 				res := core.FloatValue(-core.ToFloat(operand))
-				v.allocs--
-				if v.allocs == 0 {
-					v.err = errs.ErrObjectAllocLimit
-					return
-				}
 				v.stack[v.sp] = res
 				v.sp++
 			default:
@@ -421,11 +395,6 @@ func (v *VM) run() {
 				v.err = err
 				return
 			}
-			v.allocs--
-			if v.allocs == 0 {
-				v.err = errs.ErrObjectAllocLimit
-				return
-			}
 
 			v.stack[v.sp] = arr
 			v.sp++
@@ -450,11 +419,6 @@ func (v *VM) run() {
 				v.err = err
 				return
 			}
-			v.allocs--
-			if v.allocs == 0 {
-				v.err = errs.ErrObjectAllocLimit
-				return
-			}
 			v.stack[v.sp] = m
 			v.sp++
 
@@ -463,11 +427,6 @@ func (v *VM) run() {
 			t, err := val.Immutable(v.alloc)
 			if err != nil {
 				v.err = err
-				return
-			}
-			v.allocs--
-			if v.allocs == 0 {
-				v.err = errs.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp-1] = t
@@ -493,11 +452,6 @@ func (v *VM) run() {
 			val, err := left.Slice(v.alloc, low, high)
 			if err != nil {
 				v.err = err
-				return
-			}
-			v.allocs--
-			if v.allocs == 0 {
-				v.err = errs.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp] = val
@@ -602,11 +556,6 @@ func (v *VM) run() {
 					return
 				}
 
-				v.allocs--
-				if v.allocs == 0 {
-					v.err = errs.ErrObjectAllocLimit
-					return
-				}
 				v.stack[v.sp] = ret
 				v.sp++
 			}
@@ -658,11 +607,6 @@ func (v *VM) run() {
 				return
 			}
 
-			v.allocs--
-			if v.allocs == 0 {
-				v.err = errs.ErrObjectAllocLimit
-				return
-			}
 			v.stack[v.sp] = ret
 			v.sp++
 
@@ -774,11 +718,6 @@ func (v *VM) run() {
 				SourceMap:     fn.SourceMap,
 				Free:          free,
 			}
-			v.allocs--
-			if v.allocs == 0 {
-				v.err = errs.ErrObjectAllocLimit
-				return
-			}
 			v.stack[v.sp] = core.CompiledFunctionValue(cl)
 			v.sp++
 
@@ -843,11 +782,6 @@ func (v *VM) run() {
 			it, err := dst.Iterator(v.alloc)
 			if err != nil {
 				v.err = err
-				return
-			}
-			v.allocs--
-			if v.allocs == 0 {
-				v.err = errs.ErrObjectAllocLimit
 				return
 			}
 			v.stack[v.sp] = it

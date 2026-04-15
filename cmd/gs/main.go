@@ -131,7 +131,7 @@ func CompileAndRun(a core.Allocator, modules *vm.ModuleMap, data []byte, inputFi
 		return
 	}
 
-	machine := vm.NewVM(a, bytecode, nil, -1)
+	machine := vm.NewVM(a, bytecode, nil)
 	err = machine.Run()
 	return
 }
@@ -144,7 +144,7 @@ func RunCompiled(a core.Allocator, modules *vm.ModuleMap, data []byte) (err erro
 		return
 	}
 
-	machine := vm.NewVM(a, bytecode, nil, -1)
+	machine := vm.NewVM(a, bytecode, nil)
 	err = machine.Run()
 	return
 }
@@ -208,7 +208,7 @@ func RunREPL(a core.Allocator, modules *vm.ModuleMap, in io.Reader, out io.Write
 		}
 
 		bytecode := c.Bytecode()
-		machine := vm.NewVM(a, bytecode, globals, -1)
+		machine := vm.NewVM(a, bytecode, globals)
 		if err := machine.Run(); err != nil {
 			_, _ = fmt.Fprintln(out, err.Error())
 			continue

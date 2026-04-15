@@ -77,7 +77,6 @@
 - missing ctors(0/1/2): array, record
 - range methods: map, filter, reduce, sum, etc (mirror array methods)
 - generic range (just like int range but use Value for start/stop/step) - to be used for time, float, etc ranges as well
-- remove MaxStringLength, MaxBytesLen, MaxAlloc, etc - they are not working properly and not worth the effort ?
 - splice - use AsArray
 - move splice function to container types (methods)
 

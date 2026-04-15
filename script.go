@@ -17,7 +17,6 @@ type Script struct {
 	variables        map[string]*Variable
 	modules          vm.ModuleGetter
 	input            []byte
-	maxAllocs        int64
 	maxConstObjects  int
 	enableFileImport bool
 	importDir        string
@@ -29,7 +28,6 @@ func NewScript(alloc core.Allocator, input []byte) *Script {
 		alloc:           alloc,
 		variables:       make(map[string]*Variable),
 		input:           input,
-		maxAllocs:       -1,
 		maxConstObjects: -1,
 	}
 }
@@ -61,12 +59,6 @@ func (s *Script) SetImportDir(dir string) error {
 	}
 	s.importDir = dir
 	return nil
-}
-
-// SetMaxAllocs sets the maximum number of objects allocations during the run time.
-// Compiled script will return gse.ErrObjectAllocLimit error if it exceeds this limit.
-func (s *Script) SetMaxAllocs(n int64) {
-	s.maxAllocs = n
 }
 
 // SetMaxConstObjects sets the maximum number of objects in the compiled constants.
@@ -129,7 +121,6 @@ func (s *Script) Compile() (*Compiled, error) {
 		globalIndexes: globalIndexes,
 		bytecode:      bytecode,
 		globals:       globals,
-		maxAllocs:     s.maxAllocs,
 	}, nil
 }
 
@@ -183,7 +174,6 @@ type Compiled struct {
 	globalIndexes map[string]int // global symbol name to index
 	bytecode      *vm.Bytecode
 	globals       []core.Value
-	maxAllocs     int64
 	lock          sync.RWMutex
 }
 
@@ -192,7 +182,7 @@ func (c *Compiled) Run() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	v := vm.NewVM(c.alloc, c.bytecode, c.globals, c.maxAllocs)
+	v := vm.NewVM(c.alloc, c.bytecode, c.globals)
 	return v.Run()
 }
 
@@ -201,7 +191,7 @@ func (c *Compiled) RunContext(ctx context.Context) (err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	v := vm.NewVM(c.alloc, c.bytecode, c.globals, c.maxAllocs)
+	v := vm.NewVM(c.alloc, c.bytecode, c.globals)
 	ch := make(chan error, 1)
 	go func() {
 		defer func() {
@@ -247,7 +237,6 @@ func (c *Compiled) Clone(a core.Allocator) (*Compiled, error) {
 		globalIndexes: c.globalIndexes,
 		bytecode:      c.bytecode,
 		globals:       make([]core.Value, len(c.globals)),
-		maxAllocs:     c.maxAllocs,
 	}
 
 	// copy global objects

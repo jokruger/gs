@@ -28,7 +28,6 @@ type ARR = []any
 type testopts struct {
 	modules     *vm.ModuleMap
 	symbols     map[string]core.Value
-	maxAllocs   int64
 	skip2ndPass bool
 }
 
@@ -36,7 +35,6 @@ func Opts() *testopts {
 	return &testopts{
 		modules:     vm.NewModuleMap(),
 		symbols:     make(map[string]core.Value),
-		maxAllocs:   -1,
 		skip2ndPass: false,
 	}
 }
@@ -45,7 +43,6 @@ func (o *testopts) copy() *testopts {
 	c := &testopts{
 		modules:     o.modules.Copy(),
 		symbols:     make(map[string]core.Value),
-		maxAllocs:   o.maxAllocs,
 		skip2ndPass: o.skip2ndPass,
 	}
 	for k, v := range o.symbols {
@@ -77,12 +74,6 @@ func (o *testopts) Module(name string, mod any) *testopts {
 func (o *testopts) Symbol(name string, value core.Value) *testopts {
 	c := o.copy()
 	c.symbols[name] = value
-	return c
-}
-
-func (o *testopts) MaxAllocs(limit int64) *testopts {
-	c := o.copy()
-	c.maxAllocs = limit
 	return c
 }
 
@@ -3208,50 +3199,6 @@ func TestBangOperator(t *testing.T) {
 	expectRun(t, `out = !!5`, nil, true)
 }
 
-func TestObjectsLimit(t *testing.T) {
-	testAllocsLimit(t, `5`, 0)
-	testAllocsLimit(t, `5 + 5`, 1)
-	testAllocsLimit(t, `a := [1, 2, 3]`, 1)
-	testAllocsLimit(t, `a := 1; b := 2; c := 3; d := [a, b, c]`, 1)
-	testAllocsLimit(t, `a := {foo: 1, bar: 2}`, 1)
-	testAllocsLimit(t, `a := 1; b := 2; c := {foo: a, bar: b}`, 1)
-	testAllocsLimit(t, `
-f := func() {
-	return 5 + 5
-}
-a := f() + 5
-`, 2)
-	testAllocsLimit(t, `
-f := func() {
-	return 5 + 5
-}
-a := f()
-`, 1)
-	testAllocsLimit(t, `
-a := []
-f := func() {
-	a = append(a, 5)
-}
-f()
-f()
-f()
-`, 4)
-}
-
-func testAllocsLimit(t *testing.T, src string, limit int64) {
-	expectRun(t, src, Opts().Skip2ndPass(), core.Undefined) // no limit
-	expectRun(t, src, Opts().MaxAllocs(limit).Skip2ndPass(), core.Undefined)
-	expectRun(t, src, Opts().MaxAllocs(limit+1).Skip2ndPass(), core.Undefined)
-
-	if limit > 1 {
-		expectError(t, src, Opts().MaxAllocs(limit-1).Skip2ndPass(), "allocation limit exceeded")
-	}
-
-	if limit > 2 {
-		expectError(t, src, Opts().MaxAllocs(limit-2).Skip2ndPass(), "allocation limit exceeded")
-	}
-}
-
 func TestReturn(t *testing.T) {
 	expectRun(t, `out = func() { return 10; }()`, nil, 10)
 	expectRun(t, `out = func() { return 10; return 9; }()`, nil, 10)
@@ -4031,7 +3978,6 @@ func expectRun(t *testing.T, input string, opts *testopts, expected any) {
 
 	symbols := opts.symbols
 	modules := opts.modules
-	maxAllocs := opts.maxAllocs
 
 	expectedObj := toObject(expected)
 
@@ -4049,7 +3995,7 @@ func expectRun(t *testing.T, input string, opts *testopts, expected any) {
 		}
 
 		// compiler/VM
-		res, trace, err := traceCompileRun(file, symbols, modules, maxAllocs)
+		res, trace, err := traceCompileRun(file, symbols, modules)
 		require.NoError(t, err, "\n"+strings.Join(trace, "\n"))
 		require.Equal(t, expectedObj, res[testOut], "\n"+strings.Join(trace, "\n"))
 	}
@@ -4076,7 +4022,7 @@ func expectRun(t *testing.T, input string, opts *testopts, expected any) {
 
 		modules.AddSourceModule("__code__", []byte(fmt.Sprintf("out := undefined; %s; export out", input)))
 
-		res, trace, err := traceCompileRun(file, symbols, modules, maxAllocs)
+		res, trace, err := traceCompileRun(file, symbols, modules)
 		require.NoError(t, err, "\n"+strings.Join(trace, "\n"))
 		require.Equal(t, expectedObj, res[testOut], "\n"+strings.Join(trace, "\n"))
 	}
@@ -4089,7 +4035,6 @@ func expectError(t *testing.T, input string, opts *testopts, expected string) {
 
 	symbols := opts.symbols
 	modules := opts.modules
-	maxAllocs := opts.maxAllocs
 
 	expected = strings.TrimSpace(expected)
 	if expected == "" {
@@ -4103,7 +4048,7 @@ func expectError(t *testing.T, input string, opts *testopts, expected string) {
 	}
 
 	// compiler/VM
-	_, trace, err := traceCompileRun(program, symbols, modules, maxAllocs)
+	_, trace, err := traceCompileRun(program, symbols, modules)
 	require.Error(t, err, "\n"+strings.Join(trace, "\n"))
 	require.True(t, strings.Contains(err.Error(), expected), "expected error string: %s, got: %s\n%s", expected, err.Error(), strings.Join(trace, "\n"))
 }
@@ -4114,7 +4059,6 @@ func expectErrorIs(t *testing.T, input string, opts *testopts, expected error) {
 	}
 	symbols := opts.symbols
 	modules := opts.modules
-	maxAllocs := opts.maxAllocs
 
 	// parse
 	program := parse(t, input)
@@ -4123,7 +4067,7 @@ func expectErrorIs(t *testing.T, input string, opts *testopts, expected error) {
 	}
 
 	// compiler/VM
-	_, trace, err := traceCompileRun(program, symbols, modules, maxAllocs)
+	_, trace, err := traceCompileRun(program, symbols, modules)
 	require.Error(t, err, "\n"+strings.Join(trace, "\n"))
 	require.True(t, errors.Is(err, expected), "expected error is: %s, got: %s\n%s", expected.Error(), err.Error(), strings.Join(trace, "\n"))
 }
@@ -4134,7 +4078,6 @@ func expectErrorAs(t *testing.T, input string, opts *testopts, expected any) {
 	}
 	symbols := opts.symbols
 	modules := opts.modules
-	maxAllocs := opts.maxAllocs
 
 	// parse
 	program := parse(t, input)
@@ -4143,7 +4086,7 @@ func expectErrorAs(t *testing.T, input string, opts *testopts, expected any) {
 	}
 
 	// compiler/VM
-	_, trace, err := traceCompileRun(program, symbols, modules, maxAllocs)
+	_, trace, err := traceCompileRun(program, symbols, modules)
 	require.Error(t, err, "\n"+strings.Join(trace, "\n"))
 	require.True(t, errors.As(err, expected), "expected error as: %v, got: %v\n%s", expected, err, strings.Join(trace, "\n"))
 }
@@ -4157,12 +4100,7 @@ func (o *vmTracer) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func traceCompileRun(
-	file *parser.File,
-	symbols map[string]core.Value,
-	modules *vm.ModuleMap,
-	maxAllocs int64,
-) (res map[string]core.Value, trace []string, err error) {
+func traceCompileRun(file *parser.File, symbols map[string]core.Value, modules *vm.ModuleMap) (res map[string]core.Value, trace []string, err error) {
 	var v *vm.VM
 
 	defer func() {
@@ -4180,9 +4118,7 @@ func traceCompileRun(
 					fmt.Sprintf("  %s:%d", file, line))
 			}
 
-			trace = append(trace,
-				fmt.Sprintf("[Error Trace]\n\n  %s\n",
-					strings.Join(stackTrace, "\n  ")))
+			trace = append(trace, fmt.Sprintf("[Error Trace]\n\n  %s\n", strings.Join(stackTrace, "\n  ")))
 		}
 	}()
 
@@ -4214,7 +4150,7 @@ func traceCompileRun(
 	trace = append(trace, fmt.Sprintf("\n[Compiled Constants]\n\n%s", strings.Join(bytecode.FormatConstants(), "\n")))
 	trace = append(trace, fmt.Sprintf("\n[Compiled Instructions]\n\n%s\n", strings.Join(bytecode.FormatInstructions(), "\n")))
 
-	v = vm.NewVM(alloc, bytecode, globals, maxAllocs)
+	v = vm.NewVM(alloc, bytecode, globals)
 
 	err = v.Run()
 	{

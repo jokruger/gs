@@ -89,7 +89,7 @@ func compileFile(a core.Allocator, file *parser.File) (*vm.Bytecode, error) {
 func runVM(a core.Allocator, bytecode *vm.Bytecode) (core.Value, error) {
 	globals := make([]core.Value, vm.GlobalsSize)
 
-	v := vm.NewVM(a, bytecode, globals, -1)
+	v := vm.NewVM(a, bytecode, globals)
 	if err := v.Run(); err != nil {
 		return core.Undefined, err
 	}

@@ -9,7 +9,7 @@ import (
 )
 
 type Allocator struct {
-	allocs uint64
+	allocs uint64 // remaining number of allocations
 }
 
 // New returns a new Allocator with the given maximum number of allocations. If maxAllocs is 0, then the maximum number of allocations is 2^64 - 1.

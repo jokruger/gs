@@ -19,9 +19,6 @@ func makeOSExecCommand(vm core.VM, cmd *exec.Cmd) (core.Value, error) {
 		if err != nil {
 			return wrapError(vm, err)
 		}
-		if len(res) > core.MaxBytesLen {
-			return core.Undefined, errs.NewBytesLimitError("os.exec.combined_output")
-		}
 		return vm.Allocator().NewBytesValue(res)
 	}, 0, false)
 	if err != nil {
@@ -36,9 +33,6 @@ func makeOSExecCommand(vm core.VM, cmd *exec.Cmd) (core.Value, error) {
 		res, err := cmd.Output()
 		if err != nil {
 			return wrapError(vm, err)
-		}
-		if len(res) > core.MaxBytesLen {
-			return core.Undefined, errs.NewBytesLimitError("os.exec.output")
 		}
 		return vm.Allocator().NewBytesValue(res)
 	}, 0, false)

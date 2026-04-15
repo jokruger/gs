@@ -24,9 +24,6 @@ func hexDecodeString(vm core.VM, args []core.Value) (ret core.Value, err error) 
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	if len(res) > core.MaxBytesLen {
-		return core.Undefined, errs.NewBytesLimitError("hex.decode")
-	}
 	return vm.Allocator().NewBytesValue(res)
 }
 

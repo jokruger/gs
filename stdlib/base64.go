@@ -30,9 +30,6 @@ func b64RawURLDecodeString(vm core.VM, args []core.Value) (ret core.Value, err e
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	if len(res) > core.MaxBytesLen {
-		return core.Undefined, errs.NewBytesLimitError("base64.raw_url_decode")
-	}
 	return vm.Allocator().NewBytesValue(res)
 }
 
@@ -47,9 +44,6 @@ func b64URLDecodeString(vm core.VM, args []core.Value) (ret core.Value, err erro
 	res, err := base64.URLEncoding.DecodeString(s1)
 	if err != nil {
 		return wrapError(vm, err)
-	}
-	if len(res) > core.MaxBytesLen {
-		return core.Undefined, errs.NewBytesLimitError("base64.url_decode")
 	}
 	return vm.Allocator().NewBytesValue(res)
 }
@@ -66,9 +60,6 @@ func b64RawDecodeString(vm core.VM, args []core.Value) (ret core.Value, err erro
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	if len(res) > core.MaxBytesLen {
-		return core.Undefined, errs.NewBytesLimitError("base64.raw_decode")
-	}
 	return vm.Allocator().NewBytesValue(res)
 }
 
@@ -83,9 +74,6 @@ func b64DecodeString(vm core.VM, args []core.Value) (ret core.Value, err error) 
 	res, err := base64.StdEncoding.DecodeString(s1)
 	if err != nil {
 		return wrapError(vm, err)
-	}
-	if len(res) > core.MaxBytesLen {
-		return core.Undefined, errs.NewBytesLimitError("base64.decode")
 	}
 	return vm.Allocator().NewBytesValue(res)
 }

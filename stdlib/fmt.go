@@ -83,10 +83,6 @@ func getPrintArgs(args ...core.Value) ([]any, error) {
 		// TODO: shell we check if arg cannot be converted to string?
 		s, _ := arg.AsString()
 		slen := len(s)
-		// make sure length does not exceed the limit
-		if l+slen > core.MaxStringLen {
-			return nil, errs.NewStringLimitError("fmt.print/println")
-		}
 		l += slen
 		printArgs = append(printArgs, s)
 	}

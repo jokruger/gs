@@ -1577,10 +1577,6 @@ func TestBuiltinFunctionFormat(t *testing.T) {
 	expectRun(t, `out = format("foo %v", {a: {b: {c: [1, 2, 3]}}})`, nil, `foo {"a": {"b": {"c": [1, 2, 3]}}}`)
 	expectRun(t, `out = format("foo %v", {"a": {"b": {"c": [1, 2, 3]}}})`, nil, `foo {"a": {"b": {"c": [1, 2, 3]}}}`)
 	expectRun(t, `out = format("%v", [1, [2, [3, 4]]])`, nil, `[1, [2, [3, 4]]]`)
-
-	core.MaxStringLen = 9
-	expectError(t, `format("%s", "1234567890")`, nil, "string size limit exceeded: string literal compiler")
-	core.MaxStringLen = 2147483647
 }
 
 func TestBuiltinFunctionDelete(t *testing.T) {
@@ -1693,17 +1689,9 @@ func TestBuiltinFunctionSplice(t *testing.T) {
 }
 
 func TestBytesN(t *testing.T) {
-	curMaxBytesLen := core.MaxBytesLen
-	defer func() { core.MaxBytesLen = curMaxBytesLen }()
-	core.MaxBytesLen = 10
-
 	expectRun(t, `out = bytes(0)`, nil, make([]byte, 0))
 	expectRun(t, `out = bytes(10)`, nil, make([]byte, 10))
-	expectError(t, `bytes(11)`, nil, "bytes size limit")
-
-	core.MaxBytesLen = 1000
 	expectRun(t, `out = bytes(1000)`, nil, make([]byte, 1000))
-	expectError(t, `bytes(1001)`, nil, "bytes size limit")
 }
 
 func TestCall(t *testing.T) {

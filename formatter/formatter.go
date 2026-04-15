@@ -85,10 +85,6 @@ func (f *formatter) writePadding(n int) {
 	oldLen := len(buf)
 	newLen := oldLen + n
 
-	if newLen > core.MaxStringLen {
-		panic(errs.NewStringLimitError("formatter.writePadding"))
-	}
-
 	// Make enough room for padding.
 	if newLen > cap(buf) {
 		buf = make(fmtbuf, cap(buf)*2+n)
@@ -620,34 +616,18 @@ func (f *formatter) fmtFloat(v float64, size int, verb rune, prec int) {
 type fmtbuf []byte
 
 func (b *fmtbuf) Write(p []byte) {
-	if len(*b)+len(p) > core.MaxStringLen {
-		panic(errs.NewStringLimitError("formatter.Write"))
-	}
-
 	*b = append(*b, p...)
 }
 
 func (b *fmtbuf) WriteString(s string) {
-	if len(*b)+len(s) > core.MaxStringLen {
-		panic(errs.NewStringLimitError("formatter.WriteString"))
-	}
-
 	*b = append(*b, s...)
 }
 
 func (b *fmtbuf) WriteSingleByte(c byte) {
-	if len(*b) >= core.MaxStringLen {
-		panic(errs.NewStringLimitError("formatter.WriteSingleByte"))
-	}
-
 	*b = append(*b, c)
 }
 
 func (b *fmtbuf) WriteRune(r rune) {
-	if len(*b)+utf8.RuneLen(r) > core.MaxStringLen {
-		panic(errs.NewStringLimitError("formatter.WriteRune"))
-	}
-
 	if r < utf8.RuneSelf {
 		*b = append(*b, byte(r))
 		return

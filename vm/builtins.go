@@ -314,9 +314,6 @@ func builtinString(vm core.VM, args []core.Value) (core.Value, error) {
 
 	default:
 		if v, ok := args[0].AsString(); ok {
-			if len(v) > core.MaxStringLen {
-				return core.Undefined, errs.NewStringLimitError("string constructor")
-			}
 			return vm.Allocator().NewStringValue(v)
 		}
 		if l == 2 {
@@ -437,16 +434,10 @@ func builtinBytes(vm core.VM, args []core.Value) (core.Value, error) {
 
 	case core.VT_INT:
 		n := core.ToInt(args[0])
-		if n > int64(core.MaxBytesLen) {
-			return core.Undefined, errs.NewBytesLimitError("bytes constructor")
-		}
 		return vm.Allocator().NewBytesValue(make([]byte, int(n)))
 
 	default:
 		if v, ok := args[0].AsBytes(); ok {
-			if len(v) > core.MaxBytesLen {
-				return core.Undefined, errs.NewBytesLimitError("bytes constructor")
-			}
 			return vm.Allocator().NewBytesValue(v)
 		}
 		if l == 2 {

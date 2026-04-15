@@ -562,11 +562,6 @@ func timesTimeFormat(vm core.VM, args []core.Value) (core.Value, error) {
 	}
 
 	s := t1.Format(s2)
-	if len(s) > core.MaxStringLen {
-
-		return core.Undefined, errs.NewStringLimitError("times.time_format")
-	}
-
 	return vm.Allocator().NewStringValue(s)
 }
 

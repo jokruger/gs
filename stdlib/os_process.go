@@ -36,9 +36,6 @@ func makeOSProcessState(vm core.VM, state *os.ProcessState) (core.Value, error) 
 			return core.Undefined, errs.NewWrongNumArgumentsError("os.state.string", "0", len(args))
 		}
 		s := state.String()
-		if len(s) > core.MaxStringLen {
-			return core.Undefined, errs.NewStringLimitError("os.state.string")
-		}
 		return vm.Allocator().NewStringValue(s)
 	}, 0, false)
 	if err != nil {

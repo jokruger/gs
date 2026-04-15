@@ -95,10 +95,6 @@ func TestFileStatDir(t *testing.T) {
 }
 
 func TestOSExpandEnv(t *testing.T) {
-	curMaxStringLen := core.MaxStringLen
-	defer func() { core.MaxStringLen = curMaxStringLen }()
-	core.MaxStringLen = 12
-
 	_ = os.Setenv("GS", "FOO BAR")
 	module(t, "os").call("expand_env", "$GS").expect("FOO BAR")
 
@@ -108,19 +104,9 @@ func TestOSExpandEnv(t *testing.T) {
 	_ = os.Setenv("GS", "123456789012")
 	module(t, "os").call("expand_env", "$GS").expect("123456789012")
 
-	_ = os.Setenv("GS", "1234567890123")
-	module(t, "os").call("expand_env", "$GS").expectError()
-
 	_ = os.Setenv("GS", "123456")
 	module(t, "os").call("expand_env", "$GS$GS").expect("123456123456")
 
 	_ = os.Setenv("GS", "123456")
-	module(t, "os").call("expand_env", "${GS}${GS}").
-		expect("123456123456")
-
-	_ = os.Setenv("GS", "123456")
-	module(t, "os").call("expand_env", "$GS $GS").expectError()
-
-	_ = os.Setenv("GS", "123456")
-	module(t, "os").call("expand_env", "${GS} ${GS}").expectError()
+	module(t, "os").call("expand_env", "${GS}${GS}").expect("123456123456")
 }

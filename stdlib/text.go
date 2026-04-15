@@ -70,9 +70,6 @@ func strconvItoa(vm core.VM, args []core.Value) (ret core.Value, err error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.itoa", "first", "int(compatible)", args[0].TypeName())
 	}
 	s := strconv.Itoa(int(i1))
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.itoa")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -104,9 +101,6 @@ func stringsTrimSuffix(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.trim_suffix", "second", "string(compatible)", args[1].TypeName())
 	}
 	s := strings.TrimSuffix(s1, s2)
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.trim_suffix")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -123,9 +117,6 @@ func stringsTrimRight(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.trim_right", "second", "string(compatible)", args[1].TypeName())
 	}
 	s := strings.TrimRight(s1, s2)
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.trim_right")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -142,9 +133,6 @@ func stringsTrimPrefix(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.trim_prefix", "second", "string(compatible)", args[1].TypeName())
 	}
 	s := strings.TrimPrefix(s1, s2)
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.trim_prefix")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -161,9 +149,6 @@ func stringsTrimLeft(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.trim_left", "second", "string(compatible)", args[1].TypeName())
 	}
 	s := strings.TrimLeft(s1, s2)
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.trim_left")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -180,9 +165,6 @@ func stringsTrim(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.trim", "second", "string(compatible)", args[1].TypeName())
 	}
 	s := strings.Trim(s1, s2)
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.trim")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -296,9 +278,6 @@ func stringsSplitN(vm core.VM, args []core.Value) (core.Value, error) {
 	arr := make([]core.Value, 0, len(spl))
 	alloc := vm.Allocator()
 	for _, res := range spl {
-		if len(res) > core.MaxStringLen {
-			return core.Undefined, errs.NewStringLimitError("text.split_n")
-		}
 		t, err := alloc.NewStringValue(res)
 		if err != nil {
 			return core.Undefined, err
@@ -328,9 +307,6 @@ func stringsSplitAfterN(vm core.VM, args []core.Value) (core.Value, error) {
 	arr := make([]core.Value, 0, len(spl))
 	alloc := vm.Allocator()
 	for _, res := range spl {
-		if len(res) > core.MaxStringLen {
-			return core.Undefined, errs.NewStringLimitError("text.split_after_n")
-		}
 		t, err := alloc.NewStringValue(res)
 		if err != nil {
 			return core.Undefined, err
@@ -356,9 +332,6 @@ func stringsSplitAfter(vm core.VM, args []core.Value) (core.Value, error) {
 	arr := make([]core.Value, 0, len(spl))
 	alloc := vm.Allocator()
 	for _, res := range spl {
-		if len(res) > core.MaxStringLen {
-			return core.Undefined, errs.NewStringLimitError("text.split_after")
-		}
 		t, err := alloc.NewStringValue(res)
 		if err != nil {
 			return core.Undefined, err
@@ -384,9 +357,6 @@ func stringsSplit(vm core.VM, args []core.Value) (core.Value, error) {
 	arr := make([]core.Value, 0, len(spl))
 	alloc := vm.Allocator()
 	for _, res := range spl {
-		if len(res) > core.MaxStringLen {
-			return core.Undefined, errs.NewStringLimitError("text.split")
-		}
 		t, err := alloc.NewStringValue(res)
 		if err != nil {
 			return core.Undefined, err
@@ -408,9 +378,6 @@ func strconvUnquote(vm core.VM, args []core.Value) (core.Value, error) {
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	if len(res) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.unquote")
-	}
 	return vm.Allocator().NewStringValue(res)
 }
 
@@ -426,9 +393,6 @@ func stringsFields(vm core.VM, args []core.Value) (core.Value, error) {
 	arr := make([]core.Value, 0, len(res))
 	alloc := vm.Allocator()
 	for _, elem := range res {
-		if len(elem) > core.MaxStringLen {
-			return core.Undefined, errs.NewStringLimitError("text.fields")
-		}
 		t, err := alloc.NewStringValue(elem)
 		if err != nil {
 			return core.Undefined, err
@@ -447,9 +411,6 @@ func strconvQuote(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.quote", "first", "string(compatible)", args[0].TypeName())
 	}
 	s := strconv.Quote(s1)
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.quote")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -462,9 +423,6 @@ func stringsTrimSpace(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.trim_space", "first", "string(compatible)", args[0].TypeName())
 	}
 	s := strings.TrimSpace(s1)
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.trim_space")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -477,9 +435,6 @@ func stringsToTitle(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.to_title", "first", "string(compatible)", args[0].TypeName())
 	}
 	s := strings.ToTitle(s1)
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.to_title")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -492,9 +447,6 @@ func stringsToUpper(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.to_upper", "first", "string(compatible)", args[0].TypeName())
 	}
 	s := strings.ToUpper(s1)
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.to_upper")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -507,9 +459,6 @@ func stringsToLower(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.to_lower", "first", "string(compatible)", args[0].TypeName())
 	}
 	s := strings.ToLower(s1)
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.to_lower")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -522,9 +471,6 @@ func stringsTitle(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.title", "first", "string(compatible)", args[0].TypeName())
 	}
 	s := strings.Title(s1)
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.title")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -836,10 +782,6 @@ func textPadLeft(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.pad_left", "second", "int(compatible)", args[1].TypeName())
 	}
 
-	if int(i2) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.pad_left")
-	}
-
 	sLen := len(s1)
 	if sLen >= int(i2) {
 		return vm.Allocator().NewStringValue(s1)
@@ -877,10 +819,6 @@ func textPadRight(vm core.VM, args []core.Value) (core.Value, error) {
 	i2, ok := args[1].AsInt()
 	if !ok {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.pad_right", "second", "int(compatible)", args[1].TypeName())
-	}
-
-	if int(i2) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.pad_right")
 	}
 
 	sLen := len(s1)
@@ -921,10 +859,6 @@ func textRepeat(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.repeat", "second", "int(compatible)", args[1].TypeName())
 	}
 
-	if len(s1)*int(i2) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.repeat")
-	}
-
 	return vm.Allocator().NewStringValue(strings.Repeat(s1, int(i2)))
 }
 
@@ -952,11 +886,6 @@ func textJoin(vm core.VM, args []core.Value) (core.Value, error) {
 	s2, ok := args[1].AsString()
 	if !ok {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("text.join", "second", "string(compatible)", args[1].TypeName())
-	}
-
-	// make sure output length does not exceed the limit
-	if slen+len(s2)*(len(ss1)-1) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("text.join")
 	}
 
 	return vm.Allocator().NewStringValue(strings.Join(ss1, s2))
@@ -1125,22 +1054,13 @@ func doTextReplace(s, old, new string, n int) (string, bool) {
 		} else {
 			j += strings.Index(s[start:], old)
 		}
-
 		ssj := s[start:j]
-		if w+len(ssj)+len(new) > core.MaxStringLen {
-			return "", false
-		}
-
 		w += copy(t[w:], ssj)
 		w += copy(t[w:], new)
 		start = j + len(old)
 	}
 
 	ss := s[start:]
-	if w+len(ss) > core.MaxStringLen {
-		return "", false
-	}
-
 	w += copy(t[w:], ss)
 
 	return string(t[0:w]), true

@@ -197,16 +197,10 @@ func doTextRegexpReplace(re *regexp.Regexp, src, repl string) (string, bool) {
 	for _, m := range re.FindAllStringSubmatchIndex(src, -1) {
 		var exp []byte
 		exp = re.ExpandString(exp, repl, src, m)
-		if len(out)+m[0]-idx+len(exp) > core.MaxStringLen {
-			return "", false
-		}
 		out += src[idx:m[0]] + string(exp)
 		idx = m[1]
 	}
 	if idx < len(src) {
-		if len(out)+len(src)-idx > core.MaxStringLen {
-			return "", false
-		}
 		out += src[idx:]
 	}
 	return out, true

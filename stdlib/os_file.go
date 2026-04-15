@@ -57,9 +57,6 @@ func makeOSFile(vm core.VM, file *os.File) (core.Value, error) {
 			return core.Undefined, errs.NewWrongNumArgumentsError("os.file.name", "0", len(args))
 		}
 		s := file.Name()
-		if len(s) > core.MaxStringLen {
-			return core.Undefined, errs.NewStringLimitError("os.file.name")
-		}
 		return vm.Allocator().NewStringValue(s)
 	}, 0, false)
 	if err != nil {
@@ -82,9 +79,6 @@ func makeOSFile(vm core.VM, file *os.File) (core.Value, error) {
 		arr := make([]core.Value, 0, len(res))
 		alloc := vm.Allocator()
 		for _, r := range res {
-			if len(r) > core.MaxStringLen {
-				return core.Undefined, errs.NewStringLimitError("os.file.read_dir_names")
-			}
 			t, err := alloc.NewStringValue(r)
 			if err != nil {
 				return core.Undefined, err

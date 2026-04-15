@@ -301,9 +301,6 @@ func execLookPath(vm core.VM, args []core.Value) (core.Value, error) {
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	if len(res) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("os.exec_look_path")
-	}
 	return vm.Allocator().NewStringValue(res)
 }
 
@@ -319,9 +316,6 @@ func osReadlink(vm core.VM, args []core.Value) (core.Value, error) {
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	if len(res) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("os.read_link")
-	}
 	return vm.Allocator().NewStringValue(res)
 }
 
@@ -334,9 +328,6 @@ func osGetenv(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("os.get_env", "first", "string(compatible)", args[0].TypeName())
 	}
 	s := os.Getenv(s1)
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("os.get_env")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -376,9 +367,6 @@ func osEnviron(vm core.VM, args []core.Value) (ret core.Value, err error) {
 	arr := make([]core.Value, 0, len(env))
 	alloc := vm.Allocator()
 	for _, elem := range env {
-		if len(elem) > core.MaxStringLen {
-			return core.Undefined, errs.NewStringLimitError("os.environ")
-		}
 		t, err := alloc.NewStringValue(elem)
 		if err != nil {
 			return core.Undefined, err
@@ -396,9 +384,6 @@ func osHostname(vm core.VM, args []core.Value) (ret core.Value, err error) {
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	if len(res) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("os.hostname")
-	}
 	return vm.Allocator().NewStringValue(res)
 }
 
@@ -410,9 +395,6 @@ func osGetwd(vm core.VM, args []core.Value) (ret core.Value, err error) {
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	if len(res) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("os.get_wd")
-	}
 	return vm.Allocator().NewStringValue(res)
 }
 
@@ -421,9 +403,6 @@ func osTempDir(vm core.VM, args []core.Value) (ret core.Value, err error) {
 		return core.Undefined, errs.NewWrongNumArgumentsError("os.temp_dir", "0", len(args))
 	}
 	s := os.TempDir()
-	if len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("os.temp_dir")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 
@@ -495,9 +474,6 @@ func osReadFile(vm core.VM, args []core.Value) (ret core.Value, err error) {
 	bytes, err := os.ReadFile(fname)
 	if err != nil {
 		return wrapError(vm, err)
-	}
-	if len(bytes) > core.MaxBytesLen {
-		return core.Undefined, errs.NewBytesLimitError("os.read_file")
 	}
 	return vm.Allocator().NewBytesValue(bytes)
 }
@@ -601,9 +577,6 @@ func osArgs(vm core.VM, args []core.Value) (core.Value, error) {
 	arr := make([]core.Value, 0, len(os.Args))
 	alloc := vm.Allocator()
 	for _, osArg := range os.Args {
-		if len(osArg) > core.MaxStringLen {
-			return core.Undefined, errs.NewStringLimitError("os.args")
-		}
 		t, err := alloc.NewStringValue(osArg)
 		if err != nil {
 			return core.Undefined, err
@@ -625,9 +598,6 @@ func osLookupEnv(vm core.VM, args []core.Value) (core.Value, error) {
 	if !ok {
 		return core.False, nil
 	}
-	if len(res) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("os.lookup_env")
-	}
 	return vm.Allocator().NewStringValue(res)
 }
 
@@ -639,25 +609,9 @@ func osExpandEnv(vm core.VM, args []core.Value) (core.Value, error) {
 	if !ok {
 		return core.Undefined, errs.NewInvalidArgumentTypeError("os.expand_env", "first", "string(compatible)", args[0].TypeName())
 	}
-	var vlen int
-	var failed bool
 	s := os.Expand(s1, func(k string) string {
-		if failed {
-			return ""
-		}
-		v := os.Getenv(k)
-
-		// this does not count the other texts that are not being replaced but the code checks the final length at the end
-		vlen += len(v)
-		if vlen > core.MaxStringLen {
-			failed = true
-			return ""
-		}
-		return v
+		return os.Getenv(k)
 	})
-	if failed || len(s) > core.MaxStringLen {
-		return core.Undefined, errs.NewStringLimitError("os.expand_env")
-	}
 	return vm.Allocator().NewStringValue(s)
 }
 

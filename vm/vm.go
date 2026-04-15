@@ -456,33 +456,17 @@ func (v *VM) run() {
 
 		case core.OpImmutable:
 			val := v.stack[v.sp-1]
-			switch val.Type {
-			case core.VT_ARRAY:
-				o := (*core.Array)(val.Ptr)
-				t := v.alloc.NewArrayValue(o.Elements, true)
-				v.allocs--
-				if v.allocs == 0 {
-					v.err = errs.ErrObjectAllocLimit
-					return
-				}
-				v.stack[v.sp-1] = t
-			case core.VT_RECORD:
-				v.allocs--
-				if v.allocs == 0 {
-					v.err = errs.ErrObjectAllocLimit
-					return
-				}
-				o := (*core.Record)(val.Ptr)
-				v.stack[v.sp-1] = v.alloc.NewRecordValue(o.Elements, true)
-			case core.VT_MAP:
-				v.allocs--
-				if v.allocs == 0 {
-					v.err = errs.ErrObjectAllocLimit
-					return
-				}
-				o := (*core.Map)(val.Ptr)
-				v.stack[v.sp-1] = v.alloc.NewMapValue(o.Elements, true)
+			t, err := val.Immutable(v.alloc)
+			if err != nil {
+				v.err = err
+				return
 			}
+			v.allocs--
+			if v.allocs == 0 {
+				v.err = errs.ErrObjectAllocLimit
+				return
+			}
+			v.stack[v.sp-1] = t
 
 		case core.OpIndex, core.OpSelect:
 			index := v.stack[v.sp-1]

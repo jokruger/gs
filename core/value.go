@@ -190,3 +190,7 @@ func (v Value) Delete(key Value) (Value, error) {
 func (v Value) Slice(a Allocator, s Value, e Value) (Value, error) {
 	return ValueTypes[v.Type].Slice(v, a, s, e)
 }
+
+func (v Value) Immutable(a Allocator) (Value, error) {
+	return ValueTypes[v.Type].Immutable(v, a)
+}

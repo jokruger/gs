@@ -268,3 +268,11 @@ func recordTypeDelete(v Value, key Value) (Value, error) {
 	delete(o.Elements, s)
 	return v, nil
 }
+
+func recordTypeImmutable(v Value, a Allocator) (Value, error) {
+	o := (*Record)(v.Ptr)
+	if o.Immutable {
+		return v, nil
+	}
+	return a.NewRecordValue(o.Elements, true), nil
+}

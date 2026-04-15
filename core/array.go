@@ -904,3 +904,11 @@ func arrayTypeSlice(v Value, a Allocator, s Value, e Value) (Value, error) {
 
 	return a.NewArrayValue(o.Elements[si:ei], false), nil
 }
+
+func arrayTypeImmutable(v Value, a Allocator) (Value, error) {
+	o := (*Array)(v.Ptr)
+	if o.Immutable {
+		return v, nil
+	}
+	return a.NewArrayValue(o.Elements, true), nil
+}

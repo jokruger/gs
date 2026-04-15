@@ -527,3 +527,11 @@ func mapTypeDelete(v Value, key Value) (Value, error) {
 	delete(o.Elements, s)
 	return v, nil
 }
+
+func mapTypeImmutable(v Value, a Allocator) (Value, error) {
+	o := (*Map)(v.Ptr)
+	if o.Immutable {
+		return v, nil
+	}
+	return a.NewMapValue(o.Elements, true), nil
+}

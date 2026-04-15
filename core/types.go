@@ -85,8 +85,9 @@ type ValueType struct {
 	BinaryOp     func(v Value, a Allocator, op token.Token, r Value) (Value, error)
 	MethodCall   func(v Value, vm VM, name string, args []Value) (Value, error)
 
-	IsImmutable func(v Value) bool
 	IsIterable  func(v Value) bool
+	IsImmutable func(v Value) bool
+	Immutable   func(v Value, a Allocator) (Value, error)
 	Contains    func(v Value, e Value) bool
 	Len         func(v Value) int64
 	Iterator    func(v Value, a Allocator) Value
@@ -127,8 +128,9 @@ var ValueTypeDefaults = ValueType{
 	BinaryOp:     defaultTypeBinaryOp,
 	MethodCall:   defaultTypeMethodCall,
 
-	IsImmutable: defaultFalse,
 	IsIterable:  defaultFalse,
+	IsImmutable: defaultFalse,
+	Immutable:   defaultImmutable,
 	Contains:    defaultTypeContains,
 	Len:         default0,
 	Iterator:    defaultUndefined,
@@ -470,4 +472,8 @@ func defaultTypeDelete(v Value, key Value) (Value, error) {
 
 func defaultTypeSlice(v Value, a Allocator, s Value, e Value) (Value, error) {
 	return Undefined, errs.NewInvalidSliceError(v.TypeName())
+}
+
+func defaultImmutable(v Value, a Allocator) (Value, error) {
+	return v, nil
 }

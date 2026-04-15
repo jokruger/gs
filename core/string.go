@@ -162,13 +162,9 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("string.to_array", "0", len(args))
 		}
-		o := (*String)(v.Ptr)
-		rs := o.Runes()
-		arr := make([]Value, len(rs))
-		for i, r := range rs {
-			arr[i] = CharValue(r)
-		}
-		return vm.Allocator().NewArrayValue(arr, false), nil
+		a := vm.Allocator()
+		t, _ := stringTypeAsArray(v, a)
+		return a.NewArrayValue(t, false), nil
 
 	case "to_bool":
 		if len(args) != 0 {
@@ -375,6 +371,16 @@ func stringTypeAsTime(v Value) (time.Time, bool) {
 		return time.Time{}, false
 	}
 	return val, true
+}
+
+func stringTypeAsArray(v Value, a Allocator) ([]Value, bool) {
+	o := (*String)(v.Ptr)
+	rs := o.Runes()
+	arr := make([]Value, len(rs))
+	for i, r := range rs {
+		arr[i] = CharValue(r)
+	}
+	return arr, true
 }
 
 func stringFnTrim(v Value, a Allocator, name string, args []Value) (Value, error) {

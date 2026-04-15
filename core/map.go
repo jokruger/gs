@@ -290,6 +290,11 @@ func mapTypeAsBool(v Value) (bool, bool) {
 	return mapTypeIsTrue(v), true
 }
 
+func mapTypeAsMap(v Value, a Allocator) (map[string]Value, bool) {
+	o := (*Map)(v.Ptr)
+	return o.Elements, true
+}
+
 func mapKeys(v Value, a Allocator) (Value, error) {
 	o := (*Map)(v.Ptr)
 	keys := make([]Value, 0, len(o.Elements))

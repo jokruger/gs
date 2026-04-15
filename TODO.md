@@ -75,7 +75,6 @@
 - add Hash function for Value (and all types)
 
 - missing ctors(0/1/2): array, record
-- missing AsX functions (also extend ctor and equal to use AsX): array, map, record
 - range methods: map, filter, reduce, sum, etc (mirror array methods)
 - generic range (just like int range but use Value for start/stop/step) - to be used for time, float, etc ranges as well
 - remove MaxStringLength, MaxBytesLen, MaxAlloc, etc - they are not working properly and not worth the effort ?
@@ -90,3 +89,5 @@
   - use .data to store index, use max-buff to indicate the value was allocated on the heap
   - when buff allocated value release, mark corresponding ptr as nil
   - if released value is last in buff, decrease buff cursor (til non-nil value found)
+
+- add tests for AsX methods

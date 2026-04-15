@@ -144,12 +144,9 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("bytes.to_array", "0", len(args))
 		}
-		o := (*Bytes)(v.Ptr)
-		arr := make([]Value, len(o.Elements))
-		for i, b := range o.Elements {
-			arr[i] = IntValue(int64(b))
-		}
-		return vm.Allocator().NewArrayValue(arr, false), nil
+		a := vm.Allocator()
+		t, _ := bytesTypeAsArray(v, a)
+		return a.NewArrayValue(t, false), nil
 
 	case "to_record":
 		if len(args) != 0 {
@@ -261,6 +258,15 @@ func bytesTypeAsBool(v Value) (bool, bool) {
 func bytesTypeAsBytes(v Value) ([]byte, bool) {
 	o := (*Bytes)(v.Ptr)
 	return o.Elements, true
+}
+
+func bytesTypeAsArray(v Value, a Allocator) ([]Value, bool) {
+	o := (*Bytes)(v.Ptr)
+	arr := make([]Value, len(o.Elements))
+	for i, b := range o.Elements {
+		arr[i] = IntValue(int64(b))
+	}
+	return arr, true
 }
 
 func bytesTypeContains(v Value, e Value) bool {

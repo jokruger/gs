@@ -185,13 +185,14 @@ func init() {
 		Access:       stringTypeAccess,
 		Contains:     stringTypeContains,
 		Slice:        stringTypeSlice,
-		AsString:     stringTypeAsString,
-		AsInt:        stringTypeAsInt,
-		AsFloat:      stringTypeAsFloat,
 		AsBool:       stringTypeAsBool,
 		AsChar:       stringTypeAsChar,
-		AsBytes:      stringTypeAsBytes,
+		AsInt:        stringTypeAsInt,
+		AsFloat:      stringTypeAsFloat,
 		AsTime:       stringTypeAsTime,
+		AsString:     stringTypeAsString,
+		AsBytes:      stringTypeAsBytes,
+		AsArray:      stringTypeAsArray,
 	})
 
 	// Bytes
@@ -213,9 +214,10 @@ func init() {
 		Access:       bytesTypeAccess,
 		Contains:     bytesTypeContains,
 		Slice:        bytesTypeSlice,
-		AsString:     bytesTypeAsString,
 		AsBool:       bytesTypeAsBool,
+		AsString:     bytesTypeAsString,
 		AsBytes:      bytesTypeAsBytes,
+		AsArray:      bytesTypeAsArray,
 	})
 
 	// Array
@@ -241,9 +243,10 @@ func init() {
 		Contains:     arrayTypeContains,
 		Append:       arrayTypeAppend,
 		Slice:        arrayTypeSlice,
-		AsString:     arrayTypeAsString,
 		AsBool:       arrayTypeAsBool,
+		AsString:     arrayTypeAsString,
 		AsBytes:      arrayTypeAsBytes,
+		AsArray:      arrayTypeAsArray,
 	})
 
 	// Record
@@ -267,8 +270,9 @@ func init() {
 		Assign:       recordTypeAssign,
 		Contains:     recordTypeContains,
 		Delete:       recordTypeDelete,
-		AsString:     recordTypeAsString,
 		AsBool:       recordTypeAsBool,
+		AsString:     recordTypeAsString,
+		AsMap:        recordTypeAsMap,
 	})
 
 	// Map
@@ -292,8 +296,9 @@ func init() {
 		Assign:       mapTypeAssign,
 		Contains:     mapTypeContains,
 		Delete:       mapTypeDelete,
-		AsString:     mapTypeAsString,
 		AsBool:       mapTypeAsBool,
+		AsString:     mapTypeAsString,
+		AsMap:        mapTypeAsMap,
 	})
 
 	// IntRange
@@ -312,6 +317,7 @@ func init() {
 		Access:       intRangeTypeAccess,
 		Contains:     intRangeTypeContains,
 		AsBool:       intRangeTypeAsBool,
+		AsArray:      intRangeTypeAsArray,
 	})
 
 	// StringIterator

@@ -325,6 +325,11 @@ func arrayTypeAsBytes(v Value) ([]byte, bool) {
 	return bs, true
 }
 
+func arrayTypeAsArray(v Value, a Allocator) ([]Value, bool) {
+	o := (*Array)(v.Ptr)
+	return o.Elements, true
+}
+
 func arrayFnSort(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 0 {
 		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))

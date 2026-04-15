@@ -149,28 +149,9 @@ func intRangeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, e
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("range.to_array", "0", len(args))
 		}
-		o := (*IntRange)(v.Ptr)
-		l := o.Len()
-		if o.Start <= o.Stop {
-			arr := make([]Value, l)
-			i := 0
-			t := o.Start
-			for t < o.Stop {
-				arr[i] = IntValue(t)
-				i++
-				t += o.Step
-			}
-			return vm.Allocator().NewArrayValue(arr, false), nil
-		}
-		arr := make([]Value, l)
-		i := 0
-		t := o.Start
-		for t > o.Stop {
-			arr[i] = IntValue(t)
-			i++
-			t -= o.Step
-		}
-		return vm.Allocator().NewArrayValue(arr, false), nil
+		a := vm.Allocator()
+		t, _ := intRangeTypeAsArray(v, a)
+		return a.NewArrayValue(t, false), nil
 
 	case "is_empty":
 		if len(args) != 0 {
@@ -236,6 +217,31 @@ func intRangeTypeIsTrue(v Value) bool {
 
 func intRangeTypeAsBool(v Value) (bool, bool) {
 	return intRangeTypeIsTrue(v), true
+}
+
+func intRangeTypeAsArray(v Value, a Allocator) ([]Value, bool) {
+	o := (*IntRange)(v.Ptr)
+	l := o.Len()
+	if o.Start <= o.Stop {
+		arr := make([]Value, l)
+		i := 0
+		t := o.Start
+		for t < o.Stop {
+			arr[i] = IntValue(t)
+			i++
+			t += o.Step
+		}
+		return arr, true
+	}
+	arr := make([]Value, l)
+	i := 0
+	t := o.Start
+	for t > o.Stop {
+		arr[i] = IntValue(t)
+		i++
+		t -= o.Step
+	}
+	return arr, true
 }
 
 func intRangeTypeContains(v Value, e Value) bool {

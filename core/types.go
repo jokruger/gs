@@ -113,6 +113,8 @@ type ValueType struct {
 	AsTime   func(v Value) (time.Time, bool)
 	AsString func(v Value) (string, bool)
 	AsBytes  func(v Value) ([]byte, bool)
+	AsArray  func(v Value, a Allocator) ([]Value, bool)
+	AsMap    func(v Value, a Allocator) (map[string]Value, bool)
 }
 
 var ValueTypeDefaults = ValueType{
@@ -156,6 +158,8 @@ var ValueTypeDefaults = ValueType{
 	AsTime:   defaultTypeAsTime,
 	AsString: defaultTypeAsString,
 	AsBytes:  defaultTypeAsBytes,
+	AsArray:  defaultTypeAsArray,
+	AsMap:    defaultTypeAsMap,
 }
 
 var ValueTypes [256]ValueType
@@ -419,6 +423,14 @@ func defaultTypeAsString(v Value) (string, bool) {
 }
 
 func defaultTypeAsBytes(v Value) ([]byte, bool) {
+	return nil, false
+}
+
+func defaultTypeAsArray(v Value, a Allocator) ([]Value, bool) {
+	return nil, false
+}
+
+func defaultTypeAsMap(v Value, a Allocator) (map[string]Value, bool) {
 	return nil, false
 }
 

@@ -241,6 +241,11 @@ func recordTypeAsBool(v Value) (bool, bool) {
 	return recordTypeIsTrue(v), true
 }
 
+func recordTypeAsMap(v Value, a Allocator) (map[string]Value, bool) {
+	o := (*Record)(v.Ptr)
+	return o.Elements, true
+}
+
 func recordTypeContains(v Value, e Value) bool {
 	o := (*Record)(v.Ptr)
 	s, ok := e.AsString()

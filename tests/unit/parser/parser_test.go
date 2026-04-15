@@ -524,43 +524,6 @@ c`, func(p pfn) []Stmt {
 	expectParseError(t, `(a ? b) : e`)
 }
 
-func TestParseError(t *testing.T) {
-	expectParse(t, `error(1234)`, func(p pfn) []Stmt {
-		return stmts(
-			exprStmt(
-				errorExpr(p(1, 1), intLit(1234, p(1, 7)), p(1, 6), p(1, 11))))
-	})
-
-	expectParse(t, `err1 := error("some error")`, func(p pfn) []Stmt {
-		return stmts(
-			assignStmt(
-				exprs(ident("err1", p(1, 1))),
-				exprs(errorExpr(p(1, 9),
-					stringLit("some error", p(1, 15)), p(1, 14), p(1, 27))),
-				token.Define, p(1, 6)))
-	})
-
-	expectParse(t, `return error("some error")`, func(p pfn) []Stmt {
-		return stmts(
-			returnStmt(p(1, 1),
-				errorExpr(p(1, 8),
-					stringLit("some error", p(1, 14)), p(1, 13), p(1, 26))))
-	})
-
-	expectParse(t, `return error("some" + "error")`, func(p pfn) []Stmt {
-		return stmts(
-			returnStmt(p(1, 1),
-				errorExpr(p(1, 8),
-					binaryExpr(
-						stringLit("some", p(1, 14)),
-						stringLit("error", p(1, 23)),
-						token.Add, p(1, 21)),
-					p(1, 13), p(1, 30))))
-	})
-
-	expectParseError(t, `error()`) // must have a value
-}
-
 func TestParseForIn(t *testing.T) {
 	expectParse(t, "for x in y {}", func(p pfn) []Stmt {
 		return stmts(
@@ -2025,10 +1988,6 @@ func sliceExpr(x, low, high Expr, lbrack, rbrack core.Pos) *SliceExpr {
 	return &SliceExpr{Expr: x, Low: low, High: high, LBrack: lbrack, RBrack: rbrack}
 }
 
-func errorExpr(pos core.Pos, x Expr, lparen, rparen core.Pos) *ErrorExpr {
-	return &ErrorExpr{Expr: x, ErrorPos: pos, LParen: lparen, RParen: rparen}
-}
-
 func selectorExpr(x, sel Expr) *SelectorExpr {
 	return &SelectorExpr{Expr: x, Sel: sel}
 }
@@ -2252,15 +2211,6 @@ func equalExpr(t *testing.T, expected, actual Expr) {
 			int(actual.(*ImportExpr).TokenPos))
 		require.Equal(t, expected.Token,
 			actual.(*ImportExpr).Token)
-	case *ErrorExpr:
-		equalExpr(t, expected.Expr,
-			actual.(*ErrorExpr).Expr)
-		require.Equal(t, int(expected.ErrorPos),
-			int(actual.(*ErrorExpr).ErrorPos))
-		require.Equal(t, int(expected.LParen),
-			int(actual.(*ErrorExpr).LParen))
-		require.Equal(t, int(expected.RParen),
-			int(actual.(*ErrorExpr).RParen))
 	case *CondExpr:
 		equalExpr(t, expected.Cond,
 			actual.(*CondExpr).Cond)

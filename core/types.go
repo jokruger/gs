@@ -205,7 +205,7 @@ const (
 	OpNull          = Opcode(13) // Push null
 	OpArray         = Opcode(14) // Array object
 	OpRecord        = Opcode(15) // Record object
-	OpError         = Opcode(16) // Error object
+	OpContains      = Opcode(16) // Contains operation (x in y)
 	OpImmutable     = Opcode(17) // Immutable object
 	OpIndex         = Opcode(18) // Index operation
 	OpSliceIndex    = Opcode(19) // Slice operation
@@ -233,8 +233,7 @@ const (
 	OpSuspend       = Opcode(41) // Suspend VM
 	OpSelect        = Opcode(42) // Select operation
 	OpMethodCall    = Opcode(43) // Call method on object
-	OpContains      = Opcode(44) // Contains operation (x in y)
-	// 45...255 are reserved for future use
+	// 44...255 are reserved for future use
 )
 
 // OpcodeNames are string representation of opcodes.
@@ -258,7 +257,6 @@ var OpcodeNames = [...]string{
 	OpSetSelGlobal:  "SETSG",
 	OpArray:         "ARR",
 	OpRecord:        "RECORD",
-	OpError:         "ERROR",
 	OpImmutable:     "IMMUT",
 	OpIndex:         "INDEX",
 	OpSliceIndex:    "SLICE",
@@ -307,7 +305,6 @@ var OpcodeOperands = [...][]int{
 	OpSetSelGlobal:  {2, 1},
 	OpArray:         {2},
 	OpRecord:        {2},
-	OpError:         {},
 	OpImmutable:     {},
 	OpIndex:         {},
 	OpSliceIndex:    {},

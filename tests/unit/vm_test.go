@@ -457,6 +457,7 @@ func TestString(t *testing.T) {
 }
 
 func TestError(t *testing.T) {
+	expectRun(t, `out = error()`, nil, errorObject(nil))
 	expectRun(t, `out = error(1)`, nil, errorObject(1))
 	expectRun(t, `out = error(1).value()`, nil, 1)
 	expectRun(t, `out = error("some error")`, nil, errorObject("some error"))
@@ -4265,6 +4266,8 @@ func toObject(v any) core.Value {
 	switch v := v.(type) {
 	case core.Value:
 		return v
+	case nil:
+		return core.Undefined
 	case string:
 		return alloc.NewStringValue(v)
 	case int64:

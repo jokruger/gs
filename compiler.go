@@ -610,12 +610,6 @@ func (c *Compiler) Compile(node parser.Node) error {
 		c.emit(node, core.OpImmutable)
 		c.emit(node, core.OpReturn, 1)
 
-	case *parser.ErrorExpr:
-		if err := c.Compile(node.Expr); err != nil {
-			return err
-		}
-		c.emit(node, core.OpError)
-
 	case *parser.ImmutableExpr:
 		if err := c.Compile(node.Expr); err != nil {
 			return err

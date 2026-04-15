@@ -445,15 +445,6 @@ func (v *VM) run() {
 			v.stack[v.sp] = m
 			v.sp++
 
-		case core.OpError:
-			val := v.stack[v.sp-1]
-			v.allocs--
-			if v.allocs == 0 {
-				v.err = errs.ErrObjectAllocLimit
-				return
-			}
-			v.stack[v.sp-1] = v.alloc.NewErrorValue(val)
-
 		case core.OpImmutable:
 			val := v.stack[v.sp-1]
 			t, err := val.Immutable(v.alloc)

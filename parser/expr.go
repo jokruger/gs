@@ -221,30 +221,6 @@ func (e *CondExpr) String() string {
 	return "(" + e.Cond.String() + " ? " + e.True.String() + " : " + e.False.String() + ")"
 }
 
-// ErrorExpr represents an error expression
-type ErrorExpr struct {
-	Expr     Expr
-	ErrorPos core.Pos
-	LParen   core.Pos
-	RParen   core.Pos
-}
-
-func (e *ErrorExpr) exprNode() {}
-
-// Pos returns the position of first character belonging to the node.
-func (e *ErrorExpr) Pos() core.Pos {
-	return e.ErrorPos
-}
-
-// End returns the position of first character immediately after the node.
-func (e *ErrorExpr) End() core.Pos {
-	return e.RParen
-}
-
-func (e *ErrorExpr) String() string {
-	return "error(" + e.Expr.String() + ")"
-}
-
 // FloatLit represents a floating point literal.
 type FloatLit struct {
 	Value    float64
@@ -339,17 +315,17 @@ func (e *Ident) String() string {
 
 // ImmutableExpr represents an immutable expression
 type ImmutableExpr struct {
-	Expr     Expr
-	ErrorPos core.Pos
-	LParen   core.Pos
-	RParen   core.Pos
+	Expr   Expr
+	IPos   core.Pos
+	LParen core.Pos
+	RParen core.Pos
 }
 
 func (e *ImmutableExpr) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
 func (e *ImmutableExpr) Pos() core.Pos {
-	return e.ErrorPos
+	return e.IPos
 }
 
 // End returns the position of first character immediately after the node.

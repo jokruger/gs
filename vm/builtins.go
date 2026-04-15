@@ -10,7 +10,7 @@ import (
 )
 
 // do not change builtin function indexes as it will break compatibility
-// 33..99 are reserved for future builtin functions
+// 34..99 are reserved for future builtin functions
 var BuiltinFuncs = map[int]core.Value{
 	7:  core.NewBuiltinFunctionValue("bool", builtinBool, 0, true),
 	9:  core.NewBuiltinFunctionValue("char", builtinChar, 0, true),
@@ -21,6 +21,7 @@ var BuiltinFuncs = map[int]core.Value{
 	10: core.NewBuiltinFunctionValue("bytes", builtinBytes, 0, true),
 	21: core.NewBuiltinFunctionValue("map", builtinMap, 0, true),
 	30: core.NewBuiltinFunctionValue("range", builtinRange, 2, true),
+	33: core.NewBuiltinFunctionValue("error", builtinError, 0, true),
 
 	15: core.NewBuiltinFunctionValue("is_bool", builtinIsBool, 1, false),
 	16: core.NewBuiltinFunctionValue("is_char", builtinIsChar, 1, false),
@@ -33,8 +34,8 @@ var BuiltinFuncs = map[int]core.Value{
 	31: core.NewBuiltinFunctionValue("is_map", builtinIsMap, 1, false),
 	20: core.NewBuiltinFunctionValue("is_record", builtinIsRecord, 1, false),
 	32: core.NewBuiltinFunctionValue("is_range", builtinIsRange, 1, false),
-
 	24: core.NewBuiltinFunctionValue("is_error", builtinIsError, 1, false),
+
 	25: core.NewBuiltinFunctionValue("is_undefined", builtinIsUndefined, 1, false),
 	26: core.NewBuiltinFunctionValue("is_function", builtinIsFunction, 1, false),
 	27: core.NewBuiltinFunctionValue("is_callable", builtinIsCallable, 1, false),
@@ -227,6 +228,18 @@ func builtinLen(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewWrongNumArgumentsError("len", "1", len(args))
 	}
 	return core.IntValue(args[0].Len()), nil
+}
+
+// error([payload]) => error
+func builtinError(vm core.VM, args []core.Value) (core.Value, error) {
+	if len(args) > 1 {
+		return core.Undefined, errs.NewWrongNumArgumentsError("error", "0 or 1", len(args))
+	}
+	var payload core.Value
+	if len(args) == 1 {
+		payload = args[0]
+	}
+	return vm.Allocator().NewErrorValue(payload), nil
 }
 
 // range(start, stop[, step])

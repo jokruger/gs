@@ -78,7 +78,7 @@ const (
 	Else        = Token(157)
 	For         = Token(158)
 	Func        = Token(159)
-	Error       = Token(160)
+	Arrow       = Token(160) // => (behaves as a keyword)
 	Immutable   = Token(161)
 	If          = Token(162)
 	Return      = Token(163)
@@ -89,8 +89,7 @@ const (
 	Undefined   = Token(168)
 	Import      = Token(169)
 	Var         = Token(170)
-	Arrow       = Token(171) // => (behaves as a keyword)
-	// 172..254 are reserved for future keywords
+	// 171..254 are reserved for future keywords
 	_keywordEnd = Token(255) // Keywords block end
 )
 
@@ -163,7 +162,7 @@ var tokens = [...]string{
 	Else:        "else",
 	For:         "for",
 	Func:        "func",
-	Error:       "error",
+	Arrow:       "=>",
 	Immutable:   "immutable",
 	If:          "if",
 	Return:      "return",
@@ -174,7 +173,6 @@ var tokens = [...]string{
 	Undefined:   "undefined",
 	Import:      "import",
 	Var:         "var",
-	Arrow:       "=>",
 	_keywordEnd: "",
 }
 

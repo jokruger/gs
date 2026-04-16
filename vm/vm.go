@@ -233,8 +233,7 @@ func (v *VM) run() {
 			operand := v.stack[v.sp]
 			switch operand.Type {
 			case core.VT_INT:
-				res := core.IntValue(^core.ToInt(operand))
-				v.stack[v.sp] = res
+				v.stack[v.sp] = core.IntValue(^core.ToInt(operand))
 				v.sp++
 			default:
 				res, err := operand.UnaryOp(v.alloc, token.Xor)

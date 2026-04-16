@@ -231,30 +231,30 @@ func (v *VM) run() {
 			v.stack[v.sp] = v.constants[cidx]
 			v.sp++
 
-		case core.OpNull:
-			v.stack[v.sp] = core.Undefined
-			v.sp++
+		case core.OpBComplement:
+			operand := v.stack[v.sp-1]
+			v.sp--
 
-		case core.OpBinaryOp:
-			v.ip++
-			right := v.stack[v.sp-1]
-			left := v.stack[v.sp-2]
-			tok := token.Token(v.curInsts[v.ip])
-			res, e := left.BinaryOp(v.Allocator(), tok, right)
-			if e != nil {
-				v.sp -= 2
-				v.err = e
+			switch operand.Type {
+			case core.VT_INT:
+				res := core.IntValue(^core.ToInt(operand))
+				v.stack[v.sp] = res
+				v.sp++
+			default:
+				v.err = fmt.Errorf("invalid operation: ^%s", operand.TypeName())
 				return
 			}
-			v.stack[v.sp-2] = res
+
+		case core.OpPop:
 			v.sp--
 
-		case core.OpContains:
-			right := v.stack[v.sp-1]
-			left := v.stack[v.sp-2]
-			res := core.BoolValue(right.Contains(left))
-			v.stack[v.sp-2] = res
-			v.sp--
+		case core.OpTrue:
+			v.stack[v.sp] = core.True
+			v.sp++
+
+		case core.OpFalse:
+			v.stack[v.sp] = core.False
+			v.sp++
 
 		case core.OpEqual:
 			right := v.stack[v.sp-1]
@@ -269,37 +269,6 @@ func (v *VM) run() {
 			v.sp -= 2
 			v.stack[v.sp] = core.BoolValue(!left.Equal(right))
 			v.sp++
-
-		case core.OpPop:
-			v.sp--
-
-		case core.OpTrue:
-			v.stack[v.sp] = core.True
-			v.sp++
-
-		case core.OpFalse:
-			v.stack[v.sp] = core.False
-			v.sp++
-
-		case core.OpLNot:
-			operand := v.stack[v.sp-1]
-			v.sp--
-			v.stack[v.sp] = core.BoolValue(!operand.IsTrue())
-			v.sp++
-
-		case core.OpBComplement:
-			operand := v.stack[v.sp-1]
-			v.sp--
-
-			switch operand.Type {
-			case core.VT_INT:
-				res := core.IntValue(^core.ToInt(operand))
-				v.stack[v.sp] = res
-				v.sp++
-			default:
-				v.err = fmt.Errorf("invalid operation: ^%s", operand.TypeName())
-				return
-			}
 
 		case core.OpMinus:
 			operand := v.stack[v.sp-1]
@@ -318,6 +287,12 @@ func (v *VM) run() {
 				v.err = fmt.Errorf("invalid operation: -%s", operand.TypeName())
 				return
 			}
+
+		case core.OpLNot:
+			operand := v.stack[v.sp-1]
+			v.sp--
+			v.stack[v.sp] = core.BoolValue(!operand.IsTrue())
+			v.sp++
 
 		case core.OpJumpFalsy:
 			v.ip += 4
@@ -349,35 +324,8 @@ func (v *VM) run() {
 			pos := int(v.curInsts[v.ip+4]) | int(v.curInsts[v.ip+3])<<8 | int(v.curInsts[v.ip+2])<<16 | int(v.curInsts[v.ip+1])<<24
 			v.ip = pos - 1
 
-		case core.OpSetGlobal:
-			v.ip += 2
-			v.sp--
-			globalIndex := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
-			v.globals[globalIndex] = v.stack[v.sp]
-
-		case core.OpSetSelGlobal:
-			v.ip += 3
-			globalIndex := int(v.curInsts[v.ip-1]) | int(v.curInsts[v.ip-2])<<8
-			numSelectors := int(v.curInsts[v.ip])
-
-			// selectors and RHS value
-			selectors := make([]core.Value, numSelectors)
-			for i := 0; i < numSelectors; i++ {
-				selectors[i] = v.stack[v.sp-numSelectors+i]
-			}
-			val := v.stack[v.sp-numSelectors-1]
-			v.sp -= numSelectors + 1
-			e := v.indexAssign(v.globals[globalIndex], val, selectors)
-			if e != nil {
-				v.err = e
-				return
-			}
-
-		case core.OpGetGlobal:
-			v.ip += 2
-			globalIndex := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
-			val := v.globals[globalIndex]
-			v.stack[v.sp] = val
+		case core.OpNull:
+			v.stack[v.sp] = core.Undefined
 			v.sp++
 
 		case core.OpArray:
@@ -422,6 +370,13 @@ func (v *VM) run() {
 			v.stack[v.sp] = m
 			v.sp++
 
+		case core.OpContains:
+			right := v.stack[v.sp-1]
+			left := v.stack[v.sp-2]
+			res := core.BoolValue(right.Contains(left))
+			v.stack[v.sp-2] = res
+			v.sp--
+
 		case core.OpImmutable:
 			val := v.stack[v.sp-1]
 			t, err := val.Immutable(v.alloc)
@@ -431,7 +386,7 @@ func (v *VM) run() {
 			}
 			v.stack[v.sp-1] = t
 
-		case core.OpIndex, core.OpSelect:
+		case core.OpIndex:
 			index := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
 			v.sp -= 2
@@ -560,56 +515,6 @@ func (v *VM) run() {
 				v.sp++
 			}
 
-		case core.OpMethodCall:
-			operands, read := core.ReadOperands(core.OpcodeOperands[code], v.curInsts[v.ip+1:])
-			methodConstIdx := operands[0]
-			numArgs := operands[1]
-			spread := operands[2]
-			v.ip += read
-
-			if methodConstIdx < 0 || methodConstIdx >= len(v.constants) {
-				v.err = fmt.Errorf("invalid method constant index: %d", methodConstIdx)
-				return
-			}
-
-			receiver := v.stack[v.sp-1-numArgs]
-
-			if spread == 1 {
-				v.sp--
-				arg := v.stack[v.sp]
-				switch arg.Type {
-				case core.VT_ARRAY:
-					o := (*core.Array)(arg.Ptr)
-					for _, item := range o.Elements {
-						v.stack[v.sp] = item
-						v.sp++
-					}
-					numArgs += len(o.Elements) - 1
-				default:
-					v.err = fmt.Errorf("not an array: %s", arg.TypeName())
-					return
-				}
-				receiver = v.stack[v.sp-1-numArgs]
-			}
-
-			methodConst := v.constants[methodConstIdx]
-			methodName, ok := methodConst.AsString()
-			if !ok {
-				v.err = fmt.Errorf("invalid method name constant type: %s", methodConst.TypeName())
-				return
-			}
-
-			ret, err := receiver.MethodCall(v, methodName, v.stack[v.sp-numArgs:v.sp])
-			v.sp -= numArgs + 1
-
-			if err != nil {
-				v.err = err
-				return
-			}
-
-			v.stack[v.sp] = ret
-			v.sp++
-
 		case core.OpReturn:
 			v.ip++
 			var retVal core.Value
@@ -629,16 +534,46 @@ func (v *VM) run() {
 			v.stack[v.sp-1] = retVal
 			//v.sp++
 
-		case core.OpDefineLocal:
+		case core.OpGetGlobal:
+			v.ip += 2
+			globalIndex := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
+			val := v.globals[globalIndex]
+			v.stack[v.sp] = val
+			v.sp++
+
+		case core.OpSetGlobal:
+			v.ip += 2
+			v.sp--
+			globalIndex := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
+			v.globals[globalIndex] = v.stack[v.sp]
+
+		case core.OpSetSelGlobal:
+			v.ip += 3
+			globalIndex := int(v.curInsts[v.ip-1]) | int(v.curInsts[v.ip-2])<<8
+			numSelectors := int(v.curInsts[v.ip])
+
+			// selectors and RHS value
+			selectors := make([]core.Value, numSelectors)
+			for i := 0; i < numSelectors; i++ {
+				selectors[i] = v.stack[v.sp-numSelectors+i]
+			}
+			val := v.stack[v.sp-numSelectors-1]
+			v.sp -= numSelectors + 1
+			e := v.indexAssign(v.globals[globalIndex], val, selectors)
+			if e != nil {
+				v.err = e
+				return
+			}
+
+		case core.OpGetLocal:
 			v.ip++
 			localIndex := int(v.curInsts[v.ip])
-			sp := v.curFrame.basePointer + localIndex
-
-			// local variables can be mutated by other actions
-			// so always store the copy of popped value
-			val := v.stack[v.sp-1]
-			v.sp--
-			v.stack[sp] = val
+			val := v.stack[v.curFrame.basePointer+localIndex]
+			if val.Type == core.VT_VALUE_PTR {
+				val = *core.ToValuePtr(val)
+			}
+			v.stack[v.sp] = val
+			v.sp++
 
 		case core.OpSetLocal:
 			localIndex := int(v.curInsts[v.ip+1])
@@ -654,6 +589,17 @@ func (v *VM) run() {
 				val = v.stack[sp]
 			}
 			v.stack[sp] = val // also use a copy of popped value
+
+		case core.OpDefineLocal:
+			v.ip++
+			localIndex := int(v.curInsts[v.ip])
+			sp := v.curFrame.basePointer + localIndex
+
+			// local variables can be mutated by other actions
+			// so always store the copy of popped value
+			val := v.stack[v.sp-1]
+			v.sp--
+			v.stack[sp] = val
 
 		case core.OpSetSelLocal:
 			localIndex := int(v.curInsts[v.ip+1])
@@ -675,51 +621,6 @@ func (v *VM) run() {
 				v.err = e
 				return
 			}
-
-		case core.OpGetLocal:
-			v.ip++
-			localIndex := int(v.curInsts[v.ip])
-			val := v.stack[v.curFrame.basePointer+localIndex]
-			if val.Type == core.VT_VALUE_PTR {
-				val = *core.ToValuePtr(val)
-			}
-			v.stack[v.sp] = val
-			v.sp++
-
-		case core.OpGetBuiltin:
-			v.ip++
-			builtinIndex := int(v.curInsts[v.ip])
-			v.stack[v.sp] = BuiltinFuncs[builtinIndex]
-			v.sp++
-
-		case core.OpClosure:
-			v.ip += 3
-			constIndex := int(v.curInsts[v.ip-1]) | int(v.curInsts[v.ip-2])<<8
-			numFree := int(v.curInsts[v.ip])
-			if v.constants[constIndex].Type != core.VT_COMPILED_FUNCTION {
-				v.err = fmt.Errorf("not function: %s", v.constants[constIndex].TypeName())
-				return
-			}
-			fn := core.ToCompiledFunction(v.constants[constIndex])
-			free := make([]*core.Value, numFree)
-			for i := 0; i < numFree; i++ {
-				if v.stack[v.sp-numFree+i].Type == core.VT_VALUE_PTR {
-					free[i] = core.ToValuePtr(v.stack[v.sp-numFree+i])
-				} else {
-					free[i] = &v.stack[v.sp-numFree+i]
-				}
-			}
-			v.sp -= numFree
-			cl := &core.CompiledFunction{
-				Instructions:  fn.Instructions,
-				NumLocals:     fn.NumLocals,
-				NumParameters: fn.NumParameters,
-				VarArgs:       fn.VarArgs,
-				SourceMap:     fn.SourceMap,
-				Free:          free,
-			}
-			v.stack[v.sp] = core.CompiledFunctionValue(cl)
-			v.sp++
 
 		case core.OpGetFreePtr:
 			v.ip++
@@ -772,6 +673,41 @@ func (v *VM) run() {
 				return
 			}
 
+		case core.OpGetBuiltin:
+			v.ip++
+			builtinIndex := int(v.curInsts[v.ip])
+			v.stack[v.sp] = BuiltinFuncs[builtinIndex]
+			v.sp++
+
+		case core.OpClosure:
+			v.ip += 3
+			constIndex := int(v.curInsts[v.ip-1]) | int(v.curInsts[v.ip-2])<<8
+			numFree := int(v.curInsts[v.ip])
+			if v.constants[constIndex].Type != core.VT_COMPILED_FUNCTION {
+				v.err = fmt.Errorf("not function: %s", v.constants[constIndex].TypeName())
+				return
+			}
+			fn := core.ToCompiledFunction(v.constants[constIndex])
+			free := make([]*core.Value, numFree)
+			for i := 0; i < numFree; i++ {
+				if v.stack[v.sp-numFree+i].Type == core.VT_VALUE_PTR {
+					free[i] = core.ToValuePtr(v.stack[v.sp-numFree+i])
+				} else {
+					free[i] = &v.stack[v.sp-numFree+i]
+				}
+			}
+			v.sp -= numFree
+			cl := &core.CompiledFunction{
+				Instructions:  fn.Instructions,
+				NumLocals:     fn.NumLocals,
+				NumParameters: fn.NumParameters,
+				VarArgs:       fn.VarArgs,
+				SourceMap:     fn.SourceMap,
+				Free:          free,
+			}
+			v.stack[v.sp] = core.CompiledFunctionValue(cl)
+			v.sp++
+
 		case core.OpIteratorInit:
 			dst := v.stack[v.sp-1]
 			v.sp--
@@ -816,8 +752,85 @@ func (v *VM) run() {
 			v.stack[v.sp] = val
 			v.sp++
 
+		case core.OpBinaryOp:
+			v.ip++
+			right := v.stack[v.sp-1]
+			left := v.stack[v.sp-2]
+			tok := token.Token(v.curInsts[v.ip])
+			res, e := left.BinaryOp(v.Allocator(), tok, right)
+			if e != nil {
+				v.sp -= 2
+				v.err = e
+				return
+			}
+			v.stack[v.sp-2] = res
+			v.sp--
+
 		case core.OpSuspend:
 			return
+
+		case core.OpSelect:
+			index := v.stack[v.sp-1]
+			left := v.stack[v.sp-2]
+			v.sp -= 2
+
+			val, err := left.Access(v, index, code)
+			if err != nil {
+				v.err = err
+				return
+			}
+			v.stack[v.sp] = val
+			v.sp++
+
+		case core.OpMethodCall:
+			operands, read := core.ReadOperands(core.OpcodeOperands[code], v.curInsts[v.ip+1:])
+			methodConstIdx := operands[0]
+			numArgs := operands[1]
+			spread := operands[2]
+			v.ip += read
+
+			if methodConstIdx < 0 || methodConstIdx >= len(v.constants) {
+				v.err = fmt.Errorf("invalid method constant index: %d", methodConstIdx)
+				return
+			}
+
+			receiver := v.stack[v.sp-1-numArgs]
+
+			if spread == 1 {
+				v.sp--
+				arg := v.stack[v.sp]
+				switch arg.Type {
+				case core.VT_ARRAY:
+					o := (*core.Array)(arg.Ptr)
+					for _, item := range o.Elements {
+						v.stack[v.sp] = item
+						v.sp++
+					}
+					numArgs += len(o.Elements) - 1
+				default:
+					v.err = fmt.Errorf("not an array: %s", arg.TypeName())
+					return
+				}
+				receiver = v.stack[v.sp-1-numArgs]
+			}
+
+			methodConst := v.constants[methodConstIdx]
+			methodName, ok := methodConst.AsString()
+			if !ok {
+				v.err = fmt.Errorf("invalid method name constant type: %s", methodConst.TypeName())
+				return
+			}
+
+			ret, err := receiver.MethodCall(v, methodName, v.stack[v.sp-numArgs:v.sp])
+			v.sp -= numArgs + 1
+
+			if err != nil {
+				v.err = err
+				return
+			}
+
+			v.stack[v.sp] = ret
+			v.sp++
 
 		default:
 			v.err = fmt.Errorf("unknown opcode: %d", v.curInsts[v.ip])

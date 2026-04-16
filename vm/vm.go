@@ -450,7 +450,7 @@ func (v *VM) run() {
 			v.ip += 2
 
 			val := v.stack[v.sp-1-numArgs]
-			if !val.IsCallable() {
+			if val.Type != core.VT_COMPILED_FUNCTION && val.Type != core.VT_BUILTIN_FUNCTION && !val.IsCallable() {
 				v.err = fmt.Errorf("not callable: %s", val.TypeName())
 				return
 			}

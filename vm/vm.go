@@ -475,7 +475,6 @@ func (v *VM) run() {
 			switch val.Type {
 			case core.VT_COMPILED_FUNCTION:
 				callee := core.ToCompiledFunction(val)
-
 				if callee.VarArgs {
 					// if the closure is variadic, roll up all variadic parameters into an array
 					realArgs := int(callee.NumParameters) - 1
@@ -524,7 +523,7 @@ func (v *VM) run() {
 
 				// update call frame
 				v.curFrame.ip = v.ip // store current ip before call
-				v.curFrame = &(v.frames[v.framesIndex])
+				v.curFrame = &v.frames[v.framesIndex]
 				v.curFrame.fn = callee
 				v.curFrame.freeVars = callee.Free
 				v.curFrame.basePointer = v.sp - numArgs

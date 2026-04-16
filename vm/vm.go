@@ -728,13 +728,13 @@ func (v *VM) run() {
 			v.sp++
 
 		case core.OpIteratorInit:
-			dst := v.stack[v.sp-1]
+			l := v.stack[v.sp-1]
 			v.sp--
-			if !dst.IsIterable() {
-				v.err = fmt.Errorf("not iterable: %s", dst.TypeName())
+			if !l.IsIterable() {
+				v.err = fmt.Errorf("not iterable: %s", l.TypeName())
 				return
 			}
-			it, err := dst.Iterator(v.alloc)
+			it, err := l.Iterator(v.alloc)
 			if err != nil {
 				v.err = err
 				return
@@ -744,10 +744,7 @@ func (v *VM) run() {
 
 		case core.OpIteratorNext:
 			it := v.stack[v.sp-1]
-			v.sp--
-			hasMore := it.Next()
-			v.stack[v.sp] = core.BoolValue(hasMore)
-			v.sp++
+			v.stack[v.sp-1] = core.BoolValue(it.Next())
 
 		case core.OpIteratorKey:
 			it := v.stack[v.sp-1]

@@ -232,7 +232,7 @@ func (v *VM) run() {
 			v.sp--
 			operand := v.stack[v.sp]
 			switch operand.Type {
-			case core.VT_INT:
+			case core.VT_INT: // hot path for integer
 				v.stack[v.sp] = core.IntValue(^core.ToInt(operand))
 				v.sp++
 			default:
@@ -271,17 +271,14 @@ func (v *VM) run() {
 			v.sp++
 
 		case core.OpMinus:
-			operand := v.stack[v.sp-1]
 			v.sp--
-
+			operand := v.stack[v.sp]
 			switch operand.Type {
-			case core.VT_INT:
-				res := core.IntValue(-core.ToInt(operand))
-				v.stack[v.sp] = res
+			case core.VT_INT: // hot path for integer
+				v.stack[v.sp] = core.IntValue(-core.ToInt(operand))
 				v.sp++
-			case core.VT_FLOAT:
-				res := core.FloatValue(-core.ToFloat(operand))
-				v.stack[v.sp] = res
+			case core.VT_FLOAT: // hot path for float
+				v.stack[v.sp] = core.FloatValue(-core.ToFloat(operand))
 				v.sp++
 			default:
 				res, err := operand.UnaryOp(v.alloc, token.Sub)

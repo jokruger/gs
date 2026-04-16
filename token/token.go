@@ -4,7 +4,7 @@ import "strconv"
 
 var keywords map[string]Token
 
-type Token int
+type Token uint8
 
 const (
 	Illegal = Token(0)
@@ -177,16 +177,10 @@ var tokens = [...]string{
 }
 
 func (tok Token) String() string {
-	s := ""
-
-	if 0 <= tok && tok < Token(len(tokens)) {
-		s = tokens[tok]
-	}
-
+	s := tokens[tok]
 	if s == "" {
 		s = "token(" + strconv.Itoa(int(tok)) + ")"
 	}
-
 	return s
 }
 

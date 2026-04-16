@@ -221,9 +221,7 @@ func (v *VM) Run() (err error) {
 func (v *VM) run() {
 	for atomic.LoadInt64(&v.abort) == 0 {
 		v.ip++
-		code := v.curInsts[v.ip]
-
-		switch code {
+		switch v.curInsts[v.ip] {
 		case core.OpConstant:
 			v.ip += 2
 			cidx := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
@@ -391,7 +389,7 @@ func (v *VM) run() {
 			left := v.stack[v.sp-2]
 			v.sp -= 2
 
-			val, err := left.Access(v, index, code)
+			val, err := left.Access(v, index, core.OpIndex)
 			if err != nil {
 				v.err = err
 				return
@@ -774,7 +772,7 @@ func (v *VM) run() {
 			left := v.stack[v.sp-2]
 			v.sp -= 2
 
-			val, err := left.Access(v, index, code)
+			val, err := left.Access(v, index, core.OpSelect)
 			if err != nil {
 				v.err = err
 				return
@@ -783,7 +781,7 @@ func (v *VM) run() {
 			v.sp++
 
 		case core.OpMethodCall:
-			operands, read := core.ReadOperands(core.OpcodeOperands[code], v.curInsts[v.ip+1:])
+			operands, read := core.ReadOperands(core.OpcodeOperands[core.OpMethodCall], v.curInsts[v.ip+1:])
 			methodConstIdx := operands[0]
 			numArgs := operands[1]
 			spread := operands[2]

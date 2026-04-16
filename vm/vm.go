@@ -224,15 +224,13 @@ func (v *VM) run() {
 		switch v.curInsts[v.ip] {
 		case core.OpConstant:
 			v.ip += 2
-			cidx := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
-
+			cidx := (int(v.curInsts[v.ip-1]) << 8) | int(v.curInsts[v.ip])
 			v.stack[v.sp] = v.constants[cidx]
 			v.sp++
 
 		case core.OpBComplement:
-			operand := v.stack[v.sp-1]
 			v.sp--
-
+			operand := v.stack[v.sp]
 			switch operand.Type {
 			case core.VT_INT:
 				res := core.IntValue(^core.ToInt(operand))

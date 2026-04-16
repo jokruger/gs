@@ -232,7 +232,7 @@ func (v *VM) run() {
 			v.sp--
 			l := v.stack[v.sp]
 			switch l.Type {
-			case core.VT_INT: // hot path for integer
+			case core.VT_INT: // fast track for integer
 				v.stack[v.sp] = core.IntValue(^core.ToInt(l))
 				v.sp++
 			default:
@@ -274,10 +274,10 @@ func (v *VM) run() {
 			v.sp--
 			l := v.stack[v.sp]
 			switch l.Type {
-			case core.VT_INT: // hot path for integer
+			case core.VT_INT: // fast track for integers
 				v.stack[v.sp] = core.IntValue(-core.ToInt(l))
 				v.sp++
-			case core.VT_FLOAT: // hot path for float
+			case core.VT_FLOAT: // fast track for floats
 				v.stack[v.sp] = core.FloatValue(-core.ToFloat(l))
 				v.sp++
 			default:
@@ -294,7 +294,7 @@ func (v *VM) run() {
 			v.sp--
 			l := v.stack[v.sp]
 			if l.Type == core.VT_BOOL {
-				// hot path for boolean
+				// fast track for booleans
 				v.stack[v.sp] = core.BoolValue(!core.ToBool(l))
 			} else {
 				v.stack[v.sp] = core.BoolValue(!l.IsTrue())
@@ -306,7 +306,7 @@ func (v *VM) run() {
 			v.sp--
 			l := v.stack[v.sp]
 			if l.Type == core.VT_BOOL {
-				// hot path for boolean
+				// fast track for booleans
 				if !core.ToBool(l) {
 					pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
 					v.ip = pos - 1
@@ -320,7 +320,7 @@ func (v *VM) run() {
 			v.ip += 4
 			l := v.stack[v.sp-1]
 			if l.Type == core.VT_BOOL {
-				// hot path for boolean
+				// fast track for booleans
 				if !core.ToBool(l) {
 					pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
 					v.ip = pos - 1
@@ -338,7 +338,7 @@ func (v *VM) run() {
 			v.ip += 4
 			l := v.stack[v.sp-1]
 			if l.Type == core.VT_BOOL {
-				// hot path for boolean
+				// fast track for booleans
 				if !core.ToBool(l) {
 					v.sp--
 				} else {
@@ -383,7 +383,7 @@ func (v *VM) run() {
 			for i := v.sp - n; i < v.sp; i += 2 {
 				l := v.stack[i]
 				if l.Type == core.VT_STRING {
-					// hot path for strings
+					// fast track for strings
 					kv[core.ToString(l).Value] = v.stack[i+1]
 				} else {
 					key, ok := l.AsString()
@@ -473,7 +473,7 @@ func (v *VM) run() {
 			}
 
 			switch val.Type {
-			case core.VT_COMPILED_FUNCTION:
+			case core.VT_COMPILED_FUNCTION: // special case for compiled functions
 				callee := core.ToCompiledFunction(val)
 				if callee.VarArgs {
 					// if the closure is variadic, roll up all variadic parameters into an array
@@ -532,17 +532,24 @@ func (v *VM) run() {
 				v.framesIndex++
 				v.sp = v.sp - numArgs + callee.NumLocals
 
-			default:
-				ret, e := val.Call(v, v.stack[v.sp-numArgs:v.sp])
+			case core.VT_BUILTIN_FUNCTION: // fast track for built-in functions
+				res, err := core.ToBuiltinFunction(val).Func(v, v.stack[v.sp-numArgs:v.sp])
 				v.sp -= numArgs + 1
-
-				// runtime error
-				if e != nil {
-					v.err = e
+				if err != nil {
+					v.err = err
 					return
 				}
+				v.stack[v.sp] = res
+				v.sp++
 
-				v.stack[v.sp] = ret
+			default:
+				res, err := val.Call(v, v.stack[v.sp-numArgs:v.sp])
+				v.sp -= numArgs + 1
+				if err != nil {
+					v.err = err
+					return
+				}
+				v.stack[v.sp] = res
 				v.sp++
 			}
 

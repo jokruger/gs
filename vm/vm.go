@@ -294,6 +294,7 @@ func (v *VM) run() {
 			v.sp--
 			l := v.stack[v.sp]
 			if l.Type == core.VT_BOOL {
+				// hot path for boolean
 				v.stack[v.sp] = core.BoolValue(!core.ToBool(l))
 			} else {
 				v.stack[v.sp] = core.BoolValue(!l.IsTrue())
@@ -303,14 +304,30 @@ func (v *VM) run() {
 		case core.OpJumpFalsy:
 			v.ip += 4
 			v.sp--
-			if !v.stack[v.sp].IsTrue() {
+			l := v.stack[v.sp]
+			if l.Type == core.VT_BOOL {
+				// hot path for boolean
+				if !core.ToBool(l) {
+					pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
+					v.ip = pos - 1
+				}
+			} else if !l.IsTrue() {
 				pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
 				v.ip = pos - 1
 			}
 
 		case core.OpAndJump:
 			v.ip += 4
-			if !v.stack[v.sp-1].IsTrue() {
+			l := v.stack[v.sp-1]
+			if l.Type == core.VT_BOOL {
+				// hot path for boolean
+				if !core.ToBool(l) {
+					pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
+					v.ip = pos - 1
+				} else {
+					v.sp--
+				}
+			} else if !l.IsTrue() {
 				pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
 				v.ip = pos - 1
 			} else {
@@ -319,7 +336,16 @@ func (v *VM) run() {
 
 		case core.OpOrJump:
 			v.ip += 4
-			if !v.stack[v.sp-1].IsTrue() {
+			l := v.stack[v.sp-1]
+			if l.Type == core.VT_BOOL {
+				// hot path for boolean
+				if !core.ToBool(l) {
+					v.sp--
+				} else {
+					pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
+					v.ip = pos - 1
+				}
+			} else if !l.IsTrue() {
 				v.sp--
 			} else {
 				pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
@@ -337,19 +363,16 @@ func (v *VM) run() {
 		case core.OpArray:
 			v.ip += 2
 			n := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8
-
 			elements := make([]core.Value, 0, n)
 			for i := v.sp - n; i < v.sp; i++ {
 				elements = append(elements, v.stack[i])
 			}
 			v.sp -= n
-
 			arr, err := v.alloc.NewArrayValue(elements, false)
 			if err != nil {
 				v.err = err
 				return
 			}
-
 			v.stack[v.sp] = arr
 			v.sp++
 
@@ -363,11 +386,9 @@ func (v *VM) run() {
 					v.err = fmt.Errorf("record keys must be strings, got: %s", v.stack[i].TypeName())
 					return
 				}
-				val := v.stack[i+1]
-				kv[key] = val
+				kv[key] = v.stack[i+1]
 			}
 			v.sp -= n
-
 			m, err := v.alloc.NewRecordValue(kv, false)
 			if err != nil {
 				v.err = err

@@ -23,7 +23,6 @@ foo := func (x) {
 		} else {
 			y = y - i
 		}
-		y = ^y
 	}
 	return y
 }

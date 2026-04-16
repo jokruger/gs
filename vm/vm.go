@@ -260,14 +260,14 @@ func (v *VM) run() {
 			right := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
 			v.sp -= 2
-			v.stack[v.sp] = core.BoolValue(left.Equal(right))
+			v.stack[v.sp] = core.BoolValue(left == right || left.Equal(right))
 			v.sp++
 
 		case core.OpNotEqual:
 			right := v.stack[v.sp-1]
 			left := v.stack[v.sp-2]
 			v.sp -= 2
-			v.stack[v.sp] = core.BoolValue(!left.Equal(right))
+			v.stack[v.sp] = core.BoolValue(!(left == right || left.Equal(right)))
 			v.sp++
 
 		case core.OpMinus:

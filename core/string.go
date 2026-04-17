@@ -300,12 +300,7 @@ func stringTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, er
 		return CharValue(rs[i]), nil
 	}
 
-	k, ok := index.AsString()
-	if !ok {
-		return Undefined, errs.NewInvalidIndexTypeError("string selector access", "string", index.TypeName())
-	}
-
-	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), k)
+	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), index.String())
 }
 
 func stringTypeIsIterable(v Value) bool {

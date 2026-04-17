@@ -262,12 +262,7 @@ func arrayTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, err
 		return o.Elements[i], nil
 	}
 
-	k, ok := index.AsString()
-	if !ok {
-		return Undefined, errs.NewInvalidIndexTypeError("array selector access", "string", index.TypeName())
-	}
-
-	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), k)
+	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), index.String())
 }
 
 func arrayTypeAssign(v Value, index Value, r Value) (err error) {

@@ -193,12 +193,7 @@ func intRangeTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, 
 		return IntValue(t), nil
 	}
 
-	k, ok := index.AsString()
-	if !ok {
-		return Undefined, errs.NewInvalidIndexTypeError("range selector access", "string", index.TypeName())
-	}
-
-	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), k)
+	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), index.String())
 }
 
 func intRangeTypeIsIterable(v Value) bool {

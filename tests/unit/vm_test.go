@@ -531,7 +531,7 @@ func TestArray(t *testing.T) {
 	}, false)
 	expectRun(t, fmt.Sprintf(`out = [1, undefined, "3"] == %s`, v.String()), nil, true)
 
-	expectError(t, `[1, 2, 3].q`, nil, "Runtime Error: invalid selector: type array has no property q\n\tat test:1:11")
+	expectError(t, `[1, 2, 3].q`, nil, "Runtime Error: invalid selector: type array has no property \"q\"\n\tat test:1:11")
 
 	expectRun(t, `t := []; out = t.sort()`, nil, ARR{})
 	expectRun(t, `t := [1, 2, 3]; out = t.sort()`, nil, ARR{1, 2, 3})

@@ -838,7 +838,6 @@ func (v *VM) run() {
 			n := v.stack[v.sp-1]
 			l := v.stack[v.sp-2]
 			v.sp -= 2
-
 			val, err := l.Access(v, n, core.OpSelect)
 			if err != nil {
 				v.err = err
@@ -879,22 +878,20 @@ func (v *VM) run() {
 				receiver = v.stack[v.sp-1-numArgs]
 			}
 
-			methodConst := v.constants[methodConstIdx]
-			methodName, ok := methodConst.AsString()
-			if !ok {
-				v.err = fmt.Errorf("invalid method name constant type: %s", methodConst.TypeName())
+			name := v.constants[methodConstIdx]
+			// method name can only be a string (due to the syntax of method call)
+			if name.Type != core.VT_STRING {
+				v.err = fmt.Errorf("method name constant must be a string, got: %s", name.TypeName())
 				return
 			}
 
-			ret, err := receiver.MethodCall(v, methodName, v.stack[v.sp-numArgs:v.sp])
+			res, err := receiver.MethodCall(v, core.ToString(name).Value, v.stack[v.sp-numArgs:v.sp])
 			v.sp -= numArgs + 1
-
 			if err != nil {
 				v.err = err
 				return
 			}
-
-			v.stack[v.sp] = ret
+			v.stack[v.sp] = res
 			v.sp++
 
 		default:

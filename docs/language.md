@@ -398,6 +398,8 @@ type_name({})      // "record"
 format("x=%d y=%v", 1, [2, 3])   // "x=1 y=[2, 3]"
 ```
 
+Read more about formatting verbs in [Formatting](formatting.md).
+
 ## Errors and diagnostics
 
 Error messages include a source position:

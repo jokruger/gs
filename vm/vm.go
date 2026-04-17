@@ -853,11 +853,10 @@ func (v *VM) run() {
 			v.sp++
 
 		case core.OpMethodCall:
-			operands, read := core.ReadOperands(core.OpcodeOperands[core.OpMethodCall], v.curInsts[v.ip+1:])
-			methodConstIdx := operands[0]
-			numArgs := operands[1]
-			spread := operands[2]
-			v.ip += read
+			methodConstIdx := int(v.curInsts[v.ip+2]) | int(v.curInsts[v.ip+1])<<8
+			numArgs := int(v.curInsts[v.ip+3])
+			spread := v.curInsts[v.ip+4]
+			v.ip += 4
 
 			if methodConstIdx < 0 || methodConstIdx >= len(v.constants) {
 				v.err = fmt.Errorf("invalid method constant index: %d", methodConstIdx)

@@ -16,12 +16,23 @@ Then you can run GS scripts with the `gs` command or using hashbang:
 #!/usr/bin/env gs
 
 fmt := import("fmt")
-fmt.println("Hello", "GS")
+
+result := [1, 2, 3, 4, 5, 6]
+  .filter(x => x % 2 == 0)
+  .map(x => x * x)
+  .reduce(0, (sum, x) => sum + x)
+
+fmt.printf("sum of even squares: %v\n", result)
 ```
 
 ## Documentation
 
-TODO
+- [Installing](docs/installing.md) - Instructions for installing the GS CLI.
+- [Embedding](docs/embedding.md) - Guide to embedding the GS runtime in Go applications.
+- [Language Reference](docs/language.md) - Detailed description of GS syntax, built-in functions and types.
+- [Standard Library](docs/stdlib.md) - Overview of standard library modules and their APIs.
+- [Project Structure](docs/project.md) - Explanation of the repository layout and development workflow.
+- [Coding Conventions](docs/conventions.md) - Guidelines for code style and contributions.
 
 ## Contributing
 

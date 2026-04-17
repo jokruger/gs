@@ -39,11 +39,6 @@ func NewBytesValue(v []byte) Value {
 	return BytesValue(t)
 }
 
-// ToBytes converts boxed bytes value to []byte. It is a caller's responsibility to ensure the type is correct.
-func ToBytes(v Value) *Bytes {
-	return (*Bytes)(v.Ptr)
-}
-
 /* Bytes type methods */
 
 func bytesTypeName(v Value) string {
@@ -275,7 +270,7 @@ func bytesTypeContains(v Value, e Value) bool {
 		return bytes.Contains(o.Elements, []byte{byte(b)})
 
 	case VT_BYTES:
-		t := ToBytes(e)
+		t := (*Bytes)(e.Ptr)
 		return bytes.Contains(o.Elements, t.Elements)
 
 	default:

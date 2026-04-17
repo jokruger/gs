@@ -33,11 +33,6 @@ func NewErrorValue(payload Value) Value {
 	return ErrorValue(t)
 }
 
-// ToError converts boxed error value to *Error. It is a caller's responsibility to ensure the type is correct.
-func ToError(v Value) *Error {
-	return (*Error)(v.Ptr)
-}
-
 /* Error type methods */
 
 func errorTypeName(v Value) string {

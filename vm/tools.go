@@ -29,7 +29,7 @@ func CountObjects(o core.Value) (c int) {
 		}
 
 	case core.VT_ERROR:
-		o := core.ToError(o)
+		o := (*core.Error)(o.Ptr)
 		c += CountObjects(o.Payload)
 	}
 

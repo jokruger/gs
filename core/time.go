@@ -25,11 +25,6 @@ func NewTimeValue(t time.Time) Value {
 	return TimeValue(o)
 }
 
-// ToTime converts boxed time value to time.Time. It is a caller's responsibility to ensure the type is correct.
-func ToTime(v Value) *time.Time {
-	return (*time.Time)(v.Ptr)
-}
-
 /* Time type methods */
 
 func timeTypeName(v Value) string {

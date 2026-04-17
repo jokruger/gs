@@ -293,63 +293,70 @@ func (v *VM) run() {
 		case core.OpLNot:
 			v.sp--
 			l := v.stack[v.sp]
-			if l.Type == core.VT_BOOL {
-				// fast track for booleans
+			switch l.Type {
+			case core.VT_BOOL: // fast track for booleans
 				v.stack[v.sp] = core.BoolValue(!core.ToBool(l))
-			} else {
+				v.sp++
+			default:
 				v.stack[v.sp] = core.BoolValue(!l.IsTrue())
+				v.sp++
 			}
-			v.sp++
 
 		case core.OpJumpFalsy:
 			v.ip += 4
 			v.sp--
 			l := v.stack[v.sp]
-			if l.Type == core.VT_BOOL {
-				// fast track for booleans
+			switch l.Type {
+			case core.VT_BOOL: // fast track for booleans
 				if !core.ToBool(l) {
 					pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
 					v.ip = pos - 1
 				}
-			} else if !l.IsTrue() {
-				pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
-				v.ip = pos - 1
+			default:
+				if !l.IsTrue() {
+					pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
+					v.ip = pos - 1
+				}
 			}
 
 		case core.OpAndJump:
 			v.ip += 4
 			l := v.stack[v.sp-1]
-			if l.Type == core.VT_BOOL {
-				// fast track for booleans
+			switch l.Type {
+			case core.VT_BOOL: // fast track for booleans
 				if !core.ToBool(l) {
 					pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
 					v.ip = pos - 1
 				} else {
 					v.sp--
 				}
-			} else if !l.IsTrue() {
-				pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
-				v.ip = pos - 1
-			} else {
-				v.sp--
+			default:
+				if !l.IsTrue() {
+					pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
+					v.ip = pos - 1
+				} else {
+					v.sp--
+				}
 			}
 
 		case core.OpOrJump:
 			v.ip += 4
 			l := v.stack[v.sp-1]
-			if l.Type == core.VT_BOOL {
-				// fast track for booleans
+			switch l.Type {
+			case core.VT_BOOL: // fast track for booleans
 				if !core.ToBool(l) {
 					v.sp--
 				} else {
 					pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
 					v.ip = pos - 1
 				}
-			} else if !l.IsTrue() {
-				v.sp--
-			} else {
-				pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
-				v.ip = pos - 1
+			default:
+				if !l.IsTrue() {
+					v.sp--
+				} else {
+					pos := int(v.curInsts[v.ip]) | int(v.curInsts[v.ip-1])<<8 | int(v.curInsts[v.ip-2])<<16 | int(v.curInsts[v.ip-3])<<24
+					v.ip = pos - 1
+				}
 			}
 
 		case core.OpJump:
@@ -382,10 +389,10 @@ func (v *VM) run() {
 			kv := make(map[string]core.Value, n)
 			for i := v.sp - n; i < v.sp; i += 2 {
 				l := v.stack[i]
-				if l.Type == core.VT_STRING {
-					// fast track for strings
+				switch l.Type {
+				case core.VT_STRING: // fast track for strings
 					kv[core.ToString(l).Value] = v.stack[i+1]
-				} else {
+				default:
 					key, ok := l.AsString()
 					if !ok {
 						v.err = fmt.Errorf("record keys must be strings, got: %s", v.stack[i].TypeName())

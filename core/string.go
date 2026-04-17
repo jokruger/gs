@@ -395,7 +395,7 @@ func stringTypeContains(v Value, e Value) bool {
 	o := (*String)(v.Ptr)
 	switch e.Type {
 	case VT_CHAR:
-		c := ToChar(e)
+		c := rune(e.Data)
 		return strings.ContainsRune(o.Value, c)
 
 	case VT_STRING:

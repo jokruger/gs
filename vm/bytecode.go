@@ -101,21 +101,21 @@ func (b *Bytecode) RemoveDuplicates() {
 
 	indexMap := make(map[int]int) // mapping from old constant index to new index
 	fns := make(map[*core.CompiledFunction]int)
-	ints := make(map[int64]int)
+	ints := make(map[uint64]int)
 	strings := make(map[string]int)
 	floats := make(map[uint64]int)
-	chars := make(map[rune]int)
-	bools := make(map[bool]int)
+	chars := make(map[uint64]int)
+	bools := make(map[uint64]int)
 	immutableRecords := make(map[string]int) // for modules
 
 	for curIdx, c := range b.Constants {
 		switch c.Type {
 		case core.VT_INT:
-			if newIdx, ok := ints[core.ToInt(c)]; ok {
+			if newIdx, ok := ints[c.Data]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
 				newIdx = len(deduped)
-				ints[core.ToInt(c)] = newIdx
+				ints[c.Data] = newIdx
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
@@ -131,21 +131,21 @@ func (b *Bytecode) RemoveDuplicates() {
 			}
 
 		case core.VT_CHAR:
-			if newIdx, ok := chars[core.ToChar(c)]; ok {
+			if newIdx, ok := chars[c.Data]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
 				newIdx = len(deduped)
-				chars[core.ToChar(c)] = newIdx
+				chars[c.Data] = newIdx
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}
 
 		case core.VT_BOOL:
-			if newIdx, ok := bools[c.Data != 0]; ok {
+			if newIdx, ok := bools[c.Data]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
 				newIdx = len(deduped)
-				bools[c.Data != 0] = newIdx
+				bools[c.Data] = newIdx
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}

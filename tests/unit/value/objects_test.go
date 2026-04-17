@@ -59,24 +59,24 @@ func TestObject_Value(t *testing.T) {
 	// Char
 	v = core.CharValue('A')
 	require.True(t, v.Type == core.VT_CHAR)
-	require.Equal(t, 'A', core.ToChar(v))
+	require.Equal(t, 'A', rune(v.Data))
 	bs, err = v.EncodeBinary()
 	require.NoError(t, err)
 	err = x.DecodeBinary(bs)
 	require.NoError(t, err)
 	require.True(t, x.Type == core.VT_CHAR)
-	require.Equal(t, 'A', core.ToChar(x))
+	require.Equal(t, 'A', rune(x.Data))
 	require.Equal(t, true, v.Equal(x))
 
 	v = core.CharValue('₴')
 	require.True(t, v.Type == core.VT_CHAR)
-	require.Equal(t, '₴', core.ToChar(v))
+	require.Equal(t, '₴', rune(v.Data))
 	bs, err = v.EncodeBinary()
 	require.NoError(t, err)
 	err = x.DecodeBinary(bs)
 	require.NoError(t, err)
 	require.True(t, x.Type == core.VT_CHAR)
-	require.Equal(t, '₴', core.ToChar(x))
+	require.Equal(t, '₴', rune(x.Data))
 	require.Equal(t, true, v.Equal(x))
 
 	// Int

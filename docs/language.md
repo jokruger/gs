@@ -54,7 +54,7 @@ Container types: `array`, `record`, `map`, `range`.
 | `undefined` | no |
 | `false` | no |
 | `0` (int) | no |
-| `0.0` (float) | **yes** — all floats are truthy except NaN |
+| `0.0` (float) | yes — all floats are truthy except NaN |
 | `""` (empty string) | no |
 | `[]`, `{}`, `map()` | no — empty containers are falsy |
 | everything else | yes |

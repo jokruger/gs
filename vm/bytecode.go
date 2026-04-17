@@ -53,7 +53,7 @@ func (b *Bytecode) FormatInstructions() []string {
 func (b *Bytecode) FormatConstants() (output []string) {
 	for cidx, cn := range b.Constants {
 		if cn.Type == core.VT_COMPILED_FUNCTION {
-			f := core.ToCompiledFunction(cn)
+			f := (*core.CompiledFunction)(cn.Ptr)
 			output = append(output, fmt.Sprintf("[% 3d] (Compiled Function|%p)", cidx, f))
 			for _, l := range FormatInstructions(f.Instructions, 0) {
 				output = append(output, fmt.Sprintf("     %s", l))
@@ -151,7 +151,7 @@ func (b *Bytecode) RemoveDuplicates() {
 			}
 
 		case core.VT_COMPILED_FUNCTION:
-			cf := core.ToCompiledFunction(c)
+			cf := (*core.CompiledFunction)(c.Ptr)
 			if newIdx, ok := fns[cf]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
@@ -202,7 +202,7 @@ func (b *Bytecode) RemoveDuplicates() {
 	// other compiled functions in constants
 	for _, c := range b.Constants {
 		if c.Type == core.VT_COMPILED_FUNCTION {
-			updateConstIndexes(core.ToCompiledFunction(c).Instructions, indexMap)
+			updateConstIndexes((*core.CompiledFunction)(c.Ptr).Instructions, indexMap)
 		}
 	}
 }

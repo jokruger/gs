@@ -481,7 +481,7 @@ func (v *VM) run() {
 
 			switch val.Type {
 			case core.VT_COMPILED_FUNCTION: // special case for compiled functions
-				callee := core.ToCompiledFunction(val)
+				callee := (*core.CompiledFunction)(val.Ptr)
 				if callee.VarArgs {
 					// if the closure is variadic, roll up all variadic parameters into an array
 					realArgs := int(callee.NumParameters) - 1
@@ -608,7 +608,7 @@ func (v *VM) run() {
 			n := int(v.curInsts[v.ip])
 			val := v.stack[v.curFrame.basePointer+n]
 			if val.Type == core.VT_VALUE_PTR {
-				val = *core.ToValuePtr(val)
+				val = *(*core.Value)(val.Ptr)
 			}
 			v.stack[v.sp] = val
 			v.sp++
@@ -622,7 +622,7 @@ func (v *VM) run() {
 			val := v.stack[v.sp-1]
 			v.sp--
 			if v.stack[sp].Type == core.VT_VALUE_PTR {
-				core.ToValuePtr(v.stack[sp]).Set(val)
+				(*core.Value)(v.stack[sp].Ptr).Set(val)
 				val = v.stack[sp]
 			}
 			v.stack[sp] = val // also use a copy of popped value
@@ -645,7 +645,7 @@ func (v *VM) run() {
 			v.sp -= numSelectors + 1
 			dst := v.stack[v.curFrame.basePointer+localIndex]
 			if dst.Type == core.VT_VALUE_PTR {
-				dst = *core.ToValuePtr(dst)
+				dst = *(*core.Value)(dst.Ptr)
 			}
 			if e := v.indexAssign(dst, val, selectors); e != nil {
 				v.err = e
@@ -676,7 +676,7 @@ func (v *VM) run() {
 			sp := v.curFrame.basePointer + n
 			var freeVar *core.Value
 			if v.stack[sp].Type == core.VT_VALUE_PTR {
-				freeVar = core.ToValuePtr(v.stack[sp])
+				freeVar = (*core.Value)(v.stack[sp].Ptr)
 			} else {
 				localVal := v.stack[sp]
 				freeVar = &localVal
@@ -716,11 +716,11 @@ func (v *VM) run() {
 				v.err = fmt.Errorf("not function: %s", v.constants[constIndex].TypeName())
 				return
 			}
-			fn := core.ToCompiledFunction(v.constants[constIndex])
+			fn := (*core.CompiledFunction)(v.constants[constIndex].Ptr)
 			free := make([]*core.Value, numFree)
 			for i := 0; i < numFree; i++ {
 				if v.stack[v.sp-numFree+i].Type == core.VT_VALUE_PTR {
-					free[i] = core.ToValuePtr(v.stack[v.sp-numFree+i])
+					free[i] = (*core.Value)(v.stack[v.sp-numFree+i].Ptr)
 				} else {
 					free[i] = &v.stack[v.sp-numFree+i]
 				}

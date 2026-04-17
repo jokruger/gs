@@ -13,11 +13,6 @@ func ValuePtrValue(p *Value) Value {
 	}
 }
 
-// ToValuePtr converts boxed value pointer value to *Value. It is a caller's responsibility to ensure the type is correct.
-func ToValuePtr(v Value) *Value {
-	return (*Value)(v.Ptr)
-}
-
 /* ValuePtr type methods */
 
 func valuePtrTypeName(v Value) string {

@@ -91,12 +91,3 @@
 - add mutex in VM
 
 - vector/array operations like /+, /-, /*, etc - elementwise operations for vectors
-
-
-
-
-===
-
-- full list of compound operators
-- full list of operators
-- records vs maps

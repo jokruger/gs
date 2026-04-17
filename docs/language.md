@@ -255,6 +255,15 @@ m.keys()     // array of keys (unsorted)
 m.values()   // array of values
 ```
 
+**Record and map relationship**
+
+Records and maps represent the same logical structure: a string-keyed dictionary with values of any type. Converting a record with `map(record)` does not copy data; the resulting map points to the same underlying structure.
+
+The key difference is access rules:
+
+- Record: selector and index access read/write elements (`r.name`, `r["name"]`), but records have no member functions.
+- Map: index access reads/writes elements (`m["name"]`), while selector access is reserved for map member functions (for example `m.len()`, `m.filter(...)`, `m.keys()`).
+
 ### Strings and chars
 
 Strings are immutable and indexed by Unicode rune, not byte:

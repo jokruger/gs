@@ -3966,6 +3966,96 @@ func TestDivBy0(t *testing.T) {
 	expectError(t, `1 / 0`, nil, "division by zero")
 }
 
+func TestExamples(t *testing.T) {
+	expectRun(t, `
+out = [1, 2, 3].sum()
+`, nil, 6)
+
+	expectRun(t, `
+out = [1, 2, 3]
+	.sum()
+`, nil, 6)
+
+	expectRun(t, `
+out = [1, 2, 3].map(x => x*x).sum()
+`, nil, 14)
+
+	expectRun(t, `
+out = [1, 2, 3]
+	.map(x => x*x)
+	.sum()
+`, nil, 14)
+
+	expectRun(t, `
+out = [1, 2, 3]
+`, nil, ARR{1, 2, 3})
+
+	expectRun(t, `
+out = [1,
+	2,
+	3]
+`, nil, ARR{1, 2, 3})
+
+	expectRun(t, `
+out = [1,
+	2,
+	3]
+`, nil, ARR{1, 2, 3})
+
+	expectRun(t, `
+out = [
+	1,
+	2,
+	3
+]
+`, nil, ARR{1, 2, 3})
+
+	expectRun(t, `
+out = [
+	1,
+	2,
+	3,
+]
+`, nil, ARR{1, 2, 3})
+
+	expectRun(t, `
+out = 
+	[
+		1,
+		2,
+		3,
+	]
+`, nil, ARR{1, 2, 3})
+
+	expectRun(t, `
+result := [1, 2, 3, 4, 5, 6]
+  .filter(x => x % 2 == 0)
+  .map(x => x * x)
+  .reduce(0, (sum, x) => sum + x)
+out = result
+`, nil, 56)
+
+	expectRun(t, `
+orders := [
+  {customer: "Ada", total: 120, paid: true},
+  {customer: "Linus", total: 75, paid: false},
+  {customer: "Grace", total: 210, paid: true},
+  {customer: "Ken", total: 95, paid: true},
+]
+
+paid_total := orders
+  .filter(order => order.paid)
+  .map(order => order.total)
+  .sum()
+
+vip_customers := orders
+  .filter(order => order.total >= 100)
+  .map(order => order.customer)
+
+out = [paid_total, vip_customers]
+`, nil, ARR{425, ARR{"Ada", "Grace"}})
+}
+
 func expectRun(t *testing.T, input string, opts *testopts, expected any) {
 	if opts == nil {
 		opts = Opts()

@@ -91,3 +91,5 @@
 
 - add tests for AsX methods
 - add mutex in VM
+
+- vector/array operations like /+, /-, /*, etc - elementwise operations for vectors

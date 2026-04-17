@@ -112,20 +112,41 @@ func TestParseArray(t *testing.T) {
 				p(1, 3)))
 	})
 
-	expectParseError(t, `[1, 2, 3,]`)
-	expectParseError(t, `
+	expectParse(t, `[1, 2, 3,]`, func(p pfn) []Stmt {
+		return stmts(
+			exprStmt(
+				arrayLit(p(1, 1), p(1, 10),
+					intLit(1, p(1, 2)),
+					intLit(2, p(1, 5)),
+					intLit(3, p(1, 8)))))
+	})
+	expectParse(t, `
 [
 	1,
 	2,
 	3,
-]`)
-	expectParseError(t, `
+]`, func(p pfn) []Stmt {
+		return stmts(
+			exprStmt(
+				arrayLit(p(2, 1), p(6, 1),
+					intLit(1, p(3, 2)),
+					intLit(2, p(4, 2)),
+					intLit(3, p(5, 2)))))
+	})
+	expectParse(t, `
 [
 	1,
 	2,
 	3,
 
-]`)
+]`, func(p pfn) []Stmt {
+		return stmts(
+			exprStmt(
+				arrayLit(p(2, 1), p(7, 1),
+					intLit(1, p(3, 2)),
+					intLit(2, p(4, 2)),
+					intLit(3, p(5, 2)))))
+	})
 	expectParseError(t, `[1, 2, 3, ,]`)
 }
 
@@ -1527,6 +1548,13 @@ func TestParseMultilineSelectorContinuation(t *testing.T) {
    .sum()`), nil)
 	require.NoError(t, err)
 	require.Equal(t, "x := [1, 2, 3].sort().sum()", actual.String())
+
+	actual, err = parseSource("test", []byte(`result := [1, 2, 3, 4]
+  .filter(x => x % 2 == 0)
+  .map(x => x * x)
+  .sum()`), nil)
+	require.NoError(t, err)
+	require.Equal(t, "result := [1, 2, 3, 4].filter(func(x) {return ((x % 2) == 0)}).map(func(x) {return (x * x)}).sum()", actual.String())
 }
 
 func TestParseString(t *testing.T) {

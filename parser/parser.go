@@ -595,9 +595,18 @@ func (p *Parser) parseArrayLit() Expr {
 	for p.token != token.RBrack && p.token != token.EOF {
 		elements = append(elements, p.parseExpr())
 
-		if !p.expectComma(token.RBrack, "array element") {
-			break
+		if p.token == token.Comma {
+			p.next()
+			if p.token == token.RBrack {
+				break
+			}
+			continue
 		}
+
+		if p.token == token.Semicolon && p.tokenLit == "\n" {
+			p.next()
+		}
+		break
 	}
 
 	p.exprLevel--

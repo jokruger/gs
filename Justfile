@@ -13,6 +13,9 @@ build: generate
     @mkdir -p ./build
     @go build -o ./build/gs ./cmd/gs
 
+install: build
+    @cp ./build/gs $HOME/bin/
+
 test: generate
     @go test -race ./tests/unit/parser
     @go test -race ./tests/unit/value

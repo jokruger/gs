@@ -13,6 +13,13 @@ build: generate
     @mkdir -p ./build
     @go build -o ./build/gs ./cmd/gs
 
+build-dist: generate
+    @mkdir -p ./dist
+    GOOS=linux GOARCH=amd64 go build -o ./dist/gs-linux-amd64 ./cmd/gs
+    GOOS=darwin GOARCH=amd64 go build -o ./dist/gs-darwin-amd64 ./cmd/gs
+    GOOS=darwin GOARCH=arm64 go build -o ./dist/gs-darwin-arm64 ./cmd/gs
+    GOOS=windows GOARCH=amd64 go build -o ./dist/gs-windows-amd64.exe ./cmd/gs
+
 install: build
     @cp ./build/gs $HOME/bin/
 
@@ -29,6 +36,7 @@ bench-tool: generate
 
 clean:
     rm -rf ./build
+    rm -rf ./dist
     rm -rf ./*.prof
     rm -rf ./*.log
 

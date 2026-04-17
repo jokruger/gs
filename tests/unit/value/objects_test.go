@@ -1,6 +1,7 @@
 package value
 
 import (
+	"math"
 	"testing"
 	"time"
 
@@ -104,24 +105,24 @@ func TestObject_Value(t *testing.T) {
 	// Float
 	v = core.FloatValue(3.14)
 	require.True(t, v.Type == core.VT_FLOAT)
-	require.Equal(t, 3.14, core.ToFloat(v))
+	require.Equal(t, 3.14, math.Float64frombits(v.Data))
 	bs, err = v.EncodeBinary()
 	require.NoError(t, err)
 	err = x.DecodeBinary(bs)
 	require.NoError(t, err)
 	require.True(t, x.Type == core.VT_FLOAT)
-	require.Equal(t, 3.14, core.ToFloat(x))
+	require.Equal(t, 3.14, math.Float64frombits(x.Data))
 	require.Equal(t, true, v.Equal(x))
 
 	v = core.FloatValue(-2.71828)
 	require.True(t, v.Type == core.VT_FLOAT)
-	require.Equal(t, -2.71828, core.ToFloat(v))
+	require.Equal(t, -2.71828, math.Float64frombits(v.Data))
 	bs, err = v.EncodeBinary()
 	require.NoError(t, err)
 	err = x.DecodeBinary(bs)
 	require.NoError(t, err)
 	require.True(t, x.Type == core.VT_FLOAT)
-	require.Equal(t, -2.71828, core.ToFloat(x))
+	require.Equal(t, -2.71828, math.Float64frombits(x.Data))
 	require.Equal(t, true, v.Equal(x))
 
 	// String

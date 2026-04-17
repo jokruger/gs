@@ -3,6 +3,7 @@ package core
 import (
 	"encoding/binary"
 	"fmt"
+	"math"
 	"strconv"
 	"time"
 
@@ -160,7 +161,7 @@ func intTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, er
 	switch rhs.Type {
 	case VT_FLOAT: // int op float => float
 		l := float64(ToInt(v))
-		r := ToFloat(rhs)
+		r := math.Float64frombits(rhs.Data)
 		switch op {
 		case token.Add:
 			return FloatValue(l + r), nil

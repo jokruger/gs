@@ -103,7 +103,7 @@ func (b *Bytecode) RemoveDuplicates() {
 	fns := make(map[*core.CompiledFunction]int)
 	ints := make(map[int64]int)
 	strings := make(map[string]int)
-	floats := make(map[float64]int)
+	floats := make(map[uint64]int)
 	chars := make(map[rune]int)
 	bools := make(map[bool]int)
 	immutableRecords := make(map[string]int) // for modules
@@ -121,11 +121,11 @@ func (b *Bytecode) RemoveDuplicates() {
 			}
 
 		case core.VT_FLOAT:
-			if newIdx, ok := floats[core.ToFloat(c)]; ok {
+			if newIdx, ok := floats[c.Data]; ok {
 				indexMap[curIdx] = newIdx
 			} else {
 				newIdx = len(deduped)
-				floats[core.ToFloat(c)] = newIdx
+				floats[c.Data] = newIdx
 				indexMap[curIdx] = newIdx
 				deduped = append(deduped, c)
 			}

@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"math"
 	"sync/atomic"
 
 	"github.com/jokruger/gs/core"
@@ -278,7 +279,7 @@ func (v *VM) run() {
 				v.stack[v.sp] = core.IntValue(-core.ToInt(l))
 				v.sp++
 			case core.VT_FLOAT: // fast track for floats
-				v.stack[v.sp] = core.FloatValue(-core.ToFloat(l))
+				v.stack[v.sp] = core.FloatValue(-math.Float64frombits(l.Data))
 				v.sp++
 			default:
 				res, err := l.UnaryOp(v.alloc, token.Sub)

@@ -2,6 +2,7 @@ package formatter
 
 import (
 	"errors"
+	"math"
 	"strconv"
 	"sync"
 	"unicode/utf8"
@@ -935,7 +936,7 @@ func (p *pp) printArg(arg core.Value, verb rune) {
 		p.fmtBool(arg.Data != 0, verb)
 
 	case core.VT_FLOAT:
-		p.fmtFloat(core.ToFloat(arg), 64, verb)
+		p.fmtFloat(math.Float64frombits(arg.Data), 64, verb)
 
 	case core.VT_INT:
 		p.fmtInteger(uint64(core.ToInt(arg)), signed, verb)

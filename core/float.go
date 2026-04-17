@@ -19,11 +19,6 @@ func FloatValue(f float64) Value {
 	}
 }
 
-// ToFloat converts boxed float value to float64. It is a caller's responsibility to ensure the type is correct.
-func ToFloat(v Value) float64 {
-	return math.Float64frombits(v.Data)
-}
-
 /* Float type methods */
 
 func floatTypeName(v Value) string {
@@ -33,7 +28,7 @@ func floatTypeName(v Value) string {
 func floatTypeEncodeJSON(v Value) ([]byte, error) {
 	var y []byte
 
-	f := ToFloat(v)
+	f := math.Float64frombits(v.Data)
 	if math.IsInf(f, 0) {
 		return nil, errors.New("unsupported Inf value")
 	}
@@ -78,31 +73,31 @@ func floatTypeDecodeBinary(v *Value, data []byte) error {
 }
 
 func floatTypeString(v Value) string {
-	return strconv.FormatFloat(ToFloat(v), 'f', -1, 64)
+	return strconv.FormatFloat(math.Float64frombits(v.Data), 'f', -1, 64)
 }
 
 func floatTypeInterface(v Value) any {
-	return ToFloat(v)
+	return math.Float64frombits(v.Data)
 }
 
 func floatTypeIsTrue(v Value) bool {
-	return !math.IsNaN(ToFloat(v))
+	return !math.IsNaN(math.Float64frombits(v.Data))
 }
 
 func floatTypeAsInt(v Value) (int64, bool) {
-	return int64(ToFloat(v)), true
+	return int64(math.Float64frombits(v.Data)), true
 }
 
 func floatTypeAsString(v Value) (string, bool) {
-	return strconv.FormatFloat(ToFloat(v), 'f', -1, 64), true
+	return strconv.FormatFloat(math.Float64frombits(v.Data), 'f', -1, 64), true
 }
 
 func floatTypeAsFloat(v Value) (float64, bool) {
-	return ToFloat(v), true
+	return math.Float64frombits(v.Data), true
 }
 
 func floatTypeAsBool(v Value) (bool, bool) {
-	return !math.IsNaN(ToFloat(v)), true
+	return !math.IsNaN(math.Float64frombits(v.Data)), true
 }
 
 func floatTypeEqual(v Value, rhs Value) bool {
@@ -110,7 +105,7 @@ func floatTypeEqual(v Value, rhs Value) bool {
 	if !ok {
 		return false
 	}
-	return ToFloat(v) == r
+	return math.Float64frombits(v.Data) == r
 }
 
 func floatTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
@@ -141,7 +136,7 @@ func floatTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 }
 
 func floatTypeUnaryOp(v Value, a Allocator, op token.Token) (Value, error) {
-	f := ToFloat(v)
+	f := math.Float64frombits(v.Data)
 	switch op {
 	case token.Sub: // see also fast track in VM OpMinus
 		return FloatValue(-f), nil
@@ -157,7 +152,7 @@ func floatTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, 
 		return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 	}
 
-	l := ToFloat(v)
+	l := math.Float64frombits(v.Data)
 	switch op {
 	case token.Add:
 		return FloatValue(l + r), nil

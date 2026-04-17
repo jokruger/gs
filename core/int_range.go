@@ -72,11 +72,6 @@ func NewIntRangeValue(start, stop, step int64) Value {
 	return IntRangeValue(t)
 }
 
-// ToIntRange converts boxed array value to *IntRange. It is a caller's responsibility to ensure the type is correct.
-func ToIntRange(v Value) *IntRange {
-	return (*IntRange)(v.Ptr)
-}
-
 /* IntRange type methods */
 
 func intRangeTypeName(v Value) string {

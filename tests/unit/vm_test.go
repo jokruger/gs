@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jokruger/dec128"
 	"github.com/jokruger/gs"
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/parser"
@@ -260,6 +261,23 @@ func TestFloat(t *testing.T) {
 	expectRun(t, `out = (1.5).to_float()`, nil, 1.5)
 	expectRun(t, `out = (1.5).to_int()`, nil, 1)
 	expectRun(t, `out = (1.5).to_string()`, nil, "1.5")
+}
+
+func TestDecimal(t *testing.T) {
+	expectRun(t, `out = decimal(123)`, nil, dec128.FromInt64(123))
+	expectRun(t, `out = decimal(1.23)`, nil, dec128.FromFloat64(1.23))
+	expectRun(t, `out = decimal("1.23")`, nil, dec128.FromString("1.23"))
+
+	expectRun(t, `out = (123).to_decimal()`, nil, dec128.FromInt64(123))
+	expectRun(t, `out = (1.23).to_decimal()`, nil, dec128.FromFloat64(1.23))
+	expectRun(t, `out = "1.23".to_decimal()`, nil, dec128.FromString("1.23"))
+
+	expectRun(t, `out = decimal(1) + decimal(2)`, nil, dec128.FromString("3"))
+	expectRun(t, `out = decimal(1) + 2`, nil, dec128.FromString("3"))
+	expectRun(t, `out = 1 + decimal(2)`, nil, dec128.FromString("3"))
+
+	expectRun(t, `out = 1.0 + decimal(2)`, nil, 3.0)
+	expectRun(t, `out = decimal(1) + 2.0`, nil, dec128.FromString("3"))
 }
 
 func TestChar(t *testing.T) {
@@ -4326,6 +4344,8 @@ func toObject(v any) core.Value {
 		return core.CharValue(rune(v))
 	case float64:
 		return core.FloatValue(v)
+	case dec128.Dec128:
+		return core.NewDecimalValue(v)
 	case []byte:
 		return core.NewBytesValue(v)
 	case MAP:
@@ -4370,6 +4390,9 @@ func objectZeroCopy(o core.Value) core.Value {
 
 	case core.VT_FLOAT:
 		return core.FloatValue(0)
+
+	case core.VT_DECIMAL:
+		return core.NewDecimalValue(dec128.Zero)
 
 	case core.VT_CHAR:
 		return core.CharValue(0)

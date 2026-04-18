@@ -11,6 +11,7 @@ import (
 	"unsafe"
 
 	"github.com/araddon/dateparse"
+	"github.com/jokruger/dec128"
 	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/internal/conv"
 	"github.com/jokruger/gs/token"
@@ -200,6 +201,13 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		i, _ := stringTypeAsInt(v)
 		return IntValue(i), nil
 
+	case "to_decimal":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("string.to_decimal", "0", len(args))
+		}
+		d, _ := stringTypeAsDecimal(v)
+		return vm.Allocator().NewDecimalValue(d)
+
 	case "to_time":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("string.to_time", "0", len(args))
@@ -333,6 +341,12 @@ func stringTypeAsFloat(v Value) (float64, bool) {
 		return f, true
 	}
 	return 0, false
+}
+
+func stringTypeAsDecimal(v Value) (Decimal, bool) {
+	o := (*String)(v.Ptr)
+	d := dec128.FromString(o.Value)
+	return d, !d.IsNaN()
 }
 
 func stringTypeAsBool(v Value) (bool, bool) {

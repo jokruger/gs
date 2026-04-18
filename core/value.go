@@ -131,6 +131,10 @@ func (v Value) AsFloat() (float64, bool) {
 	return ValueTypes[v.Type].AsFloat(v)
 }
 
+func (v Value) AsDecimal() (Decimal, bool) {
+	return ValueTypes[v.Type].AsDecimal(v)
+}
+
 func (v Value) AsTime() (time.Time, bool) {
 	return ValueTypes[v.Type].AsTime(v)
 }

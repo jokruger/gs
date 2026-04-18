@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jokruger/dec128"
 	"github.com/jokruger/gs/core"
 	mock "github.com/jokruger/gs/tests"
 	"github.com/jokruger/gs/tests/require"
@@ -123,6 +124,16 @@ func TestObject_Value(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, x.Type == core.VT_FLOAT)
 	require.Equal(t, -2.71828, math.Float64frombits(x.Data))
+	require.Equal(t, true, v.Equal(x))
+
+	// Decimal
+	v = core.NewDecimalValue(dec128.FromString("3.14"))
+	require.True(t, v.Type == core.VT_DECIMAL)
+	bs, err = v.EncodeBinary()
+	require.NoError(t, err)
+	err = x.DecodeBinary(bs)
+	require.NoError(t, err)
+	require.True(t, x.Type == core.VT_DECIMAL)
 	require.Equal(t, true, v.Equal(x))
 
 	// String

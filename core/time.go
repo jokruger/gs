@@ -12,7 +12,7 @@ import (
 )
 
 // TimeValue creates new boxed time value.
-func TimeValue(v *time.Time) Value {
+func TimeValue(v *Time) Value {
 	return Value{
 		Ptr:  unsafe.Pointer(v),
 		Type: VT_TIME,
@@ -20,7 +20,7 @@ func TimeValue(v *time.Time) Value {
 }
 
 // NewTimeValue creates new (heap-allocated) boxed time value.
-func NewTimeValue(t time.Time) Value {
+func NewTimeValue(t Time) Value {
 	o := &t
 	return TimeValue(o)
 }
@@ -32,7 +32,7 @@ func timeTypeName(v Value) string {
 }
 
 func timeTypeEncodeJSON(v Value) ([]byte, error) {
-	o := (*time.Time)(v.Ptr)
+	o := (*Time)(v.Ptr)
 	y, err := o.MarshalJSON()
 	if err != nil {
 		return nil, err
@@ -41,7 +41,7 @@ func timeTypeEncodeJSON(v Value) ([]byte, error) {
 }
 
 func timeTypeEncodeBinary(v Value) ([]byte, error) {
-	o := (*time.Time)(v.Ptr)
+	o := (*Time)(v.Ptr)
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	if err := enc.Encode(*o); err != nil {
@@ -53,7 +53,7 @@ func timeTypeEncodeBinary(v Value) ([]byte, error) {
 func timeTypeDecodeBinary(v *Value, data []byte) error {
 	buf := bytes.NewBuffer(data)
 	dec := gob.NewDecoder(buf)
-	var t time.Time
+	var t Time
 	if err := dec.Decode(&t); err != nil {
 		return fmt.Errorf("time: %w", err)
 	}
@@ -62,12 +62,12 @@ func timeTypeDecodeBinary(v *Value, data []byte) error {
 }
 
 func timeTypeString(v Value) string {
-	o := (*time.Time)(v.Ptr)
+	o := (*Time)(v.Ptr)
 	return fmt.Sprintf("time(%q)", o.String())
 }
 
 func timeTypeInterface(v Value) any {
-	o := (*time.Time)(v.Ptr)
+	o := (*Time)(v.Ptr)
 	return *o
 }
 
@@ -76,12 +76,12 @@ func timeTypeEqual(v Value, r Value) bool {
 	if !ok {
 		return false
 	}
-	o := (*time.Time)(v.Ptr)
+	o := (*Time)(v.Ptr)
 	return o.Equal(t)
 }
 
 func timeTypeCopy(v Value, a Allocator) (Value, error) {
-	o := (*time.Time)(v.Ptr)
+	o := (*Time)(v.Ptr)
 	return a.NewTimeValue(*o)
 }
 
@@ -111,140 +111,140 @@ func timeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.to_string", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return vm.Allocator().NewStringValue(o.String())
 
 	case "year":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.year", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return IntValue(int64(o.Year())), nil
 
 	case "month":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.month", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return IntValue(int64(o.Month())), nil
 
 	case "day":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.day", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return IntValue(int64(o.Day())), nil
 
 	case "hour":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.hour", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return IntValue(int64(o.Hour())), nil
 
 	case "minute":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.minute", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return IntValue(int64(o.Minute())), nil
 
 	case "second":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.second", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return IntValue(int64(o.Second())), nil
 
 	case "nanosecond":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.nanosecond", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return IntValue(int64(o.Nanosecond())), nil
 
 	case "unix":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.unix", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return IntValue(o.Unix()), nil
 
 	case "unix_nano":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.unix_nano", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return IntValue(o.UnixNano()), nil
 
 	case "week_day":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.week_day", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return IntValue(int64(o.Weekday())), nil
 
 	case "year_day":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.year_day", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return IntValue(int64(o.YearDay())), nil
 
 	case "month_name":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.month_name", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return vm.Allocator().NewStringValue(o.Month().String())
 
 	case "week_day_name":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.week_day_name", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return vm.Allocator().NewStringValue(o.Weekday().String())
 
 	case "to_utc":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.to_utc", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return vm.Allocator().NewTimeValue(o.UTC())
 
 	case "to_local":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.to_local", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return vm.Allocator().NewTimeValue(o.Local())
 
 	case "to_date_string":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.to_date_string", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return vm.Allocator().NewStringValue(o.Format(time.DateOnly))
 
 	case "to_time_string":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.to_time_string", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return vm.Allocator().NewStringValue(o.Format(time.TimeOnly))
 
 	case "to_date_time_string":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.to_date_time_string", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return vm.Allocator().NewStringValue(o.Format(time.DateTime))
 
 	case "zone_offset":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.zone_offset", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		_, offset := o.Zone()
 		return IntValue(int64(offset)), nil
 
@@ -252,7 +252,7 @@ func timeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("time.zone_name", "0", len(args))
 		}
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		name, _ := o.Zone()
 		return vm.Allocator().NewStringValue(name)
 
@@ -262,17 +262,17 @@ func timeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 }
 
 func timeTypeIsTrue(v Value) bool {
-	o := (*time.Time)(v.Ptr)
+	o := (*Time)(v.Ptr)
 	return !o.IsZero()
 }
 
 func timeTypeAsString(v Value) (string, bool) {
-	o := (*time.Time)(v.Ptr)
+	o := (*Time)(v.Ptr)
 	return o.String(), true
 }
 
 func timeTypeAsInt(v Value) (int64, bool) {
-	o := (*time.Time)(v.Ptr)
+	o := (*Time)(v.Ptr)
 	return o.Unix(), true
 }
 
@@ -280,8 +280,8 @@ func timeTypeAsBool(v Value) (bool, bool) {
 	return timeTypeIsTrue(v), true
 }
 
-func timeTypeAsTime(v Value) (time.Time, bool) {
-	o := (*time.Time)(v.Ptr)
+func timeTypeAsTime(v Value) (Time, bool) {
+	o := (*Time)(v.Ptr)
 	return *o, true
 }
 
@@ -290,10 +290,10 @@ func timeTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, e
 		r := int64(rhs.Data)
 		switch op {
 		case token.Add: // time + int => time
-			o := (*time.Time)(v.Ptr)
+			o := (*Time)(v.Ptr)
 			return a.NewTimeValue(o.Add(time.Duration(r)))
 		case token.Sub: // time - int => time
-			o := (*time.Time)(v.Ptr)
+			o := (*Time)(v.Ptr)
 			return a.NewTimeValue(o.Add(time.Duration(-r)))
 		}
 	}
@@ -305,19 +305,19 @@ func timeTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, e
 
 	switch op {
 	case token.Sub: // time - time => int (duration)
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return IntValue(int64(o.Sub(r))), nil
 	case token.Less: // time < time => bool
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return BoolValue(o.Before(r)), nil
 	case token.Greater:
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return BoolValue(o.After(r)), nil
 	case token.LessEq:
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return BoolValue(o.Equal(r) || o.Before(r)), nil
 	case token.GreaterEq:
-		o := (*time.Time)(v.Ptr)
+		o := (*Time)(v.Ptr)
 		return BoolValue(o.Equal(r) || o.After(r)), nil
 	}
 

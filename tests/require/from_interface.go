@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jokruger/dec128"
 	"github.com/jokruger/gs/core"
 )
 
@@ -32,6 +33,9 @@ func FromInterface(alloc core.Allocator, v any) (core.Value, error) {
 
 	case float64:
 		return core.FloatValue(v), nil
+
+	case dec128.Dec128:
+		return alloc.NewDecimalValue(v)
 
 	case []byte:
 		return alloc.NewBytesValue(v)

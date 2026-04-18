@@ -5,10 +5,13 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/jokruger/dec128"
 	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/token"
 )
 
+type Decimal = dec128.Dec128
+type Time = time.Time
 type Opcode = byte
 type NativeFunc = func(VM, []Value) (Value, error)
 
@@ -16,7 +19,8 @@ type Allocator interface {
 	NewBuiltinFunctionValue(name string, val NativeFunc, arity int8, variadic bool) (Value, error)
 	NewCompiledFunctionValue(instructions []byte, free []*Value, sourceMap map[int]Pos, numLocals int, numParameters int8, varArgs bool) (Value, error)
 	NewErrorValue(e Value) (Value, error)
-	NewTimeValue(t time.Time) (Value, error)
+	NewDecimalValue(d Decimal) (Value, error)
+	NewTimeValue(t Time) (Value, error)
 	NewStringValue(s string) (Value, error)
 	NewStringIteratorValue(s []rune) (Value, error)
 	NewBytesValue(b []byte) (Value, error)
@@ -70,7 +74,8 @@ const (
 	VT_MAP_ITERATOR       = uint8(18)
 	VT_INT_RANGE          = uint8(19)
 	VT_INT_RANGE_ITERATOR = uint8(20)
-	VT_USER_DEFINED       = uint8(21) // must be last
+	VT_DECIMAL            = uint8(21)
+	VT_USER_DEFINED       = uint8(22) // must be last
 )
 
 type ValueType struct {
@@ -108,15 +113,16 @@ type ValueType struct {
 	Key   func(v Value, a Allocator) (Value, error)
 	Value func(v Value, a Allocator) (Value, error)
 
-	AsBool   func(v Value) (bool, bool)
-	AsChar   func(v Value) (rune, bool)
-	AsInt    func(v Value) (int64, bool)
-	AsFloat  func(v Value) (float64, bool)
-	AsTime   func(v Value) (time.Time, bool)
-	AsString func(v Value) (string, bool)
-	AsBytes  func(v Value) ([]byte, bool)
-	AsArray  func(v Value, a Allocator) ([]Value, bool)
-	AsMap    func(v Value, a Allocator) (map[string]Value, bool)
+	AsBool    func(v Value) (bool, bool)
+	AsChar    func(v Value) (rune, bool)
+	AsInt     func(v Value) (int64, bool)
+	AsFloat   func(v Value) (float64, bool)
+	AsDecimal func(v Value) (Decimal, bool)
+	AsTime    func(v Value) (Time, bool)
+	AsString  func(v Value) (string, bool)
+	AsBytes   func(v Value) ([]byte, bool)
+	AsArray   func(v Value, a Allocator) ([]Value, bool)
+	AsMap     func(v Value, a Allocator) (map[string]Value, bool)
 }
 
 var ValueTypeDefaults = ValueType{
@@ -154,15 +160,16 @@ var ValueTypeDefaults = ValueType{
 	Key:   defaultUndefined,
 	Value: defaultUndefined,
 
-	AsBool:   defaultTypeAsBool,
-	AsChar:   defaultTypeAsChar,
-	AsInt:    defaultTypeAsInt,
-	AsFloat:  defaultTypeAsFloat,
-	AsTime:   defaultTypeAsTime,
-	AsString: defaultTypeAsString,
-	AsBytes:  defaultTypeAsBytes,
-	AsArray:  defaultTypeAsArray,
-	AsMap:    defaultTypeAsMap,
+	AsBool:    defaultTypeAsBool,
+	AsChar:    defaultTypeAsChar,
+	AsInt:     defaultTypeAsInt,
+	AsFloat:   defaultTypeAsFloat,
+	AsDecimal: defaultTypeAsDecimal,
+	AsTime:    defaultTypeAsTime,
+	AsString:  defaultTypeAsString,
+	AsBytes:   defaultTypeAsBytes,
+	AsArray:   defaultTypeAsArray,
+	AsMap:     defaultTypeAsMap,
 }
 
 var ValueTypes [256]ValueType
@@ -411,8 +418,12 @@ func defaultTypeAsFloat(v Value) (float64, bool) {
 	return 0, false
 }
 
-func defaultTypeAsTime(v Value) (time.Time, bool) {
-	return time.Time{}, false
+func defaultTypeAsDecimal(v Value) (Decimal, bool) {
+	return dec128.Decimal0, false
+}
+
+func defaultTypeAsTime(v Value) (Time, bool) {
+	return Time{}, false
 }
 
 func defaultTypeAsString(v Value) (string, bool) {

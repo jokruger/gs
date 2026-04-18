@@ -123,6 +123,7 @@ func init() {
 		AsString:     intTypeAsString,
 		AsInt:        intTypeAsInt,
 		AsFloat:      intTypeAsFloat,
+		AsDecimal:    intTypeAsDecimal,
 		AsBool:       intTypeAsBool,
 		AsChar:       intTypeAsChar,
 		AsTime:       intTypeAsTime,
@@ -145,7 +146,30 @@ func init() {
 		AsString:     floatTypeAsString,
 		AsInt:        floatTypeAsInt,
 		AsFloat:      floatTypeAsFloat,
+		AsDecimal:    floatTypeAsDecimal,
 		AsBool:       floatTypeAsBool,
+	})
+
+	// Decimal
+	SetValueType(VT_DECIMAL, ValueType{
+		Name:         decimalTypeName,
+		String:       decimalTypeString,
+		Interface:    decimalTypeInterface,
+		EncodeJSON:   decimalTypeEncodeJSON,
+		EncodeBinary: decimalTypeEncodeBinary,
+		DecodeBinary: decimalTypeDecodeBinary,
+		IsTrue:       decimalTypeIsTrue,
+		Equal:        decimalTypeEqual,
+		Copy:         decimalTypeCopy,
+		Len:          default1,
+		UnaryOp:      decimalTypeUnaryOp,
+		BinaryOp:     decimalTypeBinaryOp,
+		MethodCall:   decimalTypeMethodCall,
+		AsString:     decimalTypeAsString,
+		AsInt:        decimalTypeAsInt,
+		AsFloat:      decimalTypeAsFloat,
+		AsDecimal:    decimalTypeAsDecimal,
+		AsBool:       decimalTypeAsBool,
 	})
 
 	// Time
@@ -191,6 +215,7 @@ func init() {
 		AsChar:       stringTypeAsChar,
 		AsInt:        stringTypeAsInt,
 		AsFloat:      stringTypeAsFloat,
+		AsDecimal:    stringTypeAsDecimal,
 		AsTime:       stringTypeAsTime,
 		AsString:     stringTypeAsString,
 		AsBytes:      stringTypeAsBytes,

@@ -7,6 +7,8 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/jokruger/dec128"
+	"github.com/jokruger/dec128/state"
 	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/token"
 )
@@ -96,6 +98,14 @@ func floatTypeAsFloat(v Value) (float64, bool) {
 	return math.Float64frombits(v.Data), true
 }
 
+func floatTypeAsDecimal(v Value) (Decimal, bool) {
+	f := math.Float64frombits(v.Data)
+	if math.IsInf(f, 0) || math.IsNaN(f) {
+		return dec128.NaN(state.NaN), false
+	}
+	return dec128.FromFloat64(f), true
+}
+
 func floatTypeAsBool(v Value) (bool, bool) {
 	return !math.IsNaN(math.Float64frombits(v.Data)), true
 }
@@ -115,6 +125,16 @@ func floatTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 			return Undefined, errs.NewWrongNumArgumentsError("float.to_float", "0", len(args))
 		}
 		return v, nil
+
+	case "to_decimal":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("float.to_decimal", "0", len(args))
+		}
+		f := math.Float64frombits(v.Data)
+		if math.IsInf(f, 0) || math.IsNaN(f) {
+			return vm.Allocator().NewDecimalValue(dec128.NaN(state.NaN))
+		}
+		return vm.Allocator().NewDecimalValue(dec128.FromFloat64(f))
 
 	case "to_int":
 		if len(args) != 0 {

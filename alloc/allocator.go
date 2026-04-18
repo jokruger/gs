@@ -2,7 +2,6 @@ package alloc
 
 import (
 	"math"
-	"time"
 
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/errs"
@@ -53,7 +52,16 @@ func (a *Allocator) NewErrorValue(e core.Value) (core.Value, error) {
 	return core.ErrorValue(o), nil
 }
 
-func (a *Allocator) NewTimeValue(t time.Time) (core.Value, error) {
+func (a *Allocator) NewDecimalValue(d core.Decimal) (core.Value, error) {
+	a.allocs--
+	if a.allocs == 0 {
+		return core.Undefined, errs.ErrObjectAllocLimit
+	}
+	o := &d
+	return core.DecimalValue(o), nil
+}
+
+func (a *Allocator) NewTimeValue(t core.Time) (core.Value, error) {
 	a.allocs--
 	if a.allocs == 0 {
 		return core.Undefined, errs.ErrObjectAllocLimit

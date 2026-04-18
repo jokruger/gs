@@ -4,18 +4,20 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jokruger/dec128"
 	"github.com/jokruger/gs/core"
 	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/formatter"
 )
 
 // do not change builtin function indexes as it will break compatibility
-// 34..99 are reserved for future builtin functions
+// 36..99 are reserved for future builtin functions
 var BuiltinFuncs = map[int]core.Value{
 	7:  core.NewBuiltinFunctionValue("bool", builtinBool, 0, true),
 	9:  core.NewBuiltinFunctionValue("char", builtinChar, 0, true),
 	6:  core.NewBuiltinFunctionValue("int", builtinInt, 0, true),
 	8:  core.NewBuiltinFunctionValue("float", builtinFloat, 0, true),
+	34: core.NewBuiltinFunctionValue("decimal", builtinDecimal, 0, true),
 	11: core.NewBuiltinFunctionValue("time", builtinTime, 0, true),
 	5:  core.NewBuiltinFunctionValue("string", builtinString, 0, true),
 	10: core.NewBuiltinFunctionValue("bytes", builtinBytes, 0, true),
@@ -27,6 +29,7 @@ var BuiltinFuncs = map[int]core.Value{
 	16: core.NewBuiltinFunctionValue("is_char", builtinIsChar, 1, false),
 	12: core.NewBuiltinFunctionValue("is_int", builtinIsInt, 1, false),
 	13: core.NewBuiltinFunctionValue("is_float", builtinIsFloat, 1, false),
+	35: core.NewBuiltinFunctionValue("is_decimal", builtinIsDecimal, 1, false),
 	23: core.NewBuiltinFunctionValue("is_time", builtinIsTime, 1, false),
 	14: core.NewBuiltinFunctionValue("is_string", builtinIsString, 1, false),
 	17: core.NewBuiltinFunctionValue("is_bytes", builtinIsBytes, 1, false),
@@ -83,6 +86,16 @@ func builtinIsFloat(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewWrongNumArgumentsError("is_float", "1", len(args))
 	}
 	if args[0].Type == core.VT_FLOAT {
+		return core.True, nil
+	}
+	return core.False, nil
+}
+
+func builtinIsDecimal(vm core.VM, args []core.Value) (core.Value, error) {
+	if len(args) != 1 {
+		return core.Undefined, errs.NewWrongNumArgumentsError("is_decimal", "1", len(args))
+	}
+	if args[0].Type == core.VT_DECIMAL {
 		return core.True, nil
 	}
 	return core.False, nil
@@ -363,6 +376,30 @@ func builtinFloat(vm core.VM, args []core.Value) (core.Value, error) {
 	default:
 		if v, ok := args[0].AsFloat(); ok {
 			return core.FloatValue(v), nil
+		}
+		if l == 2 {
+			return args[1], nil
+		}
+		return core.Undefined, nil
+	}
+}
+
+func builtinDecimal(vm core.VM, args []core.Value) (core.Value, error) {
+	l := len(args)
+	if l == 0 {
+		return vm.Allocator().NewDecimalValue(dec128.Decimal0)
+	}
+	if l > 2 {
+		return core.Undefined, errs.NewWrongNumArgumentsError("decimal", "0, 1 or 2", len(args))
+	}
+
+	switch args[0].Type {
+	case core.VT_DECIMAL:
+		return args[0], nil
+
+	default:
+		if v, ok := args[0].AsDecimal(); ok {
+			return vm.Allocator().NewDecimalValue(v)
 		}
 		if l == 2 {
 			return args[1], nil

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/jokruger/dec128"
 	"github.com/jokruger/gs/errs"
 	"github.com/jokruger/gs/token"
 )
@@ -68,6 +69,10 @@ func intTypeAsFloat(v Value) (float64, bool) {
 	return float64(int64(v.Data)), true
 }
 
+func intTypeAsDecimal(v Value) (Decimal, bool) {
+	return dec128.FromInt64(int64(v.Data)), true
+}
+
 func intTypeAsBool(v Value) (bool, bool) {
 	return v.Data != 0, true
 }
@@ -102,6 +107,13 @@ func intTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error)
 		}
 		f, _ := v.AsFloat()
 		return FloatValue(f), nil
+
+	case "to_decimal":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("int.to_decimal", "0", len(args))
+		}
+		d, _ := v.AsDecimal()
+		return vm.Allocator().NewDecimalValue(d)
 
 	case "to_bool":
 		if len(args) != 0 {
@@ -174,6 +186,30 @@ func intTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, er
 			return BoolValue(l <= r), nil
 		case token.GreaterEq:
 			return BoolValue(l >= r), nil
+		default:
+			return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
+		}
+
+	case VT_DECIMAL: // int op decimal => decimal
+		l := dec128.FromInt64(int64(v.Data))
+		r := (*Decimal)(rhs.Ptr)
+		switch op {
+		case token.Add:
+			return a.NewDecimalValue(l.Add(*r))
+		case token.Sub:
+			return a.NewDecimalValue(l.Sub(*r))
+		case token.Mul:
+			return a.NewDecimalValue(l.Mul(*r))
+		case token.Quo:
+			return a.NewDecimalValue(l.Div(*r))
+		case token.Less:
+			return BoolValue(l.LessThan(*r)), nil
+		case token.Greater:
+			return BoolValue(l.GreaterThan(*r)), nil
+		case token.LessEq:
+			return BoolValue(l.LessThanOrEqual(*r)), nil
+		case token.GreaterEq:
+			return BoolValue(l.GreaterThanOrEqual(*r)), nil
 		default:
 			return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 		}

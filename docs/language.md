@@ -16,6 +16,7 @@ s := "hello"      // string, double-quoted
 r := `raw string` // raw string, backtick-quoted
 b := true
 u := undefined
+d := decimal("12.34")
 ```
 
 ## Variables and scope
@@ -44,7 +45,7 @@ inc() // 2
 
 ## Types and values
 
-Scalar types: `undefined`, `bool`, `int`, `float`, `char`, `string`, `bytes`, `time`, `error`.  
+Scalar types: `undefined`, `bool`, `int`, `float`, `decimal`, `char`, `string`, `bytes`, `time`, `error`.  
 Container types: `array`, `record`, `map`, `range`.
 
 **Truthiness** is summarized below:
@@ -55,6 +56,7 @@ Container types: `array`, `record`, `map`, `range`.
 | `false` | no |
 | `0` (int) | no |
 | `0.0` (float) | yes — all floats are truthy except NaN |
+| `decimal(0)` | no |
 | `""` (empty string) | no |
 | `[]`, `{}`, `map()` | no — empty containers are falsy |
 | everything else | yes |
@@ -69,6 +71,70 @@ true == 2     // false (bool converts to 0/1)
 ```
 
 Use `type_name(x)` to inspect the actual type at runtime.
+
+### Decimal numbers
+
+`decimal` is an exact decimal type.
+
+Construct decimals with `decimal(...)` or with `.to_decimal()`:
+
+```go
+a := decimal(123)       // int -> decimal
+b := decimal(1.23)      // float -> decimal
+c := decimal("1.23")    // string -> decimal
+
+d := (123).to_decimal()
+e := (1.23).to_decimal()
+f := "1.23".to_decimal()
+```
+
+`decimal(x)` conversion rules:
+
+- `decimal()` returns `decimal(0)`.
+- `decimal(decimalValue)` returns the same decimal value.
+- `decimal(x)` attempts runtime conversion via `AsDecimal`.
+- `decimal(x, fallback)` returns `fallback` when conversion fails.
+
+`to_decimal()` member methods exist on:
+
+- `int.to_decimal()`
+- `float.to_decimal()`
+- `string.to_decimal()`
+- `decimal.to_decimal()`
+
+Notable edge cases from implementation:
+
+- `float.to_decimal()` returns decimal `NaN` for `NaN` and infinities.
+- `string.to_decimal()` returns decimal `NaN` for invalid input.
+- `decimal("bad")` returns `undefined` (or the fallback when provided), because conversion failure is tracked separately from the returned decimal value.
+
+Automatic conversions in mixed operations involving `decimal`:
+
+- `decimal op x` converts `x` to decimal (if possible), result type is decimal for arithmetic.
+- `int op decimal` promotes `int` to decimal, result type is decimal for arithmetic.
+- `float op decimal` keeps float semantics (decimal converted to float), result type is float for arithmetic.
+- `string + decimal` is valid only when string is on the left; decimal is converted to string.
+
+Examples:
+
+```go
+decimal(1) + 2      // decimal(3)
+1 + decimal(2)      // decimal(3)
+decimal(1) + 2.0    // decimal(3)
+1.0 + decimal(2)    // 3.0 (float)
+"value=" + decimal(2) // "value=2"
+```
+
+Decimal member functions:
+
+- Conversion: `to_decimal()`, `to_float()`, `to_int()`, `to_string()`
+- Classification: `is_zero()`, `is_negative()`, `is_positive()`, `is_nan()`
+- Metadata: `sign()`, `scale()`, `error()`
+- Scale/normalization: `to_scale(scale)`, `canonical()`, `trunc(scale)`
+- Neighbor/value transforms: `next_up()`, `next_down()`, `abs()`, `neg()`, `sqrt()`
+- Rounding: `round_down(scale)`, `round_up(scale)`, `round_toward_zero(scale)`, `round_away_from_zero(scale)`, `round_half_toward_zero(scale)`, `round_half_away_from_zero(scale)`, `round_bank(scale)`
+
+For all decimal methods that accept `scale`, the argument must be an `int` in the implementation-defined decimal scale range, otherwise a runtime error is raised.
 
 ## Expressions
 
@@ -282,7 +348,7 @@ Char literals are single runes. Arithmetic with chars works on their Unicode cod
 '9' - '0' // 9 (int)
 ```
 
-Key string methods: `len()`, `is_empty()`, `first()`, `last()`, `upper()`, `lower()`, `trim([cutset])`, `contains(x)`, `to_array()`, `to_bytes()`, `to_int()`, `to_float()`, `to_bool()`, `to_char()`.
+Key string methods: `len()`, `is_empty()`, `first()`, `last()`, `upper()`, `lower()`, `trim([cutset])`, `contains(x)`, `to_array()`, `to_bytes()`, `to_int()`, `to_float()`, `to_decimal()`, `to_bool()`, `to_char()`.
 
 ### Bytes
 
@@ -364,6 +430,9 @@ string(99)         // "99"
 string(undefined)  // undefined  ← not the string "undefined"
 bool(0)            // false
 bool(0.0)          // true  ← float zero is truthy
+decimal("1.25")   // decimal value
+decimal("bad")    // undefined
+decimal("bad", decimal(0)) // decimal(0)
 bytes("abc")       // bytes value
 time("2024-01-01") // time value
 ```
@@ -384,7 +453,7 @@ error("msg")            // error value with optional payload
 
 **Type predicates:**
 
-`is_int`, `is_float`, `is_bool`, `is_char`, `is_string`, `is_bytes`, `is_array`, `is_record`, `is_map`, `is_range`, `is_time`, `is_error`, `is_undefined`, `is_function`, `is_callable`, `is_iterable`, `is_immutable`
+`is_int`, `is_float`, `is_decimal`, `is_bool`, `is_char`, `is_string`, `is_bytes`, `is_array`, `is_record`, `is_map`, `is_range`, `is_time`, `is_error`, `is_undefined`, `is_function`, `is_callable`, `is_iterable`, `is_immutable`
 
 ```go
 is_array([1, 2])   // true

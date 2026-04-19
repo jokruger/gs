@@ -286,7 +286,6 @@ func TestDecimal(t *testing.T) {
 	expectRun(t, `out = 1.0 + decimal(2)`, nil, 3.0)
 	expectRun(t, `out = decimal(1) + 2.0`, nil, dec128.FromString("3"))
 
-	// d-suffix decimal literals
 	expectRun(t, `out = 1d`, nil, dec128.FromInt64(1))
 	expectRun(t, `out = 1.23d`, nil, dec128.FromString("1.23"))
 	expectRun(t, `out = type_name(1d)`, nil, "decimal")
@@ -296,6 +295,24 @@ func TestDecimal(t *testing.T) {
 	expectRun(t, `out = 1 + 2d`, nil, dec128.FromString("3"))
 	expectRun(t, `out = 1.5d + 0.5d`, nil, dec128.FromString("2"))
 	expectRun(t, `out = -1d`, nil, dec128.FromInt64(-1))
+
+	expectRun(t, `out = (1.23d).to_decimal()`, nil, dec128.FromString("1.23"))
+	expectRun(t, `out = (123d).to_float().to_decimal()`, nil, dec128.FromString("123"))
+	expectRun(t, `out = (123d).to_int().to_decimal()`, nil, dec128.FromString("123"))
+	expectRun(t, `out = (1.23d).to_string()`, nil, "1.23")
+	expectRun(t, `out = (1.23d).is_zero()`, nil, false)
+	expectRun(t, `out = (0d).is_zero()`, nil, true)
+	expectRun(t, `out = (0d).is_negative()`, nil, false)
+	expectRun(t, `out = (1d).is_negative()`, nil, false)
+	expectRun(t, `out = (-1d).is_negative()`, nil, true)
+	expectRun(t, `out = (0d).is_positive()`, nil, false)
+	expectRun(t, `out = (1d).is_positive()`, nil, true)
+	expectRun(t, `out = (-1d).is_positive()`, nil, false)
+	expectRun(t, `out = (0d).sign()`, nil, 0)
+	expectRun(t, `out = (1d).sign()`, nil, 1)
+	expectRun(t, `out = (-1d).sign()`, nil, -1)
+	expectRun(t, `out = (123d).to_scale(2).scale()`, nil, 2)
+	expectRun(t, `out = (123d).to_scale(2).canonical().scale()`, nil, 0)
 }
 
 func TestChar(t *testing.T) {

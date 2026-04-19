@@ -143,6 +143,28 @@ func intTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error)
 		t, _ := v.AsTime()
 		return vm.Allocator().NewTimeValue(t)
 
+	case "sign":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("int.sign", "0", len(args))
+		}
+		if v.Data == 0 {
+			return IntValue(0), nil
+		} else if int64(v.Data) > 0 {
+			return IntValue(1), nil
+		} else {
+			return IntValue(-1), nil
+		}
+
+	case "abs":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("int.abs", "0", len(args))
+		}
+		i := int64(v.Data)
+		if i < 0 {
+			return IntValue(-i), nil
+		}
+		return v, nil
+
 	default:
 		return Undefined, errs.NewInvalidMethodError(name, "int")
 	}

@@ -150,6 +150,22 @@ func floatTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		s, _ := v.AsString()
 		return vm.Allocator().NewStringValue(s)
 
+	case "sign":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("float.sign", "0", len(args))
+		}
+		f := math.Float64frombits(v.Data)
+		if math.IsNaN(f) {
+			return IntValue(0), nil
+		}
+		if f > 0 {
+			return IntValue(1), nil
+		}
+		if f < 0 {
+			return IntValue(-1), nil
+		}
+		return IntValue(0), nil
+
 	default:
 		return Undefined, errs.NewInvalidMethodError(name, "float")
 	}

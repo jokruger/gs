@@ -16,3 +16,4 @@ go.work.sum
 *.coverprofile
 
 coverage.*
+tmp.md

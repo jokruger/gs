@@ -91,9 +91,10 @@
 - add mutex in VM
 
 - vector/array operations like /+, /-, /*, etc - elementwise operations for vectors
-- is_zero member function for build-in types
 - format for decimal
+
 - sign member function for int/float/decimal
 - abs member function for int/float/decimal
 - pow member function for int/float/decimal
 - sqrt member function for int/float/decimal
+  

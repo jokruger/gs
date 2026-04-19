@@ -175,9 +175,9 @@ func decimalTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, er
 		o := (*Decimal)(v.Ptr)
 		return BoolValue(o.IsNaN()), nil
 
-	case "error":
+	case "error_details":
 		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError("decimal.error", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("decimal.error_details", "0", len(args))
 		}
 		o := (*Decimal)(v.Ptr)
 		e, err := vm.Allocator().NewStringValue(o.ErrorDetails().Error())
@@ -242,9 +242,9 @@ func decimalTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, er
 		o := (*Decimal)(v.Ptr)
 		return vm.Allocator().NewDecimalValue(o.Abs())
 
-	case "neg":
+	case "negate":
 		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError("decimal.neg", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("decimal.negate", "0", len(args))
 		}
 		o := (*Decimal)(v.Ptr)
 		return vm.Allocator().NewDecimalValue(o.Neg())

@@ -125,9 +125,9 @@ Decimal member functions:
 
 - Conversion: `to_decimal()`, `to_float()`, `to_int()`, `to_string()`
 - Classification: `is_zero()`, `is_negative()`, `is_positive()`, `is_nan()`
-- Metadata: `sign()`, `scale()`, `error()`
+- Metadata: `sign()`, `scale()`, `error_details()`
 - Scale/normalization: `to_scale(scale)`, `canonical()`, `trunc(scale)`
-- Neighbor/value transforms: `next_up()`, `next_down()`, `abs()`, `neg()`, `sqrt()`
+- Neighbor/value transforms: `next_up()`, `next_down()`, `abs()`, `negate()`, `sqrt()`
 - Rounding: `round_down(scale)`, `round_up(scale)`, `round_toward_zero(scale)`, `round_away_from_zero(scale)`, `round_half_toward_zero(scale)`, `round_half_away_from_zero(scale)`, `round_bank(scale)`
 
 For decimal methods that accept `scale`, the argument must be an `int` in the implementation-defined decimal scale range; otherwise a runtime error is raised.
@@ -198,7 +198,7 @@ Time member functions:
 - Conversion: `to_time()`, `to_bool()`, `to_int()`, `to_string()`
 - Date and time fields: `year()`, `month()`, `day()`, `hour()`, `minute()`, `second()`, `nanosecond()`
 - Epoch and calendar metadata: `unix()`, `unix_nano()`, `week_day()`, `year_day()`, `month_name()`, `week_day_name()`
-- Timezone and formatting: `to_utc()`, `to_local()`, `to_date_string()`, `to_time_string()`, `to_date_time_string()`, `zone_offset()`, `zone_name()`
+- Timezone and formatting: `to_utc()`, `to_local()`, `format_date()`, `format_time()`, `format_datetime()`, `zone_offset()`, `zone_name()`
 
 ## error
 

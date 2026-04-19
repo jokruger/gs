@@ -219,23 +219,23 @@ func timeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 		o := (*Time)(v.Ptr)
 		return vm.Allocator().NewTimeValue(o.Local())
 
-	case "to_date_string":
+	case "format_date":
 		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError("time.to_date_string", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("time.format_date", "0", len(args))
 		}
 		o := (*Time)(v.Ptr)
 		return vm.Allocator().NewStringValue(o.Format(time.DateOnly))
 
-	case "to_time_string":
+	case "format_time":
 		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError("time.to_time_string", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("time.format_time", "0", len(args))
 		}
 		o := (*Time)(v.Ptr)
 		return vm.Allocator().NewStringValue(o.Format(time.TimeOnly))
 
-	case "to_date_time_string":
+	case "format_datetime":
 		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError("time.to_date_time_string", "0", len(args))
+			return Undefined, errs.NewWrongNumArgumentsError("time.format_datetime", "0", len(args))
 		}
 		o := (*Time)(v.Ptr)
 		return vm.Allocator().NewStringValue(o.Format(time.DateTime))

@@ -2,11 +2,31 @@
 
 GS (Go Script) is a lightweight, high-performance dynamically typed scripting language designed for embedding in Go. It emphasizes expression-oriented programming with first-class records, arrow-function lambdas, and fluent method chaining. It runs on a sandboxable bytecode VM implemented in Go, with a module system supporting explicit exports. Source files have a `.gs` extension and content is UTF-8 encoded.
 
-## Lexical basics
+## Builtin types overview
 
-Line comments start with `//`. Block comments use `/* ... */`. Statements are separated by newlines — semicolons are inserted automatically after identifiers, literals, closing brackets, and keywords like `break`, `continue`, `return`. A newline before a dot (`.`) is treated as line continuation, not a statement break.
+GS values are grouped into scalar and container types.
 
-Literal types at a glance:
+Scalar types:
+
+- [`undefined`](types.md#undefined)
+- [`bool`](types.md#bool)
+- [`int`](types.md#int)
+- [`float`](types.md#float)
+- [`decimal`](types.md#decimal)
+- [`char`](types.md#char)
+- [`string`](types.md#string)
+- [`bytes`](types.md#bytes)
+- [`time`](types.md#time)
+- [`error`](types.md#error)
+
+Container types:
+
+- [`array`](types.md#array)
+- [`record`](types.md#record)
+- [`map`](types.md#map)
+- [`range`](types.md#range)
+
+Literal examples:
 
 ```go
 i := 42
@@ -18,6 +38,36 @@ r := `raw string` // raw string, backtick-quoted
 b := true
 u := undefined
 ```
+
+### Truthiness and equality
+
+Truthiness:
+
+| Value | Truthy? |
+|---|---|
+| `undefined` | no |
+| `false` | no |
+| `0` (int) | no |
+| `0.0` (float) | yes - all floats are truthy except NaN |
+| `decimal(0)` | no |
+| `""` (empty string) | no |
+| `[]`, `{}`, `map()` | no - empty containers are falsy |
+| everything else | yes |
+
+Equality is coercive across types. `==` tries to convert both sides to a common type:
+
+```go
+1 == "1"      // true
+true == 1     // true
+true == 2     // false (bool converts to 0/1)
+[1] == ["1"]  // true
+```
+
+Use `type_name(x)` to inspect the actual runtime type.
+
+## Lexical basics
+
+Line comments start with `//`. Block comments use `/* ... */`. Statements are separated by newlines; semicolons are inserted automatically after identifiers, literals, closing brackets, and keywords like `break`, `continue`, `return`. A newline before a dot (`.`) is treated as line continuation, not a statement break.
 
 ### Numeric literals
 
@@ -71,114 +121,20 @@ inc() // 1
 inc() // 2
 ```
 
-## Types and values
-
-Scalar types: `undefined`, `bool`, `int`, `float`, `decimal`, `char`, `string`, `bytes`, `time`, `error`.  
-Container types: `array`, `record`, `map`, `range`.
-
-**Truthiness** is summarized below:
-
-| Value | Truthy? |
-|---|---|
-| `undefined` | no |
-| `false` | no |
-| `0` (int) | no |
-| `0.0` (float) | yes — all floats are truthy except NaN |
-| `decimal(0)` | no |
-| `""` (empty string) | no |
-| `[]`, `{}`, `map()` | no — empty containers are falsy |
-| everything else | yes |
-
-**Equality** is coercive across types. `==` tries to convert both sides to a common type:
-
-```go
-1 == "1"      // true
-true == 1     // true
-true == 2     // false (bool converts to 0/1)
-[1] == ["1"]  // true
-```
-
-Use `type_name(x)` to inspect the actual type at runtime.
-
-### Decimal numbers
-
-`decimal` is an exact decimal type.
-
-Decimal values can be written directly with the `d` suffix, or constructed with `decimal(...)` or `.to_decimal()`:
-
-```go
-a := 1.23d
-b := 123d
-
-a2 := decimal(123)       // int -> decimal
-b2 := decimal(1.23)      // float -> decimal
-c2 := decimal("1.23")    // string -> decimal
-
-d := (123).to_decimal()
-e := (1.23).to_decimal()
-f := "1.23".to_decimal()
-```
-
-`decimal(x)` conversion rules:
-
-- `decimal()` returns `decimal(0)`.
-- `decimal(decimalValue)` returns the same decimal value.
-- `decimal(x)` attempts runtime conversion via `AsDecimal`.
-- `decimal(x, fallback)` returns `fallback` when conversion fails.
-
-`to_decimal()` member methods exist on:
-
-- `int.to_decimal()`
-- `float.to_decimal()`
-- `string.to_decimal()`
-- `decimal.to_decimal()`
-
-Notable edge cases from implementation:
-
-- `float.to_decimal()` returns decimal `NaN` for `NaN` and infinities.
-- `string.to_decimal()` returns decimal `NaN` for invalid input.
-- `decimal("bad")` returns `undefined` (or the fallback when provided), because conversion failure is tracked separately from the returned decimal value.
-
-Automatic conversions in mixed operations involving `decimal`:
-
-- `decimal op x` converts `x` to decimal (if possible), result type is decimal for arithmetic.
-- `int op decimal` promotes `int` to decimal, result type is decimal for arithmetic.
-- `float op decimal` keeps float semantics (decimal converted to float), result type is float for arithmetic.
-- `string + decimal` is valid only when string is on the left; decimal is converted to string.
-
-Examples:
-
-```go
-decimal(1) + 2      // decimal(3)
-1 + decimal(2)      // decimal(3)
-decimal(1) + 2.0    // decimal(3)
-1.0 + decimal(2)    // 3.0 (float)
-"value=" + decimal(2) // "value=2"
-```
-
-Decimal member functions:
-
-- Conversion: `to_decimal()`, `to_float()`, `to_int()`, `to_string()`
-- Classification: `is_zero()`, `is_negative()`, `is_positive()`, `is_nan()`
-- Metadata: `sign()`, `scale()`, `error()`
-- Scale/normalization: `to_scale(scale)`, `canonical()`, `trunc(scale)`
-- Neighbor/value transforms: `next_up()`, `next_down()`, `abs()`, `neg()`, `sqrt()`
-- Rounding: `round_down(scale)`, `round_up(scale)`, `round_toward_zero(scale)`, `round_away_from_zero(scale)`, `round_half_toward_zero(scale)`, `round_half_away_from_zero(scale)`, `round_bank(scale)`
-
-For all decimal methods that accept `scale`, the argument must be an `int` in the implementation-defined decimal scale range, otherwise a runtime error is raised.
-
 ## Expressions
 
-GS has the usual arithmetic, comparison, logical, and bitwise operators. The only notable addition is `in` for membership tests, and `?:` for ternary conditionals:
+GS has arithmetic, comparison, logical, bitwise, membership, and conditional operators.
 
 ```go
 x := 10 > 5 ? "yes" : "no"
-found := "el" in "hello"     // true — substring check
-found2 := 2 in [1, 2, 3]     // true — element check
-has_key := "a" in {a: 1}     // true — key check
+found := "el" in "hello"     // true - substring check
+found2 := 2 in [1, 2, 3]     // true - element check
+has_key := "a" in {a: 1}     // true - key check
 ```
 
-**Operator precedence** (lowest to highest):
+### Operator precedence
+
+From lowest to highest:
 
 | Level | Operators |
 |---|---|
@@ -188,9 +144,9 @@ has_key := "a" in {a: 1}     // true — key check
 | 4 | `+` `-` `\|` `^` |
 | 5 | `*` `/` `%` `<<` `>>` `&` `&^` |
 
-Unary: `-`, `+`, `!`, `^` (bitwise complement). Ternary `?:` binds looser than all binary operators.
+Unary operators: `-`, `+`, `!`, `^` (bitwise complement). Ternary `?:` binds looser than all binary operators.
 
-**Complete operator list**
+### Complete operator list
 
 | Category | Operators |
 |---|---|
@@ -210,13 +166,13 @@ String concatenation uses `+` and requires a string on the left. The right side 
 1 + "x"             // runtime error
 ```
 
-**Indexing and slicing** work on strings, arrays, and bytes. Out-of-bounds index returns `undefined` (not an error). Slices clamp silently when either bound is at the natural limit, but raise `invalid slice index` for negative bounds or inverted bounds:
+Indexing and slicing work on strings, arrays, and bytes. Out-of-bounds index returns `undefined` (not an error). Slices clamp silently when either bound is at the natural limit, but raise `invalid slice index` for negative bounds or inverted bounds:
 
 ```go
 a := [1, 2, 3, 4, 5]
 a[10]      // undefined
-a[-1:]     // [1,2,3,4,5] — clamped
-a[:100]    // [1,2,3,4,5] — clamped
+a[-1:]     // [1,2,3,4,5] - clamped
+a[:100]    // [1,2,3,4,5] - clamped
 a[:-1]     // error: invalid slice index
 a[3:1]     // error: invalid slice index
 ```
@@ -243,7 +199,7 @@ if x := compute(); x > 0 {
 
 `for` has four forms:
 
-```go 
+```go
 for { }                         // infinite loop
 for condition { }               // while-style
 for i := 0; i < 10; i++ { }     // C-style
@@ -254,9 +210,9 @@ for k, v in collection { }      // iterator with key/index
 The iterator form (`for in`) works on arrays, strings, bytes, records, maps, and ranges. When two variables are used, the first is the index (arrays/strings/bytes) or key (records/maps):
 
 ```go
-for i, v in [10, 20, 30] { }    // i = 0,1,2; v = element
+for i, v in [10, 20, 30] { }   // i = 0,1,2; v = element
 for k, v in {a: 1, b: 2} { }   // k = key string; v = value
-for c in "hello" { }            // c = char
+for c in "hello" { }           // c = char
 ```
 
 `break` and `continue` work at the innermost loop. `return` exits the current function.
@@ -298,125 +254,6 @@ f(1, 2, args...)
 
 A function with no `return` statement returns `undefined`.
 
-## Collections
-
-### Arrays
-
-Arrays are mutable and reference-typed (`a := b` makes both point at the same array):
-
-```go
-a := [1, 2, 3]
-b := a
-a[0] = 99
-// b[0] == 99
-```
-
-Key methods: `len()`, `is_empty()`, `first()`, `last()`, `sort()`, `contains(x)`, `filter(fn)`, `map(fn)`, `reduce(init, fn)`, `all(fn)`, `any(fn)`, `count(fn)`, `sum()`, `avg()`, `min()`, `max()`, `to_string()`, `to_bytes()`, `to_record()`.
-
-Lambda callbacks for `filter`/`map`/etc. can accept one argument (value) or two (index, value):
-
-```go
-[1, 2, 3, 4].filter(x => x % 2 == 0)          // [2, 4]
-[1, 2, 3].map((i, v) => i * v)                // [0, 2, 6]
-[1, 2, 3].reduce(0, (acc, v) => acc + v)      // 6
-```
-
-### Records
-
-Records are the primary object type. Keys are strings. Both dot notation and index notation work:
-
-```go
-r := {name: "Alice", age: 30}
-r.name       // "Alice"
-r["age"]     // 30
-r.missing    // undefined
-
-r.city = "Berlin"   // add new key
-delete(r, "age")    // remove key
-
-"name" in r  // true — key existence check
-```
-
-Records are also reference-typed.
-
-### Maps
-
-`map` is similar to a record but only supports index access (dot notation is used for member functions) and is backed by a separate runtime type. Create with `map()` or `map(record)`:
-
-```go
-m := map({a: 1, b: 2})
-m["a"]       // 1
-m.a          // runtime error — dot access not allowed on map
-
-m.keys()     // array of keys (unsorted)
-m.values()   // array of values
-```
-
-**Record and map relationship**
-
-Records and maps represent the same logical structure: a string-keyed dictionary with values of any type. Converting a record with `map(record)` does not copy data; the resulting map points to the same underlying structure.
-
-The key difference is access rules:
-
-- Record: selector and index access read/write elements (`r.name`, `r["name"]`), but records have no member functions.
-- Map: index access reads/writes elements (`m["name"]`), while selector access is reserved for map member functions (for example `m.len()`, `m.filter(...)`, `m.keys()`).
-
-### Strings and chars
-
-Strings are immutable and indexed by Unicode rune, not byte:
-
-```go
-s := "ウクライナ"
-s[0]         // char 'ウ'
-s[0:2]       // "ウク"
-len(s)       // 5 (rune count)
-```
-
-Char literals are single runes. Arithmetic with chars works on their Unicode code point:
-
-```go
-'A' + 1   // 66 (int)
-'9' - '0' // 9 (int)
-```
-
-Key string methods: `len()`, `is_empty()`, `first()`, `last()`, `upper()`, `lower()`, `trim([cutset])`, `contains(x)`, `to_array()`, `to_bytes()`, `to_int()`, `to_float()`, `to_decimal()`, `to_bool()`, `to_char()`.
-
-### Bytes
-
-Bytes are mutable byte arrays. Indexing returns an `int` (0–255):
-
-```go
-b := bytes("abc")
-b[0]                            // 97
-b[0:2]                          // bytes slice
-bytes("abc") + bytes("def")     // concatenation
-```
-
-### Ranges
-
-Ranges are lazy sequences. `range(start, stop)` and `range(start, stop, step)` with `step > 0`:
-
-```go
-range(0, 5).to_array()       // [0, 1, 2, 3, 4]
-range(5, 0, 1).to_array()    // [5, 4, 3, 2, 1]
-range(0, 10, 2).contains(4)  // true
-
-for v in range(1, 4) { }     // v = 1, 2, 3
-```
-
-### Immutability
-
-`immutable(x)` makes a container immutable at the container level. Mutating an immutable container raises a runtime error. `copy()` always returns a mutable deep copy, even of an immutable value:
-
-```go
-a := immutable([1, 2, 3])
-a[0] = 9       // runtime error
-type_name(a)   // "immutable-array"
-
-b := copy(a)   // mutable copy
-b[0] = 9       // ok
-```
-
 ## Modules
 
 `import("name")` is an expression that loads a module and returns its exported value. Module source can be a builtin module or a GS source file.
@@ -451,16 +288,16 @@ double(21)   // 42
 
 ## Built-in functions
 
-**Type conversion** — all accept an optional fallback as second argument. Returns `undefined` (or the fallback) when conversion fails:
+Type conversion builtins accept an optional fallback as second argument. They return `undefined` (or the fallback) when conversion fails:
 
 ```go
 int("42")          // 42
 int("bad", 0)      // 0
 float("3.14")      // 3.14
 string(99)         // "99"
-string(undefined)  // undefined  ← not the string "undefined"
+string(undefined)  // undefined  <- not the string "undefined"
 bool(0)            // false
-bool(0.0)          // true  ← float zero is truthy
+bool(0.0)          // true  <- float zero is truthy
 decimal("1.25")   // decimal value
 decimal("bad")    // undefined
 decimal("bad", decimal(0)) // decimal(0)
@@ -468,10 +305,10 @@ bytes("abc")       // bytes value
 time("2024-01-01") // time value
 ```
 
-**Collections:**
+Collections and helpers:
 
 ```go
-len(x)                  // length of any collection, string, or range
+len(x)                  // length of collection/string/range
 copy(x)                 // deep mutable copy
 append(arr, v1, v2)     // returns new array
 delete(obj, "key")      // mutates record/map in place
@@ -480,9 +317,10 @@ map()                   // empty map
 map({a: 1})             // map from record
 range(0, 10)            // range(start, stop[, step])
 error("msg")            // error value with optional payload
+type_name(x)            // runtime type name
 ```
 
-**Type predicates:**
+Type predicates:
 
 `is_int`, `is_float`, `is_decimal`, `is_bool`, `is_char`, `is_string`, `is_bytes`, `is_array`, `is_record`, `is_map`, `is_range`, `is_time`, `is_error`, `is_undefined`, `is_function`, `is_callable`, `is_iterable`, `is_immutable`
 
@@ -492,7 +330,7 @@ is_callable(len)   // true
 type_name({})      // "record"
 ```
 
-**Formatting:**
+Formatting:
 
 ```go
 format("x=%d y=%v", 1, [2, 3])   // "x=1 y=[2, 3]"
@@ -511,14 +349,14 @@ Runtime Error: invalid binary operator: int + string
 
 For runtime errors that bubble through multiple call frames, each frame is shown. Common runtime errors:
 
-- `invalid binary operator: T op T` — operator not supported for the given types
+- `invalid binary operator: T op T` - operator not supported for the given types
 - `wrong number of arguments: want=N, got=M`
-- `not callable: T` — tried to call a non-function value
-- `unresolved reference 'x'` — variable not declared
-- `redeclared: 'x'` — `:=` used on an already-declared variable in the same scope
-- `index out of bounds` — assignment to an out-of-range array index
-- `invalid slice index` — negative or inverted slice bounds
-- `object is not assignable` — assignment target is `undefined`
+- `not callable: T` - tried to call a non-function value
+- `unresolved reference 'x'` - variable not declared
+- `redeclared: 'x'` - `:=` used on an already-declared variable in the same scope
+- `index out of bounds` - assignment to an out-of-range array index
+- `invalid slice index` - negative or inverted slice bounds
+- `object is not assignable` - assignment target is `undefined`
 
 The `error(payload)` built-in creates an error value that can be returned from functions and inspected:
 
@@ -527,3 +365,7 @@ e := error("something went wrong")
 e.value()      // "something went wrong"
 is_error(e)    // true
 ```
+
+## Detailed type documentation
+
+For detailed per-type semantics, conversions, member functions, and type-specific edge cases, see [Type reference](types.md).

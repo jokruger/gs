@@ -18,6 +18,7 @@ type Script struct {
 	modules          vm.ModuleGetter
 	input            []byte
 	maxConstObjects  int
+	assignmentMode   AssignmentMode
 	enableFileImport bool
 	importDir        string
 }
@@ -29,6 +30,7 @@ func NewScript(alloc core.Allocator, input []byte) *Script {
 		variables:       make(map[string]*Variable),
 		input:           input,
 		maxConstObjects: -1,
+		assignmentMode:  AssignmentModeSmart,
 	}
 }
 
@@ -66,6 +68,11 @@ func (s *Script) SetMaxConstObjects(n int) {
 	s.maxConstObjects = n
 }
 
+// SetAssignmentMode sets how plain '=' handles unresolved identifiers during compilation.
+func (s *Script) SetAssignmentMode(mode AssignmentMode) {
+	s.assignmentMode = mode
+}
+
 // EnableFileImport enables or disables module loading from local files. Local file modules are disabled by default.
 func (s *Script) EnableFileImport(enable bool) {
 	s.enableFileImport = enable
@@ -87,6 +94,7 @@ func (s *Script) Compile() (*Compiled, error) {
 	}
 
 	c := NewCompiler(s.alloc, srcFile, symbolTable, nil, s.modules, nil)
+	c.SetAssignmentMode(s.assignmentMode)
 	c.EnableFileImport(s.enableFileImport)
 	c.SetImportDir(s.importDir)
 	if err := c.Compile(file); err != nil {

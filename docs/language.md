@@ -29,14 +29,14 @@ Container types:
 Literal examples:
 
 ```go
-i := 42
-f := 3.14
-d := 1.23d
-c := 'A'          // char (Unicode rune)
-s := "hello"      // string, double-quoted
-r := `raw string` // raw string, backtick-quoted
-b := true
-u := undefined
+i = 42
+f = 3.14
+d = 1.23d
+c = 'A'          // char (Unicode rune)
+s = "hello"      // string, double-quoted
+r = `raw string` // raw string, backtick-quoted
+b = true
+u = undefined
 ```
 
 ### Truthiness and equality
@@ -99,37 +99,72 @@ Rules:
 
 ## Variables and scope
 
-Use `:=` to declare a new variable. Use `=` or compound operators (`+=`, `-=`, etc.) to assign to an existing one. `var x` is shorthand for `x := undefined`.
+GS supports three declaration forms:
 
-```go
-a := 1
-a += 2            // a == 3
+- `var x` declares `x` in the current scope and initializes it to `undefined`.
+- `var x = expr` declares `x` in the current scope and assigns `expr`.
+- `x := expr` is shorthand for `var x = expr`.
 
-var msg           // msg == undefined
-msg = "ready"
-```
+By default, plain `=` assignment is **smart**:
+
+- If the identifier already exists in current or outer scope, `x = expr` assigns to that variable.
+- If it does not exist, `x = expr` declares it in the current scope and assigns `expr`.
+
+Compound assignment operators (`+=`, `-=`, etc.) are always strict and require an existing variable.
+
+You can switch plain `=` to strict mode in the compiler/CLI, where unresolved `x = expr` becomes a compile error.
 
 Redeclaring with `:=` in the same scope is a compile error. Variables declared inside `if`/`for` blocks are local to that block. Closures capture free variables by reference, so mutations are visible from the outer scope:
 
 ```go
-counter := func() {
-    n := 0
+counter = func() {
+    n = 0
     return func() { n += 1; return n }
 }
-inc := counter()
+inc = counter()
 inc() // 1
 inc() // 2
 ```
+
+### Variable scope and shadowing in block initialization
+
+In `if` and `for` statements, plain `=` and `:=` create different scope contexts:
+
+```go
+x = 0
+y = 0
+if x = 10; x > 0 {
+    y = 1
+} else {
+    y = 2
+}
+// x == 10, y == 1 (= modifies outer x)
+```
+
+vs
+
+```go
+x = 0
+y = 0
+if x := 10; x > 0 {
+    y = 1
+} else {
+    y = 2
+}
+// x == 0, y == 1 (:= declares new local x in if block)
+```
+
+In the first example, `x` already exists in outer scope, so `x = 10` modifies that outer variable. In the second example, `x := 10` declares a new local variable `x` confined to the if block scope, shadowing the outer `x`. The outer `x` remains unchanged.
 
 ## Expressions
 
 GS has arithmetic, comparison, logical, bitwise, membership, and conditional operators.
 
 ```go
-x := 10 > 5 ? "yes" : "no"
-found := "el" in "hello"     // true - substring check
-found2 := 2 in [1, 2, 3]     // true - element check
-has_key := "a" in {a: 1}     // true - key check
+x = 10 > 5 ? "yes" : "no"
+found = "el" in "hello"     // true - substring check
+found2 = 2 in [1, 2, 3]     // true - element check
+has_key = "a" in {a: 1}     // true - key check
 ```
 
 ### Operator precedence
@@ -169,7 +204,7 @@ String concatenation uses `+` and requires a string on the left. The right side 
 Indexing and slicing work on strings, arrays, and bytes. Out-of-bounds index returns `undefined` (not an error). Slices clamp silently when either bound is at the natural limit, but raise `invalid slice index` for negative bounds or inverted bounds:
 
 ```go
-a := [1, 2, 3, 4, 5]
+a = [1, 2, 3, 4, 5]
 a[10]      // undefined
 a[-1:]     // [1,2,3,4,5] - clamped
 a[:100]    // [1,2,3,4,5] - clamped
@@ -190,7 +225,7 @@ undefined.a.b.c     // undefined
 `if` and `for` look like Go. An `if` can include an init statement:
 
 ```go
-if x := compute(); x > 0 {
+if x = compute(); x > 0 {
     use(x)
 } else {
     fallback()
@@ -202,7 +237,7 @@ if x := compute(); x > 0 {
 ```go
 for { }                         // infinite loop
 for condition { }               // while-style
-for i := 0; i < 10; i++ { }     // C-style
+for i = 0; i < 10; i++ { }     // C-style
 for v in collection { }         // iterator
 for k, v in collection { }      // iterator with key/index
 ```
@@ -222,18 +257,18 @@ for c in "hello" { }           // c = char
 Functions are first-class values. The short arrow syntax is idiomatic for callbacks:
 
 ```go
-double := x => x * 2
-add := (a, b) => a + b
+double = x => x * 2
+add = (a, b) => a + b
 
 // Block body needs explicit return
-clamp := (v, lo, hi) => {
+clamp = (v, lo, hi) => {
     if v < lo { return lo }
     if v > hi { return hi }
     return v
 }
 
 // Regular function literal
-f := func(x, y) {
+f = func(x, y) {
     return x + y
 }
 ```
@@ -241,14 +276,14 @@ f := func(x, y) {
 Variadic parameters collect extra arguments into an immutable array:
 
 ```go
-f := func(a, b, ...rest) { return rest }
+f = func(a, b, ...rest) { return rest }
 f(1, 2, 3, 4)   // rest == [3, 4]
 ```
 
 To spread an array into a call, use `...` after the last argument:
 
 ```go
-args := [3, 4]
+args = [3, 4]
 f(1, 2, args...)
 ```
 
@@ -270,7 +305,7 @@ export {
 
 ```go
 // main.gs
-m := import("math_utils")
+m = import("math_utils")
 m.square(4)   // 16
 ```
 
@@ -282,7 +317,7 @@ export func(x) { return x * 2 }
 ```
 
 ```go
-double := import("double")
+double = import("double")
 double(21)   // 42
 ```
 
@@ -361,7 +396,7 @@ For runtime errors that bubble through multiple call frames, each frame is shown
 The `error(payload)` built-in creates an error value that can be returned from functions and inspected:
 
 ```go
-e := error("something went wrong")
+e = error("something went wrong")
 e.value()      // "something went wrong"
 is_error(e)    // true
 ```

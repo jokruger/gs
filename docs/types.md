@@ -11,7 +11,7 @@ Represents absence of value.
 - Many conversion builtins return `undefined` on conversion failure unless a fallback is provided.
 
 ```go
-u := undefined
+u = undefined
 u.anything        // undefined
 u[0]              // undefined
 ```
@@ -24,7 +24,7 @@ Boolean values are `true` and `false`.
 - Participates in coercive equality/comparisons where appropriate.
 
 ```go
-ok := true
+ok = true
 ok && false   // false
 ```
 
@@ -39,8 +39,8 @@ Signed integer type.
 Declaration and usage:
 
 ```go
-i := 42
-i2 := 0x2a
+i = 42
+i2 = 0x2a
 ```
 
 Int member functions:
@@ -55,9 +55,9 @@ Floating-point type.
 Declaration and usage:
 
 ```go
-f := 3.14
-g := 1e3
-h := 1f
+f = 3.14
+g = 1e3
+h = 1f
 ```
 
 Float member functions:
@@ -72,16 +72,16 @@ Float member functions:
 Declaration and construction:
 
 ```go
-a := 1.23d
-b := 123d
+a = 1.23d
+b = 123d
 
-a2 := decimal(123)       // int -> decimal
-b2 := decimal(1.23)      // float -> decimal
-c2 := decimal("1.23")    // string -> decimal
+a2 = decimal(123)       // int -> decimal
+b2 = decimal(1.23)      // float -> decimal
+c2 = decimal("1.23")    // string -> decimal
 
-d := (123).to_decimal()
-e := (1.23).to_decimal()
-f := "1.23".to_decimal()
+d = (123).to_decimal()
+e = (1.23).to_decimal()
+f = "1.23".to_decimal()
 ```
 
 `decimal(x)` conversion rules:
@@ -139,7 +139,7 @@ For decimal methods that accept `scale`, the argument must be an `int` in the im
 Declaration and usage:
 
 ```go
-c := 'A'
+c = 'A'
 'A' + 1   // 66 (int)
 '9' - '0' // 9 (int)
 ```
@@ -155,7 +155,7 @@ Strings are immutable and indexed by Unicode rune (not byte).
 Declaration and usage:
 
 ```go
-s := "ウクライナ"
+s = "ウクライナ"
 s[0]         // char 'ウ'
 s[0:2]       // "ウク"
 len(s)       // 5 (rune count)
@@ -174,7 +174,7 @@ Bytes are mutable byte arrays. Indexing returns an `int` in `0..255`.
 Declaration and usage:
 
 ```go
-b := bytes("abc")
+b = bytes("abc")
 b[0]                            // 97
 b[0:2]                          // bytes slice
 bytes("abc") + bytes("def")     // concatenation
@@ -190,7 +190,7 @@ Bytes member functions:
 Time values are builtin scalar values, usually created via `time(...)`.
 
 ```go
-t := time("2024-01-01")
+t = time("2024-01-01")
 ```
 
 Time member functions:
@@ -205,7 +205,7 @@ Time member functions:
 Error values carry payload and are first-class values.
 
 ```go
-e := error("something went wrong")
+e = error("something went wrong")
 e.value()      // "something went wrong"
 is_error(e)    // true
 ```
@@ -217,13 +217,13 @@ Error member functions:
 
 ## array
 
-Arrays are mutable and reference-typed (`a := b` makes both variables point at the same array).
+Arrays are mutable and reference-typed (`a = b` makes both variables point at the same array).
 
 Declaration and usage:
 
 ```go
-a := [1, 2, 3]
-b := a
+a = [1, 2, 3]
+b = a
 a[0] = 99
 // b[0] == 99
 ```
@@ -251,7 +251,7 @@ Records are the primary object type. Keys are strings. Both dot notation and ind
 Declaration and usage:
 
 ```go
-r := {name: "Alice", age: 30}
+r = {name: "Alice", age: 30}
 r.name       // "Alice"
 r["age"]     // 30
 r.missing    // undefined
@@ -273,7 +273,7 @@ Records do not expose member functions. Selector access is for fields.
 Declaration and usage:
 
 ```go
-m := map({a: 1, b: 2})
+m = map({a: 1, b: 2})
 m["a"]       // 1
 m.a          // runtime error - dot access not allowed on map elements
 
@@ -322,10 +322,10 @@ Range member functions:
 `copy()` always returns a mutable deep copy, even from an immutable value:
 
 ```go
-a := immutable([1, 2, 3])
+a = immutable([1, 2, 3])
 a[0] = 9       // runtime error
 type_name(a)   // "immutable-array"
 
-b := copy(a)   // mutable copy
+b = copy(a)   // mutable copy
 b[0] = 9       // ok
 ```

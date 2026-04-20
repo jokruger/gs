@@ -28,6 +28,17 @@ type loop struct {
 	Breaks    []int
 }
 
+// AssignmentMode controls how plain '=' handles unresolved identifiers.
+type AssignmentMode int
+
+const (
+	// AssignmentModeSmart declares a variable in current scope for unresolved '=' assignments.
+	AssignmentModeSmart AssignmentMode = iota
+
+	// AssignmentModeStrict requires variables to already exist for '=' assignments.
+	AssignmentModeStrict
+)
+
 // CompilerError represents a compiler error.
 type CompilerError struct {
 	FileSet *parser.SourceFileSet
@@ -57,6 +68,7 @@ type Compiler struct {
 	allowFileImport bool
 	loops           []*loop
 	loopIndex       int
+	assignmentMode  AssignmentMode
 	trace           io.Writer
 	indent          int
 }
@@ -99,11 +111,27 @@ func NewCompiler(
 		scopes:          []compilationScope{mainScope},
 		scopeIndex:      0,
 		loopIndex:       -1,
+		assignmentMode:  AssignmentModeSmart,
 		trace:           trace,
 		modules:         modules,
 		compiledModules: make(map[string]*core.CompiledFunction),
 		importFileExt:   []string{SourceFileExtDefault},
 	}
+}
+
+// SetAssignmentMode sets how plain '=' handles unresolved identifiers.
+func (c *Compiler) SetAssignmentMode(mode AssignmentMode) {
+	switch mode {
+	case AssignmentModeSmart, AssignmentModeStrict:
+		c.assignmentMode = mode
+	default:
+		panic(fmt.Errorf("invalid assignment mode: %d", mode))
+	}
+}
+
+// GetAssignmentMode returns the active assignment mode.
+func (c *Compiler) GetAssignmentMode() AssignmentMode {
+	return c.assignmentMode
 }
 
 // Compile compiles the AST node.
@@ -731,7 +759,13 @@ func (c *Compiler) compileAssign(node parser.Node, lhs, rhs []parser.Expr, op to
 		}
 	} else {
 		if !exists {
-			return c.errorf(node, "unresolved reference '%s'", ident)
+			if op == token.Assign && numSel == 0 && c.assignmentMode == AssignmentModeSmart {
+				if isFunc {
+					symbol = c.symbolTable.Define(ident)
+				}
+			} else {
+				return c.errorf(node, "unresolved reference '%s'", ident)
+			}
 		}
 	}
 
@@ -749,7 +783,7 @@ func (c *Compiler) compileAssign(node parser.Node, lhs, rhs []parser.Expr, op to
 		}
 	}
 
-	if op == token.Define && !isFunc {
+	if (op == token.Define || (op == token.Assign && numSel == 0 && c.assignmentMode == AssignmentModeSmart && !exists)) && !isFunc {
 		symbol = c.symbolTable.Define(ident)
 	}
 
@@ -1146,6 +1180,7 @@ func (c *Compiler) fork(file *parser.SourceFile, modulePath string, symbolTable 
 	child := NewCompiler(c.alloc, file, symbolTable, nil, c.modules, c.trace)
 	child.modulePath = modulePath // module file path
 	child.parent = c              // parent to set to current compiler
+	child.assignmentMode = c.assignmentMode
 	child.allowFileImport = c.allowFileImport
 	child.importDir = c.importDir
 	child.importFileExt = c.importFileExt

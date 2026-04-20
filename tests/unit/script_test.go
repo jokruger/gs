@@ -78,6 +78,23 @@ func TestScript_Run(t *testing.T) {
 	compiledGet(t, c, "a", int64(5))
 }
 
+func TestScript_SetAssignmentMode(t *testing.T) {
+	s := gs.NewScript(alloc, []byte(`a = 1`))
+	_, err := s.Compile()
+	require.NoError(t, err)
+
+	s = gs.NewScript(alloc, []byte(`a = 1`))
+	s.SetAssignmentMode(gs.AssignmentModeStrict)
+	_, err = s.Compile()
+	require.Error(t, err)
+	require.True(t, strings.Contains(err.Error(), "unresolved reference 'a'"))
+
+	s = gs.NewScript(alloc, []byte(`a += 1`))
+	_, err = s.Compile()
+	require.Error(t, err)
+	require.True(t, strings.Contains(err.Error(), "unresolved reference 'a'"))
+}
+
 func TestScript_BuiltinModules(t *testing.T) {
 	s := gs.NewScript(alloc, []byte(`math := import("math"); a := math.abs(-19.84)`))
 	s.SetImports(stdlib.GetModuleMap("math"))

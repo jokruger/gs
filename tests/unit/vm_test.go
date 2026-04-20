@@ -391,7 +391,7 @@ func TestString(t *testing.T) {
 		expectRun(t, fmt.Sprintf("out = %s[%d]", strStr, idx), nil, str[idx])
 		expectRun(t, fmt.Sprintf("out = %s[0 + %d]", strStr, idx), nil, str[idx])
 		expectRun(t, fmt.Sprintf("out = %s[1 + %d - 1]", strStr, idx), nil, str[idx])
-		expectRun(t, fmt.Sprintf("idx := %d; out = %s[idx]", idx, strStr), nil, str[idx])
+		expectRun(t, fmt.Sprintf("idx = %d; out = %s[idx]", idx, strStr), nil, str[idx])
 	}
 
 	expectRun(t, fmt.Sprintf("%s[%d]", strStr, -1), nil, core.Undefined)
@@ -3887,6 +3887,15 @@ func TestIntegrity(t *testing.T) {
 	`, nil, "[8, 2]")
 
 	expectRun(t, `
+		x = [9, 8, 7, 6, 5, 4, 3, 2, 1]
+		r1 = x.sort().filter(e => e % 2 == 0).last()
+		y = map({a: 1, b: 2, c: 3})
+		r2 = y.values().sort().filter(e => e == 2).first()
+
+		out = string([r1, r2])
+	`, nil, "[8, 2]")
+
+	expectRun(t, `
 		out = [1, 2, 3]
 			.sort()
 			.filter(e => e > 1)
@@ -4150,6 +4159,11 @@ out = x
 `, nil, 1)
 
 	expectRun(t, `
+x = 1
+out = x
+`, nil, 1)
+
+	expectRun(t, `
 x := 1
 for i in [0, 1, 2] {
 	x = i // assignment to outer variable
@@ -4158,7 +4172,23 @@ out = x
 `, nil, 2)
 
 	expectRun(t, `
+x = 1
+for i in [0, 1, 2] {
+	x = i // assignment to outer variable
+}
+out = x
+`, nil, 2)
+
+	expectRun(t, `
 x := 1
+for i in [0, 1, 2] {
+	x := i // declaration of new variable that shadows outer variable, so outer variable is not modified
+}
+out = x
+`, nil, 1)
+
+	expectRun(t, `
+x = 1
 for i in [0, 1, 2] {
 	x := i // declaration of new variable that shadows outer variable, so outer variable is not modified
 }
@@ -4175,6 +4205,15 @@ out = x
 `, nil, 2)
 
 	expectRun(t, `
+x = 1
+foo = func() {
+	x = 2 // assignment to outer variable
+}
+foo()
+out = x
+`, nil, 2)
+
+	expectRun(t, `
 x := 1
 foo := func() {
 	x := 2 // declaration of new variable that shadows outer variable, so outer variable is not modified
@@ -4182,6 +4221,37 @@ foo := func() {
 foo()
 out = x
 `, nil, 1)
+
+	expectRun(t, `
+x = 1
+foo = func() {
+	x := 2 // declaration of new variable that shadows outer variable, so outer variable is not modified
+}
+foo()
+out = x
+`, nil, 1)
+
+	expectRun(t, `
+x = 0
+y = 0
+if x = 10; x > 0 {
+    y = 1
+} else {
+    y = 2
+}
+out = [x, y]
+`, nil, ARR{10, 1}) // x == 10, y == 1 (= modifies outer x)
+
+	expectRun(t, `
+x = 0
+y = 0
+if x := 10; x > 0 {
+    y = 1
+} else {
+    y = 2
+}
+out = [x, y]
+`, nil, ARR{0, 1}) // x == 0, y == 1 (:= declares new local x in if block)
 }
 
 func expectRun(t *testing.T, input string, opts *testopts, expected any) {

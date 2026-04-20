@@ -30,6 +30,18 @@ Pass a `.gs` source file as the first argument:
 gs hello.gs
 ```
 
+### CLI flags
+
+- `-o <file>`: write compiled bytecode to a file
+- `-version`: print the CLI version
+- `-strict-assign`: require variables to already exist for plain `=` assignment
+
+By default, GS uses smart `=` assignment at compile time (`x = expr` declares `x` in current scope if unresolved). Use `-strict-assign` to enforce explicit declaration before `=`.
+
+```sh
+gs -strict-assign hello.gs
+```
+
 ### Hashbang / shebang scripts
 
 Add a hashbang line as the first line of your script to make it directly executable:

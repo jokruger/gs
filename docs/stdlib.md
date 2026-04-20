@@ -23,7 +23,7 @@ Notes:
 Example:
 
 ```gs
-base64 := import("base64")
+base64 = import("base64")
 base64.encode(bytes("hello"))
 ```
 
@@ -41,7 +41,7 @@ base64.encode(bytes("hello"))
 Example:
 
 ```gs
-fmt := import("fmt")
+fmt = import("fmt")
 fmt.printf("sum=%v\n", 20 + 22)
 ```
 
@@ -55,7 +55,7 @@ fmt.printf("sum=%v\n", 20 + 22)
 Example:
 
 ```gs
-hex := import("hex")
+hex = import("hex")
 hex.encode(bytes("ok"))
 ```
 
@@ -67,7 +67,7 @@ hex.encode(bytes("ok"))
 Example:
 
 ```gs
-json := import("json")
+json = import("json")
 json.encode({"a": 1, "b": true})
 ```
 
@@ -81,7 +81,7 @@ json.encode({"a": 1, "b": true})
 Example:
 
 ```gs
-math := import("math")
+math = import("math")
 math.sqrt(144)
 ```
 
@@ -150,7 +150,7 @@ Constants:
 Example:
 
 ```gs
-os := import("os")
+os = import("os")
 os.read_file("./README.md")
 ```
 
@@ -220,7 +220,7 @@ Constants:
 Example:
 
 ```gs
-rand := import("rand")
+rand = import("rand")
 rand.int_n(100)
 ```
 
@@ -245,7 +245,7 @@ rand.int_n(100)
 Example:
 
 ```gs
-text := import("text")
+text = import("text")
 text.trim_space("  hello  ")
 ```
 
@@ -302,7 +302,7 @@ text.trim_space("  hello  ")
 Example:
 
 ```gs
-times := import("times")
+times = import("times")
 times.time_format(times.now(), times.format_rfc3339)
 ```
 

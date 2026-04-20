@@ -1071,8 +1071,14 @@ func TestCompilerErrorReport(t *testing.T) {
 	expectCompileError(t, `import("user1")`,
 		"Compile Error: module 'user1' not found\n\tat test:1:1")
 
-	expectCompileError(t, `a = 1`,
-		"Compile Error: unresolved reference 'a'\n\tat test:1:1")
+	_, trace, err := traceCompile(`a = 1`, nil)
+	if err != nil {
+		for _, tr := range trace {
+			t.Log(tr)
+		}
+	}
+	require.NoError(t, err)
+
 	expectCompileError(t, `a := a`,
 		"Compile Error: unresolved reference 'a'\n\tat test:1:6")
 	expectCompileError(t, `a, b := 1, 2`,
@@ -1092,6 +1098,23 @@ func TestCompilerErrorReport(t *testing.T) {
 		"Compile Error: continue not allowed outside loop\n\tat test:1:10")
 	expectCompileError(t, `func() { export 5 }`,
 		"Compile Error: export not allowed inside function\n\tat test:1:10")
+}
+
+func TestCompilerAssignmentMode(t *testing.T) {
+	_, _, err := traceCompileWithMode(`a = 1`, nil, gs.AssignmentModeSmart)
+	require.NoError(t, err)
+
+	_, _, err = traceCompileWithMode(`a = 1`, nil, gs.AssignmentModeStrict)
+	require.Error(t, err)
+	require.True(t, strings.Contains(err.Error(), "unresolved reference 'a'"))
+
+	_, _, err = traceCompileWithMode(`a += 1`, nil, gs.AssignmentModeSmart)
+	require.Error(t, err)
+	require.True(t, strings.Contains(err.Error(), "unresolved reference 'a'"))
+
+	_, _, err = traceCompileWithMode(`a.b = 1`, nil, gs.AssignmentModeSmart)
+	require.Error(t, err)
+	require.True(t, strings.Contains(err.Error(), "unresolved reference 'a'"))
 }
 
 func TestCompilerDeadCode(t *testing.T) {
@@ -1481,6 +1504,10 @@ func (o *compileTracer) Write(p []byte) (n int, err error) {
 }
 
 func traceCompile(input string, symbols map[string]core.Value) (res *vm.Bytecode, trace []string, err error) {
+	return traceCompileWithMode(input, symbols, gs.AssignmentModeSmart)
+}
+
+func traceCompileWithMode(input string, symbols map[string]core.Value, mode gs.AssignmentMode) (res *vm.Bytecode, trace []string, err error) {
 	fileSet := parser.NewFileSet()
 	file := fileSet.AddFile("test", -1, len(input))
 
@@ -1496,6 +1523,7 @@ func traceCompile(input string, symbols map[string]core.Value) (res *vm.Bytecode
 
 	tr := &compileTracer{}
 	c := gs.NewCompiler(alloc, file, symTable, nil, nil, tr)
+	c.SetAssignmentMode(mode)
 	parsed, err := p.ParseFile()
 	if err != nil {
 		return

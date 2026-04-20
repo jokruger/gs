@@ -28,6 +28,7 @@ var (
 	showHelp      bool
 	showVersion   bool
 	resolvePath   bool // TODO Remove this flag at version 3
+	strictAssign  bool
 	version       = "dev"
 )
 
@@ -36,6 +37,7 @@ func init() {
 	flag.StringVar(&compileOutput, "o", "", "Compile output file")
 	flag.BoolVar(&showVersion, "version", false, "Show version")
 	flag.BoolVar(&resolvePath, "resolve", false, "Resolve relative import paths")
+	flag.BoolVar(&strictAssign, "strict-assign", false, "Require variables to be declared before '=' assignment")
 	flag.Parse()
 }
 
@@ -202,6 +204,9 @@ func RunREPL(a core.Allocator, modules *vm.ModuleMap, in io.Reader, out io.Write
 
 		file = addPrints(file)
 		c := gs.NewCompiler(a, srcFile, symbolTable, constants, modules, nil)
+		if strictAssign {
+			c.SetAssignmentMode(gs.AssignmentModeStrict)
+		}
 		if err := c.Compile(file); err != nil {
 			_, _ = fmt.Fprintln(out, err.Error())
 			continue
@@ -228,6 +233,9 @@ func compileSrc(a core.Allocator, modules *vm.ModuleMap, src []byte, inputFile s
 	}
 
 	c := gs.NewCompiler(a, srcFile, nil, nil, modules, nil)
+	if strictAssign {
+		c.SetAssignmentMode(gs.AssignmentModeStrict)
+	}
 	c.EnableFileImport(true)
 	if resolvePath {
 		c.SetImportDir(filepath.Dir(inputFile))
@@ -250,6 +258,7 @@ func doHelp() {
 	fmt.Println("Flags:")
 	fmt.Println()
 	fmt.Println("	-o        compile output file")
+	fmt.Println("	-strict-assign  require variables to be declared before '=' assignment")
 	fmt.Println("	-version  show version")
 	fmt.Println()
 	fmt.Println("Examples:")

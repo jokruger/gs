@@ -137,3 +137,5 @@
 - range.max()
 - range.sum()
 - range.avg()
+
+- try to get rig of ":=". Is it possible to analyze ast during compile time and determine if variable is assigned for the first time - when assigned for the first time, use declaration operation, otherwise use assignment

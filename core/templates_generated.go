@@ -6,7 +6,287 @@ package core
 
 import "github.com/jokruger/gs/errs"
 
-/* === templates/count.tmpl === */
+/* === templates/array_all.tmpl === */
+
+func arrayFnAll(v Value, vm VM, name string, args []Value) (Value, error) {
+	if len(args) != 1 {
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
+	}
+
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+	}
+
+	o := (*Array)(v.Ptr)
+	es := o.Elements
+	var buf [2]Value
+	switch fn.Arity() {
+	case 1:
+		for _, v := range es {
+			buf[0] = v
+			res, err := fn.Call(vm, buf[:1])
+			if err != nil {
+				return Undefined, err
+			}
+			if !res.IsTrue() {
+				return BoolValue(false), nil
+			}
+		}
+		return BoolValue(true), nil
+
+	case 2:
+		for i, v := range es {
+			buf[0] = IntValue(int64(i))
+			buf[1] = v
+			res, err := fn.Call(vm, buf[:2])
+			if err != nil {
+				return Undefined, err
+			}
+			if !res.IsTrue() {
+				return BoolValue(false), nil
+			}
+		}
+		return BoolValue(true), nil
+
+	default:
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+	}
+}
+
+func stringFnAll(v Value, vm VM, name string, args []Value) (Value, error) {
+	if len(args) != 1 {
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
+	}
+
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+	}
+
+	o := (*String)(v.Ptr)
+	es := o.Runes()
+	var buf [2]Value
+	switch fn.Arity() {
+	case 1:
+		for _, v := range es {
+			buf[0] = IntValue(int64(v))
+			res, err := fn.Call(vm, buf[:1])
+			if err != nil {
+				return Undefined, err
+			}
+			if !res.IsTrue() {
+				return BoolValue(false), nil
+			}
+		}
+		return BoolValue(true), nil
+
+	case 2:
+		for i, v := range es {
+			buf[0] = IntValue(int64(i))
+			buf[1] = IntValue(int64(v))
+			res, err := fn.Call(vm, buf[:2])
+			if err != nil {
+				return Undefined, err
+			}
+			if !res.IsTrue() {
+				return BoolValue(false), nil
+			}
+		}
+		return BoolValue(true), nil
+
+	default:
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+	}
+}
+
+func bytesFnAll(v Value, vm VM, name string, args []Value) (Value, error) {
+	if len(args) != 1 {
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
+	}
+
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+	}
+
+	o := (*Bytes)(v.Ptr)
+	es := o.Elements
+	var buf [2]Value
+	switch fn.Arity() {
+	case 1:
+		for _, v := range es {
+			buf[0] = IntValue(int64(v))
+			res, err := fn.Call(vm, buf[:1])
+			if err != nil {
+				return Undefined, err
+			}
+			if !res.IsTrue() {
+				return BoolValue(false), nil
+			}
+		}
+		return BoolValue(true), nil
+
+	case 2:
+		for i, v := range es {
+			buf[0] = IntValue(int64(i))
+			buf[1] = IntValue(int64(v))
+			res, err := fn.Call(vm, buf[:2])
+			if err != nil {
+				return Undefined, err
+			}
+			if !res.IsTrue() {
+				return BoolValue(false), nil
+			}
+		}
+		return BoolValue(true), nil
+
+	default:
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+	}
+}
+
+/* === templates/array_any.tmpl === */
+
+func arrayFnAny(v Value, vm VM, name string, args []Value) (Value, error) {
+	if len(args) != 1 {
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
+	}
+
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+	}
+
+	o := (*Array)(v.Ptr)
+	es := o.Elements
+	var buf [2]Value
+	switch fn.Arity() {
+	case 1:
+		for _, v := range es {
+			buf[0] = v
+			res, err := fn.Call(vm, buf[:1])
+			if err != nil {
+				return Undefined, err
+			}
+			if res.IsTrue() {
+				return BoolValue(true), nil
+			}
+		}
+		return BoolValue(false), nil
+
+	case 2:
+		for i, v := range es {
+			buf[0] = IntValue(int64(i))
+			buf[1] = v
+			res, err := fn.Call(vm, buf[:2])
+			if err != nil {
+				return Undefined, err
+			}
+			if res.IsTrue() {
+				return BoolValue(true), nil
+			}
+		}
+		return BoolValue(false), nil
+
+	default:
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+	}
+}
+
+func stringFnAny(v Value, vm VM, name string, args []Value) (Value, error) {
+	if len(args) != 1 {
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
+	}
+
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+	}
+
+	o := (*String)(v.Ptr)
+	es := o.Runes()
+	var buf [2]Value
+	switch fn.Arity() {
+	case 1:
+		for _, v := range es {
+			buf[0] = IntValue(int64(v))
+			res, err := fn.Call(vm, buf[:1])
+			if err != nil {
+				return Undefined, err
+			}
+			if res.IsTrue() {
+				return BoolValue(true), nil
+			}
+		}
+		return BoolValue(false), nil
+
+	case 2:
+		for i, v := range es {
+			buf[0] = IntValue(int64(i))
+			buf[1] = IntValue(int64(v))
+			res, err := fn.Call(vm, buf[:2])
+			if err != nil {
+				return Undefined, err
+			}
+			if res.IsTrue() {
+				return BoolValue(true), nil
+			}
+		}
+		return BoolValue(false), nil
+
+	default:
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+	}
+}
+
+func bytesFnAny(v Value, vm VM, name string, args []Value) (Value, error) {
+	if len(args) != 1 {
+		return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
+	}
+
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "non-variadic function", fn.TypeName())
+	}
+
+	o := (*Bytes)(v.Ptr)
+	es := o.Elements
+	var buf [2]Value
+	switch fn.Arity() {
+	case 1:
+		for _, v := range es {
+			buf[0] = IntValue(int64(v))
+			res, err := fn.Call(vm, buf[:1])
+			if err != nil {
+				return Undefined, err
+			}
+			if res.IsTrue() {
+				return BoolValue(true), nil
+			}
+		}
+		return BoolValue(false), nil
+
+	case 2:
+		for i, v := range es {
+			buf[0] = IntValue(int64(i))
+			buf[1] = IntValue(int64(v))
+			res, err := fn.Call(vm, buf[:2])
+			if err != nil {
+				return Undefined, err
+			}
+			if res.IsTrue() {
+				return BoolValue(true), nil
+			}
+		}
+		return BoolValue(false), nil
+
+	default:
+		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
+	}
+}
+
+/* === templates/array_count.tmpl === */
 
 func arrayFnCount(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 1 {
@@ -152,7 +432,7 @@ func bytesFnCount(v Value, vm VM, name string, args []Value) (Value, error) {
 	}
 }
 
-/* === templates/filter.tmpl === */
+/* === templates/array_filter.tmpl === */
 
 func arrayFnFilter(v Value, vm VM, name string, args []Value) (Value, error) {
 	if len(args) != 1 {
@@ -299,4 +579,72 @@ func bytesFnFilter(v Value, vm VM, name string, args []Value) (Value, error) {
 	default:
 		return Undefined, errs.NewInvalidArgumentTypeError(name, "first", "f/1 or f/2", fn.TypeName())
 	}
+}
+
+/* === templates/array_first_last.tmpl === */
+
+func arrayFnFirst(v Value, _ VM, name string, args []Value) (Value, error) {
+	if len(args) != 0 {
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	o := (*Array)(v.Ptr)
+	if len(o.Elements) == 0 {
+		return Undefined, nil
+	}
+	return o.Elements[0], nil
+}
+
+func arrayFnLast(v Value, _ VM, name string, args []Value) (Value, error) {
+	if len(args) != 0 {
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	o := (*Array)(v.Ptr)
+	if len(o.Elements) == 0 {
+		return Undefined, nil
+	}
+	return o.Elements[len(o.Elements)-1], nil
+}
+
+func bytesFnFirst(v Value, _ VM, name string, args []Value) (Value, error) {
+	if len(args) != 0 {
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	o := (*Bytes)(v.Ptr)
+	if len(o.Elements) == 0 {
+		return Undefined, nil
+	}
+	return IntValue(int64(o.Elements[0])), nil
+}
+
+func bytesFnLast(v Value, _ VM, name string, args []Value) (Value, error) {
+	if len(args) != 0 {
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	o := (*Bytes)(v.Ptr)
+	if len(o.Elements) == 0 {
+		return Undefined, nil
+	}
+	return IntValue(int64(o.Elements[len(o.Elements)-1])), nil
+}
+
+func stringFnFirst(v Value, _ VM, name string, args []Value) (Value, error) {
+	if len(args) != 0 {
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	o := (*String)(v.Ptr)
+	if len(o.Value) == 0 {
+		return Undefined, nil
+	}
+	return CharValue(o.At(0)), nil
+}
+
+func stringFnLast(v Value, _ VM, name string, args []Value) (Value, error) {
+	if len(args) != 0 {
+		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
+	}
+	o := (*String)(v.Ptr)
+	if len(o.Value) == 0 {
+		return Undefined, nil
+	}
+	return CharValue(o.At(o.Len() - 1)), nil
 }

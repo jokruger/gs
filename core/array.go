@@ -174,15 +174,35 @@ func arrayTypeCopy(v Value, a Allocator) (Value, error) {
 }
 
 func arrayTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
+	o := (*Array)(v.Ptr)
+	alloc := vm.Allocator()
+
 	switch name {
 	case "to_array":
-		return arrayFnToArray(v, vm, "array.to_array", args)
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("array.to_array", "0", len(args))
+		}
+		return v, nil
 
 	case "to_bytes":
-		return arrayFnToBytes(v, vm, "array.to_bytes", args)
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("array.to_bytes", "0", len(args))
+		}
+		bs := make([]byte, len(o.Elements))
+		for i, e := range o.Elements {
+			bs[i], _ = e.AsByte()
+		}
+		return alloc.NewBytesValue(bs)
 
 	case "to_string":
-		return arrayFnToString(v, vm, "array.to_string", args)
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("array.to_string", "0", len(args))
+		}
+		r := make([]rune, len(o.Elements))
+		for i, e := range o.Elements {
+			r[i], _ = e.AsChar()
+		}
+		return alloc.NewStringValue(string(r))
 
 	case "to_record":
 		return arrayFnToRecord(v, vm, "array.to_record", args)
@@ -626,42 +646,6 @@ func arrayFnReduce(v Value, vm VM, name string, args []Value) (Value, error) {
 	default:
 		return Undefined, errs.NewInvalidArgumentTypeError(name, "second", "f/2 or f/3", fn.TypeName())
 	}
-}
-
-func arrayFnToArray(v Value, vm VM, name string, args []Value) (Value, error) {
-	if len(args) != 0 {
-		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
-	}
-	return v, nil
-}
-
-func arrayFnToBytes(v Value, vm VM, name string, args []Value) (Value, error) {
-	if len(args) != 0 {
-		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
-	}
-	o := (*Array)(v.Ptr)
-	bs := make([]byte, len(o.Elements))
-	for i, e := range o.Elements {
-		b, _ := e.AsInt()
-		bs[i] = byte(b)
-	}
-	return vm.Allocator().NewBytesValue(bs)
-}
-
-func arrayFnToString(v Value, vm VM, name string, args []Value) (Value, error) {
-	if len(args) != 0 {
-		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
-	}
-	o := (*Array)(v.Ptr)
-	r := make([]rune, len(o.Elements))
-	for i, e := range o.Elements {
-		rv, ok := e.AsChar()
-		if !ok {
-			rv = ' '
-		}
-		r[i] = rv
-	}
-	return vm.Allocator().NewStringValue(string(r))
 }
 
 func arrayFnToRecord(v Value, vm VM, name string, args []Value) (Value, error) {

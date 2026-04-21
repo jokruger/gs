@@ -123,6 +123,14 @@ func (v Value) AsChar() (rune, bool) {
 	return ValueTypes[v.Type].AsChar(v)
 }
 
+func (v Value) AsByte() (byte, bool) {
+	i, ok := ValueTypes[v.Type].AsInt(v)
+	if !ok || i < 0 || i > 255 {
+		return 0, false
+	}
+	return byte(i), true
+}
+
 func (v Value) AsInt() (int64, bool) {
 	return ValueTypes[v.Type].AsInt(v)
 }

@@ -6,6 +6,7 @@ import (
 	"math"
 	"strconv"
 	"time"
+	"unicode/utf8"
 
 	"github.com/jokruger/dec128"
 	"github.com/jokruger/gs/errs"
@@ -78,7 +79,11 @@ func intTypeAsBool(v Value) (bool, bool) {
 }
 
 func intTypeAsChar(v Value) (rune, bool) {
-	return rune(int64(v.Data)), true
+	i := int64(v.Data)
+	if i < 0 || i > utf8.MaxRune {
+		return 0, false
+	}
+	return rune(i), true
 }
 
 func intTypeAsTime(v Value) (time.Time, bool) {

@@ -173,6 +173,9 @@ func mapTypeCopy(v Value, a Allocator) (Value, error) {
 }
 
 func mapTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
+	o := (*Map)(v.Ptr)
+	alloc := vm.Allocator()
+
 	switch name {
 	case "to_map":
 		if len(args) != 0 {
@@ -184,15 +187,37 @@ func mapTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error)
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("map.to_record", "0", len(args))
 		}
-		o := (*Map)(v.Ptr)
-		return vm.Allocator().NewRecordValue(o.Elements, o.Immutable)
+		return alloc.NewRecordValue(o.Elements, o.Immutable)
 
 	case "is_empty":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError("map.is_empty", "0", len(args))
 		}
-		o := (*Map)(v.Ptr)
 		return BoolValue(len(o.Elements) == 0), nil
+
+	case "len":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("map.len", "0", len(args))
+		}
+		return IntValue(int64(len(o.Elements))), nil
+
+	case "keys":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("map.keys", "0", len(args))
+		}
+		return mapKeys(v, alloc)
+
+	case "values":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("map.values", "0", len(args))
+		}
+		return mapValues(v, alloc)
+
+	case "contains":
+		if len(args) != 1 {
+			return Undefined, errs.NewWrongNumArgumentsError("map.contains", "1", len(args))
+		}
+		return BoolValue(mapTypeContains(v, args[0])), nil
 
 	case "filter":
 		return mapFnFilter(v, vm, "map.filter", args)
@@ -205,31 +230,6 @@ func mapTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error)
 
 	case "any":
 		return mapFnAny(v, vm, "map.any", args)
-
-	case "len":
-		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError("map.len", "0", len(args))
-		}
-		o := (*Map)(v.Ptr)
-		return IntValue(int64(len(o.Elements))), nil
-
-	case "keys":
-		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError("map.keys", "0", len(args))
-		}
-		return mapKeys(v, vm.Allocator())
-
-	case "values":
-		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError("map.values", "0", len(args))
-		}
-		return mapValues(v, vm.Allocator())
-
-	case "contains":
-		if len(args) != 1 {
-			return Undefined, errs.NewWrongNumArgumentsError("map.contains", "1", len(args))
-		}
-		return BoolValue(mapTypeContains(v, args[0])), nil
 
 	default:
 		return Undefined, errs.NewInvalidMethodError(name, v.TypeName())

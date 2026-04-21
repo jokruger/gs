@@ -205,10 +205,24 @@ func arrayTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		return alloc.NewStringValue(string(r))
 
 	case "to_record":
-		return arrayFnToRecord(v, vm, "array.to_record", args)
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("array.to_record", "0", len(args))
+		}
+		r := make(map[string]Value, len(o.Elements))
+		for i, v := range o.Elements {
+			r[strconv.Itoa(i)] = v
+		}
+		return alloc.NewRecordValue(r, false)
 
 	case "to_map":
-		return arrayFnToMap(v, vm, "array.to_map", args)
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError("array.to_map", "0", len(args))
+		}
+		r := make(map[string]Value, len(o.Elements))
+		for i, v := range o.Elements {
+			r[strconv.Itoa(i)] = v
+		}
+		return alloc.NewMapValue(r, false)
 
 	case "sort":
 		return arrayFnSort(v, vm, "array.sort", args)
@@ -388,9 +402,10 @@ func arrayFnFilter(v Value, vm VM, name string, args []Value) (Value, error) {
 	o := (*Array)(v.Ptr)
 	alloc := vm.Allocator()
 	var buf [2]Value
+	filtered := make([]Value, 0, len(o.Elements))
+
 	switch fn.Arity() {
 	case 1:
-		filtered := make([]Value, 0, len(o.Elements))
 		for _, v := range o.Elements {
 			buf[0] = v
 			res, err := fn.Call(vm, buf[:1])
@@ -404,7 +419,6 @@ func arrayFnFilter(v Value, vm VM, name string, args []Value) (Value, error) {
 		return alloc.NewArrayValue(filtered, false)
 
 	case 2:
-		filtered := make([]Value, 0, len(o.Elements))
 		for i, v := range o.Elements {
 			buf[0] = IntValue(int64(i))
 			buf[1] = v
@@ -435,9 +449,10 @@ func arrayFnCount(v Value, vm VM, name string, args []Value) (Value, error) {
 
 	o := (*Array)(v.Ptr)
 	var buf [2]Value
+	var count int64
+
 	switch fn.Arity() {
 	case 1:
-		var count int64
 		for _, v := range o.Elements {
 			buf[0] = v
 			res, err := fn.Call(vm, buf[:1])
@@ -451,7 +466,6 @@ func arrayFnCount(v Value, vm VM, name string, args []Value) (Value, error) {
 		return IntValue(count), nil
 
 	case 2:
-		var count int64
 		for i, v := range o.Elements {
 			buf[0] = IntValue(int64(i))
 			buf[1] = v
@@ -573,9 +587,10 @@ func arrayFnMap(v Value, vm VM, name string, args []Value) (Value, error) {
 	o := (*Array)(v.Ptr)
 	alloc := vm.Allocator()
 	var buf [2]Value
+	mapped := make([]Value, 0, len(o.Elements))
+
 	switch fn.Arity() {
 	case 1:
-		mapped := make([]Value, 0, len(o.Elements))
 		for _, v := range o.Elements {
 			buf[0] = v
 			res, err := fn.Call(vm, buf[:1])
@@ -587,7 +602,6 @@ func arrayFnMap(v Value, vm VM, name string, args []Value) (Value, error) {
 		return alloc.NewArrayValue(mapped, false)
 
 	case 2:
-		mapped := make([]Value, 0, len(o.Elements))
 		for i, v := range o.Elements {
 			buf[0] = IntValue(int64(i))
 			buf[1] = v
@@ -646,30 +660,6 @@ func arrayFnReduce(v Value, vm VM, name string, args []Value) (Value, error) {
 	default:
 		return Undefined, errs.NewInvalidArgumentTypeError(name, "second", "f/2 or f/3", fn.TypeName())
 	}
-}
-
-func arrayFnToRecord(v Value, vm VM, name string, args []Value) (Value, error) {
-	if len(args) != 0 {
-		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
-	}
-	o := (*Array)(v.Ptr)
-	r := make(map[string]Value, len(o.Elements))
-	for i, v := range o.Elements {
-		r[strconv.Itoa(i)] = v
-	}
-	return vm.Allocator().NewRecordValue(r, false)
-}
-
-func arrayFnToMap(v Value, vm VM, name string, args []Value) (Value, error) {
-	if len(args) != 0 {
-		return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
-	}
-	o := (*Array)(v.Ptr)
-	r := make(map[string]Value, len(o.Elements))
-	for i, v := range o.Elements {
-		r[strconv.Itoa(i)] = v
-	}
-	return vm.Allocator().NewMapValue(r, false)
 }
 
 func arrayFnIsEmpty(v Value, vm VM, name string, args []Value) (Value, error) {

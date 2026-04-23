@@ -115,11 +115,11 @@ size := 1000
 s := ""
 for r := 0; r < size*2; r++ {
     if r%2 == 0 {
-        s += string(char(r))
+        s += string(rune(r))
     }
 }
 n := 0
-for r := char(0); r < size*2; r++ {
+for r := rune(0); r < size*2; r++ {
     if text.contains(s, r) {
         n++
     }

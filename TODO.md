@@ -105,3 +105,4 @@
 
 - container types: .reverse(), .shuffle(), .unique(), .join(sep), .split(sep), .chunk(size), .window(size, step), .zip(other), .enumerate()
 - separate string and unicode
+- shell we use ".to_" names?

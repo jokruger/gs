@@ -59,5 +59,5 @@ func stringIteratorTypeKey(v Value, alloc Allocator) (Value, error) {
 
 func stringIteratorTypeValue(v Value, alloc Allocator) (Value, error) {
 	i := (*StringIterator)(v.Ptr)
-	return CharValue(i.v[i.i]), nil
+	return RuneValue(i.v[i.i]), nil
 }

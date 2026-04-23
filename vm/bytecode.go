@@ -142,7 +142,7 @@ func (b *Bytecode) RemoveDuplicates() {
 				deduped = append(deduped, c)
 			}
 
-		case core.VT_CHAR:
+		case core.VT_RUNE:
 			if newIdx, ok := chars[c.Data]; ok {
 				indexMap[curIdx] = newIdx
 			} else {

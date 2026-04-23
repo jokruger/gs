@@ -1987,10 +1987,8 @@ func stringLit(value string, pos core.Pos) *StringLit {
 	return &StringLit{Value: value, ValuePos: pos}
 }
 
-func charLit(value rune, pos core.Pos) *CharLit {
-	return &CharLit{
-		Value: value, ValuePos: pos, Literal: fmt.Sprintf("'%c'", value),
-	}
+func charLit(value rune, pos core.Pos) *RuneLit {
+	return &RuneLit{Value: value, ValuePos: pos, Literal: fmt.Sprintf("'%c'", value)}
 }
 
 func boolLit(value bool, pos core.Pos) *BoolLit {
@@ -2154,11 +2152,11 @@ func equalExpr(t *testing.T, expected, actual Expr) {
 	case *UndefinedLit:
 		require.Equal(t, int(expected.TokenPos),
 			int(actual.(*UndefinedLit).TokenPos))
-	case *CharLit:
+	case *RuneLit:
 		require.Equal(t, expected.Value,
-			actual.(*CharLit).Value)
+			actual.(*RuneLit).Value)
 		require.Equal(t, int(expected.ValuePos),
-			int(actual.(*CharLit).ValuePos))
+			int(actual.(*RuneLit).ValuePos))
 	case *StringLit:
 		require.Equal(t, expected.Value,
 			actual.(*StringLit).Value)

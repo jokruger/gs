@@ -14,7 +14,7 @@ import (
 // 36..99 are reserved for future builtin functions
 var BuiltinFuncs = map[int]core.Value{
 	7:  core.NewBuiltinFunctionValue("bool", builtinBool, 0, true),
-	9:  core.NewBuiltinFunctionValue("char", builtinChar, 0, true),
+	9:  core.NewBuiltinFunctionValue("rune", builtinRune, 0, true),
 	6:  core.NewBuiltinFunctionValue("int", builtinInt, 0, true),
 	8:  core.NewBuiltinFunctionValue("float", builtinFloat, 0, true),
 	34: core.NewBuiltinFunctionValue("decimal", builtinDecimal, 0, true),
@@ -26,7 +26,7 @@ var BuiltinFuncs = map[int]core.Value{
 	33: core.NewBuiltinFunctionValue("error", builtinError, 0, true),
 
 	15: core.NewBuiltinFunctionValue("is_bool", builtinIsBool, 1, false),
-	16: core.NewBuiltinFunctionValue("is_char", builtinIsChar, 1, false),
+	16: core.NewBuiltinFunctionValue("is_rune", builtinIsRune, 1, false),
 	12: core.NewBuiltinFunctionValue("is_int", builtinIsInt, 1, false),
 	13: core.NewBuiltinFunctionValue("is_float", builtinIsFloat, 1, false),
 	35: core.NewBuiltinFunctionValue("is_decimal", builtinIsDecimal, 1, false),
@@ -111,11 +111,11 @@ func builtinIsBool(vm core.VM, args []core.Value) (core.Value, error) {
 	return core.False, nil
 }
 
-func builtinIsChar(vm core.VM, args []core.Value) (core.Value, error) {
+func builtinIsRune(vm core.VM, args []core.Value) (core.Value, error) {
 	if len(args) != 1 {
-		return core.Undefined, errs.NewWrongNumArgumentsError("is_char", "1", len(args))
+		return core.Undefined, errs.NewWrongNumArgumentsError("is_rune", "1", len(args))
 	}
-	if args[0].Type == core.VT_CHAR {
+	if args[0].Type == core.VT_RUNE {
 		return core.True, nil
 	}
 	return core.False, nil
@@ -432,22 +432,22 @@ func builtinBool(vm core.VM, args []core.Value) (core.Value, error) {
 	}
 }
 
-func builtinChar(vm core.VM, args []core.Value) (core.Value, error) {
+func builtinRune(vm core.VM, args []core.Value) (core.Value, error) {
 	l := len(args)
 	if l == 0 {
-		return core.CharValue(0), nil
+		return core.RuneValue(0), nil
 	}
 	if l > 2 {
-		return core.Undefined, errs.NewWrongNumArgumentsError("char", "0, 1 or 2", len(args))
+		return core.Undefined, errs.NewWrongNumArgumentsError("rune", "0, 1 or 2", len(args))
 	}
 
 	switch args[0].Type {
-	case core.VT_CHAR:
+	case core.VT_RUNE:
 		return args[0], nil
 
 	default:
-		if v, ok := args[0].AsChar(); ok {
-			return core.CharValue(v), nil
+		if v, ok := args[0].AsRune(); ok {
+			return core.RuneValue(v), nil
 		}
 		if l == 2 {
 			return args[1], nil

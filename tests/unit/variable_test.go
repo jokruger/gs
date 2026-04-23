@@ -72,7 +72,7 @@ func TestVariable(t *testing.T) {
 		require.Equal(t, tc.ValueType, v.ValueType(), "Name: %s", tc.Name)
 		require.Equal(t, tc.IntValue, v.Int(), "Name: %s", tc.Name)
 		require.Equal(t, tc.FloatValue, v.Float(), "Name: %s", tc.Name)
-		require.Equal(t, tc.CharValue, v.Char(), "Name: %s", tc.Name)
+		require.Equal(t, tc.CharValue, v.Rune(), "Name: %s", tc.Name)
 		require.Equal(t, tc.BoolValue, v.Bool(), "Name: %s", tc.Name)
 		require.Equal(t, tc.StringValue, v.String(), "Name: %s", tc.Name)
 		require.Equal(t, tc.Object, v.Object(), "Name: %s", tc.Name)

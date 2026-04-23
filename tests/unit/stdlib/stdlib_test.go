@@ -186,9 +186,9 @@ func object(v any) core.Value {
 	case bool:
 		return core.BoolValue(v)
 	case rune:
-		return core.CharValue(v)
+		return core.RuneValue(v)
 	case byte: // for convenience
-		return core.CharValue(rune(v))
+		return core.RuneValue(rune(v))
 	case float64:
 		return core.FloatValue(v)
 	case []byte:

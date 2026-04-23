@@ -78,7 +78,7 @@ func intTypeAsBool(v Value) (bool, bool) {
 	return v.Data != 0, true
 }
 
-func intTypeAsChar(v Value) (rune, bool) {
+func intTypeAsRune(v Value) (rune, bool) {
 	i := int64(v.Data)
 	if i < 0 || i > utf8.MaxRune {
 		return 0, false
@@ -127,12 +127,12 @@ func intTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error)
 		b, _ := v.AsBool()
 		return BoolValue(b), nil
 
-	case "to_char":
+	case "to_rune":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		c, _ := v.AsChar()
-		return CharValue(c), nil
+		c, _ := v.AsRune()
+		return RuneValue(c), nil
 
 	case "to_string":
 		if len(args) != 0 {

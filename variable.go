@@ -55,10 +55,9 @@ func (v *Variable) Float() float64 {
 	return c
 }
 
-// Char returns rune value of the variable value. It returns 0 if the value is
-// not convertible to rune.
-func (v *Variable) Char() rune {
-	c, _ := v.value.AsChar()
+// Rune returns rune value of the variable value. It returns 0 if the value is not convertible to rune.
+func (v *Variable) Rune() rune {
+	c, _ := v.value.AsRune()
 	return c
 }
 

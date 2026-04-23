@@ -35,9 +35,9 @@ func TestBytecodeConstBool(t *testing.T) {
 
 func TestBytecodeConstChar(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		core.CharValue('a'),
-		core.CharValue('b'),
-		core.CharValue('c'),
+		core.RuneValue('a'),
+		core.RuneValue('b'),
+		core.RuneValue('c'),
 	)))
 }
 
@@ -85,7 +85,7 @@ func TestBytecodeConstArray(t *testing.T) {
 		core.NewArrayValue([]core.Value{
 			core.IntValue(1),
 			core.FloatValue(2.0),
-			core.CharValue('3'),
+			core.RuneValue('3'),
 			core.NewStringValue("four"),
 		}, true),
 	)))
@@ -94,7 +94,7 @@ func TestBytecodeConstArray(t *testing.T) {
 		core.NewArrayValue([]core.Value{
 			core.IntValue(1),
 			core.FloatValue(2.0),
-			core.CharValue('3'),
+			core.RuneValue('3'),
 			core.NewStringValue("four"),
 		}, false),
 	)))
@@ -105,7 +105,7 @@ func TestBytecodeConstMap(t *testing.T) {
 		core.NewRecordValue(map[string]core.Value{
 			"a": core.IntValue(1),
 			"b": core.FloatValue(2.0),
-			"c": core.CharValue('3'),
+			"c": core.RuneValue('3'),
 			"d": core.NewStringValue("four"),
 		}, true),
 	)))
@@ -114,7 +114,7 @@ func TestBytecodeConstMap(t *testing.T) {
 		core.NewRecordValue(map[string]core.Value{
 			"a": core.IntValue(1),
 			"b": core.FloatValue(2.0),
-			"c": core.CharValue('3'),
+			"c": core.RuneValue('3'),
 			"d": core.NewStringValue("four"),
 		}, false),
 	)))
@@ -131,7 +131,7 @@ func TestBytecode(t *testing.T) {
 
 	testBytecodeSerialization(t, bytecode(
 		concatInsts(), objectsArray(
-			core.CharValue('y'),
+			core.RuneValue('y'),
 			core.FloatValue(93.11),
 			compiledFunction(1, 0,
 				vm.MakeInstruction(core.OpConstant, 3),
@@ -166,7 +166,7 @@ func TestBytecode(t *testing.T) {
 				"true":  core.True,
 				"false": core.False,
 				"bytes": core.NewBytesValue(make([]byte, 16)),
-				"char":  core.CharValue('Y'),
+				"char":  core.RuneValue('Y'),
 				"error": core.NewErrorValue(core.NewStringValue("some error")),
 				"float": core.FloatValue(-19.84),
 				"immutable_array": core.NewArrayValue([]core.Value{
@@ -230,7 +230,7 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 	testBytecodeRemoveDuplicates(t,
 		bytecode(
 			concatInsts(), objectsArray(
-				core.CharValue('y'),
+				core.RuneValue('y'),
 				core.FloatValue(93.11),
 				compiledFunction(1, 0,
 					vm.MakeInstruction(core.OpConstant, 3),
@@ -242,7 +242,7 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 				core.NewStringValue("bar"))),
 		bytecode(
 			concatInsts(), objectsArray(
-				core.CharValue('y'),
+				core.RuneValue('y'),
 				core.FloatValue(93.11),
 				compiledFunction(1, 0,
 					vm.MakeInstruction(core.OpConstant, 3),
@@ -269,7 +269,7 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 			objectsArray(
 				core.IntValue(1),
 				core.FloatValue(2.0),
-				core.CharValue('3'),
+				core.RuneValue('3'),
 				core.NewStringValue("four"),
 				compiledFunction(1, 0,
 					vm.MakeInstruction(core.OpConstant, 3),
@@ -279,7 +279,7 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 					vm.MakeInstruction(core.OpGetFree, 0)),
 				core.IntValue(1),
 				core.FloatValue(2.0),
-				core.CharValue('3'),
+				core.RuneValue('3'),
 				core.NewStringValue("four"))),
 		bytecode(
 			concatInsts(
@@ -296,7 +296,7 @@ func TestBytecode_RemoveDuplicates(t *testing.T) {
 			objectsArray(
 				core.IntValue(1),
 				core.FloatValue(2.0),
-				core.CharValue('3'),
+				core.RuneValue('3'),
 				core.NewStringValue("four"),
 				compiledFunction(1, 0,
 					vm.MakeInstruction(core.OpConstant, 3),

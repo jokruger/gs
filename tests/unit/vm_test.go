@@ -233,7 +233,7 @@ func TestInteger(t *testing.T) {
 	expectRun(t, `out = (12).to_int()`, nil, 12)
 	expectRun(t, `out = (0).to_bool()`, nil, false)
 	expectRun(t, `out = (10).to_bool()`, nil, true)
-	expectRun(t, `out = (48).to_char()`, nil, '0')
+	expectRun(t, `out = (48).to_rune()`, nil, '0')
 	expectRun(t, `out = (48).to_float()`, nil, 48.0)
 	expectRun(t, `out = (48).to_string()`, nil, "48")
 	expectRun(t, `out = (1234567890).to_time().to_utc().to_string()`, nil, "2009-02-13 23:31:30 +0000 UTC")
@@ -334,26 +334,26 @@ func TestChar(t *testing.T) {
 	expectRun(t, `out = '4' <= '4'`, nil, true)
 	expectRun(t, `out = '4' >= '4'`, nil, true)
 
-	v := core.CharValue('A')
+	v := core.RuneValue('A')
 	s, _ := v.AsString()
 	require.Equal(t, "A", s)
-	v = core.CharValue('A')
+	v = core.RuneValue('A')
 	require.Equal(t, "'A'", v.String())
 
-	v = core.CharValue('0')
+	v = core.RuneValue('0')
 	expectRun(t, fmt.Sprintf(`out = '0' == %s`, v.String()), nil, true)
-	v = core.CharValue('A')
+	v = core.RuneValue('A')
 	expectRun(t, fmt.Sprintf(`out = 'A' == %s`, v.String()), nil, true)
-	v = core.CharValue('₴')
+	v = core.RuneValue('₴')
 	expectRun(t, fmt.Sprintf(`out = '₴' == %s`, v.String()), nil, true)
-	v = core.CharValue('\'')
+	v = core.RuneValue('\'')
 	expectRun(t, fmt.Sprintf(`out = '\'' == %s`, v.String()), nil, true)
 
 	expectRun(t, `out = '4' + 4`, nil, 56) // '4' is 52 in ASCII
 	expectRun(t, `out = '4' + "4"`, nil, "44")
-	expectError(t, `'4' - "4"`, nil, "invalid binary operator: char - string")
+	expectError(t, `'4' - "4"`, nil, "invalid binary operator: rune - string")
 
-	expectRun(t, `out = '4'.to_char()`, nil, '4')
+	expectRun(t, `out = '4'.to_rune()`, nil, '4')
 	expectRun(t, `out = '4'.to_bool()`, nil, true)
 	expectRun(t, `out = '4'.to_int()`, nil, 52)
 	expectRun(t, `out = '4'.to_string()`, nil, "4")
@@ -475,8 +475,8 @@ func TestString(t *testing.T) {
 	expectRun(t, `out = "true".to_bool().to_string()`, nil, "true")
 	expectRun(t, `out = "abc".to_bytes()`, nil, core.NewBytesValue([]byte{'a', 'b', 'c'}))
 	expectRun(t, `out = "abc".to_bytes().to_string()`, nil, "abc")
-	expectRun(t, `out = "a".to_char()`, nil, 'a')
-	expectRun(t, `out = "a".to_char().to_string()`, nil, "a")
+	expectRun(t, `out = "a".to_rune()`, nil, 'a')
+	expectRun(t, `out = "a".to_rune().to_string()`, nil, "a")
 	expectRun(t, `out = "1.2".to_float()`, nil, 1.2)
 	expectRun(t, `out = "1.2".to_float().to_string()`, nil, "1.2")
 	expectRun(t, `out = "12".to_int()`, nil, 12)
@@ -944,11 +944,11 @@ x := bytes("abcdefg")
 y := x[2:5]
 res1 := ""
 for v in x {
-	res1 += v.to_char()
+	res1 += v.to_rune()
 }
 res2 := ""
 for v in y {
-	res2 += v.to_char()
+	res2 += v.to_rune()
 }
 out = [res1, res2]
 `, nil, ARR{"abcdefg", "cde"})
@@ -960,13 +960,13 @@ isum1 := 0
 res1 := ""
 for i, v in x {
 	isum1 += i
-	res1 += v.to_char()
+	res1 += v.to_rune()
 }
 isum2 := 0
 res2 := ""
 for i, v in y {
 	isum2 += i
-	res2 += v.to_char()
+	res2 += v.to_rune()
 }
 out = [isum1, res1, isum2, res2]
 `, nil, ARR{21, "abcdefg", 3, "cde"})
@@ -1558,25 +1558,25 @@ func TestBuiltinFunctionFloat(t *testing.T) {
 	expectRun(t, `out = float(undefined, 1)`, nil, 1)
 	expectRun(t, `out = float(undefined, 1.8)`, nil, 1.8)
 	expectRun(t, `out = float(undefined, "-52.2")`, nil, "-52.2")
-	expectRun(t, `out = float(undefined, char(56))`, nil, '8')
+	expectRun(t, `out = float(undefined, rune(56))`, nil, '8')
 	expectRun(t, `out = float(undefined, undefined)`, nil, core.Undefined)
 }
 
-func TestBuiltinFunctionChar(t *testing.T) {
-	expectRun(t, `out = char(56)`, nil, '8')
-	expectRun(t, `out = char(1.8)`, nil, core.Undefined)
-	expectRun(t, `out = char("-52.2")`, nil, core.Undefined)
-	expectRun(t, `out = char(true)`, nil, core.Undefined)
-	expectRun(t, `out = char(false)`, nil, core.Undefined)
-	expectRun(t, `out = char('8')`, nil, '8')
-	expectRun(t, `out = char([1,8.1,true,3])`, nil, core.Undefined)
-	expectRun(t, `out = char({a: 1, b: "foo"})`, nil, core.Undefined)
-	expectRun(t, `out = char(undefined)`, nil, core.Undefined)
-	expectRun(t, `out = char(56, 'a')`, nil, '8')
-	expectRun(t, `out = char(undefined, '8')`, nil, '8')
-	expectRun(t, `out = char(undefined, 56)`, nil, 56)
-	expectRun(t, `out = char(undefined, "-52.2")`, nil, "-52.2")
-	expectRun(t, `out = char(undefined, undefined)`, nil, core.Undefined)
+func TestBuiltinFunctionRune(t *testing.T) {
+	expectRun(t, `out = rune(56)`, nil, '8')
+	expectRun(t, `out = rune(1.8)`, nil, core.Undefined)
+	expectRun(t, `out = rune("-52.2")`, nil, core.Undefined)
+	expectRun(t, `out = rune(true)`, nil, core.Undefined)
+	expectRun(t, `out = rune(false)`, nil, core.Undefined)
+	expectRun(t, `out = rune('8')`, nil, '8')
+	expectRun(t, `out = rune([1,8.1,true,3])`, nil, core.Undefined)
+	expectRun(t, `out = rune({a: 1, b: "foo"})`, nil, core.Undefined)
+	expectRun(t, `out = rune(undefined)`, nil, core.Undefined)
+	expectRun(t, `out = rune(56, 'a')`, nil, '8')
+	expectRun(t, `out = rune(undefined, '8')`, nil, '8')
+	expectRun(t, `out = rune(undefined, 56)`, nil, 56)
+	expectRun(t, `out = rune(undefined, "-52.2")`, nil, "-52.2")
+	expectRun(t, `out = rune(undefined, undefined)`, nil, core.Undefined)
 }
 
 func TestBuiltinFunctionBool(t *testing.T) {
@@ -1590,7 +1590,7 @@ func TestBuiltinFunctionBool(t *testing.T) {
 	expectRun(t, `out = bool(true)`, nil, true)       // true: true
 	expectRun(t, `out = bool(false)`, nil, false)     // false: false
 	expectRun(t, `out = bool('8')`, nil, true)        // non-zero chars: true
-	expectRun(t, `out = bool(char(0))`, nil, false)   // zero char: false
+	expectRun(t, `out = bool(rune(0))`, nil, false)   // zero rune: false
 	expectRun(t, `out = bool([1])`, nil, true)        // non-empty arrays: true
 	expectRun(t, `out = bool([])`, nil, false)        // empty array: false
 	expectRun(t, `out = bool({a: 1})`, nil, true)     // non-empty maps: true
@@ -1653,7 +1653,7 @@ func TestBuiltinFunctionTypeName(t *testing.T) {
 	expectRun(t, `out = type_name("a")`, nil, "string")
 	expectRun(t, `out = type_name([1,2,3])`, nil, "array")
 	expectRun(t, `out = type_name({k:1})`, nil, "record")
-	expectRun(t, `out = type_name('a')`, nil, "char")
+	expectRun(t, `out = type_name('a')`, nil, "rune")
 	expectRun(t, `out = type_name(true)`, nil, "bool")
 	expectRun(t, `out = type_name(false)`, nil, "bool")
 	expectRun(t, `out = type_name(bytes( 1))`, nil, "bytes")
@@ -1685,7 +1685,7 @@ func TestBuiltinFunctionDelete(t *testing.T) {
 	expectError(t, `delete(bytes("str"), 1)`, nil, `invalid delete error: type bytes does not support delete`)
 	expectError(t, `delete(error("err"), 1)`, nil, `invalid delete error: type error does not support delete`)
 	expectError(t, `delete(true, 1)`, nil, `invalid delete error: type bool does not support delete`)
-	expectError(t, `delete(char('c'), 1)`, nil, `invalid delete error: type char does not support delete`)
+	expectError(t, `delete(rune('c'), 1)`, nil, `invalid delete error: type rune does not support delete`)
 	expectError(t, `delete(undefined, 1)`, nil, `invalid delete error: type undefined does not support delete`)
 	expectError(t, `delete(time(1257894000), 1)`, nil, `invalid delete error: type time does not support delete`)
 	expectError(t, `delete(immutable({}), "key")`, nil, `invalid delete error: type immutable-record does not support delete`)
@@ -1709,7 +1709,7 @@ func TestBuiltinFunctionSplice(t *testing.T) {
 	expectError(t, `splice(bytes("str"))`, nil, `invalid argument type: (splice) argument first expects type array, got bytes`)
 	expectError(t, `splice(error("err"))`, nil, `invalid argument type: (splice) argument first expects type array, got error`)
 	expectError(t, `splice(true)`, nil, `invalid argument type: (splice) argument first expects type array, got bool`)
-	expectError(t, `splice(char('c'))`, nil, `invalid argument type: (splice) argument first expects type array, got char`)
+	expectError(t, `splice(rune('c'))`, nil, `invalid argument type: (splice) argument first expects type array, got rune`)
 	expectError(t, `splice(undefined)`, nil, `invalid argument type: (splice) argument first expects type array, got undefined`)
 	expectError(t, `splice(time(1257894000))`, nil, `invalid argument type: (splice) argument first expects type array, got time`)
 	expectError(t, `splice(immutable({}))`, nil, `invalid argument type: (splice) argument first expects type array, got immutable-record`)
@@ -4526,9 +4526,9 @@ func toObject(v any) core.Value {
 	case bool:
 		return core.BoolValue(v)
 	case rune:
-		return core.CharValue(v)
+		return core.RuneValue(v)
 	case byte: // for convenience
-		return core.CharValue(rune(v))
+		return core.RuneValue(rune(v))
 	case float64:
 		return core.FloatValue(v)
 	case dec128.Dec128:
@@ -4581,8 +4581,8 @@ func objectZeroCopy(o core.Value) core.Value {
 	case core.VT_DECIMAL:
 		return core.NewDecimalValue(dec128.Zero)
 
-	case core.VT_CHAR:
-		return core.CharValue(0)
+	case core.VT_RUNE:
+		return core.RuneValue(0)
 
 	case core.VT_STRING:
 		return core.NewStringValue("")

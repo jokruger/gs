@@ -234,7 +234,7 @@ func genericArrayTypeMethodCall(v Value, vm VM, name string, args []Value) (Valu
 		}
 		r := make([]rune, len(o.Elements))
 		for i, e := range o.Elements {
-			r[i], _ = e.AsChar()
+			r[i], _ = e.AsRune()
 		}
 		return alloc.NewStringValue(string(r))
 

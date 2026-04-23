@@ -26,10 +26,10 @@ func FromInterface(alloc core.Allocator, v any) (core.Value, error) {
 		return core.BoolValue(v), nil
 
 	case rune:
-		return core.CharValue(v), nil
+		return core.RuneValue(v), nil
 
 	case byte:
-		return core.CharValue(rune(v)), nil
+		return core.RuneValue(rune(v)), nil
 
 	case float64:
 		return core.FloatValue(v), nil

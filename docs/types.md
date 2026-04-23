@@ -45,7 +45,7 @@ i2 = 0x2a
 
 Int member functions:
 
-- Conversion: `to_int()`, `to_float()`, `to_decimal()`, `to_bool()`, `to_char()`, `to_string()`, `to_time()`
+- Conversion: `to_int()`, `to_float()`, `to_decimal()`, `to_bool()`, `to_rune()`, `to_string()`, `to_time()`
 - Numeric utilities: `sign()`, `abs()`
 
 ## float
@@ -132,9 +132,9 @@ Decimal member functions:
 
 For decimal methods that accept `scale`, the argument must be an `int` in the implementation-defined decimal scale range; otherwise a runtime error is raised.
 
-## char
+## rune
 
-`char` is a single Unicode rune.
+`rune` is a single Unicode code point.
 
 Declaration and usage:
 
@@ -144,9 +144,9 @@ c = 'A'
 '9' - '0' // 9 (int)
 ```
 
-Char member functions:
+Rune member functions:
 
-- Conversion: `to_char()`, `to_bool()`, `to_int()`, `to_string()`
+- Conversion: `to_rune()`, `to_bool()`, `to_int()`, `to_string()`
 
 ## string
 
@@ -156,14 +156,14 @@ Declaration and usage:
 
 ```go
 s = "ウクライナ"
-s[0]         // char 'ウ'
+s[0]         // rune 'ウ'
 s[0:2]       // "ウク"
 len(s)       // 5 (rune count)
 ```
 
 String member functions:
 
-- Conversion: `to_string()`, `to_array()`, `to_bool()`, `to_bytes()`, `to_char()`, `to_float()`, `to_int()`, `to_decimal()`, `to_time()`, `to_record()`, `to_map()`
+- Conversion: `to_string()`, `to_array()`, `to_bool()`, `to_bytes()`, `to_rune()`, `to_float()`, `to_int()`, `to_decimal()`, `to_time()`, `to_record()`, `to_map()`
 - Transformations and filtering: `lower()`, `upper()`, `trim([cutset])`, `sort()`, `filter(fn)`
 - Predicates and matching: `all(fn)`, `any(fn)`
 - Aggregations: `count(fn)`, `min()`, `max()`

@@ -104,5 +104,7 @@
 - type() member function for all types, returning type name as string
 
 - container types: .reverse(), .shuffle(), .unique(), .join(sep), .split(sep), .chunk(size), .window(size, step), .zip(other), .enumerate()
+- byte type
 - separate string and unicode
 - shell we use ".to_" names?
+- why we need immutable arrays/records/maps?

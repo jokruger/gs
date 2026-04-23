@@ -119,8 +119,8 @@ func (v Value) AsBool() (bool, bool) {
 	return ValueTypes[v.Type].AsBool(v)
 }
 
-func (v Value) AsChar() (rune, bool) {
-	return ValueTypes[v.Type].AsChar(v)
+func (v Value) AsRune() (rune, bool) {
+	return ValueTypes[v.Type].AsRune(v)
 }
 
 func (v Value) AsByte() (byte, bool) {

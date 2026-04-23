@@ -59,7 +59,7 @@ const (
 	VT_COMPILED_FUNCTION  = uint8(3)
 	VT_ERROR              = uint8(4)
 	VT_BOOL               = uint8(5)
-	VT_CHAR               = uint8(6)
+	VT_RUNE               = uint8(6)
 	VT_INT                = uint8(7)
 	VT_FLOAT              = uint8(8)
 	VT_DECIMAL            = uint8(9)
@@ -117,7 +117,7 @@ type ValueType struct {
 	Value func(v Value, a Allocator) (Value, error)
 
 	AsBool    func(v Value) (bool, bool)
-	AsChar    func(v Value) (rune, bool)
+	AsRune    func(v Value) (rune, bool)
 	AsInt     func(v Value) (int64, bool)
 	AsFloat   func(v Value) (float64, bool)
 	AsDecimal func(v Value) (Decimal, bool)
@@ -164,7 +164,7 @@ var ValueTypeDefaults = ValueType{
 	Value: defaultUndefined,
 
 	AsBool:    defaultTypeAsBool,
-	AsChar:    defaultTypeAsChar,
+	AsRune:    defaultTypeAsRune,
 	AsInt:     defaultTypeAsInt,
 	AsFloat:   defaultTypeAsFloat,
 	AsDecimal: defaultTypeAsDecimal,
@@ -413,7 +413,7 @@ func defaultTypeAsBool(v Value) (bool, bool) {
 	return false, false
 }
 
-func defaultTypeAsChar(v Value) (rune, bool) {
+func defaultTypeAsRune(v Value) (rune, bool) {
 	return 0, false
 }
 

@@ -87,23 +87,23 @@ func init() {
 		AsBool:       boolTypeAsBool,
 	})
 
-	// Char
-	SetValueType(VT_CHAR, ValueType{
-		Name:         charTypeName,
-		String:       charTypeString,
-		Interface:    charTypeInterface,
-		EncodeJSON:   charTypeEncodeJSON,
-		EncodeBinary: charTypeEncodeBinary,
-		DecodeBinary: charTypeDecodeBinary,
-		IsTrue:       charTypeIsTrue,
-		Equal:        charTypeEqual,
+	// Rune
+	SetValueType(VT_RUNE, ValueType{
+		Name:         runeTypeName,
+		String:       runeTypeString,
+		Interface:    runeTypeInterface,
+		EncodeJSON:   runeTypeEncodeJSON,
+		EncodeBinary: runeTypeEncodeBinary,
+		DecodeBinary: runeTypeDecodeBinary,
+		IsTrue:       runeTypeIsTrue,
+		Equal:        runeTypeEqual,
 		Len:          default1,
-		BinaryOp:     charTypeBinaryOp,
-		MethodCall:   charTypeMethodCall,
-		AsString:     charTypeAsString,
-		AsInt:        charTypeAsInt,
-		AsBool:       charTypeAsBool,
-		AsChar:       charTypeAsChar,
+		BinaryOp:     runeTypeBinaryOp,
+		MethodCall:   runeTypeMethodCall,
+		AsString:     runeTypeAsString,
+		AsInt:        runeTypeAsInt,
+		AsBool:       runeTypeAsBool,
+		AsRune:       runeTypeAsRune,
 	})
 
 	// Int
@@ -125,7 +125,7 @@ func init() {
 		AsFloat:      intTypeAsFloat,
 		AsDecimal:    intTypeAsDecimal,
 		AsBool:       intTypeAsBool,
-		AsChar:       intTypeAsChar,
+		AsRune:       intTypeAsRune,
 		AsTime:       intTypeAsTime,
 	})
 
@@ -212,7 +212,7 @@ func init() {
 		Contains:     stringTypeContains,
 		Slice:        stringTypeSlice,
 		AsBool:       stringTypeAsBool,
-		AsChar:       stringTypeAsChar,
+		AsRune:       stringTypeAsRune,
 		AsInt:        stringTypeAsInt,
 		AsFloat:      stringTypeAsFloat,
 		AsDecimal:    stringTypeAsDecimal,

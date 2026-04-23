@@ -57,26 +57,26 @@ func TestObject_Value(t *testing.T) {
 	require.Equal(t, false, x.Data != 0)
 	require.Equal(t, true, v.Equal(x))
 
-	// Char
-	v = core.CharValue('A')
-	require.True(t, v.Type == core.VT_CHAR)
+	// Rune
+	v = core.RuneValue('A')
+	require.True(t, v.Type == core.VT_RUNE)
 	require.Equal(t, 'A', rune(v.Data))
 	bs, err = v.EncodeBinary()
 	require.NoError(t, err)
 	err = x.DecodeBinary(bs)
 	require.NoError(t, err)
-	require.True(t, x.Type == core.VT_CHAR)
+	require.True(t, x.Type == core.VT_RUNE)
 	require.Equal(t, 'A', rune(x.Data))
 	require.Equal(t, true, v.Equal(x))
 
-	v = core.CharValue('₴')
-	require.True(t, v.Type == core.VT_CHAR)
+	v = core.RuneValue('₴')
+	require.True(t, v.Type == core.VT_RUNE)
 	require.Equal(t, '₴', rune(v.Data))
 	bs, err = v.EncodeBinary()
 	require.NoError(t, err)
 	err = x.DecodeBinary(bs)
 	require.NoError(t, err)
-	require.True(t, x.Type == core.VT_CHAR)
+	require.True(t, x.Type == core.VT_RUNE)
 	require.Equal(t, '₴', rune(x.Data))
 	require.Equal(t, true, v.Equal(x))
 
@@ -355,8 +355,8 @@ func TestObject_TypeName(t *testing.T) {
 	o = core.FloatValue(0)
 	require.Equal(t, "float", o.TypeName())
 
-	o = core.CharValue(0)
-	require.Equal(t, "char", o.TypeName())
+	o = core.RuneValue(0)
+	require.Equal(t, "rune", o.TypeName())
 
 	o = core.NewStringValue("")
 	require.Equal(t, "string", o.TypeName())
@@ -418,9 +418,9 @@ func TestObject_IsTrue(t *testing.T) {
 	require.True(t, o.IsTrue())
 
 	// non-zero char is true
-	o = core.CharValue(' ')
+	o = core.RuneValue(' ')
 	require.True(t, o.IsTrue())
-	o = core.CharValue('T')
+	o = core.RuneValue('T')
 	require.True(t, o.IsTrue())
 
 	// empty string is false, non-empty string is true
@@ -477,10 +477,10 @@ func TestObject_String(t *testing.T) {
 	o = core.FloatValue(1)
 	require.Equal(t, "1", o.String())
 
-	o = core.CharValue(' ')
+	o = core.RuneValue(' ')
 	require.Equal(t, "' '", o.String())
 
-	o = core.CharValue('T')
+	o = core.RuneValue('T')
 	require.Equal(t, "'T'", o.String())
 
 	o = core.NewStringValue("")
@@ -517,7 +517,7 @@ func TestObject_String(t *testing.T) {
 func TestObject_BinaryOp(t *testing.T) {
 	var o core.Value
 
-	o = core.CharValue(0)
+	o = core.RuneValue(0)
 	_, err := o.BinaryOp(alloc, token.Add, core.Undefined)
 	require.Error(t, err)
 
@@ -618,9 +618,9 @@ func TestError_Equals(t *testing.T) {
 	bool2 := core.True
 	bool3 := core.False
 
-	char1 := core.CharValue('A')
-	char2 := core.CharValue('A')
-	char3 := core.CharValue('B')
+	char1 := core.RuneValue('A')
+	char2 := core.RuneValue('A')
+	char3 := core.RuneValue('B')
 
 	int1 := core.IntValue(123)
 	int2 := core.IntValue(123)
@@ -1168,7 +1168,7 @@ func TestString_BinaryOp(t *testing.T) {
 
 			rc := []rune(rstr)[r]
 			testBinaryOp(t, core.NewStringValue(ls), token.Add,
-				core.CharValue(rc),
+				core.RuneValue(rc),
 				core.NewStringValue(ls+string(rc)))
 		}
 	}

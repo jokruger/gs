@@ -173,26 +173,26 @@ func (e *MethodCallExpr) String() string {
 	return e.Object.String() + "." + e.MethodName + "(" + strings.Join(args, ", ") + ")"
 }
 
-// CharLit represents a character literal.
-type CharLit struct {
+// RuneLit represents a character literal.
+type RuneLit struct {
 	Value    rune
 	ValuePos core.Pos
 	Literal  string
 }
 
-func (e *CharLit) exprNode() {}
+func (e *RuneLit) exprNode() {}
 
 // Pos returns the position of first character belonging to the node.
-func (e *CharLit) Pos() core.Pos {
+func (e *RuneLit) Pos() core.Pos {
 	return e.ValuePos
 }
 
 // End returns the position of first character immediately after the node.
-func (e *CharLit) End() core.Pos {
+func (e *RuneLit) End() core.Pos {
 	return core.Pos(int(e.ValuePos) + len(e.Literal))
 }
 
-func (e *CharLit) String() string {
+func (e *RuneLit) String() string {
 	return e.Literal
 }
 

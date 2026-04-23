@@ -9,79 +9,79 @@ import (
 	"github.com/jokruger/kavun/token"
 )
 
-// CharValue creates new char value.
-func CharValue(c rune) Value {
+// RuneValue creates new rune value.
+func RuneValue(c rune) Value {
 	return Value{
 		Data: uint64(c),
-		Type: VT_CHAR,
+		Type: VT_RUNE,
 	}
 }
 
-/* Char type methods */
+/* Rune type methods */
 
-func charTypeName(v Value) string {
-	return "char"
+func runeTypeName(v Value) string {
+	return "rune"
 }
 
-func charTypeEncodeJSON(v Value) ([]byte, error) {
+func runeTypeEncodeJSON(v Value) ([]byte, error) {
 	c := rune(v.Data)
 	s := strconv.FormatInt(int64(c), 10)
 	return []byte(s), nil
 }
 
-func charTypeEncodeBinary(v Value) ([]byte, error) {
+func runeTypeEncodeBinary(v Value) ([]byte, error) {
 	b := make([]byte, 4)
 	binary.BigEndian.PutUint32(b, uint32(v.Data))
 	return b, nil
 }
 
-func charTypeDecodeBinary(v *Value, data []byte) error {
+func runeTypeDecodeBinary(v *Value, data []byte) error {
 	if len(data) < 4 {
-		return fmt.Errorf("char: expected 4 bytes, got %d", len(data))
+		return fmt.Errorf("rune: expected 4 bytes, got %d", len(data))
 	}
 	v.Data = uint64(binary.BigEndian.Uint32(data))
 	return nil
 }
 
-func charTypeString(v Value) string {
+func runeTypeString(v Value) string {
 	return fmt.Sprintf("%q", rune(v.Data))
 }
 
-func charTypeInterface(v Value) any {
+func runeTypeInterface(v Value) any {
 	return rune(v.Data)
 }
 
-func charTypeIsTrue(v Value) bool {
+func runeTypeIsTrue(v Value) bool {
 	return v.Data != 0
 }
 
-func charTypeAsInt(v Value) (int64, bool) {
+func runeTypeAsInt(v Value) (int64, bool) {
 	return int64(v.Data), true
 }
 
-func charTypeAsString(v Value) (string, bool) {
+func runeTypeAsString(v Value) (string, bool) {
 	return string(rune(v.Data)), true
 }
 
-func charTypeAsBool(v Value) (bool, bool) {
+func runeTypeAsBool(v Value) (bool, bool) {
 	return v.Data != 0, true
 }
 
-func charTypeAsChar(v Value) (rune, bool) {
+func runeTypeAsRune(v Value) (rune, bool) {
 	return rune(v.Data), true
 }
 
-func charTypeEqual(v Value, rhs Value) bool {
-	r, ok := rhs.AsChar()
+func runeTypeEqual(v Value, rhs Value) bool {
+	r, ok := rhs.AsRune()
 	if !ok {
 		return false
 	}
 	return rune(v.Data) == r
 }
 
-func charTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
+func runeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
 	switch name {
-	case "to_char":
+	case "to_rune":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -91,7 +91,7 @@ func charTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		b, _ := charTypeAsBool(v)
+		b, _ := runeTypeAsBool(v)
 		return BoolValue(b), nil
 
 	case "to_int":
@@ -105,17 +105,17 @@ func charTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		s, _ := charTypeAsString(v)
+		s, _ := runeTypeAsString(v)
 		return vm.Allocator().NewStringValue(s)
 
 	default:
-		return Undefined, errs.NewInvalidMethodError(name, "char")
+		return Undefined, errs.NewInvalidMethodError(name, "rune")
 	}
 }
 
-func charTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, error) {
+func runeTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, error) {
 	switch rhs.Type {
-	case VT_INT: // char op int => int
+	case VT_INT: // rune op int => int
 		l := int64(v.Data)
 		r := int64(rhs.Data)
 		switch op {
@@ -135,7 +135,7 @@ func charTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, e
 			return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 		}
 
-	case VT_STRING: // char op string => string
+	case VT_STRING: // rune op string => string
 		l := string(rune(v.Data))
 		r, _ := stringTypeAsString(rhs)
 		switch op {
@@ -146,8 +146,8 @@ func charTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, e
 		}
 
 	default:
-		// char op any => char
-		r, ok := rhs.AsChar()
+		// rune op any => rune
+		r, ok := rhs.AsRune()
 		if !ok {
 			return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
 		}
@@ -155,9 +155,9 @@ func charTypeBinaryOp(v Value, a Allocator, op token.Token, rhs Value) (Value, e
 		l := rune(v.Data)
 		switch op {
 		case token.Add:
-			return CharValue(l + r), nil
+			return RuneValue(l + r), nil
 		case token.Sub:
-			return CharValue(l - r), nil
+			return RuneValue(l - r), nil
 		case token.Less:
 			return BoolValue(l < r), nil
 		case token.Greater:

@@ -252,8 +252,8 @@ func (c *Compiler) Compile(node parser.Node) error {
 		}
 		c.emit(node, core.OpConstant, c.addConstant(t))
 
-	case *parser.CharLit:
-		c.emit(node, core.OpConstant, c.addConstant(core.CharValue(node.Value)))
+	case *parser.RuneLit:
+		c.emit(node, core.OpConstant, c.addConstant(core.RuneValue(node.Value)))
 
 	case *parser.UndefinedLit:
 		c.emit(node, core.OpNull)

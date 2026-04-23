@@ -13,7 +13,7 @@ Scalar types:
 - [`int`](types.md#int)
 - [`float`](types.md#float)
 - [`decimal`](types.md#decimal)
-- [`char`](types.md#char)
+- [`rune`](types.md#rune)
 - [`string`](types.md#string)
 - [`bytes`](types.md#bytes)
 - [`time`](types.md#time)
@@ -32,7 +32,7 @@ Literal examples:
 i = 42
 f = 3.14
 d = 1.23d
-c = 'A'          // char (Unicode rune)
+c = 'A'          // rune (Unicode code point)
 s = "hello"      // string, double-quoted
 r = `raw string` // raw string, backtick-quoted
 b = true
@@ -247,7 +247,7 @@ The iterator form (`for in`) works on arrays, strings, bytes, records, maps, and
 ```go
 for i, v in [10, 20, 30] { }   // i = 0,1,2; v = element
 for k, v in {a: 1, b: 2} { }   // k = key string; v = value
-for c in "hello" { }           // c = char
+for c in "hello" { }           // c = rune
 ```
 
 `break` and `continue` work at the innermost loop. `return` exits the current function.
@@ -338,6 +338,7 @@ decimal("bad")    // undefined
 decimal("bad", decimal(0)) // decimal(0)
 bytes("abc")       // bytes value
 time("2024-01-01") // time value
+rune(0)            // rune 0
 ```
 
 Collections and helpers:
@@ -357,7 +358,7 @@ type_name(x)            // runtime type name
 
 Type predicates:
 
-`is_int`, `is_float`, `is_decimal`, `is_bool`, `is_char`, `is_string`, `is_bytes`, `is_array`, `is_record`, `is_map`, `is_range`, `is_time`, `is_error`, `is_undefined`, `is_function`, `is_callable`, `is_iterable`, `is_immutable`
+`is_int`, `is_float`, `is_decimal`, `is_bool`, `is_rune`, `is_string`, `is_bytes`, `is_array`, `is_record`, `is_map`, `is_range`, `is_time`, `is_error`, `is_undefined`, `is_function`, `is_callable`, `is_iterable`, `is_immutable`
 
 ```go
 is_array([1, 2])   // true

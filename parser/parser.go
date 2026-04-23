@@ -564,7 +564,7 @@ func (p *Parser) parseCharLit() Expr {
 	if n := len(p.tokenLit); n >= 3 {
 		code, _, _, err := strconv.UnquoteChar(p.tokenLit[1:n-1], '\'')
 		if err == nil {
-			x := &CharLit{
+			x := &RuneLit{
 				Value:    code,
 				ValuePos: p.pos,
 				Literal:  p.tokenLit,

@@ -362,7 +362,7 @@ func stringTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, er
 
 func stringTypeIterator(v Value, a Allocator) (Value, error) {
 	o := (*String)(v.Ptr)
-	return a.NewStringIteratorValue(o.Runes())
+	return a.NewRunesIteratorValue(o.Runes())
 }
 
 func stringTypeIsTrue(v Value) bool {

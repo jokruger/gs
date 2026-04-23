@@ -423,14 +423,14 @@ func init() {
 		AsArray:      intRangeTypeAsArray,
 	})
 
-	// StringIterator
-	SetValueType(VT_STRING_ITERATOR, ValueType{
-		Name:   stringIteratorTypeName,
-		String: stringIteratorTypeString,
-		Equal:  stringIteratorTypeEqual,
-		Next:   stringIteratorTypeNext,
-		Key:    stringIteratorTypeKey,
-		Value:  stringIteratorTypeValue,
+	// RunesIterator
+	SetValueType(VT_RUNES_ITERATOR, ValueType{
+		Name:   runesIteratorTypeName,
+		String: runesIteratorTypeString,
+		Equal:  runesIteratorTypeEqual,
+		Next:   runesIteratorTypeNext,
+		Key:    runesIteratorTypeKey,
+		Value:  runesIteratorTypeValue,
 	})
 
 	// BytesIterator

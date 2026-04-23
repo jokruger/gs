@@ -80,14 +80,14 @@ func (a *Allocator) NewStringValue(s string) (core.Value, error) {
 	return core.StringValue(o), nil
 }
 
-func (a *Allocator) NewStringIteratorValue(s []rune) (core.Value, error) {
+func (a *Allocator) NewRunesIteratorValue(s []rune) (core.Value, error) {
 	a.allocs--
 	if a.allocs == 0 {
 		return core.Undefined, errs.ErrObjectAllocLimit
 	}
-	o := &core.StringIterator{}
+	o := &core.RunesIterator{}
 	o.Set(s)
-	return core.StringIteratorValue(o), nil
+	return core.RunesIteratorValue(o), nil
 }
 
 func (a *Allocator) NewBytesValue(b []byte) (core.Value, error) {

@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/jokruger/dec128"
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/token"
 )
 
 type bailout struct{}
@@ -93,7 +93,7 @@ func (p ErrorList) Err() error {
 	return p
 }
 
-// Parser parses the Gs source files.
+// Parser parses the Kavun source files.
 type Parser struct {
 	file      *SourceFile
 	errors    ErrorList

@@ -3,8 +3,8 @@ package stdlib
 import (
 	"regexp"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
 )
 
 func makeTextRegexp(vm core.VM, re *regexp.Regexp) (core.Value, error) {

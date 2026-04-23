@@ -1,7 +1,7 @@
 package stdlib
 
 import (
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun/vm"
 )
 
 //go:generate go run gensrcmods.go

@@ -3,7 +3,7 @@ package parser
 import (
 	"strings"
 
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun/core"
 )
 
 const (

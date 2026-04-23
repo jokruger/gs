@@ -9,8 +9,8 @@ import (
 
 	"github.com/jokruger/dec128"
 	"github.com/jokruger/dec128/state"
-	"github.com/jokruger/gs/errs"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/errs"
+	"github.com/jokruger/kavun/token"
 )
 
 // FloatValue creates new boxed float value.

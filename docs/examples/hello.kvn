@@ -1,0 +1,4 @@
+#!/usr/bin/env kavun
+
+fmt = import("fmt")
+fmt.println("Hello Kavun!")

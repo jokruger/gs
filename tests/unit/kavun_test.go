@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/tests/require"
+	"github.com/jokruger/kavun/vm"
 )
 
 func TestInstructions_String(t *testing.T) {

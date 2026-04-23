@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun/core"
 )
 
 func TestTextRE(t *testing.T) {

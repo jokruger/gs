@@ -3,7 +3,7 @@ package parser
 import (
 	"testing"
 
-	"github.com/jokruger/gs/parser"
+	"github.com/jokruger/kavun/parser"
 )
 
 func TestIdentListString(t *testing.T) {

@@ -1,6 +1,6 @@
 package stdlib
 
-import "github.com/jokruger/gs/core"
+import "github.com/jokruger/kavun/core"
 
 // BuiltinModules are builtin type standard library modules.
 var BuiltinModules = map[string]map[string]core.Value{

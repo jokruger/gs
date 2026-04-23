@@ -1,10 +1,10 @@
-package gs
+package kavun
 
 import (
 	"errors"
 	"time"
 
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun/core"
 )
 
 // Variable is a user-defined variable for the script.

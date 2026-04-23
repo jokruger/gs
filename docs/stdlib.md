@@ -1,6 +1,6 @@
 # Standard Library
 
-This document covers the main builtin modules in GS stdlib:
+This document covers the main builtin modules in Kavun stdlib:
 
 - `base64`
 - `fmt`
@@ -14,7 +14,7 @@ This document covers the main builtin modules in GS stdlib:
 
 Notes:
 
-- Signatures below use GS-facing names and argument order.
+- Signatures below use Kavun-facing names and argument order.
 - `error` in return descriptions means the function returns an error value on failure.
 - Some modules also export constants (for example `math`, `times`, `os`).
 
@@ -22,7 +22,7 @@ Notes:
 
 Example:
 
-```gs
+```go
 base64 = import("base64")
 base64.encode(bytes("hello"))
 ```
@@ -40,7 +40,7 @@ base64.encode(bytes("hello"))
 
 Example:
 
-```gs
+```go
 fmt = import("fmt")
 fmt.printf("sum=%v\n", 20 + 22)
 ```
@@ -54,7 +54,7 @@ fmt.printf("sum=%v\n", 20 + 22)
 
 Example:
 
-```gs
+```go
 hex = import("hex")
 hex.encode(bytes("ok"))
 ```
@@ -66,13 +66,13 @@ hex.encode(bytes("ok"))
 
 Example:
 
-```gs
+```go
 json = import("json")
 json.encode({"a": 1, "b": true})
 ```
 
-- `json.decode(data bytes|string) -> value | error`: Decode JSON bytes into GS value.
-- `json.encode(value) -> bytes | error`: Encode GS value into JSON bytes.
+- `json.decode(data bytes|string) -> value | error`: Decode JSON bytes into Kavun value.
+- `json.encode(value) -> bytes | error`: Encode Kavun value into JSON bytes.
 - `json.indent(data bytes|string, prefix string, indent string) -> bytes | error`: Pretty-format JSON bytes.
 - `json.html_escape(data bytes|string) -> bytes | error`: Escape JSON for safe HTML embedding.
 
@@ -80,7 +80,7 @@ json.encode({"a": 1, "b": true})
 
 Example:
 
-```gs
+```go
 math = import("math")
 math.sqrt(144)
 ```
@@ -149,7 +149,7 @@ Constants:
 
 Example:
 
-```gs
+```go
 os = import("os")
 os.read_file("./README.md")
 ```
@@ -219,7 +219,7 @@ Constants:
 
 Example:
 
-```gs
+```go
 rand = import("rand")
 rand.int_n(100)
 ```
@@ -244,7 +244,7 @@ rand.int_n(100)
 
 Example:
 
-```gs
+```go
 text = import("text")
 text.trim_space("  hello  ")
 ```
@@ -301,7 +301,7 @@ text.trim_space("  hello  ")
 
 Example:
 
-```gs
+```go
 times = import("times")
 times.time_format(times.now(), times.format_rfc3339)
 ```

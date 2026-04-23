@@ -10,8 +10,8 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/jokruger/gs/errs"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/errs"
+	"github.com/jokruger/kavun/token"
 )
 
 type Bytes struct {

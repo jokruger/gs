@@ -6,11 +6,11 @@ import (
 	"time"
 
 	"github.com/jokruger/dec128"
-	"github.com/jokruger/gs/core"
-	mock "github.com/jokruger/gs/tests"
-	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/token"
-	_ "github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun/core"
+	mock "github.com/jokruger/kavun/tests"
+	"github.com/jokruger/kavun/tests/require"
+	"github.com/jokruger/kavun/token"
+	_ "github.com/jokruger/kavun/vm"
 )
 
 var vm = mock.Vm

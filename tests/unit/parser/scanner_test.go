@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/parser"
+	"github.com/jokruger/kavun/tests/require"
+	"github.com/jokruger/kavun/token"
 )
 
 var testFileSet = parser.NewFileSet()

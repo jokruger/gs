@@ -1,8 +1,8 @@
 package tests
 
 import (
-	al "github.com/jokruger/gs/alloc"
-	"github.com/jokruger/gs/core"
+	al "github.com/jokruger/kavun/alloc"
+	"github.com/jokruger/kavun/core"
 )
 
 var Alloc = al.New(0)

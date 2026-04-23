@@ -3,8 +3,8 @@ package parser
 import (
 	"strings"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/token"
 )
 
 // Expr represents an expression node in the AST.

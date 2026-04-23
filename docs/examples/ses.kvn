@@ -1,4 +1,4 @@
-#!/usr/bin/env gs
+#!/usr/bin/env kavun
 
 fmt = import("fmt")
 

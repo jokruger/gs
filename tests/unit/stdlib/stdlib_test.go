@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/stdlib"
-	mock "github.com/jokruger/gs/tests"
-	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/stdlib"
+	mock "github.com/jokruger/kavun/tests"
+	"github.com/jokruger/kavun/tests/require"
+	"github.com/jokruger/kavun/vm"
 )
 
 type ARR = []any
@@ -233,7 +233,7 @@ func object(v any) core.Value {
 func expect(t *testing.T, input string, expected any) {
 	e, err := require.FromInterface(alloc, expected)
 	require.NoError(t, err)
-	s := gs.NewScript(alloc, []byte(input))
+	s := kavun.NewScript(alloc, []byte(input))
 	s.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
 	c, err := s.Run()
 	require.NoError(t, err)

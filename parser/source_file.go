@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun/core"
 )
 
 // SourceFilePos represents a position information in the file.

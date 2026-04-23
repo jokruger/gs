@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/tests/require"
+	"github.com/jokruger/kavun"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/tests/require"
 )
 
 func TestEval(t *testing.T) {
@@ -20,7 +20,7 @@ func TestEval(t *testing.T) {
 			require.NoError(t, err)
 			ps[k] = o
 		}
-		actual, err := gs.Eval(ctx, alloc, expr, ps)
+		actual, err := kavun.Eval(ctx, alloc, expr, ps)
 		require.NoError(t, err)
 		require.Equal(t, e, actual)
 	}

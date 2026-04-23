@@ -3,8 +3,8 @@ package stdlib
 import (
 	"time"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
 )
 
 var timesModule = map[string]core.Value{

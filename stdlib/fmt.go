@@ -3,9 +3,9 @@ package stdlib
 import (
 	"fmt"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
-	"github.com/jokruger/gs/formatter"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
+	"github.com/jokruger/kavun/formatter"
 )
 
 var fmtModule = map[string]core.Value{

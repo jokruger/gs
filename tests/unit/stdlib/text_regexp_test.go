@@ -3,7 +3,7 @@ package stdlib
 import (
 	"testing"
 
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun/core"
 )
 
 func TestTextREAlternation(t *testing.T) {

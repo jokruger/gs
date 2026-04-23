@@ -1,4 +1,4 @@
-module github.com/jokruger/gs
+module github.com/jokruger/kavun
 
 go 1.26
 

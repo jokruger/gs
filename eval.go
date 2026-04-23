@@ -1,11 +1,11 @@
-package gs
+package kavun
 
 import (
 	"context"
 	"fmt"
 	"strings"
 
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun/core"
 )
 
 // Eval compiles and executes given expr with params, and returns an evaluated value.

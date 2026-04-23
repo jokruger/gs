@@ -3,8 +3,8 @@ package unit
 import (
 	"testing"
 
-	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun/tests/require"
+	"github.com/jokruger/kavun/vm"
 )
 
 func TestSymbolTable(t *testing.T) {

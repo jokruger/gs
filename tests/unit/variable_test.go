@@ -3,9 +3,9 @@ package unit
 import (
 	"testing"
 
-	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/tests/require"
+	"github.com/jokruger/kavun"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/tests/require"
 )
 
 type VariableTest struct {
@@ -66,7 +66,7 @@ func TestVariable(t *testing.T) {
 		o, err := require.FromInterface(alloc, tc.Value)
 		require.NoError(t, err)
 
-		v := gs.NewVariable(tc.Name, o)
+		v := kavun.NewVariable(tc.Name, o)
 		val := v.Value()
 		require.Equal(t, tc.Value, val.Interface(), "Name: %s", tc.Name)
 		require.Equal(t, tc.ValueType, v.ValueType(), "Name: %s", tc.Name)

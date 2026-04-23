@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
 )
 
 var osModule = map[string]core.Value{

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/jokruger/gs/errs"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/errs"
+	"github.com/jokruger/kavun/token"
 )
 
 // CharValue creates new char value.

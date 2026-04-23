@@ -1,7 +1,7 @@
 package vm
 
 import (
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun/core"
 )
 
 // CountObjects returns the number of objects that a given object o contains.

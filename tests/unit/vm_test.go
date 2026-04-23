@@ -11,12 +11,12 @@ import (
 	"time"
 
 	"github.com/jokruger/dec128"
-	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/stdlib"
-	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/parser"
+	"github.com/jokruger/kavun/stdlib"
+	"github.com/jokruger/kavun/tests/require"
+	"github.com/jokruger/kavun/vm"
 )
 
 const testOut = "out"
@@ -4451,7 +4451,7 @@ func traceCompileRun(file *parser.File, symbols map[string]core.Value, modules *
 	}
 
 	tr := &vmTracer{}
-	c := gs.NewCompiler(alloc, file.InputFile, symTable, nil, modules, tr)
+	c := kavun.NewCompiler(alloc, file.InputFile, symTable, nil, modules, tr)
 	err = c.Compile(file)
 	trace = append(trace, fmt.Sprintf("\n[Compiler Trace]\n\n%s", strings.Join(tr.Out, "")))
 	if err != nil {

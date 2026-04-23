@@ -3,7 +3,7 @@ package vm
 import (
 	"fmt"
 
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun/core"
 )
 
 // MakeInstruction returns a bytecode for an opcode and the operands.

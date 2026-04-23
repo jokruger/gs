@@ -5,8 +5,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/token"
 )
 
 // byte order mark
@@ -24,7 +24,7 @@ const (
 // ScannerErrorHandler is an error handler for the scanner.
 type ScannerErrorHandler func(pos SourceFilePos, msg string)
 
-// Scanner reads the Gs source text.
+// Scanner reads the Kavun source text.
 type Scanner struct {
 	file         *SourceFile         // source file handle
 	src          []byte              // source

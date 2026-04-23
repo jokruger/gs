@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/kavun/errs"
 )
 
 type Map struct {

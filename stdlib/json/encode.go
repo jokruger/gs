@@ -7,7 +7,7 @@
 package json
 
 import (
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun/core"
 )
 
 // Encode returns the JSON encoding of the object.

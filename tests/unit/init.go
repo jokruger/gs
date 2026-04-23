@@ -7,10 +7,10 @@ import (
 	"strings"
 	"unsafe"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
-	mock "github.com/jokruger/gs/tests"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
+	mock "github.com/jokruger/kavun/tests"
+	"github.com/jokruger/kavun/token"
 )
 
 var alloc = mock.Alloc

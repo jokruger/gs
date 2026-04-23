@@ -5,8 +5,8 @@ import (
 	"unsafe"
 
 	"github.com/jokruger/dec128"
-	"github.com/jokruger/gs/errs"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/errs"
+	"github.com/jokruger/kavun/token"
 )
 
 // DecimalValue creates new boxed decimal value.

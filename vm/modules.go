@@ -1,7 +1,7 @@
 package vm
 
 import (
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun/core"
 )
 
 // Importable interface represents importable module instance.
@@ -91,7 +91,7 @@ func (m *ModuleMap) AddMap(o *ModuleMap) {
 	}
 }
 
-// SourceModule is an importable module that's written in Gs.
+// SourceModule is an importable module that's written in Kavun.
 type SourceModule struct {
 	Src []byte
 }

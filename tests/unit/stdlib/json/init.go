@@ -1,7 +1,7 @@
 package json
 
 import (
-	allocs "github.com/jokruger/gs/alloc"
+	allocs "github.com/jokruger/kavun/alloc"
 )
 
 var alloc = allocs.New(0)

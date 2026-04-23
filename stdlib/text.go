@@ -7,8 +7,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
 )
 
 var textModule = map[string]core.Value{

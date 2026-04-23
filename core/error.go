@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/kavun/errs"
 )
 
 type Error struct {

@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/jokruger/dec128"
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
-	"github.com/jokruger/gs/formatter"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
+	"github.com/jokruger/kavun/formatter"
 )
 
 // do not change builtin function indexes as it will break compatibility

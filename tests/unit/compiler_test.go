@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/stdlib"
-	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/parser"
+	"github.com/jokruger/kavun/stdlib"
+	"github.com/jokruger/kavun/tests/require"
+	"github.com/jokruger/kavun/vm"
 )
 
 func TestCompiler_Compile(t *testing.T) {
@@ -1101,18 +1101,18 @@ func TestCompilerErrorReport(t *testing.T) {
 }
 
 func TestCompilerAssignmentMode(t *testing.T) {
-	_, _, err := traceCompileWithMode(`a = 1`, nil, gs.AssignmentModeSmart)
+	_, _, err := traceCompileWithMode(`a = 1`, nil, kavun.AssignmentModeSmart)
 	require.NoError(t, err)
 
-	_, _, err = traceCompileWithMode(`a = 1`, nil, gs.AssignmentModeStrict)
+	_, _, err = traceCompileWithMode(`a = 1`, nil, kavun.AssignmentModeStrict)
 	require.Error(t, err)
 	require.True(t, strings.Contains(err.Error(), "unresolved reference 'a'"))
 
-	_, _, err = traceCompileWithMode(`a += 1`, nil, gs.AssignmentModeSmart)
+	_, _, err = traceCompileWithMode(`a += 1`, nil, kavun.AssignmentModeSmart)
 	require.Error(t, err)
 	require.True(t, strings.Contains(err.Error(), "unresolved reference 'a'"))
 
-	_, _, err = traceCompileWithMode(`a.b = 1`, nil, gs.AssignmentModeSmart)
+	_, _, err = traceCompileWithMode(`a.b = 1`, nil, kavun.AssignmentModeSmart)
 	require.Error(t, err)
 	require.True(t, strings.Contains(err.Error(), "unresolved reference 'a'"))
 }
@@ -1374,12 +1374,12 @@ func TestCompiler_custom_extension(t *testing.T) {
 	file, err := p.ParseFile()
 	require.NoError(t, err)
 
-	c := gs.NewCompiler(alloc, srcFile, nil, nil, modules, nil)
+	c := kavun.NewCompiler(alloc, srcFile, nil, nil, modules, nil)
 	c.EnableFileImport(true)
 	c.SetImportDir(filepath.Dir(pathFileSource))
 
-	// Search for "*.gs" and ".yb" (custom extension)
-	c.SetImportFileExt(".gs", ".yb")
+	// Search for "*.kvn" and ".yb" (custom extension)
+	c.SetImportFileExt(".kvn", ".yb")
 
 	err = c.Compile(file)
 	require.NoError(t, err)
@@ -1391,14 +1391,14 @@ func TestCompilerNewCompiler_default_file_extension(t *testing.T) {
 	fileSet := parser.NewFileSet()
 	file := fileSet.AddFile("test", -1, len(input))
 
-	c := gs.NewCompiler(alloc, file, nil, nil, modules, nil)
+	c := kavun.NewCompiler(alloc, file, nil, nil, modules, nil)
 	c.EnableFileImport(true)
 
-	require.Equal(t, []string{".gs"}, c.GetImportFileExt(), "newly created compiler object must contain the default extension")
+	require.Equal(t, []string{".kvn"}, c.GetImportFileExt(), "newly created compiler object must contain the default extension")
 }
 
 func TestCompilerSetImportExt_extension_name_validation(t *testing.T) {
-	c := new(gs.Compiler) // Instantiate a new compiler object with no initialization
+	c := new(kavun.Compiler) // Instantiate a new compiler object with no initialization
 
 	// Test of empty arg
 	err := c.SetImportFileExt()
@@ -1412,11 +1412,11 @@ func TestCompilerSetImportExt_extension_name_validation(t *testing.T) {
 		requireErr bool
 		msgFail    string
 	}{
-		{[]string{".gs"}, []string{".gs"}, false, "well-formed extension should not return an error"},
-		{[]string{""}, []string{".gs"}, true, "empty extension name should return an error"},
-		{[]string{"foo"}, []string{".gs"}, true, "name without dot prefix should return an error"},
-		{[]string{"foo.bar"}, []string{".gs"}, true, "malformed extension should return an error"},
-		{[]string{"foo."}, []string{".gs"}, true, "malformed extension should return an error"},
+		{[]string{".kvn"}, []string{".kvn"}, false, "well-formed extension should not return an error"},
+		{[]string{""}, []string{".kvn"}, true, "empty extension name should return an error"},
+		{[]string{"foo"}, []string{".kvn"}, true, "name without dot prefix should return an error"},
+		{[]string{"foo.bar"}, []string{".kvn"}, true, "malformed extension should return an error"},
+		{[]string{"foo."}, []string{".kvn"}, true, "malformed extension should return an error"},
 		{[]string{".yb"}, []string{".yb"}, false, "name with dot prefix should be added"},
 		{[]string{".foo", ".bar"}, []string{".foo", ".bar"}, false, "it should replace instead of appending"},
 	} {
@@ -1504,10 +1504,10 @@ func (o *compileTracer) Write(p []byte) (n int, err error) {
 }
 
 func traceCompile(input string, symbols map[string]core.Value) (res *vm.Bytecode, trace []string, err error) {
-	return traceCompileWithMode(input, symbols, gs.AssignmentModeSmart)
+	return traceCompileWithMode(input, symbols, kavun.AssignmentModeSmart)
 }
 
-func traceCompileWithMode(input string, symbols map[string]core.Value, mode gs.AssignmentMode) (res *vm.Bytecode, trace []string, err error) {
+func traceCompileWithMode(input string, symbols map[string]core.Value, mode kavun.AssignmentMode) (res *vm.Bytecode, trace []string, err error) {
 	fileSet := parser.NewFileSet()
 	file := fileSet.AddFile("test", -1, len(input))
 
@@ -1522,7 +1522,7 @@ func traceCompileWithMode(input string, symbols map[string]core.Value, mode gs.A
 	}
 
 	tr := &compileTracer{}
-	c := gs.NewCompiler(alloc, file, symTable, nil, nil, tr)
+	c := kavun.NewCompiler(alloc, file, symTable, nil, nil, tr)
 	c.SetAssignmentMode(mode)
 	parsed, err := p.ParseFile()
 	if err != nil {

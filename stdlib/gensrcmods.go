@@ -11,18 +11,18 @@ import (
 	"strconv"
 )
 
-var gsModFileRE = regexp.MustCompile(`^srcmod_(\w+).gs$`)
+var kavunModFileRE = regexp.MustCompile(`^srcmod_(\w+).kvn$`)
 
 func main() {
 	modules := make(map[string]string)
 
-	// enumerate all Gs module files
+	// enumerate all Kavun module files
 	files, err := os.ReadDir(".")
 	if err != nil {
 		log.Fatal(err)
 	}
 	for _, file := range files {
-		m := gsModFileRE.FindStringSubmatch(file.Name())
+		m := kavunModFileRE.FindStringSubmatch(file.Name())
 		if m != nil {
 			modName := m[1]
 

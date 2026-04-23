@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/parser"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/parser"
 )
 
 // Bytecode is a compiled instructions and constants.

@@ -4,8 +4,8 @@ import (
 	gojson "encoding/json"
 	"testing"
 
-	"github.com/jokruger/gs/stdlib/json"
-	"github.com/jokruger/gs/tests/require"
+	"github.com/jokruger/kavun/stdlib/json"
+	"github.com/jokruger/kavun/tests/require"
 )
 
 type ARR = []any

@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/alloc"
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/stdlib"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun"
+	"github.com/jokruger/kavun/alloc"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/parser"
+	"github.com/jokruger/kavun/stdlib"
+	"github.com/jokruger/kavun/vm"
 )
 
 type tc struct {
@@ -181,7 +181,7 @@ func compileFile(a core.Allocator, file *parser.File) (time.Duration, *vm.Byteco
 	start := time.Now()
 
 	m := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
-	c := gs.NewCompiler(a, file.InputFile, symTable, nil, m, nil)
+	c := kavun.NewCompiler(a, file.InputFile, symTable, nil, m, nil)
 	if err := c.Compile(file); err != nil {
 		return time.Since(start), nil, err
 	}

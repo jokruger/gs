@@ -7,8 +7,8 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
 )
 
 // Strings for use with fmtbuf.WriteString. This is less overhead than using fmtbuf.Write with byte arrays.

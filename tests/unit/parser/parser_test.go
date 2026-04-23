@@ -8,10 +8,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jokruger/gs/core"
-	. "github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/core"
+	. "github.com/jokruger/kavun/parser"
+	"github.com/jokruger/kavun/tests/require"
+	"github.com/jokruger/kavun/token"
 )
 
 func TestParserError(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
 )
 
 func makeOSProcessState(vm core.VM, state *os.ProcessState) (core.Value, error) {

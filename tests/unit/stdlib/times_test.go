@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/tests/require"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/tests/require"
 )
 
 func TestTimes(t *testing.T) {

@@ -5,7 +5,7 @@
 Requires Go 1.26 or later.
 
 ```sh
-go install github.com/jokruger/gs/cmd/gs@latest
+go install github.com/jokruger/kavun/cmd/kavun@latest
 ```
 
 Make sure `$GOPATH/bin` (or `$HOME/go/bin`) is on your `PATH`.
@@ -14,20 +14,20 @@ Make sure `$GOPATH/bin` (or `$HOME/go/bin`) is on your `PATH`.
 
 ### REPL
 
-Launch the interactive REPL by running `gs` with no arguments:
+Launch the interactive REPL by running `kavun` with no arguments:
 
 ```sh
-gs
+kavun
 ```
 
-You will see the `>> ` prompt. Type any GS expression and press Enter to evaluate it. Press `Ctrl+D` to exit.
+You will see the `>> ` prompt. Type any Kavun expression and press Enter to evaluate it. Press `Ctrl+D` to exit.
 
 ### Running a script
 
-Pass a `.gs` source file as the first argument:
+Pass a `.kvn` source file as the first argument:
 
 ```sh
-gs hello.gs
+kavun hello.kvn
 ```
 
 ### CLI flags
@@ -36,10 +36,10 @@ gs hello.gs
 - `-version`: print the CLI version
 - `-strict-assign`: require variables to already exist for plain `=` assignment
 
-By default, GS uses smart `=` assignment at compile time (`x = expr` declares `x` in current scope if unresolved). Use `-strict-assign` to enforce explicit declaration before `=`.
+By default, Kavun uses smart `=` assignment at compile time (`x = expr` declares `x` in current scope if unresolved). Use `-strict-assign` to enforce explicit declaration before `=`.
 
 ```sh
-gs -strict-assign hello.gs
+kavun -strict-assign hello.kvn
 ```
 
 ### Hashbang / shebang scripts
@@ -47,17 +47,17 @@ gs -strict-assign hello.gs
 Add a hashbang line as the first line of your script to make it directly executable:
 
 ```go
-#!/usr/bin/env gs
+#!/usr/bin/env kavun
 
 fmt := import("fmt")
-fmt.println("Hello GS!")
+fmt.println("Hello Kavun!")
 ```
 
 Then make the file executable and run it:
 
 ```sh
-chmod +x hello.gs
-./hello.gs
+chmod +x hello.kvn
+./hello.kvn
 ```
 
 ## Building from source
@@ -67,15 +67,15 @@ The project uses [just](https://github.com/casey/just) as its build tool. Instal
 Clone the repository and enter the project directory:
 
 ```sh
-git clone https://github.com/jokruger/gs.git
-cd gs
+git clone https://github.com/jokruger/kavun.git
+cd kavun
 ```
 
 ### Common recipes
 
 | Command | Description |
 |---------|-------------|
-| `just build` | Generate sources and compile the `gs` binary into `./build/gs` |
+| `just build` | Generate sources and compile the `kavun` binary into `./build/kavun` |
 | `just install` | Build and copy the binary to `$HOME/bin/` |
 | `just test` | Run the full test suite |
 | `just clean` | Remove build artefacts and profiling files |

@@ -3,8 +3,8 @@ package stdlib
 import (
 	"os"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
 )
 
 func makeOSFile(vm core.VM, file *os.File) (core.Value, error) {

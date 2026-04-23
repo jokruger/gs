@@ -5,10 +5,10 @@ import (
 	"math"
 	"sync/atomic"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
-	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
+	"github.com/jokruger/kavun/parser"
+	"github.com/jokruger/kavun/token"
 )
 
 var (

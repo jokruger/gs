@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"unsafe"
 
-	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/kavun/errs"
 )
 
 type IntRange struct {

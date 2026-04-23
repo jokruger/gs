@@ -12,9 +12,9 @@ To avoid allocations, the VM passes stack slices directly to callees. The full c
 
 Functions should not have side effects on caller state beyond their explicit return values. Mutating arguments violates this principle.
 
-## GS Language Conventions
+## Kavun Language Conventions
 
-This section defines conventions for naming, behavior, and design choices affecting the GS language itself.
+This section defines conventions for naming, behavior, and design choices affecting the Kavun language itself.
 
 ### Properties vs Member Functions
 

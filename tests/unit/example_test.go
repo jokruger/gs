@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun"
+	"github.com/jokruger/kavun/core"
 )
 
 func Example() {
@@ -22,7 +22,7 @@ each([a, b, c, d], func(x) {
 })`
 
 	// create a new Script instance
-	script := gs.NewScript(alloc, []byte(src))
+	script := kavun.NewScript(alloc, []byte(src))
 
 	// set values
 	script.Add("a", core.IntValue(1))

@@ -3,9 +3,9 @@ package unit
 import (
 	"testing"
 
-	"github.com/jokruger/gs/core"
-	mock "github.com/jokruger/gs/tests"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun/core"
+	mock "github.com/jokruger/kavun/tests"
+	"github.com/jokruger/kavun/vm"
 )
 
 func Test_builtinDelete(t *testing.T) {

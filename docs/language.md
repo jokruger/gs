@@ -1,10 +1,10 @@
 # Language Reference
 
-GS (Go Script) is a lightweight, high-performance dynamically typed scripting language designed for embedding in Go. It emphasizes expression-oriented programming with first-class records, arrow-function lambdas, and fluent method chaining. It runs on a sandboxable bytecode VM implemented in Go, with a module system supporting explicit exports. Source files have a `.gs` extension and content is UTF-8 encoded.
+Kavun (кавун, watermelon) is a lightweight, high-performance dynamically typed scripting language designed for embedding in Go. It emphasizes expression-oriented programming with first-class records, arrow-function lambdas, and fluent method chaining. It runs on a sandboxable bytecode VM implemented in Go, with a module system supporting explicit exports. Source files have a `.kvn` extension and content is UTF-8 encoded.
 
 ## Builtin types overview
 
-GS values are grouped into scalar and container types.
+Kavun values are grouped into scalar and container types.
 
 Scalar types:
 
@@ -71,7 +71,7 @@ Line comments start with `//`. Block comments use `/* ... */`. Statements are se
 
 ### Numeric literals
 
-GS supports several ways to write numeric values:
+Kavun supports several ways to write numeric values:
 
 ```go
 1         // int
@@ -99,7 +99,7 @@ Rules:
 
 ## Variables and scope
 
-GS supports three declaration forms:
+Kavun supports three declaration forms:
 
 - `var x` declares `x` in the current scope and initializes it to `undefined`.
 - `var x = expr` declares `x` in the current scope and assigns `expr`.
@@ -158,7 +158,7 @@ In the first example, `x` already exists in outer scope, so `x = 10` modifies th
 
 ## Expressions
 
-GS has arithmetic, comparison, logical, bitwise, membership, and conditional operators.
+Kavun has arithmetic, comparison, logical, bitwise, membership, and conditional operators.
 
 ```go
 x = 10 > 5 ? "yes" : "no"
@@ -291,12 +291,12 @@ A function with no `return` statement returns `undefined`.
 
 ## Modules
 
-`import("name")` is an expression that loads a module and returns its exported value. Module source can be a builtin module or a GS source file.
+`import("name")` is an expression that loads a module and returns its exported value. Module source can be a builtin module or a Kavun source file.
 
-A GS module uses `export` to publish its result. The exported value is automatically made immutable. `export` inside a function body is a compile error.
+A Kavun module uses `export` to publish its result. The exported value is automatically made immutable. `export` inside a function body is a compile error.
 
 ```go
-// math_utils.gs
+// math_utils.kvn
 export {
     square: func(x) { return x * x },
     cube:   func(x) { return x * x * x },
@@ -304,7 +304,7 @@ export {
 ```
 
 ```go
-// main.gs
+// main.kvn
 m = import("math_utils")
 m.square(4)   // 16
 ```
@@ -312,7 +312,7 @@ m.square(4)   // 16
 A module can also export a single function directly, making the import callable:
 
 ```go
-// double.gs
+// double.kvn
 export func(x) { return x * 2 }
 ```
 
@@ -379,7 +379,7 @@ Error messages include a source position:
 
 ```sh
 Runtime Error: invalid binary operator: int + string
-    at myfile.gs:12:5
+    at myfile.kvn:12:5
 ```
 
 For runtime errors that bubble through multiple call frames, each frame is shown. Common runtime errors:

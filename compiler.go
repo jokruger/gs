@@ -1,4 +1,4 @@
-package gs
+package kavun
 
 import (
 	"errors"
@@ -9,10 +9,10 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/token"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/parser"
+	"github.com/jokruger/kavun/token"
+	"github.com/jokruger/kavun/vm"
 )
 
 // compilationScope represents a compiled instructions and the last two instructions that were emitted.
@@ -597,7 +597,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 			}
 
 			switch v := v.(type) {
-			case []byte: // module written in Gs
+			case []byte: // module written in Kavun
 				compiled, err := c.compileModule(node, node.ModuleName, v, false)
 				if err != nil {
 					return err
@@ -709,7 +709,7 @@ func (c *Compiler) SetImportDir(dir string) {
 }
 
 // SetImportFileExt sets the extension name of the source file for loading local module files.
-// Use this method if you want other source file extension than ".gs".
+// Use this method if you want other source file extension than ".kvn".
 // This function requires at least one argument, since it will replace the current list of extension name.
 func (c *Compiler) SetImportFileExt(exts ...string) error {
 	if len(exts) == 0 {

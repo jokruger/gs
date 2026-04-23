@@ -8,15 +8,15 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jokruger/gs"
-	al "github.com/jokruger/gs/alloc"
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/stdlib"
-	"github.com/jokruger/gs/tests/require"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun"
+	al "github.com/jokruger/kavun/alloc"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/stdlib"
+	"github.com/jokruger/kavun/tests/require"
+	"github.com/jokruger/kavun/vm"
 )
 
-func add(s *gs.Script, name string, value any) error {
+func add(s *kavun.Script, name string, value any) error {
 	v, err := require.FromInterface(alloc, value)
 	if err != nil {
 		return err
@@ -25,7 +25,7 @@ func add(s *gs.Script, name string, value any) error {
 	return nil
 }
 
-func set(c *gs.Compiled, name string, value any) error {
+func set(c *kavun.Compiled, name string, value any) error {
 	v, err := require.FromInterface(alloc, value)
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func set(c *gs.Compiled, name string, value any) error {
 }
 
 func TestScript_Add(t *testing.T) {
-	s := gs.NewScript(alloc, []byte(`a := b; c := test(b); d := test(5)`))
+	s := kavun.NewScript(alloc, []byte(`a := b; c := test(b); d := test(5)`))
 	require.NoError(t, add(s, "b", 5))     // b = 5
 	require.NoError(t, add(s, "b", "foo")) // b = "foo"  (re-define before compilation)
 	require.NoError(t, add(s, "test",
@@ -60,7 +60,7 @@ func TestScript_Add(t *testing.T) {
 }
 
 func TestScript_Remove(t *testing.T) {
-	s := gs.NewScript(alloc, []byte(`a := b`))
+	s := kavun.NewScript(alloc, []byte(`a := b`))
 	err := add(s, "b", 5)
 	require.NoError(t, err)
 	require.True(t, s.Remove("b")) // b is removed
@@ -69,7 +69,7 @@ func TestScript_Remove(t *testing.T) {
 }
 
 func TestScript_Run(t *testing.T) {
-	s := gs.NewScript(alloc, []byte(`a := b`))
+	s := kavun.NewScript(alloc, []byte(`a := b`))
 	err := add(s, "b", 5)
 	require.NoError(t, err)
 	c, err := s.Run()
@@ -79,24 +79,24 @@ func TestScript_Run(t *testing.T) {
 }
 
 func TestScript_SetAssignmentMode(t *testing.T) {
-	s := gs.NewScript(alloc, []byte(`a = 1`))
+	s := kavun.NewScript(alloc, []byte(`a = 1`))
 	_, err := s.Compile()
 	require.NoError(t, err)
 
-	s = gs.NewScript(alloc, []byte(`a = 1`))
-	s.SetAssignmentMode(gs.AssignmentModeStrict)
+	s = kavun.NewScript(alloc, []byte(`a = 1`))
+	s.SetAssignmentMode(kavun.AssignmentModeStrict)
 	_, err = s.Compile()
 	require.Error(t, err)
 	require.True(t, strings.Contains(err.Error(), "unresolved reference 'a'"))
 
-	s = gs.NewScript(alloc, []byte(`a += 1`))
+	s = kavun.NewScript(alloc, []byte(`a += 1`))
 	_, err = s.Compile()
 	require.Error(t, err)
 	require.True(t, strings.Contains(err.Error(), "unresolved reference 'a'"))
 }
 
 func TestScript_BuiltinModules(t *testing.T) {
-	s := gs.NewScript(alloc, []byte(`math := import("math"); a := math.abs(-19.84)`))
+	s := kavun.NewScript(alloc, []byte(`math := import("math"); a := math.abs(-19.84)`))
 	s.SetImports(stdlib.GetModuleMap("math"))
 	c, err := s.Run()
 	require.NoError(t, err)
@@ -118,7 +118,7 @@ func TestScript_BuiltinModules(t *testing.T) {
 }
 
 func TestScript_SourceModules(t *testing.T) {
-	s := gs.NewScript(alloc, []byte(`
+	s := kavun.NewScript(alloc, []byte(`
 enum := import("enum")
 a := enum.all([1,2,3], func(_, v) { 
 	return v > 0 
@@ -137,7 +137,7 @@ a := enum.all([1,2,3], func(_, v) {
 
 func TestScript_SetMaxConstObjects(t *testing.T) {
 	// one constant '5'
-	s := gs.NewScript(alloc, []byte(`a := 5`))
+	s := kavun.NewScript(alloc, []byte(`a := 5`))
 	s.SetMaxConstObjects(1) // limit = 1
 	_, err := s.Compile()
 	require.NoError(t, err)
@@ -147,7 +147,7 @@ func TestScript_SetMaxConstObjects(t *testing.T) {
 	require.Equal(t, "exceeding constant objects limit: 1", err.Error())
 
 	// two constants '5' and '1'
-	s = gs.NewScript(alloc, []byte(`a := 5 + 1`))
+	s = kavun.NewScript(alloc, []byte(`a := 5 + 1`))
 	s.SetMaxConstObjects(2) // limit = 2
 	_, err = s.Compile()
 	require.NoError(t, err)
@@ -157,7 +157,7 @@ func TestScript_SetMaxConstObjects(t *testing.T) {
 	require.Equal(t, "exceeding constant objects limit: 2", err.Error())
 
 	// duplicates will be removed
-	s = gs.NewScript(alloc, []byte(`a := 5 + 5`))
+	s = kavun.NewScript(alloc, []byte(`a := 5 + 5`))
 	s.SetMaxConstObjects(1) // limit = 1
 	_, err = s.Compile()
 	require.NoError(t, err)
@@ -167,7 +167,7 @@ func TestScript_SetMaxConstObjects(t *testing.T) {
 	require.Equal(t, "exceeding constant objects limit: 1", err.Error())
 
 	// no limit set
-	s = gs.NewScript(alloc, []byte(`a := 1 + 2 + 3 + 4 + 5`))
+	s = kavun.NewScript(alloc, []byte(`a := 1 + 2 + 3 + 4 + 5`))
 	_, err = s.Compile()
 	require.NoError(t, err)
 }
@@ -219,7 +219,7 @@ e := mod1.double(s)
 		),
 	}
 
-	scr := gs.NewScript(alloc, code)
+	scr := kavun.NewScript(alloc, code)
 	_ = add(scr, "a", 0)
 	_ = add(scr, "b", 0)
 	_ = add(scr, "c", 0)
@@ -229,7 +229,7 @@ e := mod1.double(s)
 	compiled, err := scr.Compile()
 	require.NoError(t, err)
 
-	executeFn := func(compiled *gs.Compiled, a, b, c int) (d, e int) {
+	executeFn := func(compiled *kavun.Compiled, a, b, c int) (d, e int) {
 		av, _ := require.FromInterface(alloc, a)
 		bv, _ := require.FromInterface(alloc, b)
 		cv, _ := require.FromInterface(alloc, c)
@@ -250,7 +250,7 @@ e := mod1.double(s)
 		alc := al.New(0)
 		cln, err := compiled.Clone(alc)
 		require.NoError(t, err)
-		go func(compiled *gs.Compiled) {
+		go func(compiled *kavun.Compiled) {
 			time.Sleep(time.Duration(rand.Int63n(50)) * time.Millisecond)
 			defer wg.Done()
 
@@ -288,7 +288,7 @@ out := c1()
 	compiledGet(t, c, "out", int64(15))
 }
 
-func compiledGetCounter(t *testing.T, c *gs.Compiled, name string, expected *Counter) {
+func compiledGetCounter(t *testing.T, c *kavun.Compiled, name string, expected *Counter) {
 	v := c.Get(name)
 	require.NotNil(t, v)
 
@@ -300,7 +300,7 @@ func compiledGetCounter(t *testing.T, c *gs.Compiled, name string, expected *Cou
 
 func TestScriptSourceModule(t *testing.T) {
 	// script1 imports "mod1"
-	scr := gs.NewScript(alloc, []byte(`out := import("mod")`))
+	scr := kavun.NewScript(alloc, []byte(`out := import("mod")`))
 	mods := vm.NewModuleMap()
 	mods.AddSourceModule("mod", []byte(`export 5`))
 	scr.SetImports(mods)
@@ -310,7 +310,7 @@ func TestScriptSourceModule(t *testing.T) {
 	require.Equal(t, int64(5), v.Interface())
 
 	// executing module function
-	scr = gs.NewScript(alloc, []byte(`fn := import("mod"); out := fn()`))
+	scr = kavun.NewScript(alloc, []byte(`fn := import("mod"); out := fn()`))
 	mods = vm.NewModuleMap()
 	mods.AddSourceModule("mod",
 		[]byte(`a := 3; export func() { return a + 5 }`))
@@ -320,7 +320,7 @@ func TestScriptSourceModule(t *testing.T) {
 	v = c.Get("out").Value()
 	require.Equal(t, int64(8), v.Interface())
 
-	scr = gs.NewScript(alloc, []byte(`out := import("mod")`))
+	scr = kavun.NewScript(alloc, []byte(`out := import("mod")`))
 	mods = vm.NewModuleMap()
 	mods.AddSourceModule("mod", []byte(`text := import("text"); export text.title("foo")`))
 	mods.AddBuiltinModule("text", map[string]core.Value{
@@ -361,7 +361,7 @@ func BenchmarkArrayIndexCompare(b *testing.B) {
 }
 
 func bench(n int, input string) {
-	s := gs.NewScript(alloc, []byte(input))
+	s := kavun.NewScript(alloc, []byte(input))
 	c, err := s.Compile()
 	if err != nil {
 		panic(err)
@@ -486,7 +486,7 @@ export func(ctx) {
 	return closure()
 }`
 
-	s := gs.NewScript(alloc, []byte(m))
+	s := kavun.NewScript(alloc, []byte(m))
 	mods := vm.NewModuleMap()
 	mods.AddSourceModule("expression", []byte(src))
 	s.SetImports(mods)
@@ -500,8 +500,8 @@ export func(ctx) {
 	require.True(t, strings.Contains(err.Error(), "expression:4:6"))
 }
 
-func compile(t *testing.T, input string, vars M) *gs.Compiled {
-	s := gs.NewScript(alloc, []byte(input))
+func compile(t *testing.T, input string, vars M) *kavun.Compiled {
+	s := kavun.NewScript(alloc, []byte(input))
 	for vn, vv := range vars {
 		err := add(s, vn, vv)
 		require.NoError(t, err)
@@ -514,7 +514,7 @@ func compile(t *testing.T, input string, vars M) *gs.Compiled {
 }
 
 func compileError(t *testing.T, input string, vars M) {
-	s := gs.NewScript(alloc, []byte(input))
+	s := kavun.NewScript(alloc, []byte(input))
 	for vn, vv := range vars {
 		err := add(s, vn, vv)
 		require.NoError(t, err)
@@ -523,12 +523,12 @@ func compileError(t *testing.T, input string, vars M) {
 	require.Error(t, err)
 }
 
-func compiledRun(t *testing.T, c *gs.Compiled) {
+func compiledRun(t *testing.T, c *kavun.Compiled) {
 	err := c.Run()
 	require.NoError(t, err)
 }
 
-func compiledGet(t *testing.T, c *gs.Compiled, name string, expected any) {
+func compiledGet(t *testing.T, c *kavun.Compiled, name string, expected any) {
 	e, err := require.FromInterface(alloc, expected)
 	require.NoError(t, err)
 	v := c.Get(name)
@@ -536,7 +536,7 @@ func compiledGet(t *testing.T, c *gs.Compiled, name string, expected any) {
 	require.Equal(t, e, v.Value())
 }
 
-func compiledGetAll(t *testing.T, c *gs.Compiled, expected M) {
+func compiledGetAll(t *testing.T, c *kavun.Compiled, expected M) {
 	vars := c.GetAll()
 	require.Equal(t, len(expected), len(vars))
 
@@ -554,11 +554,11 @@ func compiledGetAll(t *testing.T, c *gs.Compiled, expected M) {
 	}
 }
 
-func compiledIsDefined(t *testing.T, c *gs.Compiled, name string, expected bool) {
+func compiledIsDefined(t *testing.T, c *kavun.Compiled, name string, expected bool) {
 	require.Equal(t, expected, c.IsDefined(name))
 }
 func TestCompiled_Clone(t *testing.T) {
-	script := gs.NewScript(alloc, []byte(`
+	script := kavun.NewScript(alloc, []byte(`
 count += 1
 data["b"] = 2
 `))

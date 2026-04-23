@@ -3,8 +3,8 @@ package stdlib
 import (
 	"encoding/base64"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
 )
 
 var base64Module = map[string]core.Value{

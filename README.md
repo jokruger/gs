@@ -1,19 +1,19 @@
-# GS (Go Script)
+# Kavun
 
-GS (Go Script) is a lightweight, high-performance, embeddable scripting language for Go, built around expression-oriented programming and consistent language design principles. Its feature set, including arrow-function lambdas, data-type member functions, and fluent chaining, enables transformation-heavy code to be written as clear expressions instead of loop-and-branch boilerplate. It runs on a bytecode VM implemented in Go, making embedding and sandboxing straightforward in Go services and tools.
+Kavun (кавун, watermelon) is a lightweight, high-performance, embeddable scripting language for Go, built around expression-oriented programming and consistent language design principles. Its feature set, including arrow-function lambdas, data-type member functions, and fluent chaining, enables transformation-heavy code to be written as clear expressions instead of loop-and-branch boilerplate. It runs on a bytecode VM implemented in Go, making embedding and sandboxing straightforward in Go services and tools.
 
 ## Quick Start
 
 Install the cli with Go's toolchain:
 
 ```bash
-go install github.com/jokruger/gs/cmd/gs@latest
+go install github.com/jokruger/kavun/cmd/kavun@latest
 ```
 
-Then you can run GS scripts with the `gs` command or using hashbang:
+Then you can run Kavun scripts with the `kavun` command or using hashbang:
 
 ```go
-#!/usr/bin/env gs
+#!/usr/bin/env kavun
 
 fmt = import("fmt")
 
@@ -27,8 +27,8 @@ fmt.printf("sum of even squares: %v\n", result)
 
 ## Documentation
 
-- [Installing](docs/installing.md) - Instructions for installing the GS CLI.
-- [Embedding](docs/embedding.md) - Guide to embedding the GS runtime in Go applications.
+- [Installing](docs/installing.md) - Instructions for installing the Kavun CLI.
+- [Embedding](docs/embedding.md) - Guide to embedding the Kavun runtime in Go applications.
 - [Language Reference](docs/language.md) - Syntax, expressions, statements, functions, modules, built-ins, and diagnostics.
 - [Type Reference](docs/types.md) - Detailed builtin type semantics, conversions, and member functions.
 - [Standard Library](docs/stdlib.md) - Overview of standard library modules and their APIs.

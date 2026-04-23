@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/jokruger/dec128"
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun/core"
 )
 
 func FromInterface(alloc core.Allocator, v any) (core.Value, error) {

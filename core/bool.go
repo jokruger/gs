@@ -3,7 +3,7 @@ package core
 import (
 	"fmt"
 
-	"github.com/jokruger/gs/errs"
+	"github.com/jokruger/kavun/errs"
 )
 
 // BoolValue creates new boxed bool value.

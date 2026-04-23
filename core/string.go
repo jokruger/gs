@@ -12,9 +12,9 @@ import (
 
 	"github.com/araddon/dateparse"
 	"github.com/jokruger/dec128"
-	"github.com/jokruger/gs/errs"
-	"github.com/jokruger/gs/internal/conv"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/errs"
+	"github.com/jokruger/kavun/internal/conv"
+	"github.com/jokruger/kavun/token"
 )
 
 type String struct {

@@ -6,18 +6,18 @@
 package main
 
 import (
-	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/alloc"
-	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/stdlib"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun"
+	"github.com/jokruger/kavun/alloc"
+	"github.com/jokruger/kavun/parser"
+	"github.com/jokruger/kavun/stdlib"
+	"github.com/jokruger/kavun/vm"
 )
 
 func main() {
 	// Inline script source
 	src := []byte(`
 fmt := import("fmt")
-fmt.println("Hello GS!")
+fmt.println("Hello Kavun!")
 `)
 
 	// Parse -> AST
@@ -32,7 +32,7 @@ fmt.println("Hello GS!")
 	// Compile -> bytecode
 	a := alloc.New(0) // 0 => no allocation cap
 	modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
-	c := gs.NewCompiler(a, srcFile, nil, nil, modules, nil)
+	c := kavun.NewCompiler(a, srcFile, nil, nil, modules, nil)
 	if err := c.Compile(file); err != nil {
 		panic(err)
 	}
@@ -49,11 +49,11 @@ fmt.println("Hello GS!")
 ## Runtime components
 
 - Parser (`parser` package): transforms source bytes into AST (`*parser.File`) and reports syntax errors with source positions.
-- Compiler (`gs.NewCompiler`): transforms AST into VM bytecode. It needs allocator, source file metadata, symbol table/constants (optional for simple use), and module getter.
+- Compiler (`kavun.NewCompiler`): transforms AST into VM bytecode. It needs allocator, source file metadata, symbol table/constants (optional for simple use), and module getter.
 - Allocator (`alloc.New`): controls runtime object allocation. `alloc.New(0)` means effectively unlimited allocations; non-zero can be used as a safety limit.
 - VM (`vm.NewVM`): executes compiled bytecode.
 
-`gs.NewScript` is a higher-level helper around the same pipeline when you prefer convenience over low-level control.
+`kavun.NewScript` is a higher-level helper around the same pipeline when you prefer convenience over low-level control.
 
 ## Imports and host modules
 
@@ -81,13 +81,13 @@ For local file imports, enable them on compiler/script and set an import directo
 ```go
 c.EnableFileImport(true)
 c.SetImportDir("./scripts")
-// Optional custom extensions, default is .gs
-_ = c.SetImportFileExt(".gs", ".yb")
+// Optional custom extensions, default is .kvn
+_ = c.SetImportFileExt(".kvn", ".yb")
 ```
 
 ## User-defined data types
 
-GS types are registered via `core.SetValueType`. User-defined type IDs must be greater than or equal to `core.VT_USER_DEFINED`.
+Kavun types are registered via `core.SetValueType`. User-defined type IDs must be greater than or equal to `core.VT_USER_DEFINED`.
 
 ```go
 package mytypes
@@ -96,8 +96,8 @@ import (
 	"fmt"
 	"unsafe"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/token"
 )
 
 const VT_COUNTER = core.VT_USER_DEFINED + 1
@@ -129,10 +129,10 @@ func init() {
 }
 ```
 
-Expose values/functions to scripts through globals (low-level symbol table flow) or the `gs.Script` API.
+Expose values/functions to scripts through globals (low-level symbol table flow) or the `kavun.Script` API.
 
 ```go
-s := gs.NewScript(a, []byte(`out := c + 2`))
+s := kavun.NewScript(a, []byte(`out := c + 2`))
 s.Add("c", mytypes.NewCounterValue(40))
 compiled, err := s.Run()
 if err != nil {
@@ -143,13 +143,13 @@ fmt.Println(compiled.Get("out").Value().String()) // Counter(42)
 
 ## Host function injection (CLI-style)
 
-The GS CLI REPL injects a host function into globals through a symbol table entry. The same pattern works in embedded apps.
+The Kavun CLI REPL injects a host function into globals through a symbol table entry. The same pattern works in embedded apps.
 
 ```go
 a := alloc.New(0)
 modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
 
-src := []byte(`print("Hello GS!")`)
+src := []byte(`print("Hello Kavun!")`)
 fileSet := parser.NewFileSet()
 srcFile := fileSet.AddFile("inline", -1, len(src))
 file, err := parser.NewParser(srcFile, src, nil).ParseFile()
@@ -182,7 +182,7 @@ if err != nil {
 }
 globals[printSym.Index] = printFn
 
-c := gs.NewCompiler(a, srcFile, symbolTable, nil, modules, nil)
+c := kavun.NewCompiler(a, srcFile, symbolTable, nil, modules, nil)
 if err := c.Compile(file); err != nil {
 	panic(err)
 }
@@ -195,7 +195,7 @@ if err := machine.Run(); err != nil {
 
 ## Set variables before run, read variables after run
 
-Use `gs.Script` when you want host-provided inputs and easy output extraction.
+Use `kavun.Script` when you want host-provided inputs and easy output extraction.
 
 ```go
 package main
@@ -203,9 +203,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/alloc"
-	"github.com/jokruger/gs/core"
+	"github.com/jokruger/kavun"
+	"github.com/jokruger/kavun/alloc"
+	"github.com/jokruger/kavun/core"
 )
 
 func main() {
@@ -216,12 +216,12 @@ sum := x + y
 message := "Hello, " + name
 `)
 
-	s := gs.NewScript(a, src)
+	s := kavun.NewScript(a, src)
 
 	// Set globals before execution.
 	s.Add("x", core.IntValue(20))
 	s.Add("y", core.IntValue(22))
-	name, err := a.NewStringValue("GS")
+	name, err := a.NewStringValue("Kavun")
 	if err != nil {
 		panic(err)
 	}
@@ -236,7 +236,7 @@ message := "Hello, " + name
 	sum, _ := compiled.Get("sum").Value().AsInt()
 	msg, _ := compiled.Get("message").Value().AsString()
 	fmt.Println(sum) // 42
-	fmt.Println(msg) // Hello, GS
+	fmt.Println(msg) // Hello, Kavun
 }
 ```
 

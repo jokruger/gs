@@ -11,10 +11,10 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/token"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/parser"
+	"github.com/jokruger/kavun/token"
+	"github.com/jokruger/kavun/vm"
 )
 
 // NoError asserts err is not an error.

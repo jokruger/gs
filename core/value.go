@@ -5,7 +5,7 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/token"
 )
 
 // The minimum required fields for Value are ptr, d64 and kind. This allow to store primitive types such as int, float, rune; and heap allocated objects.

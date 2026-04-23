@@ -4,8 +4,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/tests/require"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/tests/require"
 )
 
 func TestReadFile(t *testing.T) {
@@ -95,18 +95,18 @@ func TestFileStatDir(t *testing.T) {
 }
 
 func TestOSExpandEnv(t *testing.T) {
-	_ = os.Setenv("GS", "FOO BAR")
-	module(t, "os").call("expand_env", "$GS").expect("FOO BAR")
+	_ = os.Setenv("KAVUN", "FOO BAR")
+	module(t, "os").call("expand_env", "$KAVUN").expect("FOO BAR")
 
-	_ = os.Setenv("GS", "FOO")
-	module(t, "os").call("expand_env", "$GS $GS").expect("FOO FOO")
+	_ = os.Setenv("KAVUN", "FOO")
+	module(t, "os").call("expand_env", "$KAVUN $KAVUN").expect("FOO FOO")
 
-	_ = os.Setenv("GS", "123456789012")
-	module(t, "os").call("expand_env", "$GS").expect("123456789012")
+	_ = os.Setenv("KAVUN", "123456789012")
+	module(t, "os").call("expand_env", "$KAVUN").expect("123456789012")
 
-	_ = os.Setenv("GS", "123456")
-	module(t, "os").call("expand_env", "$GS$GS").expect("123456123456")
+	_ = os.Setenv("KAVUN", "123456")
+	module(t, "os").call("expand_env", "$KAVUN$KAVUN").expect("123456123456")
 
-	_ = os.Setenv("GS", "123456")
-	module(t, "os").call("expand_env", "${GS}${GS}").expect("123456123456")
+	_ = os.Setenv("KAVUN", "123456")
+	module(t, "os").call("expand_env", "${KAVUN}${KAVUN}").expect("123456123456")
 }

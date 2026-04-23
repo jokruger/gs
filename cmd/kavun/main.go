@@ -10,16 +10,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/alloc"
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/stdlib"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun"
+	"github.com/jokruger/kavun/alloc"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/parser"
+	"github.com/jokruger/kavun/stdlib"
+	"github.com/jokruger/kavun/vm"
 )
 
 const (
-	sourceFileExt = ".gs"
+	sourceFileExt = ".kvn"
 	replPrompt    = ">> "
 )
 
@@ -203,9 +203,9 @@ func RunREPL(a core.Allocator, modules *vm.ModuleMap, in io.Reader, out io.Write
 		}
 
 		file = addPrints(file)
-		c := gs.NewCompiler(a, srcFile, symbolTable, constants, modules, nil)
+		c := kavun.NewCompiler(a, srcFile, symbolTable, constants, modules, nil)
 		if strictAssign {
-			c.SetAssignmentMode(gs.AssignmentModeStrict)
+			c.SetAssignmentMode(kavun.AssignmentModeStrict)
 		}
 		if err := c.Compile(file); err != nil {
 			_, _ = fmt.Fprintln(out, err.Error())
@@ -232,9 +232,9 @@ func compileSrc(a core.Allocator, modules *vm.ModuleMap, src []byte, inputFile s
 		return nil, err
 	}
 
-	c := gs.NewCompiler(a, srcFile, nil, nil, modules, nil)
+	c := kavun.NewCompiler(a, srcFile, nil, nil, modules, nil)
 	if strictAssign {
-		c.SetAssignmentMode(gs.AssignmentModeStrict)
+		c.SetAssignmentMode(kavun.AssignmentModeStrict)
 	}
 	c.EnableFileImport(true)
 	if resolvePath {
@@ -253,7 +253,7 @@ func compileSrc(a core.Allocator, modules *vm.ModuleMap, src []byte, inputFile s
 func doHelp() {
 	fmt.Println("Usage:")
 	fmt.Println()
-	fmt.Println("	gs [flags] {input-file}")
+	fmt.Println("	kavun [flags] {input-file}")
 	fmt.Println()
 	fmt.Println("Flags:")
 	fmt.Println()
@@ -263,20 +263,20 @@ func doHelp() {
 	fmt.Println()
 	fmt.Println("Examples:")
 	fmt.Println()
-	fmt.Println("	gs")
+	fmt.Println("	kavun")
 	fmt.Println()
-	fmt.Println("	          Start Gs REPL")
+	fmt.Println("	          Start Kavun REPL")
 	fmt.Println()
-	fmt.Println("	gs myapp.gs")
+	fmt.Println("	kavun myapp.kvn")
 	fmt.Println()
-	fmt.Println("	          Compile and run source file (myapp.gs)")
-	fmt.Println("	          Source file must have .gs extension")
+	fmt.Println("	          Compile and run source file (myapp.kvn)")
+	fmt.Println("	          Source file must have .kvn extension")
 	fmt.Println()
-	fmt.Println("	gs -o myapp myapp.gs")
+	fmt.Println("	kavun -o myapp myapp.kvn")
 	fmt.Println()
-	fmt.Println("	          Compile source file (myapp.gs) into bytecode file (myapp)")
+	fmt.Println("	          Compile source file (myapp.kvn) into bytecode file (myapp)")
 	fmt.Println()
-	fmt.Println("	gs myapp")
+	fmt.Println("	kavun myapp")
 	fmt.Println()
 	fmt.Println("	          Run bytecode file (myapp)")
 	fmt.Println()

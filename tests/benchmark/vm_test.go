@@ -3,12 +3,12 @@ package benchmark
 import (
 	"testing"
 
-	"github.com/jokruger/gs"
-	"github.com/jokruger/gs/alloc"
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/parser"
-	"github.com/jokruger/gs/stdlib"
-	"github.com/jokruger/gs/vm"
+	"github.com/jokruger/kavun"
+	"github.com/jokruger/kavun/alloc"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/parser"
+	"github.com/jokruger/kavun/stdlib"
+	"github.com/jokruger/kavun/vm"
 )
 
 func BenchmarkVM(b *testing.B) {
@@ -67,7 +67,7 @@ func compileFile(a core.Allocator, file *parser.File) (*vm.Bytecode, error) {
 	symTable := vm.NewSymbolTable()
 	symTable.Define("out")
 	m := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
-	c := gs.NewCompiler(a, file.InputFile, symTable, nil, m, nil)
+	c := kavun.NewCompiler(a, file.InputFile, symTable, nil, m, nil)
 	if err := c.Compile(file); err != nil {
 		return nil, err
 	}

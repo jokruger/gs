@@ -9,8 +9,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/jokruger/dec128"
-	"github.com/jokruger/gs/errs"
-	"github.com/jokruger/gs/token"
+	"github.com/jokruger/kavun/errs"
+	"github.com/jokruger/kavun/token"
 )
 
 // IntValue creates new boxed int value.

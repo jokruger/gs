@@ -4,9 +4,9 @@ import (
 	"bytes"
 	gojson "encoding/json"
 
-	"github.com/jokruger/gs/core"
-	"github.com/jokruger/gs/errs"
-	"github.com/jokruger/gs/stdlib/json"
+	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/errs"
+	"github.com/jokruger/kavun/stdlib/json"
 )
 
 var jsonModule = map[string]core.Value{

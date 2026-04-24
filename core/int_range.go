@@ -220,23 +220,27 @@ func intRangeFnToString(v Value, vm VM, args []Value) (Value, error) {
 		return Undefined, errs.NewWrongNumArgumentsError("to_string", "0", len(args))
 	}
 	o := (*IntRange)(v.Ptr)
-	bs := make([]rune, o.Len())
+	alloc := vm.Allocator()
+	rs, err := alloc.NewRunes(int(o.Len()), true)
+	if err != nil {
+		return Undefined, err
+	}
 	i := 0
 	t := o.Start
 	if o.Start <= o.Stop {
 		for t < o.Stop {
-			bs[i] = rune(t)
+			rs[i] = rune(t)
 			i++
 			t += o.Step
 		}
-		return vm.Allocator().NewStringValue(string(bs))
+		return alloc.NewStringValue(string(rs))
 	}
 	for t > o.Stop {
-		bs[i] = rune(t)
+		rs[i] = rune(t)
 		i++
 		t -= o.Step
 	}
-	return vm.Allocator().NewStringValue(string(bs))
+	return alloc.NewStringValue(string(rs))
 }
 
 func intRangeFnToRecord(v Value, vm VM, args []Value) (Value, error) {

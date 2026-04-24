@@ -489,12 +489,16 @@ func stringFnFilter(v Value, vm VM, args []Value) (Value, error) {
 		return Undefined, errs.NewInvalidArgumentTypeError("filter", "first", "non-variadic function", fn.TypeName())
 	}
 
+	var buf [2]Value
 	o := (*String)(v.Ptr)
 	alloc := vm.Allocator()
-	var buf [2]Value
+	filtered, err := alloc.NewRunes(utf8.RuneCountInString(o.Value), false)
+	if err != nil {
+		return Undefined, err
+	}
+
 	switch fn.Arity() {
 	case 1:
-		filtered := make([]rune, 0, len(o.Value))
 		for _, v := range o.Value {
 			buf[0] = RuneValue(v)
 			res, err := fn.Call(vm, buf[:1])
@@ -508,7 +512,6 @@ func stringFnFilter(v Value, vm VM, args []Value) (Value, error) {
 		return alloc.NewStringValue(string(filtered))
 
 	case 2:
-		filtered := make([]rune, 0, len(o.Value))
 		for i, v := range o.Value {
 			buf[0] = IntValue(int64(i))
 			buf[1] = RuneValue(v)

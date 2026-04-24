@@ -431,7 +431,10 @@ func runesTypeAsTime(v Value) (time.Time, bool) {
 
 func runesTypeAsArray(v Value, a Allocator) ([]Value, bool) {
 	o := (*Runes)(v.Ptr)
-	arr := make([]Value, len(o.Elements))
+	arr, err := a.NewArray(len(o.Elements), true)
+	if err != nil {
+		return nil, false
+	}
 	for i, r := range o.Elements {
 		arr[i] = RuneValue(r)
 	}

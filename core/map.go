@@ -227,7 +227,10 @@ func mapTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, error
 
 func mapFnKeys(v Value, a Allocator) (Value, error) {
 	o := (*Map)(v.Ptr)
-	keys := make([]Value, 0, len(o.Elements))
+	keys, err := a.NewArray(len(o.Elements), false)
+	if err != nil {
+		return Undefined, err
+	}
 	for k := range o.Elements {
 		t, err := a.NewStringValue(k)
 		if err != nil {
@@ -240,7 +243,10 @@ func mapFnKeys(v Value, a Allocator) (Value, error) {
 
 func mapFnValues(v Value, a Allocator) (Value, error) {
 	o := (*Map)(v.Ptr)
-	values := make([]Value, 0, len(o.Elements))
+	values, err := a.NewArray(len(o.Elements), false)
+	if err != nil {
+		return Undefined, err
+	}
 	for _, v := range o.Elements {
 		values = append(values, v)
 	}

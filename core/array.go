@@ -165,7 +165,10 @@ func arrayTypeEqual(v Value, r Value) bool {
 func arrayTypeCopy(v Value, a Allocator) (Value, error) {
 	// Deep copy the array and its elements even if it is immutable (since the elements themselves may be mutable)
 	o := (*Array)(v.Ptr)
-	c := make([]Value, len(o.Elements))
+	c, err := a.NewArray(len(o.Elements), true)
+	if err != nil {
+		return Undefined, err
+	}
 	for i, e := range o.Elements {
 		t, err := e.Copy(a)
 		if err != nil {
@@ -383,13 +386,6 @@ func arrayTypeContains(v Value, e Value) bool {
 
 func arrayTypeAppend(v Value, a Allocator, args []Value) (Value, error) {
 	o := (*Array)(v.Ptr)
-	if v.Const {
-		sz := len(o.Elements)
-		t := make([]Value, sz+len(args))
-		copy(t, o.Elements)
-		copy(t[sz:], args)
-		return a.NewArrayValue(t, false)
-	}
 	return a.NewArrayValue(append(o.Elements, args...), false)
 }
 
@@ -485,11 +481,15 @@ func arrayFnSort(v Value, vm VM, args []Value) (Value, error) {
 		return Undefined, errs.NewWrongNumArgumentsError("sort", "0", len(args))
 	}
 
-	o := (*Array)(v.Ptr)
-	t := make([]Value, len(o.Elements))
-	copy(t, o.Elements)
 	alloc := vm.Allocator()
 	var err error
+
+	o := (*Array)(v.Ptr)
+	t, err := alloc.NewArray(len(o.Elements), true)
+	if err != nil {
+		return Undefined, err
+	}
+	copy(t, o.Elements)
 	slices.SortFunc(t, func(a, b Value) int {
 		less, e := a.BinaryOp(alloc, token.Less, b)
 		if e != nil {
@@ -521,10 +521,13 @@ func arrayFnFilter(v Value, vm VM, args []Value) (Value, error) {
 		return Undefined, errs.NewInvalidArgumentTypeError("filter", "first", "non-variadic function", fn.TypeName())
 	}
 
+	var buf [2]Value
 	o := (*Array)(v.Ptr)
 	alloc := vm.Allocator()
-	var buf [2]Value
-	filtered := make([]Value, 0, len(o.Elements))
+	filtered, err := alloc.NewArray(len(o.Elements), false)
+	if err != nil {
+		return Undefined, err
+	}
 
 	switch fn.Arity() {
 	case 1:
@@ -706,20 +709,23 @@ func arrayFnMap(v Value, vm VM, args []Value) (Value, error) {
 		return Undefined, errs.NewInvalidArgumentTypeError("map", "first", "non-variadic function", fn.TypeName())
 	}
 
+	var buf [2]Value
 	o := (*Array)(v.Ptr)
 	alloc := vm.Allocator()
-	var buf [2]Value
-	mapped := make([]Value, 0, len(o.Elements))
+	mapped, err := alloc.NewArray(len(o.Elements), true)
+	if err != nil {
+		return Undefined, err
+	}
 
 	switch fn.Arity() {
 	case 1:
-		for _, v := range o.Elements {
+		for i, v := range o.Elements {
 			buf[0] = v
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
 				return Undefined, err
 			}
-			mapped = append(mapped, res)
+			mapped[i] = res
 		}
 		return alloc.NewArrayValue(mapped, false)
 
@@ -731,7 +737,7 @@ func arrayFnMap(v Value, vm VM, args []Value) (Value, error) {
 			if err != nil {
 				return Undefined, err
 			}
-			mapped = append(mapped, res)
+			mapped[i] = res
 		}
 		return alloc.NewArrayValue(mapped, false)
 

@@ -325,7 +325,10 @@ func intRangeTypeAsBool(v Value) (bool, bool) {
 
 func intRangeTypeAsArray(v Value, a Allocator) ([]Value, bool) {
 	o := (*IntRange)(v.Ptr)
-	arr := make([]Value, o.Len())
+	arr, err := a.NewArray(int(o.Len()), true)
+	if err != nil {
+		return nil, false
+	}
 	i := 0
 	t := o.Start
 	if o.Start <= o.Stop {

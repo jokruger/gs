@@ -301,7 +301,10 @@ func bytesTypeAsBytes(v Value) ([]byte, bool) {
 
 func bytesTypeAsArray(v Value, a Allocator) ([]Value, bool) {
 	o := (*Bytes)(v.Ptr)
-	arr := make([]Value, len(o.Elements))
+	arr, err := a.NewArray(len(o.Elements), true)
+	if err != nil {
+		return nil, false
+	}
 	for i, b := range o.Elements {
 		arr[i] = IntValue(int64(b))
 	}

@@ -404,7 +404,10 @@ func stringTypeAsTime(v Value) (time.Time, bool) {
 
 func stringTypeAsArray(v Value, a Allocator) ([]Value, bool) {
 	o := (*String)(v.Ptr)
-	arr := make([]Value, len(o.Value))
+	arr, err := a.NewArray(utf8.RuneCountInString(o.Value), true)
+	if err != nil {
+		return nil, false
+	}
 	for i, r := range o.Value {
 		arr[i] = IntValue(int64(r))
 	}

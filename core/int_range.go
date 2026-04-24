@@ -248,7 +248,11 @@ func intRangeFnToRecord(v Value, vm VM, args []Value) (Value, error) {
 		return Undefined, errs.NewWrongNumArgumentsError("to_record", "0", len(args))
 	}
 	o := (*IntRange)(v.Ptr)
-	m := make(map[string]Value, o.Len())
+	alloc := vm.Allocator()
+	m, err := alloc.NewMap(int(o.Len()))
+	if err != nil {
+		return Undefined, err
+	}
 	i := 0
 	t := o.Start
 	if o.Start <= o.Stop {
@@ -257,14 +261,14 @@ func intRangeFnToRecord(v Value, vm VM, args []Value) (Value, error) {
 			i++
 			t += o.Step
 		}
-		return vm.Allocator().NewRecordValue(m, false)
+		return alloc.NewRecordValue(m, false)
 	}
 	for t > o.Stop {
 		m[strconv.Itoa(i)] = IntValue(t)
 		i++
 		t -= o.Step
 	}
-	return vm.Allocator().NewRecordValue(m, false)
+	return alloc.NewRecordValue(m, false)
 }
 
 func intRangeFnToMap(v Value, vm VM, args []Value) (Value, error) {
@@ -272,7 +276,11 @@ func intRangeFnToMap(v Value, vm VM, args []Value) (Value, error) {
 		return Undefined, errs.NewWrongNumArgumentsError("to_map", "0", len(args))
 	}
 	o := (*IntRange)(v.Ptr)
-	m := make(map[string]Value, o.Len())
+	alloc := vm.Allocator()
+	m, err := alloc.NewMap(int(o.Len()))
+	if err != nil {
+		return Undefined, err
+	}
 	i := 0
 	t := o.Start
 	if o.Start <= o.Stop {
@@ -281,14 +289,14 @@ func intRangeFnToMap(v Value, vm VM, args []Value) (Value, error) {
 			i++
 			t += o.Step
 		}
-		return vm.Allocator().NewMapValue(m, false)
+		return alloc.NewMapValue(m, false)
 	}
 	for t > o.Stop {
 		m[strconv.Itoa(i)] = IntValue(t)
 		i++
 		t -= o.Step
 	}
-	return vm.Allocator().NewMapValue(m, false)
+	return alloc.NewMapValue(m, false)
 }
 
 func intRangeTypeAccess(v Value, a Allocator, index Value, mode Opcode) (Value, error) {

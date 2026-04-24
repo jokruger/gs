@@ -211,9 +211,12 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		m := make(map[string]Value, len(o.Value))
+		m, err := alloc.NewMap(utf8.RuneCountInString(o.Value))
+		if err != nil {
+			return Undefined, err
+		}
 		for i, r := range o.Value {
-			m[strconv.Itoa(i)] = IntValue(int64(r))
+			m[strconv.Itoa(i)] = RuneValue(r)
 		}
 		return alloc.NewRecordValue(m, false)
 
@@ -221,9 +224,12 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		m := make(map[string]Value, len(o.Value))
+		m, err := alloc.NewMap(utf8.RuneCountInString(o.Value))
+		if err != nil {
+			return Undefined, err
+		}
 		for i, r := range o.Value {
-			m[strconv.Itoa(i)] = IntValue(int64(r))
+			m[strconv.Itoa(i)] = RuneValue(r)
 		}
 		return alloc.NewMapValue(m, false)
 
@@ -409,7 +415,7 @@ func stringTypeAsArray(v Value, a Allocator) ([]Value, bool) {
 		return nil, false
 	}
 	for i, r := range o.Value {
-		arr[i] = IntValue(int64(r))
+		arr[i] = RuneValue(r)
 	}
 	return arr, true
 }

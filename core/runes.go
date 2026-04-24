@@ -209,9 +209,11 @@ func runesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		rs := o.Elements
-		m := make(map[string]Value, len(rs))
-		for i, r := range rs {
+		m, err := alloc.NewMap(len(o.Elements))
+		if err != nil {
+			return Undefined, err
+		}
+		for i, r := range o.Elements {
 			m[strconv.Itoa(i)] = RuneValue(r)
 		}
 		return alloc.NewRecordValue(m, false)
@@ -220,9 +222,11 @@ func runesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		rs := o.Elements
-		m := make(map[string]Value, len(rs))
-		for i, r := range rs {
+		m, err := alloc.NewMap(len(o.Elements))
+		if err != nil {
+			return Undefined, err
+		}
+		for i, r := range o.Elements {
 			m[strconv.Itoa(i)] = RuneValue(r)
 		}
 		return alloc.NewMapValue(m, false)

@@ -20,9 +20,6 @@ type Array struct {
 
 func (o *Array) Set(elements []Value) {
 	o.Elements = elements
-	if o.Elements == nil {
-		o.Elements = []Value{}
-	}
 }
 
 // ArrayValue creates boxed array value.
@@ -240,7 +237,10 @@ func arrayTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		r := make(map[string]Value, len(o.Elements))
+		r, err := alloc.NewMap(len(o.Elements))
+		if err != nil {
+			return Undefined, err
+		}
 		for i, v := range o.Elements {
 			r[strconv.Itoa(i)] = v
 		}
@@ -250,7 +250,10 @@ func arrayTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		r := make(map[string]Value, len(o.Elements))
+		r, err := alloc.NewMap(len(o.Elements))
+		if err != nil {
+			return Undefined, err
+		}
 		for i, v := range o.Elements {
 			r[strconv.Itoa(i)] = v
 		}

@@ -20,9 +20,6 @@ type Bytes struct {
 
 func (o *Bytes) Set(elements []byte) {
 	o.Elements = elements
-	if o.Elements == nil {
-		o.Elements = []byte{}
-	}
 }
 
 // BytesValue creates new boxed bytes value.
@@ -154,7 +151,10 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		m := make(map[string]Value, len(o.Elements))
+		m, err := alloc.NewMap(len(o.Elements))
+		if err != nil {
+			return Undefined, err
+		}
 		for i, b := range o.Elements {
 			m[strconv.Itoa(i)] = IntValue(int64(b))
 		}
@@ -164,7 +164,10 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		m := make(map[string]Value, len(o.Elements))
+		m, err := alloc.NewMap(len(o.Elements))
+		if err != nil {
+			return Undefined, err
+		}
 		for i, b := range o.Elements {
 			m[strconv.Itoa(i)] = IntValue(int64(b))
 		}

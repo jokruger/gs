@@ -16,9 +16,6 @@ type Map struct {
 
 func (o *Map) Set(elements map[string]Value) {
 	o.Elements = elements
-	if o.Elements == nil {
-		o.Elements = make(map[string]Value)
-	}
 }
 
 // RecordValue creates new boxed record value.
@@ -74,7 +71,10 @@ func recordTypeString(v Value) string {
 func recordTypeCopy(v Value, a Allocator) (Value, error) {
 	// perform a deep copy of the record even if it is immutable (since the values may be mutable)
 	o := (*Map)(v.Ptr)
-	c := make(map[string]Value, len(o.Elements))
+	c, err := a.NewMap(len(o.Elements))
+	if err != nil {
+		return Undefined, err
+	}
 	for k, v := range o.Elements {
 		t, err := v.Copy(a)
 		if err != nil {
@@ -132,7 +132,10 @@ func mapTypeString(v Value) string {
 func mapTypeCopy(v Value, a Allocator) (Value, error) {
 	// perform a deep copy of the map even if it is immutable (since the values may be mutable)
 	o := (*Map)(v.Ptr)
-	c := make(map[string]Value, len(o.Elements))
+	c, err := a.NewMap(len(o.Elements))
+	if err != nil {
+		return Undefined, err
+	}
 	for k, v := range o.Elements {
 		t, err := v.Copy(a)
 		if err != nil {
@@ -263,12 +266,16 @@ func mapFnFilter(v Value, vm VM, args []Value) (Value, error) {
 		return Undefined, errs.NewInvalidArgumentTypeError("filter", "first", "non-variadic function", fn.TypeName())
 	}
 
-	alloc := vm.Allocator()
 	var buf [2]Value
+	alloc := vm.Allocator()
+	o := (*Map)(v.Ptr)
+	filtered, err := alloc.NewMap(len(o.Elements))
+	if err != nil {
+		return Undefined, err
+	}
+
 	switch fn.Arity() {
 	case 1:
-		o := (*Map)(v.Ptr)
-		filtered := make(map[string]Value, len(o.Elements))
 		for k, v := range o.Elements {
 			t, err := alloc.NewStringValue(k)
 			if err != nil {
@@ -286,8 +293,6 @@ func mapFnFilter(v Value, vm VM, args []Value) (Value, error) {
 		return alloc.NewMapValue(filtered, false)
 
 	case 2:
-		o := (*Map)(v.Ptr)
-		filtered := make(map[string]Value, len(o.Elements))
 		for k, v := range o.Elements {
 			t, err := alloc.NewStringValue(k)
 			if err != nil {

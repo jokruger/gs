@@ -1,3 +1,4 @@
+- for arrays, bytes, runes, strings - store data=leng and ptr=underlying data (&[0] / StringData, etc) to avoid allocation of header struct
 - allocate/release underlying arrays and maps through allocator
 - use store underlying array/map pinter in Value.Ptr instead of using wrapper struct
 - remove bool argument from NewMap/NewRecord/NewArray - use separate constructors for mutable/immutable

@@ -351,7 +351,11 @@ func builtinString(vm core.VM, args []core.Value) (core.Value, error) {
 func builtinRunes(vm core.VM, args []core.Value) (core.Value, error) {
 	l := len(args)
 	if l == 0 {
-		return vm.Allocator().NewRunesValue([]rune{})
+		rs, err := vm.Allocator().NewRunes(0)
+		if err != nil {
+			return core.Undefined, err
+		}
+		return vm.Allocator().NewRunesValue(rs)
 	}
 	if l > 2 {
 		return core.Undefined, errs.NewWrongNumArgumentsError("runes", "0, 1 or 2", len(args))

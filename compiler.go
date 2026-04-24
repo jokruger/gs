@@ -232,12 +232,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		c.emit(node, core.OpConstant, c.addConstant(core.FloatValue(node.Value)))
 
 	case *parser.DecimalLit:
-		d, err := c.alloc.NewDecimal()
-		if err != nil {
-			return err
-		}
-		*d = node.Value
-		t := core.DecimalValue(d)
+		t := core.NewDecimalValue(node.Value)
 		c.emit(node, core.OpConstant, c.addConstant(t))
 
 	case *parser.BoolLit:
@@ -248,17 +243,11 @@ func (c *Compiler) Compile(node parser.Node) error {
 		}
 
 	case *parser.StringLit:
-		t, err := c.alloc.NewStringValue(node.Value)
-		if err != nil {
-			return err
-		}
+		t := core.NewStringValue(node.Value)
 		c.emit(node, core.OpConstant, c.addConstant(t))
 
 	case *parser.RunesLit:
-		t, err := c.alloc.NewRunesValue(node.Value)
-		if err != nil {
-			return err
-		}
+		t := core.NewRunesValue(node.Value)
 		c.emit(node, core.OpConstant, c.addConstant(t))
 
 	case *parser.RuneLit:
@@ -402,10 +391,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 	case *parser.RecordLit:
 		for _, elt := range node.Elements {
 			// key
-			t, err := c.alloc.NewStringValue(elt.Key)
-			if err != nil {
-				return err
-			}
+			t := core.NewStringValue(elt.Key)
 			c.emit(node, core.OpConstant, c.addConstant(t))
 
 			// value
@@ -587,10 +573,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		if node.Ellipsis.IsValid() {
 			ellipsis = 1
 		}
-		t, err := c.alloc.NewStringValue(node.MethodName)
-		if err != nil {
-			return err
-		}
+		t := core.NewStringValue(node.MethodName)
 		methodIdx := c.addConstant(t)
 		c.emit(node, core.OpMethodCall, methodIdx, len(node.Args), ellipsis)
 

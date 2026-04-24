@@ -1,6 +1,8 @@
 package alloc
 
 import (
+	"time"
+
 	"github.com/jokruger/kavun/core"
 )
 
@@ -11,8 +13,42 @@ func New() core.Allocator {
 	return &Allocator{}
 }
 
-func (a *Allocator) ReleaseValue(v core.Value) {
+func (a *Allocator) Reset() {
 }
+
+/* Low-level resources */
+
+func (a *Allocator) NewDecimal() (*core.Decimal, error) {
+	o := &core.Decimal{}
+	return o, nil
+}
+
+func (a *Allocator) NewTime() (*time.Time, error) {
+	o := &time.Time{}
+	return o, nil
+}
+
+func (a *Allocator) NewRunes(capacity int) ([]rune, error) {
+	o := make([]rune, 0, capacity)
+	return o, nil
+}
+
+func (a *Allocator) NewBytes(capacity int) ([]byte, error) {
+	o := make([]byte, 0, capacity)
+	return o, nil
+}
+
+func (a *Allocator) NewArray(capacity int) ([]core.Value, error) {
+	o := make([]core.Value, 0, capacity)
+	return o, nil
+}
+
+func (a *Allocator) NewMap(capacity int) (map[string]core.Value, error) {
+	o := make(map[string]core.Value, capacity)
+	return o, nil
+}
+
+/* Value envelopes */
 
 func (a *Allocator) NewBuiltinFunctionValue(name string, fn core.NativeFunc, arity int8, variadic bool) (core.Value, error) {
 	o := &core.BuiltinFunction{}

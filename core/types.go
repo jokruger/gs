@@ -15,53 +15,21 @@ type Time = time.Time
 type Opcode = byte
 type NativeFunc = func(VM, []Value) (Value, error)
 
-// Allocator creates values and may reuse their storage when possible.
-//
-// For simple values whose allocation is limited to the value object itself,
-// the lifecycle is straightforward: the caller obtains the value through the
-// corresponding New...Value method, uses it, and calls ReleaseValue when the
-// value is no longer needed. At that point the allocator may either free the
-// underlying storage or keep it for future reuse.
-//
-// For complex values, ReleaseValue applies only to the value envelope managed
-// by the allocator, not to resources stored inside that envelope. For example,
-// a compiled function may reference instruction buffers, free variables,
-// source maps, and similar data provided by the caller. Releasing the compiled
-// function value allows the allocator to recycle only the compiled function
-// object itself; the referenced resources remain owned by the caller and are
-// reclaimed by the GC unless they are managed separately.
-//
-// The intended allocation strategy is therefore split by ownership boundary:
-// envelope objects are created with New...Value and returned with ReleaseValue,
-// while internal resources that have their own allocator support must be
-// released independently.
-//
-// In case of StringValue, the allocator may reuse the string wrapper objects,
-// but the underlying string data is immutable and shared by all wrappers,
-// so it is not managed by the allocator.
-//
-// In case of ArrayValue, BytesValue, MapValue, etc., the allocator may reuse
-// the wrapper objects as well as the underlying data buffers, which are managed
-// by their own New/Release methods.
+// Allocator is an interface for arena allocation implementation.
+// Note that pool strategy makes no sense because it is not possible (in most cases) to know when to release the value.
+// However, an arena strategy may still be useful, especially for short-lived scripts and repetitive VM execution patterns.
 type Allocator interface {
+	Reset()
+
+	// Low-level resources
 	NewDecimal() (*Decimal, error)
-	ReleaseDecimal(d *Decimal)
-
 	NewTime() (*Time, error)
-	ReleaseTime(t *Time)
-
 	NewRunes(capacity int) ([]rune, error)
-	ReleaseRunes(r []rune)
-
 	NewBytes(capacity int) ([]byte, error)
-	ReleaseBytes(b []byte)
-
 	NewArray(capacity int) ([]Value, error)
-	ReleaseArray(arr []Value)
-
 	NewMap(capacity int) (map[string]Value, error)
-	ReleaseMap(m map[string]Value)
 
+	// Value envelopes
 	NewBuiltinFunctionValue(name string, val NativeFunc, arity int8, variadic bool) (Value, error)
 	NewCompiledFunctionValue(instructions []byte, free []*Value, sourceMap map[int]Pos, numLocals int, numParameters int8, varArgs bool) (Value, error)
 	NewErrorValue(e Value) (Value, error)
@@ -77,8 +45,6 @@ type Allocator interface {
 	NewArrayIteratorValue(arr []Value) (Value, error)
 	NewMapIteratorValue(m map[string]Value) (Value, error)
 	NewIntRangeIteratorValue(start, stop, step int64) (Value, error)
-
-	ReleaseValue(v Value)
 }
 
 type VM interface {

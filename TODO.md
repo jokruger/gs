@@ -22,6 +22,9 @@
 
 ===
 
+- string, add method to get len in runes (utf8.RuneCountInString)
+- runes.trim - custom implementation that uses runes slice from allocator
+
 - implement correct allocations limit control (dynamic objects, buffers, strings, etc) - is it even possible to control taking into account user types?
 
 - variable.go - use AsX instead of type assertion

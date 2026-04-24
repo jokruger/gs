@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 	"unsafe"
 
 	"github.com/araddon/dateparse"
@@ -139,7 +140,15 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		return alloc.NewRunesValue([]rune(o.Value))
+		c := utf8.RuneCountInString(o.Value)
+		rs, err := alloc.NewRunes(c)
+		if err != nil {
+			return Undefined, err
+		}
+		for _, r := range o.Value {
+			rs = append(rs, r)
+		}
+		return alloc.NewRunesValue(rs)
 
 	case "to_array":
 		if len(args) != 0 {

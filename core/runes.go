@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 	"unsafe"
 
 	"github.com/araddon/dateparse"
@@ -23,9 +24,6 @@ type Runes struct {
 
 func (o *Runes) Set(r []rune) {
 	o.Elements = r
-	if o.Elements == nil {
-		o.Elements = []rune{}
-	}
 }
 
 // RunesValue creates new boxed runes value.
@@ -124,7 +122,12 @@ func runesTypeEqual(v Value, r Value) bool {
 
 func runesTypeCopy(v Value, a Allocator) (Value, error) {
 	o := (*Runes)(v.Ptr)
-	return a.NewRunesValue(o.Elements)
+	rs, err := a.NewRunes(len(o.Elements))
+	if err != nil {
+		return Undefined, err
+	}
+	rs = append(rs, o.Elements...)
+	return a.NewRunesValue(rs)
 }
 
 func runesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
@@ -276,13 +279,27 @@ func runesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		return alloc.NewRunesValue([]rune(strings.ToLower(string(o.Elements))))
+		rs, err := alloc.NewRunes(len(o.Elements))
+		if err != nil {
+			return Undefined, err
+		}
+		for _, r := range o.Elements {
+			rs = append(rs, unicode.ToLower(r))
+		}
+		return alloc.NewRunesValue(rs)
 
 	case "upper":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		return alloc.NewRunesValue([]rune(strings.ToUpper(string(o.Elements))))
+		rs, err := alloc.NewRunes(len(o.Elements))
+		if err != nil {
+			return Undefined, err
+		}
+		for _, r := range o.Elements {
+			rs = append(rs, unicode.ToUpper(r))
+		}
+		return alloc.NewRunesValue(rs)
 
 	case "contains":
 		if len(args) != 1 {
@@ -307,9 +324,11 @@ func runesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		rs := o.Elements
-		sorted := make([]rune, len(rs))
-		copy(sorted, rs)
+		sorted, err := alloc.NewRunes(len(o.Elements))
+		if err != nil {
+			return Undefined, err
+		}
+		sorted = append(sorted, o.Elements...)
 		slices.Sort(sorted)
 		return alloc.NewRunesValue(sorted)
 
@@ -503,13 +522,15 @@ func runesFnFilter(v Value, vm VM, args []Value) (Value, error) {
 	}
 
 	o := (*Runes)(v.Ptr)
-	rs := o.Elements
 	alloc := vm.Allocator()
 	var buf [2]Value
 	switch fn.Arity() {
 	case 1:
-		filtered := make([]rune, 0, len(rs))
-		for _, v := range rs {
+		filtered, err := alloc.NewRunes(len(o.Elements))
+		if err != nil {
+			return Undefined, err
+		}
+		for _, v := range o.Elements {
 			buf[0] = RuneValue(v)
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
@@ -522,8 +543,11 @@ func runesFnFilter(v Value, vm VM, args []Value) (Value, error) {
 		return alloc.NewRunesValue(filtered)
 
 	case 2:
-		filtered := make([]rune, 0, len(rs))
-		for i, v := range rs {
+		filtered, err := alloc.NewRunes(len(o.Elements))
+		if err != nil {
+			return Undefined, err
+		}
+		for i, v := range o.Elements {
 			buf[0] = IntValue(int64(i))
 			buf[1] = RuneValue(v)
 			res, err := fn.Call(vm, buf[:2])
@@ -552,12 +576,11 @@ func runesFnCount(v Value, vm VM, args []Value) (Value, error) {
 	}
 
 	o := (*Runes)(v.Ptr)
-	rs := o.Elements
 	var buf [2]Value
 	switch fn.Arity() {
 	case 1:
 		var count int64
-		for _, v := range rs {
+		for _, v := range o.Elements {
 			buf[0] = RuneValue(v)
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
@@ -571,7 +594,7 @@ func runesFnCount(v Value, vm VM, args []Value) (Value, error) {
 
 	case 2:
 		var count int64
-		for i, v := range rs {
+		for i, v := range o.Elements {
 			buf[0] = IntValue(int64(i))
 			buf[1] = RuneValue(v)
 			res, err := fn.Call(vm, buf[:2])
@@ -600,11 +623,10 @@ func runesFnAll(v Value, vm VM, args []Value) (Value, error) {
 	}
 
 	o := (*Runes)(v.Ptr)
-	rs := o.Elements
 	var buf [2]Value
 	switch fn.Arity() {
 	case 1:
-		for _, v := range rs {
+		for _, v := range o.Elements {
 			buf[0] = RuneValue(v)
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
@@ -617,7 +639,7 @@ func runesFnAll(v Value, vm VM, args []Value) (Value, error) {
 		return BoolValue(true), nil
 
 	case 2:
-		for i, v := range rs {
+		for i, v := range o.Elements {
 			buf[0] = IntValue(int64(i))
 			buf[1] = RuneValue(v)
 			res, err := fn.Call(vm, buf[:2])
@@ -646,11 +668,10 @@ func runesFnAny(v Value, vm VM, args []Value) (Value, error) {
 	}
 
 	o := (*Runes)(v.Ptr)
-	rs := o.Elements
 	var buf [2]Value
 	switch fn.Arity() {
 	case 1:
-		for _, v := range rs {
+		for _, v := range o.Elements {
 			buf[0] = RuneValue(v)
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
@@ -663,7 +684,7 @@ func runesFnAny(v Value, vm VM, args []Value) (Value, error) {
 		return BoolValue(false), nil
 
 	case 2:
-		for i, v := range rs {
+		for i, v := range o.Elements {
 			buf[0] = IntValue(int64(i))
 			buf[1] = RuneValue(v)
 			res, err := fn.Call(vm, buf[:2])

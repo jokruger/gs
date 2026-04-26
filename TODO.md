@@ -1,3 +1,5 @@
+# TODO list for Kavun
+
 - remove allocator from compiler/parser - in dedupe allow pass nil and use heap if needed.
 - implement reusable VM (add reset) so the same VM can be called multiple times with different scripts.
 - do not zero values in pool, or make it configurable
@@ -86,7 +88,7 @@
 - add time.is_leap_year(), time.is_weekend(), time.is_weekday(), time.is_holiday() (with holiday calendar)
 - map/array/record/string/bytes -> value level?
 - string-iterator, array-iterator, etc -> value level?
-- char - implement methods from https://pkg.go.dev/unicode
+- char - implement methods from <https://pkg.go.dev/unicode>
 - add Hash function for Value (and all types)
 
 - missing ctors(0/1/2): array, record
@@ -96,31 +98,29 @@
 - move splice function to container types (methods)
 
 - in VM slice logic, use fast path for VT_INT
-  
 - smart arena allocator:
-  - used for complex (ptr-based) types only, no need to pre-allocate ints, bools, etc
-  - use preallocated buffers
-  - use .data to store index, use max-buff to indicate the value was allocated on the heap
-  - when buff allocated value release, mark corresponding ptr as nil
-  - if released value is last in buff, decrease buff cursor (til non-nil value found)
+    - used for complex (ptr-based) types only, no need to pre-allocate ints, bools, etc
+    - use preallocated buffers
+    - use .data to store index, use max-buff to indicate the value was allocated on the heap
+    - when buff allocated value release, mark corresponding ptr as nil
+    - if released value is last in buff, decrease buff cursor (til non-nil value found)
 
 - add tests for AsX methods
 - add mutex in VM
 
-- vector/array operations like /+, /-, /*, etc - elementwise operations for vectors
+- vector/array operations like /+, /-, /\*, etc - elementwise operations for vectors
 - format for decimal
 
 - sign member function for int/float/decimal
 - abs member function for int/float/decimal
 - pow member function for int/float/decimal
 - sqrt member function for int/float/decimal
-  
 - type() member function for all types, returning type name as string
 
 - container types: .reverse(), .shuffle(), .unique(), .join(sep), .split(sep), .chunk(size), .window(size, step), .zip(other), .enumerate()
 - byte type
 - separate string and unicode
-- shell we use ".to_" names?
+- shell we use ".to\_" names?
 - why we need immutable arrays/records/maps?
 
 - remove map/record to string conversion - it breaks consistency... complex values should be printed, not converted to string implicitly

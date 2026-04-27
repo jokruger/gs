@@ -4543,7 +4543,7 @@ func traceCompileRun(file *parser.File, symbols map[string]core.Value, modules *
 	trace = append(trace, fmt.Sprintf("\n[Compiled Constants]\n\n%s", strings.Join(bytecode.FormatConstants(), "\n")))
 	trace = append(trace, fmt.Sprintf("\n[Compiled Instructions]\n\n%s\n", strings.Join(bytecode.FormatInstructions(), "\n")))
 
-	v = vm.NewVM(alloc, bytecode, globals)
+	v = vm.NewVM(alloc, bytecode, globals, vm.DefaultMaxFrames, vm.DefaultStackSize)
 
 	err = v.Run()
 	{

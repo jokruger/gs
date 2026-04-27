@@ -40,28 +40,37 @@ type VM struct {
 	// Runtime state
 	constants   []core.Value // constant pool used by OpConstant, method dispatch, closures, and other opcode operands
 	globals     []core.Value // global variable storage used by global load/store/select opcodes
+	frames      []frame      // call frame stack
+	stack       []core.Value // operand stack
 	alloc       *core.Arena  // object allocator used by arrays, records, iterators, errors, closures, and call helpers
 	framesIndex int          // number of active frames; updated on calls, returns, and synthetic callback frames
 
 	// Cold diagnostic state: only used when execution aborts or a stack trace is formatted.
 	fileSet *parser.SourceFileSet // source positions for runtime stack traces
 	err     error                 // last runtime error captured by run()
-
-	// Large fixed-size arrays
-	frames [MaxFrames]frame      // call frame stack
-	stack  [StackSize]core.Value // operand stack
 }
 
 // NewVM creates a VM.
-func NewVM(alloc *core.Arena, bytecode *Bytecode, globals []core.Value) *VM {
+// If VM is expected to run multiple times, it is the caller's responsibility to ensure the globals slice contains a fresh copy of
+// global variables for each run, otherwise the global variables will be shared across runs and may cause unexpected behaviors.
+func NewVM(alloc *core.Arena, bytecode *Bytecode, globals []core.Value, maxFrames int, maxStack int) *VM {
 	if globals == nil {
 		globals = make([]core.Value, GlobalsSize)
 	}
+	if maxFrames <= 0 {
+		maxFrames = DefaultMaxFrames
+	}
+	if maxStack <= 0 {
+		maxStack = DefaultStackSize
+	}
+
 	v := &VM{
 		alloc:       alloc,
 		constants:   bytecode.Constants,
 		sp:          0,
 		globals:     globals,
+		frames:      make([]frame, maxFrames),
+		stack:       make([]core.Value, maxStack),
 		fileSet:     bytecode.FileSet,
 		framesIndex: 1,
 		ip:          -1,
@@ -71,6 +80,38 @@ func NewVM(alloc *core.Arena, bytecode *Bytecode, globals []core.Value) *VM {
 	v.curFrame = &v.frames[0]
 	v.curInsts = v.curFrame.fn.Instructions
 	return v
+}
+
+// Reset resets the VM state to run new main function.
+// It is the caller's responsibility to ensure the globals slice contains a fresh copy of global variables for the new run,
+// otherwise the global variables will be shared across runs and may cause unexpected behaviors.
+func (v *VM) Reset(bytecode *Bytecode, globals []core.Value) {
+	if globals == nil {
+		globals = make([]core.Value, GlobalsSize)
+	}
+
+	v.ip = -1
+	v.sp = 0
+	v.abort = 0
+	v.constants = bytecode.Constants
+	v.globals = globals
+
+	for i := range v.frames {
+		v.frames[i].fn = nil
+		v.frames[i].freeVars = nil
+	}
+	v.frames[0].fn = bytecode.MainFunction
+	v.frames[0].ip = -1
+	v.curFrame = &v.frames[0]
+	v.curInsts = v.curFrame.fn.Instructions
+
+	for i := range v.stack {
+		v.stack[i].Ptr = nil
+	}
+
+	v.framesIndex = 1
+	v.fileSet = bytecode.FileSet
+	v.err = nil
 }
 
 // Allocator returns the allocator used by the VM.
@@ -122,11 +163,11 @@ func (v *VM) Call(fn *core.CompiledFunction, args []core.Value) (core.Value, err
 	v.err = nil
 
 	// This helper consumes two frame slots: a synthetic trampoline frame and the callee frame.
-	if v.framesIndex+1 >= MaxFrames {
+	if v.framesIndex+1 >= len(v.frames) {
 		v.err = errs.NewStackOverflowError("native callback frames")
 		return core.Undefined, v.err
 	}
-	if v.sp+1+numArgs > StackSize {
+	if v.sp+1+numArgs > len(v.stack) {
 		v.err = errs.ErrStackOverflow
 		return core.Undefined, v.err
 	}
@@ -506,7 +547,7 @@ func (v *VM) run() {
 						continue
 					}
 				}
-				if v.framesIndex >= MaxFrames {
+				if v.framesIndex >= len(v.frames) {
 					v.err = errs.ErrStackOverflow
 					return
 				}

@@ -67,7 +67,7 @@ func runVM(a *core.Arena, bytecode *vm.Bytecode) (core.Value, error) {
 	globals := make([]core.Value, vm.GlobalsSize)
 
 	a.Reset()
-	v := vm.NewVM(a, bytecode, globals)
+	v := vm.NewVM(a, bytecode, globals, vm.DefaultMaxFrames, vm.DefaultStackSize)
 	if err := v.Run(); err != nil {
 		return core.Undefined, err
 	}

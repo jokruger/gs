@@ -39,7 +39,7 @@ fmt.println("Hello Kavun!")
 	bytecode := c.Bytecode()
 
 	// Run in VM
-	machine := vm.NewVM(a, bytecode, nil)
+	machine := vm.NewVM(a, bytecode, nil, vm.DefaultMaxFrames, vm.DefaultStackSize)
 	if err := machine.Run(); err != nil {
 		panic(err)
 	}
@@ -187,7 +187,7 @@ if err := c.Compile(file); err != nil {
 	panic(err)
 }
 
-machine := vm.NewVM(a, c.Bytecode(), globals)
+machine := vm.NewVM(a, c.Bytecode(), globals, vm.DefaultMaxFrames, vm.DefaultStackSize)
 if err := machine.Run(); err != nil {
 	panic(err)
 }

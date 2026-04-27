@@ -3,6 +3,7 @@ package kavun
 import (
 	"context"
 	"fmt"
+	"maps"
 	"path/filepath"
 	"sync"
 
@@ -18,9 +19,11 @@ type Script struct {
 	modules          vm.ModuleGetter
 	input            []byte
 	maxConstObjects  int
+	maxFrames        int
+	maxStack         int
 	assignmentMode   AssignmentMode
-	enableFileImport bool
 	importDir        string
+	enableFileImport bool
 }
 
 // NewScript creates a Script instance with an input script.
@@ -30,6 +33,8 @@ func NewScript(alloc *core.Arena, input []byte) *Script {
 		variables:       make(map[string]*Variable),
 		input:           input,
 		maxConstObjects: -1,
+		maxFrames:       -1,
+		maxStack:        -1,
 		assignmentMode:  AssignmentModeSmart,
 	}
 }
@@ -66,6 +71,16 @@ func (s *Script) SetImportDir(dir string) error {
 // SetMaxConstObjects sets the maximum number of objects in the compiled constants.
 func (s *Script) SetMaxConstObjects(n int) {
 	s.maxConstObjects = n
+}
+
+// SetMaxFrames sets the maximum number of frames for the compiled script.
+func (s *Script) SetMaxFrames(n int) {
+	s.maxFrames = n
+}
+
+// SetMaxStack sets the maximum stack size for the compiled script.
+func (s *Script) SetMaxStack(n int) {
+	s.maxStack = n
 }
 
 // SetAssignmentMode sets how plain '=' handles unresolved identifiers during compilation.
@@ -126,9 +141,11 @@ func (s *Script) Compile() (*Compiled, error) {
 	}
 	return &Compiled{
 		alloc:         s.alloc,
-		globalIndexes: globalIndexes,
 		bytecode:      bytecode,
+		globalIndexes: globalIndexes,
 		globals:       globals,
+		maxFrames:     s.maxFrames,
+		maxStack:      s.maxStack,
 	}, nil
 }
 
@@ -165,7 +182,6 @@ func (s *Script) prepCompile() (symbolTable *vm.SymbolTable, globals []core.Valu
 	}
 
 	globals = make([]core.Value, vm.GlobalsSize)
-
 	for idx, name := range names {
 		symbol := symbolTable.Define(name)
 		if symbol.Index != idx {
@@ -178,11 +194,15 @@ func (s *Script) prepCompile() (symbolTable *vm.SymbolTable, globals []core.Valu
 
 // Compiled is a compiled instance of the user script. Use Script.Compile() to create Compiled object.
 type Compiled struct {
-	alloc         *core.Arena
-	globalIndexes map[string]int // global symbol name to index
-	bytecode      *vm.Bytecode
-	globals       []core.Value
-	lock          sync.RWMutex
+	lock           sync.RWMutex
+	alloc          *core.Arena
+	bytecode       *vm.Bytecode
+	globalIndexes  map[string]int // global symbol name to index
+	globals        []core.Value
+	globalsRuntime []core.Value // global variables during execution
+	maxFrames      int
+	maxStack       int
+	vm             *vm.VM
 }
 
 // Run executes the compiled script in the virtual machine.
@@ -190,8 +210,28 @@ func (c *Compiled) Run() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	v := vm.NewVM(c.alloc, c.bytecode, c.globals)
-	return v.Run()
+	if c.vm == nil {
+		c.globalsRuntime = make([]core.Value, len(c.globals))
+		for i, v := range c.globals {
+			t, err := v.Copy(c.alloc)
+			if err != nil {
+				return err
+			}
+			c.globalsRuntime[i] = t
+		}
+		c.vm = vm.NewVM(c.alloc, c.bytecode, c.globalsRuntime, c.maxFrames, c.maxStack)
+	} else {
+		for i, v := range c.globals {
+			t, err := v.Copy(c.alloc)
+			if err != nil {
+				return err
+			}
+			c.globalsRuntime[i] = t
+		}
+		c.vm.Reset(c.bytecode, c.globalsRuntime)
+	}
+
+	return c.vm.Run()
 }
 
 // RunContext is like Run but includes a context.
@@ -199,7 +239,27 @@ func (c *Compiled) RunContext(ctx context.Context) (err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	v := vm.NewVM(c.alloc, c.bytecode, c.globals)
+	if c.vm == nil {
+		c.globalsRuntime = make([]core.Value, len(c.globals))
+		for i, v := range c.globals {
+			t, err := v.Copy(c.alloc)
+			if err != nil {
+				return err
+			}
+			c.globalsRuntime[i] = t
+		}
+		c.vm = vm.NewVM(c.alloc, c.bytecode, c.globalsRuntime, c.maxFrames, c.maxStack)
+	} else {
+		for i, v := range c.globals {
+			t, err := v.Copy(c.alloc)
+			if err != nil {
+				return err
+			}
+			c.globalsRuntime[i] = t
+		}
+		c.vm.Reset(c.bytecode, c.globalsRuntime)
+	}
+
 	ch := make(chan error, 1)
 	go func() {
 		defer func() {
@@ -214,12 +274,12 @@ func (c *Compiled) RunContext(ctx context.Context) (err error) {
 				}
 			}
 		}()
-		ch <- v.Run()
+		ch <- c.vm.Run()
 	}()
 
 	select {
 	case <-ctx.Done():
-		v.Abort()
+		c.vm.Abort()
 		<-ch
 		err = ctx.Err()
 	case err = <-ch:
@@ -240,20 +300,25 @@ func (c *Compiled) Clone(a *core.Arena) (*Compiled, error) {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
-	clone := &Compiled{
-		alloc:         a,
-		globalIndexes: c.globalIndexes,
-		bytecode:      c.bytecode,
-		globals:       make([]core.Value, len(c.globals)),
-	}
+	globalIndexes := make(map[string]int, len(c.globalIndexes))
+	maps.Copy(globalIndexes, c.globalIndexes)
 
-	// copy global objects
-	for idx, g := range c.globals {
-		t, err := g.Copy(a)
+	globals := make([]core.Value, len(c.globals))
+	for i, v := range c.globals {
+		t, err := v.Copy(a)
 		if err != nil {
 			return nil, err
 		}
-		clone.globals[idx] = t
+		globals[i] = t
+	}
+
+	clone := &Compiled{
+		alloc:         a,
+		globalIndexes: globalIndexes,
+		bytecode:      c.bytecode,
+		globals:       globals,
+		maxFrames:     c.maxFrames,
+		maxStack:      c.maxStack,
 	}
 
 	return clone, nil
@@ -268,6 +333,10 @@ func (c *Compiled) IsDefined(name string) bool {
 	if !ok {
 		return false
 	}
+	if c.globalsRuntime != nil {
+		v := c.globalsRuntime[idx]
+		return v.Type != core.VT_UNDEFINED
+	}
 	v := c.globals[idx]
 	return v.Type != core.VT_UNDEFINED
 }
@@ -278,8 +347,16 @@ func (c *Compiled) Get(name string) *Variable {
 	defer c.lock.RUnlock()
 
 	v := core.Undefined
-	if idx, ok := c.globalIndexes[name]; ok {
-		v = c.globals[idx]
+	if c.globalsRuntime != nil {
+		// if the script has been executed, get the variable value from the runtime globals
+		if idx, ok := c.globalIndexes[name]; ok {
+			v = c.globalsRuntime[idx]
+		}
+	} else {
+		// if the script has not been executed, get the variable value from the compile-time globals
+		if idx, ok := c.globalIndexes[name]; ok {
+			v = c.globals[idx]
+		}
 	}
 
 	return NewVariable(name, v)
@@ -291,10 +368,18 @@ func (c *Compiled) GetAll() []*Variable {
 	defer c.lock.RUnlock()
 
 	vars := make([]*Variable, 0, len(c.globalIndexes))
-	for name, idx := range c.globalIndexes {
-		v := c.globals[idx]
-		vars = append(vars, NewVariable(name, v))
+	if c.globalsRuntime != nil {
+		for name, idx := range c.globalIndexes {
+			v := c.globalsRuntime[idx]
+			vars = append(vars, NewVariable(name, v))
+		}
+	} else {
+		for name, idx := range c.globalIndexes {
+			v := c.globals[idx]
+			vars = append(vars, NewVariable(name, v))
+		}
 	}
+
 	return vars
 }
 

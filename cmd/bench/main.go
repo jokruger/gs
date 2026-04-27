@@ -196,7 +196,7 @@ func runVM(a *core.Arena, bytecode *vm.Bytecode) (time.Duration, core.Value, err
 
 	start := time.Now()
 
-	v := vm.NewVM(a, bytecode, globals)
+	v := vm.NewVM(a, bytecode, globals, vm.DefaultMaxFrames, vm.DefaultStackSize)
 	if err := v.Run(); err != nil {
 		return time.Since(start), core.Undefined, err
 	}

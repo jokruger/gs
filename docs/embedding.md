@@ -7,7 +7,7 @@ package main
 
 import (
 	"github.com/jokruger/kavun"
-	"github.com/jokruger/kavun/alloc"
+	"github.com/jokruger/kavun/core"
 	"github.com/jokruger/kavun/parser"
 	"github.com/jokruger/kavun/stdlib"
 	"github.com/jokruger/kavun/vm"
@@ -30,7 +30,7 @@ fmt.println("Hello Kavun!")
 	}
 
 	// Compile -> bytecode
-	a := alloc.New(0) // 0 => no allocation cap
+	a := core.NewArena(nil)
 	modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
 	c := kavun.NewCompiler(a, srcFile, nil, nil, modules, nil)
 	if err := c.Compile(file); err != nil {
@@ -146,7 +146,7 @@ fmt.Println(compiled.Get("out").Value().String()) // Counter(42)
 The Kavun CLI REPL injects a host function into globals through a symbol table entry. The same pattern works in embedded apps.
 
 ```go
-a := alloc.New(0)
+a := core.NewArena(nil)
 modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
 
 src := []byte(`print("Hello Kavun!")`)
@@ -204,12 +204,11 @@ import (
 	"fmt"
 
 	"github.com/jokruger/kavun"
-	"github.com/jokruger/kavun/alloc"
 	"github.com/jokruger/kavun/core"
 )
 
 func main() {
-	a := alloc.New(0)
+	a := core.NewArena(nil)
 
 	src := []byte(`
 sum := x + y

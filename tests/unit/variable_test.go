@@ -63,7 +63,7 @@ func TestVariable(t *testing.T) {
 	}
 
 	for _, tc := range vars {
-		o, err := require.FromInterface(alloc, tc.Value)
+		o, err := require.FromInterface(cta, tc.Value)
 		require.NoError(t, err)
 
 		v := kavun.NewVariable(tc.Name, o)

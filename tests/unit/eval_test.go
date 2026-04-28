@@ -10,6 +10,8 @@ import (
 )
 
 func TestEval(t *testing.T) {
+	alloc := core.NewArena(nil)
+
 	eval := func(expr string, params map[string]any, expected any) {
 		e, err := require.FromInterface(alloc, expected)
 		require.NoError(t, err)

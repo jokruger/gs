@@ -117,6 +117,11 @@ func Equal(t *testing.T, expected, actual any, msg ...any) {
 			failExpectedActual(t, e, a, msg...)
 		}
 
+	case uint8:
+		if e != a.(uint8) {
+			failExpectedActual(t, e, a, msg...)
+		}
+
 	case string:
 		if e != a.(string) {
 			failExpectedActual(t, e, a, msg...)

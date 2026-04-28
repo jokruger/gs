@@ -14,7 +14,7 @@ import (
 )
 
 var vm = mock.Vm
-var alloc = mock.Alloc
+var alloc = core.NewArena(nil)
 
 func TestObject_Value(t *testing.T) {
 	var v core.Value

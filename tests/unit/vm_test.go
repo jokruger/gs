@@ -4494,7 +4494,9 @@ func (o *vmTracer) Write(p []byte) (n int, err error) {
 }
 
 func traceCompileRun(file *parser.File, symbols map[string]core.Value, modules *vm.ModuleMap) (res map[string]core.Value, trace []string, err error) {
-	var v *vm.VM
+	cta := core.NewArena(nil)
+	rta := core.NewArena(nil)
+	machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
 
 	defer func() {
 		if e := recover(); e != nil {
@@ -4531,7 +4533,7 @@ func traceCompileRun(file *parser.File, symbols map[string]core.Value, modules *
 	}
 
 	tr := &vmTracer{}
-	c := kavun.NewCompiler(alloc, file.InputFile, symTable, nil, modules, tr)
+	c := kavun.NewCompiler(cta, file.InputFile, symTable, nil, modules, tr)
 	err = c.Compile(file)
 	trace = append(trace, fmt.Sprintf("\n[Compiler Trace]\n\n%s", strings.Join(tr.Out, "")))
 	if err != nil {
@@ -4543,9 +4545,8 @@ func traceCompileRun(file *parser.File, symbols map[string]core.Value, modules *
 	trace = append(trace, fmt.Sprintf("\n[Compiled Constants]\n\n%s", strings.Join(bytecode.FormatConstants(), "\n")))
 	trace = append(trace, fmt.Sprintf("\n[Compiled Instructions]\n\n%s\n", strings.Join(bytecode.FormatInstructions(), "\n")))
 
-	v = vm.NewVM(alloc, bytecode, globals, vm.DefaultMaxFrames, vm.DefaultStackSize)
-
-	err = v.Run()
+	machine.Reset(rta, bytecode, globals)
+	err = machine.Run()
 	{
 		res = make(map[string]core.Value)
 		for name := range symbols {
@@ -4560,7 +4561,7 @@ func traceCompileRun(file *parser.File, symbols map[string]core.Value, modules *
 		trace = append(trace, fmt.Sprintf("\n[Globals]\n\n%s",
 			strings.Join(formatGlobals(globals), "\n")))
 	}
-	if err == nil && !v.IsStackEmpty() {
+	if err == nil && !machine.IsStackEmpty() {
 		err = errors.New("non empty stack after execution")
 	}
 

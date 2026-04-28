@@ -82,6 +82,10 @@ func NewCompiler(
 	modules vm.ModuleGetter,
 	trace io.Writer,
 ) *Compiler {
+	if alloc == nil {
+		alloc = core.NewArena(nil)
+	}
+
 	mainScope := compilationScope{
 		SymbolInit: make(map[string]bool),
 		SourceMap:  make(map[int]core.Pos),

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/jokruger/kavun/core"
+	"github.com/jokruger/kavun/vm"
 )
 
 // Eval compiles and executes given expr with params, and returns an evaluated value.
@@ -22,14 +23,15 @@ func Eval(ctx context.Context, expr string, params map[string]core.Value) (any, 
 		script.Add(pk, pv)
 	}
 
-	compiled, err := script.Compile(nil, nil)
+	cta := core.NewArena(nil)
+	rta := core.NewArena(nil)
+	machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
+	compiled, err := script.Compile(cta)
 	if err != nil {
 		return nil, fmt.Errorf("script compile: %w", err)
 	}
-
-	if err := compiled.RunContext(ctx); err != nil {
+	if err := compiled.RunContext(ctx, rta, machine); err != nil {
 		return nil, fmt.Errorf("script run: %w", err)
 	}
-
 	return compiled.Get("__res__").Value(), nil
 }

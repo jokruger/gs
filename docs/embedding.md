@@ -1,14 +1,12 @@
 # Embedding Kavun In Go
 
-The recommended embedding API is `kavun.Script`.
-
-It wraps parsing, compilation, globals setup, and VM execution into a higher-level workflow that is easier to integrate and maintain in Go applications.
+The recommended embedding API is `kavun.Script`. It wraps parsing, compilation, globals setup, and VM execution into a higher-level workflow that is easier to integrate and maintain in Go applications.
 
 Direct use of compiler and VM is still available when you need lower-level control, but this document focuses on Script-first usage.
 
 ## Quick Start (Script)
 
-This is the primary pattern (also used by benchmarks): create a script, set imports, compile once, run many times.
+This is the primary pattern: create a script, compile once, then run repeatedly with explicit runtime resources.
 
 ```go
 package main
@@ -19,6 +17,7 @@ import (
 	"github.com/jokruger/kavun"
 	"github.com/jokruger/kavun/core"
 	"github.com/jokruger/kavun/stdlib"
+	"github.com/jokruger/kavun/vm"
 )
 
 func main() {
@@ -36,50 +35,33 @@ out = fib(10)
 	script.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
 	script.Add("out", core.Undefined)
 
-	compiled, err := script.Compile(nil, nil)
+    // Compile-time allocator.
+	cta := core.NewArena(nil)
+
+    // Runtime allocator and VM.
+	rta := core.NewArena(nil)
+	machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
+
+    // Compile once.
+	compiled, err := script.Compile(cta)
 	if err != nil {
 		panic(err)
 	}
 
-	if err := compiled.Run(); err != nil {
-		panic(err)
-	}
+    // Run repeatedly with the same compiled code and runtime resources.
+    for i := 0; i < 100; i++ {
+	    if err := compiled.Run(rta, machine); err != nil {
+		    panic(err)
+	    }
+    }
 
 	fmt.Println("result:", compiled.GetValue("out"))
 }
 ```
 
-## Script Lifecycle
+`Compiled.Run(...)` resets the runtime allocator and reinitializes VM state before each execution.
 
-Use these two workflows depending on your needs:
-
-1. One-shot execution
-
-```go
-compiled, err := script.Run() // compile + run
-if err != nil {
-	panic(err)
-}
-```
-
-2. Reusable execution (preferred for performance)
-
-```go
-compiled, err := script.Compile(nil, nil) // compile once
-if err != nil {
-	panic(err)
-}
-
-for i := 0; i < 100; i++ {
-	if err := compiled.Run(); err != nil {
-		panic(err)
-	}
-}
-```
-
-`Compiled.Run()` is designed for recurrent execution. It reuses internal VM structures and resets internal runtime resources between runs (allocator-backed runtime values, globals runtime state, and VM state) so you can execute the same compiled script repeatedly.
-
-At the lower-level VM API, reuse is also possible via `vm.Reset(...)`, including swapping bytecode to run different scripts.
+At lower-level, reuse is done with `rta.Reset()` and `machine.Reset(rta, bytecode, globals)`.
 
 ## Inputs And Outputs
 
@@ -91,15 +73,8 @@ script.Add("y", core.IntValue(22))
 script.Add("out", core.Undefined)
 ```
 
-Read values after run:
-
-```go
-out := compiled.GetValue("out")
-sum, _ := out.AsInt()
-fmt.Println(sum)
-```
-
-You can update compiled globals between runs:
+After compilation, `compiled.Set(...)` prepares input globals for the next execution.
+It does not update the runtime state exposed by `Get`, `GetValue`, or `GetAll` directly.
 
 ```go
 if err := compiled.Set("x", core.IntValue(50)); err != nil {
@@ -108,16 +83,26 @@ if err := compiled.Set("x", core.IntValue(50)); err != nil {
 if err := compiled.Set("y", core.IntValue(7)); err != nil {
 	panic(err)
 }
-if err := compiled.Run(); err != nil {
+if err := compiled.Run(rta, machine); err != nil {
 	panic(err)
 }
+```
+
+`Get`, `GetValue`, and `GetAll` read runtime global variables produced by the last script execution.
+In practice, `Set` configures the inputs, and `Get*` reads the outputs, so `Get*` should be used only after the script has run.
+
+Read values after run:
+
+```go
+out := compiled.GetValue("out")
+sum, _ := out.AsInt()
+fmt.Println(sum)
 ```
 
 Other helpers:
 
 - `compiled.Get(name)` returns a `*kavun.Variable`
 - `compiled.GetAll()` returns all globals
-- `compiled.IsDefined(name)` checks whether a global exists and is not `undefined`
 
 ## Imports
 
@@ -169,69 +154,111 @@ If you need custom source extensions for file imports, use the lower-level compi
 `Script` exposes common limits and execution controls:
 
 - `script.SetMaxConstObjects(n)`
-- `script.SetMaxFrames(n)`
-- `script.SetMaxStack(n)`
 - `script.SetAssignmentMode(mode)`
 
 Example:
 
 ```go
 script.SetMaxConstObjects(10_000)
-script.SetMaxFrames(4_096)
-script.SetMaxStack(8_192)
 script.SetAssignmentMode(kavun.AssignmentModeSmart)
 ```
 
 ## Concurrency
 
-`Compiled` is safe for repeated use from one goroutine, and it can be cloned for parallel execution.
+`Script`, `Compiled`, `VM`, and allocator helpers are not thread-safe.
 
-For concurrent runs, create one clone per goroutine with its own runtime arena:
+If you need parallel execution, user code must provide synchronization and isolated runtime resources.
+
+Safe pattern for parallel runs:
+
+- each goroutine uses its own `Compiled` (for example via `Clone`)
+- each goroutine uses its own runtime arena and VM
+- shared resources are protected with explicit locking
+
+Example:
 
 ```go
-base, err := script.Compile(nil, nil)
+base, err := script.Compile(core.NewArena(nil))
 if err != nil {
 	panic(err)
 }
 
-arena := core.NewArena(nil)
-clone, err := base.Clone(arena)
+clone, err := base.Clone(core.NewArena(nil))
 if err != nil {
 	panic(err)
 }
 
-if err := clone.Run(); err != nil {
+rta := core.NewArena(nil)
+machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
+
+if err := clone.Run(rta, machine); err != nil {
 	panic(err)
 }
 ```
 
-`RunContext(ctx)` is also available for cancellable execution.
+Use `RunContext(ctx, rta, machine)` for cancellable execution.
 
 ## Allocators
 
-`Script.Compile(cta, rta)` accepts two allocators:
+You must separate compile-time and runtime allocators.
 
-- `cta`: compile-time allocator
-- `rta`: run-time allocator
+- `script.Compile(cta)` uses compile-time allocator
+- `compiled.Run(rta, machine)` / `compiled.RunContext(ctx, rta, machine)` use runtime allocator
 
-If you pass `nil` for either allocator, Kavun creates a default allocator internally.
+Do not reuse the same allocator instance for compile-time and runtime paths.
+Runtime execution resets the runtime allocator, so using the same allocator for both can invalidate compile-time data when VM is reused.
 
 ```go
-compiled, err := script.Compile(nil, nil) // both allocators use defaults
+cta := core.NewArena(nil)
+rta := core.NewArena(nil)
+machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
+
+compiled, err := script.Compile(cta)
 if err != nil {
+	panic(err)
+}
+
+if err := compiled.Run(rta, machine); err != nil {
 	panic(err)
 }
 ```
 
-Compile-time and run-time allocators are separated by design. This avoids mixing compiler allocations with runtime allocations and usually gives better reuse characteristics in recurrent execution.
+If `cta` passed to `Compile` is `nil`, Kavun creates a default compile-time allocator internally.
 
-If needed, you can still pass the same allocator instance for both:
+## Lazy Resource Management And VM.Clear
+
+By default, VM reuse is lazy: stack and frame references are not fully cleared on each run.
+This improves performance but can keep some references alive longer (until overwritten).
+
+If you prefer more aggressive release behavior, call `machine.Clear()` explicitly.
 
 ```go
-arena := core.NewArena(nil)
-compiled, err := script.Compile(arena, arena)
-if err != nil {
+if err := compiled.Run(rta, machine); err != nil {
 	panic(err)
+}
+
+// Optional: release remaining references in stack/frames.
+machine.Clear()
+```
+
+Use `Clear` when memory pressure is more important than peak throughput.
+
+## One-Shot Helper Pattern
+
+If you still want a one-shot flow in app code, build it explicitly:
+
+```go
+func RunOnce(src []byte) error {
+	script := kavun.NewScript(src)
+	cta := core.NewArena(nil)
+	rta := core.NewArena(nil)
+	machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
+
+	compiled, err := script.Compile(cta)
+	if err != nil {
+		return err
+	}
+	return compiled.Run(rta, machine)
 }
 ```
 

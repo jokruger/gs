@@ -132,8 +132,10 @@ func CompileAndRun(a *core.Arena, modules *vm.ModuleMap, data []byte, inputFile 
 		return
 	}
 
-	machine := vm.NewVM(a, bytecode, nil, vm.DefaultMaxFrames, vm.DefaultStackSize)
+	machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
+	machine.Reset(a, bytecode, nil)
 	err = machine.Run()
+
 	return
 }
 
@@ -145,8 +147,10 @@ func RunCompiled(a *core.Arena, modules *vm.ModuleMap, data []byte) (err error) 
 		return
 	}
 
-	machine := vm.NewVM(a, bytecode, nil, vm.DefaultMaxFrames, vm.DefaultStackSize)
+	machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
+	machine.Reset(a, bytecode, nil)
 	err = machine.Run()
+
 	return
 }
 
@@ -212,7 +216,8 @@ func RunREPL(a *core.Arena, modules *vm.ModuleMap, in io.Reader, out io.Writer) 
 		}
 
 		bytecode := c.Bytecode()
-		machine := vm.NewVM(a, bytecode, globals, vm.DefaultMaxFrames, vm.DefaultStackSize)
+		machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
+		machine.Reset(a, bytecode, globals)
 		if err := machine.Run(); err != nil {
 			_, _ = fmt.Fprintln(out, err.Error())
 			continue

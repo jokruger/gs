@@ -1374,7 +1374,7 @@ func TestCompiler_custom_extension(t *testing.T) {
 	file, err := p.ParseFile()
 	require.NoError(t, err)
 
-	c := kavun.NewCompiler(alloc, srcFile, nil, nil, modules, nil)
+	c := kavun.NewCompiler(nil, srcFile, nil, nil, modules, nil)
 	c.EnableFileImport(true)
 	c.SetImportDir(filepath.Dir(pathFileSource))
 
@@ -1391,7 +1391,7 @@ func TestCompilerNewCompiler_default_file_extension(t *testing.T) {
 	fileSet := parser.NewFileSet()
 	file := fileSet.AddFile("test", -1, len(input))
 
-	c := kavun.NewCompiler(alloc, file, nil, nil, modules, nil)
+	c := kavun.NewCompiler(nil, file, nil, nil, modules, nil)
 	c.EnableFileImport(true)
 
 	require.Equal(t, []string{".kvn"}, c.GetImportFileExt(), "newly created compiler object must contain the default extension")
@@ -1522,7 +1522,7 @@ func traceCompileWithMode(input string, symbols map[string]core.Value, mode kavu
 	}
 
 	tr := &compileTracer{}
-	c := kavun.NewCompiler(alloc, file, symTable, nil, nil, tr)
+	c := kavun.NewCompiler(nil, file, symTable, nil, nil, tr)
 	c.SetAssignmentMode(mode)
 	parsed, err := p.ParseFile()
 	if err != nil {

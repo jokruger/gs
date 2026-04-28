@@ -382,7 +382,7 @@ func testBytecodeSerialization(t *testing.T, b *vm.Bytecode) {
 	require.NoError(t, err)
 
 	r := &vm.Bytecode{}
-	err = r.Decode(alloc, bytes.NewReader(buf.Bytes()), nil)
+	err = r.Decode(core.NewArena(nil), bytes.NewReader(buf.Bytes()), nil)
 	require.NoError(t, err)
 
 	require.Equal(t, b.FileSet, r.FileSet)

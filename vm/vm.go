@@ -51,41 +51,23 @@ type VM struct {
 }
 
 // NewVM creates a VM.
-// If VM is expected to run multiple times, it is the caller's responsibility to ensure the globals slice contains a fresh copy of
-// global variables for each run, otherwise the global variables will be shared across runs and may cause unexpected behaviors.
-func NewVM(alloc *core.Arena, bytecode *Bytecode, globals []core.Value, maxFrames int, maxStack int) *VM {
-	if globals == nil {
-		globals = make([]core.Value, GlobalsSize)
-	}
+func NewVM(maxFrames int, maxStack int) *VM {
 	if maxFrames <= 0 {
 		maxFrames = DefaultMaxFrames
 	}
+
 	if maxStack <= 0 {
 		maxStack = DefaultStackSize
 	}
 
-	v := &VM{
-		alloc:       alloc,
-		constants:   bytecode.Constants,
-		sp:          0,
-		globals:     globals,
-		frames:      make([]frame, maxFrames),
-		stack:       make([]core.Value, maxStack),
-		fileSet:     bytecode.FileSet,
-		framesIndex: 1,
-		ip:          -1,
+	return &VM{
+		frames: make([]frame, maxFrames),
+		stack:  make([]core.Value, maxStack),
 	}
-	v.frames[0].fn = bytecode.MainFunction
-	v.frames[0].ip = -1
-	v.curFrame = &v.frames[0]
-	v.curInsts = v.curFrame.fn.Instructions
-	return v
 }
 
 // Reset resets the VM state to run new main function.
-// It is the caller's responsibility to ensure the globals slice contains a fresh copy of global variables for the new run,
-// otherwise the global variables will be shared across runs and may cause unexpected behaviors.
-func (v *VM) Reset(bytecode *Bytecode, globals []core.Value) {
+func (v *VM) Reset(alloc *core.Arena, bytecode *Bytecode, globals []core.Value) {
 	if globals == nil {
 		globals = make([]core.Value, GlobalsSize)
 	}
@@ -95,23 +77,28 @@ func (v *VM) Reset(bytecode *Bytecode, globals []core.Value) {
 	v.abort = 0
 	v.constants = bytecode.Constants
 	v.globals = globals
+	v.alloc = alloc
 
-	for i := range v.frames {
-		v.frames[i].fn = nil
-		v.frames[i].freeVars = nil
-	}
 	v.frames[0].fn = bytecode.MainFunction
 	v.frames[0].ip = -1
 	v.curFrame = &v.frames[0]
 	v.curInsts = v.curFrame.fn.Instructions
+	v.framesIndex = 1
 
+	v.fileSet = bytecode.FileSet
+	v.err = nil
+}
+
+// Clear clears the remaining stack and frames to release references to heap objects and help GC.
+// This step is not strictly necessary for correctness, but can help reduce memory usage and GC overhead when the same VM is reused for multiple runs.
+func (v *VM) Clear() {
+	for i := range v.frames {
+		v.frames[i].fn = nil
+		v.frames[i].freeVars = nil
+	}
 	for i := range v.stack {
 		v.stack[i].Ptr = nil
 	}
-
-	v.framesIndex = 1
-	v.fileSet = bytecode.FileSet
-	v.err = nil
 }
 
 // Allocator returns the allocator used by the VM.

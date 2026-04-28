@@ -18,7 +18,7 @@ func TestReadFile(t *testing.T) {
 	require.NoError(t, err)
 	_ = tf.Close()
 
-	module(t, "os").call("read_file", tf.Name()).expect(alloc.NewBytesValue(content))
+	module(t, "os").call("read_file", tf.Name()).expect(core.NewBytesValue(content))
 }
 
 func TestReadFileArgs(t *testing.T) {
@@ -44,10 +44,10 @@ func TestFileStatFile(t *testing.T) {
 		return
 	}
 
-	name := alloc.NewStringValue(stat.Name())
+	name := core.NewStringValue(stat.Name())
 	mt := core.NewTimeValue(stat.ModTime())
 
-	module(t, "os").call("stat", tf.Name()).expect(alloc.NewRecordValue(map[string]core.Value{
+	module(t, "os").call("stat", tf.Name()).expect(core.NewRecordValue(map[string]core.Value{
 		"name":      name,
 		"mtime":     mt,
 		"size":      core.IntValue(stat.Size()),
@@ -64,10 +64,10 @@ func TestFileStatDir(t *testing.T) {
 	stat, err := os.Stat(td)
 	require.NoError(t, err)
 
-	name := alloc.NewStringValue(stat.Name())
+	name := core.NewStringValue(stat.Name())
 	mt := core.NewTimeValue(stat.ModTime())
 
-	module(t, "os").call("stat", td).expect(alloc.NewRecordValue(map[string]core.Value{
+	module(t, "os").call("stat", td).expect(core.NewRecordValue(map[string]core.Value{
 		"name":      name,
 		"mtime":     mt,
 		"size":      core.IntValue(stat.Size()),

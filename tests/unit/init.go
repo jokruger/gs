@@ -9,11 +9,10 @@ import (
 
 	"github.com/jokruger/kavun/core"
 	"github.com/jokruger/kavun/errs"
-	mock "github.com/jokruger/kavun/tests"
 	"github.com/jokruger/kavun/token"
 )
 
-var alloc = mock.Alloc
+var cta = core.NewArena(nil)
 
 var (
 	VT_COUNTER               = core.VT_USER_DEFINED + 1

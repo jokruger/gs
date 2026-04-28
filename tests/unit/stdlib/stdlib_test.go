@@ -231,13 +231,17 @@ func object(v any) core.Value {
 }
 
 func expect(t *testing.T, input string, expected any) {
-	e, err := require.FromInterface(alloc, expected)
+	cta := core.NewArena(nil)
+	rta := core.NewArena(nil)
+	machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
+
+	e, err := require.FromInterface(cta, expected)
 	require.NoError(t, err)
 	s := kavun.NewScript([]byte(input))
 	s.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
-	c, err := s.Compile(nil, nil)
+	c, err := s.Compile(cta)
 	require.NoError(t, err)
-	err = c.Run()
+	err = c.Run(rta, machine)
 	require.NoError(t, err)
 	require.NotNil(t, c)
 	v := c.Get("out")

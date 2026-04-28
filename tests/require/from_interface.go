@@ -9,6 +9,10 @@ import (
 )
 
 func FromInterface(alloc *core.Arena, v any) (core.Value, error) {
+	if alloc == nil {
+		alloc = core.NewArena(nil)
+	}
+
 	switch v := v.(type) {
 	case nil:
 		return core.Undefined, nil

@@ -7,6 +7,7 @@ import (
 	"github.com/jokruger/kavun"
 	"github.com/jokruger/kavun/core"
 	"github.com/jokruger/kavun/stdlib"
+	"github.com/jokruger/kavun/vm"
 )
 
 type tc struct {
@@ -139,13 +140,16 @@ func main() {
 }
 
 func runBench(input []byte) (compileTime time.Duration, runTime time.Duration, result core.Value, err error) {
-	var compiled *kavun.Compiled
+	var compiled *kavun.Compiled                                  // placeholder for compiled script
+	cta := core.NewArena(nil)                                     // compile time arena
+	rta := core.NewArena(nil)                                     // run time arena
+	machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize) // virtual machine
 
 	start := time.Now()
 	script := kavun.NewScript(input)
 	script.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
 	script.Add("out", core.Undefined)
-	compiled, err = script.Compile(nil, nil)
+	compiled, err = script.Compile(cta)
 	if err != nil {
 		return
 	}
@@ -153,7 +157,7 @@ func runBench(input []byte) (compileTime time.Duration, runTime time.Duration, r
 
 	start = time.Now()
 	for range 100 {
-		if err = compiled.Run(); err != nil {
+		if err = compiled.Run(rta, machine); err != nil {
 			return
 		}
 	}

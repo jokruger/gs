@@ -2,11 +2,11 @@
 
 The recommended embedding API is `kavun.Script`. It wraps parsing, compilation, globals setup, and VM execution into a higher-level workflow that is easier to integrate and maintain in Go applications.
 
-Direct use of compiler and VM is still available when you need lower-level control, but this document focuses on Script-first usage.
+For lower-level control over compilation and execution, direct use of the compiler and VM is still available; this document focuses on the Script-first approach.
 
-## Quick Start (Script)
+## Quick Start
 
-This is the primary pattern: create a script, compile once, then run repeatedly with explicit runtime resources.
+The primary pattern: create a script, compile once, then run multiple times.
 
 ```go
 package main
@@ -31,41 +31,66 @@ fib := func(x) {
 out = fib(10)
 `)
 
+	// Create and configure script
 	script := kavun.NewScript(src)
 	script.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
 	script.Add("out", core.Undefined)
 
-    // Compile-time allocator.
-	cta := core.NewArena(nil)
-
-    // Runtime allocator and VM.
-	rta := core.NewArena(nil)
+	// Create allocators and VM
+	cta := core.NewArena(nil)      // Compile-time allocator
+	rta := core.NewArena(nil)      // Runtime allocator
 	machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
 
-    // Compile once.
+	// Compile once
 	compiled, err := script.Compile(cta)
 	if err != nil {
 		panic(err)
 	}
 
-    // Run repeatedly with the same compiled code and runtime resources.
-    for i := 0; i < 100; i++ {
-	    if err := compiled.Run(rta, machine); err != nil {
-		    panic(err)
-	    }
-    }
+	// Run repeatedly with the same compiled code
+	for i := 0; i < 100; i++ {
+		if err := compiled.Run(rta, machine); err != nil {
+			panic(err)
+		}
+	}
 
 	fmt.Println("result:", compiled.GetValue("out"))
 }
 ```
 
-`Compiled.Run(...)` resets the runtime allocator and reinitializes VM state before each execution.
+## Allocators
 
-At lower-level, reuse is done with `rta.Reset()` and `machine.Reset(rta, bytecode, globals)`.
+Memory in Kavun is managed through two separate allocators:
 
-## Inputs And Outputs
+- **Compile-time allocator** — used during parsing and compilation. Created once and persists for the lifetime of compiled code.
+- **Runtime allocator** — used during script execution. Created for each run (or reused between runs) and reset by `Compiled.Run(...)`.
 
-Set host variables before compile with `script.Add`.
+**Critical requirement**: you must use separate allocator instances for compile and runtime paths. Reusing the same allocator can invalidate compile-time data when the runtime allocator resets.
+
+```go
+// Correct: separate allocators
+cta := core.NewArena(nil)
+rta := core.NewArena(nil)
+
+compiled, err := script.Compile(cta)
+if err != nil {
+	panic(err)
+}
+
+if err := compiled.Run(rta, machine); err != nil {
+	panic(err)
+}
+```
+
+If you pass `nil` for the compile-time allocator, Kavun creates a default one internally.
+
+**How reuse works:**
+- `Compiled.Run(rta, machine)` resets the runtime allocator and reinitializes VM state before each execution.
+- At lower-level, explicit reuse is done with `rta.Reset()` and `machine.Reset(rta, bytecode, globals)`.
+
+## Inputs and Outputs
+
+Pass data to scripts by setting globals before compilation:
 
 ```go
 script.Add("x", core.IntValue(20))
@@ -73,8 +98,7 @@ script.Add("y", core.IntValue(22))
 script.Add("out", core.Undefined)
 ```
 
-After compilation, `compiled.Set(...)` prepares input globals for the next execution.
-It does not update the runtime state exposed by `Get`, `GetValue`, or `GetAll` directly.
+Before each run, update input values with `compiled.Set(...)`:
 
 ```go
 if err := compiled.Set("x", core.IntValue(50)); err != nil {
@@ -88,10 +112,7 @@ if err := compiled.Run(rta, machine); err != nil {
 }
 ```
 
-`Get`, `GetValue`, and `GetAll` read runtime global variables produced by the last script execution.
-In practice, `Set` configures the inputs, and `Get*` reads the outputs, so `Get*` should be used only after the script has run.
-
-Read values after run:
+After execution, retrieve output values with `Get`, `GetValue`, or `GetAll`:
 
 ```go
 out := compiled.GetValue("out")
@@ -99,14 +120,15 @@ sum, _ := out.AsInt()
 fmt.Println(sum)
 ```
 
-Other helpers:
+API reference:
 
-- `compiled.Get(name)` returns a `*kavun.Variable`
-- `compiled.GetAll()` returns all globals
+- `compiled.GetValue(name)` — returns a `core.Value`
+- `compiled.Get(name)` — returns a `*kavun.Variable` wrapper
+- `compiled.GetAll()` — returns all globals
 
-## Imports
+## Modules and Imports
 
-Use a module map to control what `import("...")` can load.
+Control what scripts can import with a module map:
 
 ```go
 modules := vm.NewModuleMap()
@@ -127,17 +149,15 @@ export add := func(a, b) { return a + b }
 script.SetImports(modules)
 ```
 
-Suggested default for general-purpose apps:
+For general-purpose applications, use all stdlib modules:
 
 ```go
 script.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
 ```
 
-## File Imports
+### File Imports
 
-Local file imports are disabled by default.
-
-Enable them explicitly:
+File imports are disabled by default. Enable them explicitly:
 
 ```go
 script.EnableFileImport(true)
@@ -146,36 +166,31 @@ if err := script.SetImportDir("./scripts"); err != nil {
 }
 ```
 
-`Script` does not expose file extension customization.
-If you need custom source extensions for file imports, use the lower-level compiler API (`Compiler.SetImportFileExt`) directly.
+For custom file extensions, use the lower-level compiler API (`Compiler.SetImportFileExt`).
 
-## Runtime And Compiler Limits
+## Configuration and Limits
 
-`Script` exposes common limits and execution controls:
-
-- `script.SetMaxConstObjects(n)`
-- `script.SetAssignmentMode(mode)`
-
-Example:
+Configure common execution constraints:
 
 ```go
 script.SetMaxConstObjects(10_000)
 script.SetAssignmentMode(kavun.AssignmentModeSmart)
 ```
 
+Available options:
+
+- `script.SetMaxConstObjects(n)` — maximum number of constant objects
+- `script.SetAssignmentMode(mode)` — assignment behavior mode
+
 ## Concurrency
 
-`Script`, `Compiled`, `VM`, and allocator helpers are not thread-safe.
+`Script`, `Compiled`, `VM`, and allocators are **not thread-safe**. For parallel execution:
 
-If you need parallel execution, user code must provide synchronization and isolated runtime resources.
+1. Each goroutine must use its own `Compiled` (via `Clone`)
+2. Each goroutine must use its own runtime arena and VM
+3. Protect shared resources with explicit locking
 
 Safe pattern for parallel runs:
-
-- each goroutine uses its own `Compiled` (for example via `Clone`)
-- each goroutine uses its own runtime arena and VM
-- shared resources are protected with explicit locking
-
-Example:
 
 ```go
 base, err := script.Compile(core.NewArena(nil))
@@ -183,11 +198,13 @@ if err != nil {
 	panic(err)
 }
 
+// Each goroutine clones the compiled code
 clone, err := base.Clone(core.NewArena(nil))
 if err != nil {
 	panic(err)
 }
 
+// Each goroutine has isolated runtime resources
 rta := core.NewArena(nil)
 machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
 
@@ -196,65 +213,37 @@ if err := clone.Run(rta, machine); err != nil {
 }
 ```
 
-Use `RunContext(ctx, rta, machine)` for cancellable execution.
+For cancellable execution, use `RunContext(ctx, rta, machine)`.
 
-## Allocators
+## Memory Management
 
-You must separate compile-time and runtime allocators.
+By default, VM reuse is lazy: stack and frame references are not fully cleared between runs. This improves performance but keeps some references alive longer (until overwritten).
 
-- `script.Compile(cta)` uses compile-time allocator
-- `compiled.Run(rta, machine)` / `compiled.RunContext(ctx, rta, machine)` use runtime allocator
-
-Do not reuse the same allocator instance for compile-time and runtime paths.
-Runtime execution resets the runtime allocator, so using the same allocator for both can invalidate compile-time data when VM is reused.
-
-```go
-cta := core.NewArena(nil)
-rta := core.NewArena(nil)
-machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
-
-compiled, err := script.Compile(cta)
-if err != nil {
-	panic(err)
-}
-
-if err := compiled.Run(rta, machine); err != nil {
-	panic(err)
-}
-```
-
-If `cta` passed to `Compile` is `nil`, Kavun creates a default compile-time allocator internally.
-
-## Lazy Resource Management And VM.Clear
-
-By default, VM reuse is lazy: stack and frame references are not fully cleared on each run.
-This improves performance but can keep some references alive longer (until overwritten).
-
-If you prefer more aggressive release behavior, call `machine.Clear()` explicitly.
+For more aggressive memory release when memory pressure is critical:
 
 ```go
 if err := compiled.Run(rta, machine); err != nil {
 	panic(err)
 }
 
-// Optional: release remaining references in stack/frames.
+// Optional: explicitly release remaining stack/frame references
 machine.Clear()
 ```
 
-Use `Clear` when memory pressure is more important than peak throughput.
+Use `Clear()` when you prioritize releasing memory over peak throughput.
 
-## One-Shot Helper Pattern
+## Advanced Patterns
 
-If you still want a one-shot flow in app code, build it explicitly:
+### One-Shot Execution
+
+If you prefer a simpler one-shot flow without explicit resource management:
 
 ```go
 func RunOnce(src []byte) error {
 	script := kavun.NewScript(src)
-	cta := core.NewArena(nil)
 	rta := core.NewArena(nil)
 	machine := vm.NewVM(vm.DefaultMaxFrames, vm.DefaultStackSize)
-
-	compiled, err := script.Compile(cta)
+	compiled, err := script.Compile(nil)
 	if err != nil {
 		return err
 	}
@@ -262,12 +251,11 @@ func RunOnce(src []byte) error {
 }
 ```
 
+This pattern is simpler but loses the benefits of reusing compiled code and VM state across multiple executions.
+
 ### Custom Allocator Payload
 
-Allocator behavior can be extended with a custom payload via `core.ArenaOptions.Payload`.
-Payload must implement `Reset()` and is reset together with the arena.
-
-This is useful when embedding user-defined types (see unit tests for custom type registration patterns) and you want type-specific allocation or caches to follow arena lifecycle.
+Allocator behavior can be extended with a custom payload that follows the allocator lifecycle.
 
 ```go
 type MyPayload struct {
@@ -282,5 +270,7 @@ opts := core.DefaultArenaOptions()
 opts.Payload = &MyPayload{}
 
 arena := core.NewArena(opts)
-_ = arena.Payload() // retrieve custom payload when needed
+payload := arena.Payload() // retrieve custom payload when needed
 ```
+
+The payload must implement `Reset()` and is reset together with the arena. This is useful for custom type registration and type-specific allocation or caches (see unit tests for custom type registration patterns).

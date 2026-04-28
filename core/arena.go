@@ -7,6 +7,10 @@ import (
 	"github.com/jokruger/slab"
 )
 
+type Resettable interface {
+	Reset()
+}
+
 type ArenaOptions struct {
 	Decimals int
 	Times    int
@@ -37,7 +41,7 @@ type ArenaOptions struct {
 	MapIterators      int
 	IntRangeIterators int
 
-	Payload any
+	Payload Resettable
 }
 
 func DefaultArenaOptions() *ArenaOptions {
@@ -97,7 +101,7 @@ type Arena struct {
 	mapIterators      slab.Slab[MapIterator]
 	intRangeIterators slab.Slab[IntRangeIterator]
 
-	payload any
+	payload Resettable
 }
 
 // NewArena creates a new Arena with the given options. If opts is nil, it uses the default options.
@@ -232,6 +236,10 @@ func (a *Arena) Reset() {
 	a.arrayIterators.Reset()
 	a.mapIterators.Reset()
 	a.intRangeIterators.Reset()
+
+	if a.payload != nil {
+		a.payload.Reset()
+	}
 }
 
 /* Low-level resources */

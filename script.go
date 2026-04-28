@@ -14,7 +14,6 @@ import (
 
 // Script can simplify compilation and execution of embedded scripts.
 type Script struct {
-	alloc            *core.Arena
 	variables        map[string]*Variable
 	modules          vm.ModuleGetter
 	input            []byte
@@ -27,9 +26,8 @@ type Script struct {
 }
 
 // NewScript creates a Script instance with an input script.
-func NewScript(alloc *core.Arena, input []byte) *Script {
+func NewScript(input []byte) *Script {
 	return &Script{
-		alloc:           alloc,
 		variables:       make(map[string]*Variable),
 		input:           input,
 		maxConstObjects: -1,
@@ -94,7 +92,15 @@ func (s *Script) EnableFileImport(enable bool) {
 }
 
 // Compile compiles the script with all the defined variables, and, returns Compiled object.
-func (s *Script) Compile() (*Compiled, error) {
+// Receives compile-time and runtime arenas for better memory management. If arenas are not provided, it will create new ones internally.
+func (s *Script) Compile(cta *core.Arena, rta *core.Arena) (*Compiled, error) {
+	if cta == nil {
+		cta = core.NewArena(nil)
+	}
+	if rta == nil {
+		rta = core.NewArena(nil)
+	}
+
 	symbolTable, globals, err := s.prepCompile()
 	if err != nil {
 		return nil, err
@@ -108,7 +114,7 @@ func (s *Script) Compile() (*Compiled, error) {
 		return nil, err
 	}
 
-	c := NewCompiler(s.alloc, srcFile, symbolTable, nil, s.modules, nil)
+	c := NewCompiler(cta, srcFile, symbolTable, nil, s.modules, nil)
 	c.SetAssignmentMode(s.assignmentMode)
 	c.EnableFileImport(s.enableFileImport)
 	c.SetImportDir(s.importDir)
@@ -139,8 +145,9 @@ func (s *Script) Compile() (*Compiled, error) {
 			return nil, fmt.Errorf("exceeding constant objects limit: %d", cnt)
 		}
 	}
+
 	return &Compiled{
-		alloc:         s.alloc,
+		alloc:         rta,
 		bytecode:      bytecode,
 		globalIndexes: globalIndexes,
 		globals:       globals,
@@ -149,24 +156,17 @@ func (s *Script) Compile() (*Compiled, error) {
 	}, nil
 }
 
-// Run compiles and runs the scripts. Use returned compiled object to access global variables.
-func (s *Script) Run() (compiled *Compiled, err error) {
-	compiled, err = s.Compile()
+// Run compiles and runs the script, and returns the compiled instance.
+// Note: prefer to use Compile() and Run() separately for better performance and control over the execution.
+func (s *Script) Run() (*Compiled, error) {
+	compiled, err := s.Compile(nil, nil)
 	if err != nil {
-		return
+		return nil, err
 	}
-	err = compiled.Run()
-	return
-}
-
-// RunContext is like Run but includes a context.
-func (s *Script) RunContext(ctx context.Context) (compiled *Compiled, err error) {
-	compiled, err = s.Compile()
-	if err != nil {
-		return
+	if err := compiled.Run(); err != nil {
+		return nil, err
 	}
-	err = compiled.RunContext(ctx)
-	return
+	return compiled, nil
 }
 
 func (s *Script) prepCompile() (symbolTable *vm.SymbolTable, globals []core.Value, err error) {
@@ -210,25 +210,8 @@ func (c *Compiled) Run() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if c.vm == nil {
-		c.globalsRuntime = make([]core.Value, len(c.globals))
-		for i, v := range c.globals {
-			t, err := v.Copy(c.alloc)
-			if err != nil {
-				return err
-			}
-			c.globalsRuntime[i] = t
-		}
-		c.vm = vm.NewVM(c.alloc, c.bytecode, c.globalsRuntime, c.maxFrames, c.maxStack)
-	} else {
-		for i, v := range c.globals {
-			t, err := v.Copy(c.alloc)
-			if err != nil {
-				return err
-			}
-			c.globalsRuntime[i] = t
-		}
-		c.vm.Reset(c.bytecode, c.globalsRuntime)
+	if err := c.prepareRun(); err != nil {
+		return err
 	}
 
 	return c.vm.Run()
@@ -239,25 +222,8 @@ func (c *Compiled) RunContext(ctx context.Context) (err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	if c.vm == nil {
-		c.globalsRuntime = make([]core.Value, len(c.globals))
-		for i, v := range c.globals {
-			t, err := v.Copy(c.alloc)
-			if err != nil {
-				return err
-			}
-			c.globalsRuntime[i] = t
-		}
-		c.vm = vm.NewVM(c.alloc, c.bytecode, c.globalsRuntime, c.maxFrames, c.maxStack)
-	} else {
-		for i, v := range c.globals {
-			t, err := v.Copy(c.alloc)
-			if err != nil {
-				return err
-			}
-			c.globalsRuntime[i] = t
-		}
-		c.vm.Reset(c.bytecode, c.globalsRuntime)
+	if err := c.prepareRun(); err != nil {
+		return err
 	}
 
 	ch := make(chan error, 1)
@@ -341,8 +307,8 @@ func (c *Compiled) IsDefined(name string) bool {
 	return v.Type != core.VT_UNDEFINED
 }
 
-// Get returns a variable identified by the name.
-func (c *Compiled) Get(name string) *Variable {
+// GetValue returns a value identified by the name.
+func (c *Compiled) GetValue(name string) core.Value {
 	c.lock.RLock()
 	defer c.lock.RUnlock()
 
@@ -359,6 +325,12 @@ func (c *Compiled) Get(name string) *Variable {
 		}
 	}
 
+	return v
+}
+
+// Get returns a variable identified by the name.
+func (c *Compiled) Get(name string) *Variable {
+	v := c.GetValue(name)
 	return NewVariable(name, v)
 }
 
@@ -394,5 +366,34 @@ func (c *Compiled) Set(name string, val core.Value) error {
 		return fmt.Errorf("'%s' is not defined", name)
 	}
 	c.globals[idx] = val
+	return nil
+}
+
+func (c *Compiled) prepareRun() error {
+	// first run
+	if c.vm == nil {
+		c.globalsRuntime = make([]core.Value, len(c.globals))
+		for i, v := range c.globals {
+			t, err := v.Copy(c.alloc)
+			if err != nil {
+				return err
+			}
+			c.globalsRuntime[i] = t
+		}
+		c.vm = vm.NewVM(c.alloc, c.bytecode, c.globalsRuntime, c.maxFrames, c.maxStack)
+		return nil
+	}
+
+	// subsequent runs
+	c.alloc.Reset()
+	for i, v := range c.globals {
+		t, err := v.Copy(c.alloc)
+		if err != nil {
+			return err
+		}
+		c.globalsRuntime[i] = t
+	}
+	c.vm.Reset(c.bytecode, c.globalsRuntime)
+
 	return nil
 }

@@ -1,7 +1,6 @@
 package unit
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/jokruger/kavun"
@@ -22,7 +21,7 @@ each([a, b, c, d], func(x) {
 })`
 
 	// create a new Script instance
-	script := kavun.NewScript(alloc, []byte(src))
+	script := kavun.NewScript([]byte(src))
 
 	// set values
 	script.Add("a", core.IntValue(1))
@@ -31,7 +30,7 @@ each([a, b, c, d], func(x) {
 	script.Add("d", core.IntValue(4))
 
 	// run the script
-	compiled, err := script.RunContext(context.Background())
+	compiled, err := script.Run()
 	if err != nil {
 		panic(err)
 	}

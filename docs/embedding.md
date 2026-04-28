@@ -1,248 +1,107 @@
-# Embedding
+# Embedding Kavun In Go
 
-## Minimal example
+The recommended embedding API is `kavun.Script`.
+
+It wraps parsing, compilation, globals setup, and VM execution into a higher-level workflow that is easier to integrate and maintain in Go applications.
+
+Direct use of compiler and VM is still available when you need lower-level control, but this document focuses on Script-first usage.
+
+## Quick Start (Script)
+
+This is the primary pattern (also used by benchmarks): create a script, set imports, compile once, run many times.
 
 ```go
 package main
 
 import (
+	"fmt"
+
 	"github.com/jokruger/kavun"
 	"github.com/jokruger/kavun/core"
-	"github.com/jokruger/kavun/parser"
 	"github.com/jokruger/kavun/stdlib"
-	"github.com/jokruger/kavun/vm"
 )
 
 func main() {
-	// Inline script source
 	src := []byte(`
-fmt := import("fmt")
-fmt.println("Hello Kavun!")
+fib := func(x) {
+	if x < 2 {
+		return x
+	}
+	return fib(x-1) + fib(x-2)
+}
+out = fib(10)
 `)
 
-	// Parse -> AST
-	fileSet := parser.NewFileSet()
-	srcFile := fileSet.AddFile("inline", -1, len(src))
-	p := parser.NewParser(srcFile, src, nil)
-	file, err := p.ParseFile()
+	script := kavun.NewScript(src)
+	script.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
+	script.Add("out", core.Undefined)
+
+	compiled, err := script.Compile(nil, nil)
 	if err != nil {
 		panic(err)
 	}
 
-	// Compile -> bytecode
-	a := core.NewArena(nil)
-	modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
-	c := kavun.NewCompiler(a, srcFile, nil, nil, modules, nil)
-	if err := c.Compile(file); err != nil {
+	if err := compiled.Run(); err != nil {
 		panic(err)
 	}
-	bytecode := c.Bytecode()
 
-	// Run in VM
-	machine := vm.NewVM(a, bytecode, nil, vm.DefaultMaxFrames, vm.DefaultStackSize)
-	if err := machine.Run(); err != nil {
-		panic(err)
-	}
+	fmt.Println("result:", compiled.GetValue("out"))
 }
 ```
 
-## Runtime components
+## Script Lifecycle
 
-- Parser (`parser` package): transforms source bytes into AST (`*parser.File`) and reports syntax errors with source positions.
-- Compiler (`kavun.NewCompiler`): transforms AST into VM bytecode. It needs allocator, source file metadata, symbol table/constants (optional for simple use), and module getter.
-- Allocator (`alloc.New`): controls runtime object allocation. `alloc.New(0)` means effectively unlimited allocations; non-zero can be used as a safety limit.
-- VM (`vm.NewVM`): executes compiled bytecode.
+Use these two workflows depending on your needs:
 
-`kavun.NewScript` is a higher-level helper around the same pipeline when you prefer convenience over low-level control.
-
-## Imports and host modules
-
-Use a module map to control what `import("...")` can load.
+1. One-shot execution
 
 ```go
-modules := vm.NewModuleMap()
-
-// Add selected stdlib modules only.
-modules.AddMap(stdlib.GetModuleMap("math", "json"))
-
-// Add a host builtin module.
-modules.AddBuiltinModule("host", map[string]core.Value{
-	"answer": core.IntValue(42),
-})
-
-// Add a source module from bytes.
-modules.AddSourceModule("helpers", []byte(`
-export add := func(a, b) { return a + b }
-`))
-```
-
-For local file imports, enable them on compiler/script and set an import directory.
-
-```go
-c.EnableFileImport(true)
-c.SetImportDir("./scripts")
-// Optional custom extensions, default is .kvn
-_ = c.SetImportFileExt(".kvn", ".yb")
-```
-
-## User-defined data types
-
-Kavun types are registered via `core.SetValueType`. User-defined type IDs must be greater than or equal to `core.VT_USER_DEFINED`.
-
-```go
-package mytypes
-
-import (
-	"fmt"
-	"unsafe"
-
-	"github.com/jokruger/kavun/core"
-	"github.com/jokruger/kavun/token"
-)
-
-const VT_COUNTER = core.VT_USER_DEFINED + 1
-
-type Counter struct {
-	N int64
-}
-
-func NewCounterValue(n int64) core.Value {
-	return core.Value{Ptr: unsafe.Pointer(&Counter{N: n}), Type: VT_COUNTER}
-}
-
-func toCounter(v core.Value) *Counter {
-	return (*Counter)(v.Ptr)
-}
-
-func init() {
-	core.SetValueType(VT_COUNTER, core.ValueType{
-		Name:   func(core.Value) string { return "counter" },
-		String: func(v core.Value) string { return fmt.Sprintf("Counter(%d)", toCounter(v).N) },
-		IsTrue: func(v core.Value) bool { return toCounter(v).N != 0 },
-		BinaryOp: func(v core.Value, a *core.Arena, op token.Token, rhs core.Value) (core.Value, error) {
-			if op != token.Add || rhs.Type != core.VT_INT {
-				return core.Undefined, fmt.Errorf("unsupported op")
-			}
-			return NewCounterValue(toCounter(v).N + int64(rhs.Data)), nil
-		},
-	})
-}
-```
-
-Expose values/functions to scripts through globals (low-level symbol table flow) or the `kavun.Script` API.
-
-```go
-s := kavun.NewScript(a, []byte(`out := c + 2`))
-s.Add("c", mytypes.NewCounterValue(40))
-compiled, err := s.Run()
+compiled, err := script.Run() // compile + run
 if err != nil {
 	panic(err)
 }
-fmt.Println(compiled.Get("out").Value().String()) // Counter(42)
 ```
 
-## Host function injection (CLI-style)
-
-The Kavun CLI REPL injects a host function into globals through a symbol table entry. The same pattern works in embedded apps.
+2. Reusable execution (preferred for performance)
 
 ```go
-a := core.NewArena(nil)
-modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
-
-src := []byte(`print("Hello Kavun!")`)
-fileSet := parser.NewFileSet()
-srcFile := fileSet.AddFile("inline", -1, len(src))
-file, err := parser.NewParser(srcFile, src, nil).ParseFile()
+compiled, err := script.Compile(nil, nil) // compile once
 if err != nil {
 	panic(err)
 }
 
-symbolTable := vm.NewSymbolTable()
-for idx, fn := range vm.BuiltinFuncs {
-	// Builtins must be pre-registered in the same symbol table.
-	symbolTable.DefineBuiltin(idx, (*core.BuiltinFunction)(fn.Ptr).Name)
-}
-
-globals := make([]core.Value, vm.GlobalsSize)
-printSym := symbolTable.Define("print")
-printFn, err := a.NewBuiltinFunctionValue(
-	"print",
-	func(vm core.VM, args []core.Value) (core.Value, error) {
-		for _, arg := range args {
-			fmt.Print(arg.String())
-		}
-		fmt.Println()
-		return core.Undefined, nil
-	},
-	1,
-	false,
-)
-if err != nil {
-	panic(err)
-}
-globals[printSym.Index] = printFn
-
-c := kavun.NewCompiler(a, srcFile, symbolTable, nil, modules, nil)
-if err := c.Compile(file); err != nil {
-	panic(err)
-}
-
-machine := vm.NewVM(a, c.Bytecode(), globals, vm.DefaultMaxFrames, vm.DefaultStackSize)
-if err := machine.Run(); err != nil {
-	panic(err)
+for i := 0; i < 100; i++ {
+	if err := compiled.Run(); err != nil {
+		panic(err)
+	}
 }
 ```
 
-## Set variables before run, read variables after run
+`Compiled.Run()` is designed for recurrent execution. It reuses internal VM structures and resets internal runtime resources between runs (allocator-backed runtime values, globals runtime state, and VM state) so you can execute the same compiled script repeatedly.
 
-Use `kavun.Script` when you want host-provided inputs and easy output extraction.
+At the lower-level VM API, reuse is also possible via `vm.Reset(...)`, including swapping bytecode to run different scripts.
+
+## Inputs And Outputs
+
+Set host variables before compile with `script.Add`.
 
 ```go
-package main
-
-import (
-	"fmt"
-
-	"github.com/jokruger/kavun"
-	"github.com/jokruger/kavun/core"
-)
-
-func main() {
-	a := core.NewArena(nil)
-
-	src := []byte(`
-sum := x + y
-message := "Hello, " + name
-`)
-
-	s := kavun.NewScript(a, src)
-
-	// Set globals before execution.
-	s.Add("x", core.IntValue(20))
-	s.Add("y", core.IntValue(22))
-	name, err := a.NewStringValue("Kavun")
-	if err != nil {
-		panic(err)
-	}
-	s.Add("name", name)
-
-	compiled, err := s.Run()
-	if err != nil {
-		panic(err)
-	}
-
-	// Read globals after execution.
-	sum, _ := compiled.Get("sum").Value().AsInt()
-	msg, _ := compiled.Get("message").Value().AsString()
-	fmt.Println(sum) // 42
-	fmt.Println(msg) // Hello, Kavun
-}
+script.Add("x", core.IntValue(20))
+script.Add("y", core.IntValue(22))
+script.Add("out", core.Undefined)
 ```
 
-You can also update a compiled global between runs with `compiled.Set(name, value)`.
+Read values after run:
 
 ```go
-// Reuse compiled bytecode with updated inputs.
+out := compiled.GetValue("out")
+sum, _ := out.AsInt()
+fmt.Println(sum)
+```
+
+You can update compiled globals between runs:
+
+```go
 if err := compiled.Set("x", core.IntValue(50)); err != nil {
 	panic(err)
 }
@@ -252,15 +111,149 @@ if err := compiled.Set("y", core.IntValue(7)); err != nil {
 if err := compiled.Run(); err != nil {
 	panic(err)
 }
-
-sum2, _ := compiled.Get("sum").Value().AsInt()
-fmt.Println(sum2) // 57
 ```
 
-## Practical notes
+Other helpers:
 
-- `alloc.Allocator` is single-threaded; do not share one allocator across concurrent executions.
-- Use the same allocator instance for the full pipeline of one execution unit (parse/compile/run) so values produced during compilation and values allocated at runtime follow the same lifetime model.
-- Use separate allocator instances for separate VM instances (especially when running VMs concurrently) to avoid cross-VM ownership and reuse issues.
-- `bytecode.RemoveDuplicates()` is optional and mainly a size optimization.
-- Keep module exposure explicit (`vm.NewModuleMap`) for sandboxed embedding.
+- `compiled.Get(name)` returns a `*kavun.Variable`
+- `compiled.GetAll()` returns all globals
+- `compiled.IsDefined(name)` checks whether a global exists and is not `undefined`
+
+## Imports
+
+Use a module map to control what `import("...")` can load.
+
+```go
+modules := vm.NewModuleMap()
+
+// Selected stdlib modules
+modules.AddMap(stdlib.GetModuleMap("math", "json"))
+
+// Host builtin module
+modules.AddBuiltinModule("host", map[string]core.Value{
+	"answer": core.IntValue(42),
+})
+
+// In-memory source module
+modules.AddSourceModule("helpers", []byte(`
+export add := func(a, b) { return a + b }
+`))
+
+script.SetImports(modules)
+```
+
+Suggested default for general-purpose apps:
+
+```go
+script.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
+```
+
+## File Imports
+
+Local file imports are disabled by default.
+
+Enable them explicitly:
+
+```go
+script.EnableFileImport(true)
+if err := script.SetImportDir("./scripts"); err != nil {
+	panic(err)
+}
+```
+
+`Script` does not expose file extension customization.
+If you need custom source extensions for file imports, use the lower-level compiler API (`Compiler.SetImportFileExt`) directly.
+
+## Runtime And Compiler Limits
+
+`Script` exposes common limits and execution controls:
+
+- `script.SetMaxConstObjects(n)`
+- `script.SetMaxFrames(n)`
+- `script.SetMaxStack(n)`
+- `script.SetAssignmentMode(mode)`
+
+Example:
+
+```go
+script.SetMaxConstObjects(10_000)
+script.SetMaxFrames(4_096)
+script.SetMaxStack(8_192)
+script.SetAssignmentMode(kavun.AssignmentModeSmart)
+```
+
+## Concurrency
+
+`Compiled` is safe for repeated use from one goroutine, and it can be cloned for parallel execution.
+
+For concurrent runs, create one clone per goroutine with its own runtime arena:
+
+```go
+base, err := script.Compile(nil, nil)
+if err != nil {
+	panic(err)
+}
+
+arena := core.NewArena(nil)
+clone, err := base.Clone(arena)
+if err != nil {
+	panic(err)
+}
+
+if err := clone.Run(); err != nil {
+	panic(err)
+}
+```
+
+`RunContext(ctx)` is also available for cancellable execution.
+
+## Allocators
+
+`Script.Compile(cta, rta)` accepts two allocators:
+
+- `cta`: compile-time allocator
+- `rta`: run-time allocator
+
+If you pass `nil` for either allocator, Kavun creates a default allocator internally.
+
+```go
+compiled, err := script.Compile(nil, nil) // both allocators use defaults
+if err != nil {
+	panic(err)
+}
+```
+
+Compile-time and run-time allocators are separated by design. This avoids mixing compiler allocations with runtime allocations and usually gives better reuse characteristics in recurrent execution.
+
+If needed, you can still pass the same allocator instance for both:
+
+```go
+arena := core.NewArena(nil)
+compiled, err := script.Compile(arena, arena)
+if err != nil {
+	panic(err)
+}
+```
+
+### Custom Allocator Payload
+
+Allocator behavior can be extended with a custom payload via `core.ArenaOptions.Payload`.
+Payload must implement `Reset()` and is reset together with the arena.
+
+This is useful when embedding user-defined types (see unit tests for custom type registration patterns) and you want type-specific allocation or caches to follow arena lifecycle.
+
+```go
+type MyPayload struct {
+	buf []byte
+}
+
+func (p *MyPayload) Reset() {
+	p.buf = p.buf[:0]
+}
+
+opts := core.DefaultArenaOptions()
+opts.Payload = &MyPayload{}
+
+arena := core.NewArena(opts)
+_ = arena.Payload() // retrieve custom payload when needed
+```

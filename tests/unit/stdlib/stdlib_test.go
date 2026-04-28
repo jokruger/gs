@@ -233,9 +233,11 @@ func object(v any) core.Value {
 func expect(t *testing.T, input string, expected any) {
 	e, err := require.FromInterface(alloc, expected)
 	require.NoError(t, err)
-	s := kavun.NewScript(alloc, []byte(input))
+	s := kavun.NewScript([]byte(input))
 	s.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
-	c, err := s.Run()
+	c, err := s.Compile(nil, nil)
+	require.NoError(t, err)
+	err = c.Run()
 	require.NoError(t, err)
 	require.NotNil(t, c)
 	v := c.Get("out")

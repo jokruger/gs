@@ -20,7 +20,7 @@ func TestEval(t *testing.T) {
 			require.NoError(t, err)
 			ps[k] = o
 		}
-		actual, err := kavun.Eval(ctx, alloc, expr, ps)
+		actual, err := kavun.Eval(ctx, expr, ps)
 		require.NoError(t, err)
 		require.Equal(t, e, actual)
 	}

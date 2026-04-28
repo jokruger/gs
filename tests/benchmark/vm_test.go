@@ -4,10 +4,6 @@ import (
 	"testing"
 
 	"github.com/jokruger/kavun"
-	"github.com/jokruger/kavun/core"
-	"github.com/jokruger/kavun/parser"
-	"github.com/jokruger/kavun/stdlib"
-	"github.com/jokruger/kavun/vm"
 )
 
 func BenchmarkVM(b *testing.B) {
@@ -20,57 +16,17 @@ for i := 0; i < 1000; i++ {
 }
 `)
 
-	a := core.NewArena(nil)
-	astFile, err := parse(src)
-	if err != nil {
-		b.Fatal(err)
-	}
-	bytecode, err := compileFile(a, astFile)
+	script := kavun.NewScript(src)
+	compiled, err := script.Compile(nil, nil)
 	if err != nil {
 		b.Fatal(err)
 	}
 
 	b.Run("vmRun", func(b *testing.B) {
-		var err error
-
 		for i := 0; i < b.N; i++ {
-			_, err = runVM(a, bytecode)
-		}
-
-		if err != nil {
-			b.Fatal(err)
+			if err := compiled.Run(); err != nil {
+				b.Fatal(err)
+			}
 		}
 	})
-}
-
-func parse(input []byte) (*parser.File, error) {
-	fileSet := parser.NewFileSet()
-	inputFile := fileSet.AddFile("bench", -1, len(input))
-	p := parser.NewParser(inputFile, input, nil)
-	return p.ParseFile()
-}
-
-func compileFile(a *core.Arena, file *parser.File) (*vm.Bytecode, error) {
-	symTable := vm.NewSymbolTable()
-	symTable.Define("out")
-	m := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
-	c := kavun.NewCompiler(a, file.InputFile, symTable, nil, m, nil)
-	if err := c.Compile(file); err != nil {
-		return nil, err
-	}
-	bytecode := c.Bytecode()
-	bytecode.RemoveDuplicates()
-	return bytecode, nil
-}
-
-func runVM(a *core.Arena, bytecode *vm.Bytecode) (core.Value, error) {
-	globals := make([]core.Value, vm.GlobalsSize)
-
-	a.Reset()
-	v := vm.NewVM(a, bytecode, globals, vm.DefaultMaxFrames, vm.DefaultStackSize)
-	if err := v.Run(); err != nil {
-		return core.Undefined, err
-	}
-
-	return globals[0], nil
 }

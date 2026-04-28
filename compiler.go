@@ -1182,14 +1182,6 @@ func (c *Compiler) fork(file *parser.SourceFile, modulePath string, symbolTable 
 	return child
 }
 
-func (c *Compiler) error(node parser.Node, err error) error {
-	return &CompilerError{
-		FileSet: c.file.Set(),
-		Node:    node,
-		Err:     err,
-	}
-}
-
 func (c *Compiler) errorf(node parser.Node, format string, args ...any) error {
 	return &CompilerError{
 		FileSet: c.file.Set(),

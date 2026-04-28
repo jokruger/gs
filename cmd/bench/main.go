@@ -6,9 +6,7 @@ import (
 
 	"github.com/jokruger/kavun"
 	"github.com/jokruger/kavun/core"
-	"github.com/jokruger/kavun/parser"
 	"github.com/jokruger/kavun/stdlib"
-	"github.com/jokruger/kavun/vm"
 )
 
 type tc struct {
@@ -18,7 +16,7 @@ type tc struct {
 
 var tests = []tc{
 	{
-		name: "fib1(30)/10",
+		name: "fib1(20)",
 		src: `
 fib := func(x) {
 	if x == 0 {
@@ -28,13 +26,11 @@ fib := func(x) {
 	}
 	return fib(x-1) + fib(x-2)
 }
-for i := 0; i < 10; i++ {
-	out = fib(30)
-}
+out = fib(20)
 `},
 
 	{
-		name: "fib2(30)/10000",
+		name: "fib2(20)",
 		src: `
 fib := func(x, a, b) {
 	if x == 0 {
@@ -44,35 +40,29 @@ fib := func(x, a, b) {
 	}
 	return fib(x-1, b, a+b)
 }
-for i := 0; i < 10000; i++ {
-	out = fib(30, 0, 1)
-}
+out = fib(20, 0, 1)
 `},
 
 	{
-		name: "sumPow1/100",
-		src: `
-for l := 0; l < 100; l++ {
-	out = 0
-	for e in range(1, 10000, 1) {
-		out = out + e * e
-	}
-}
-`},
-
-	{
-		name: "sumPow2/100",
-		src: `
-for l := 0; l < 100; l++ {
-	out = range(1, 10000, 1).to_array().reduce(0, (a, b) => a + b * b)
-}
-`},
-
-	{
-		name: "closures/100000",
+		name: "sumPow1",
 		src: `
 out = 0
-for i := 0; i < 100000; i++ {
+for e in range(1, 10000, 1) {
+	out = out + e * e
+}
+`},
+
+	{
+		name: "sumPow2",
+		src: `
+out = range(1, 10000, 1).to_array().reduce(0, (a, b) => a + b * b)
+`},
+
+	{
+		name: "closures",
+		src: `
+out = 0
+for i := 0; i < 1000; i++ {
     func(x) {
         out += x
     }(i)
@@ -80,9 +70,9 @@ for i := 0; i < 100000; i++ {
 `},
 
 	{
-		name: "iter/1000",
+		name: "iter",
 		src: `
-s := range(0, 1000, 1).to_array()
+s := range(0, 100, 1).to_array()
 out = 0
 for i := 0; i < len(s); i++ {
     for j := 0; j < len(s); j++ {
@@ -93,9 +83,9 @@ for i := 0; i < len(s); i++ {
 `},
 
 	{
-		name: "str1/1000",
+		name: "str1",
 		src: `
-for l := 0; l < 1000; l++ {
+for l := 0; l < 10; l++ {
 	x := range(1, 1000, 1).to_array().map(e => "num" + e)
 	if l%2 == 0 {
 		x = x.map(e => e.lower())
@@ -107,10 +97,10 @@ for l := 0; l < 1000; l++ {
 `},
 
 	{
-		name: "str2/1000",
+		name: "str2",
 		src: `
 text := import("text")
-size := 1000
+size := 100
 s := ""
 for r := 0; r < size*2; r++ {
     if r%2 == 0 {
@@ -125,81 +115,49 @@ for r := rune(0); r < size*2; r++ {
 }
 out = n
 `},
+
+	{
+		name: "decimals",
+		src: `
+out = decimal(0)
+for i := 0; i < 1000; i++ {
+	out = out + 1.0d / decimal(i + 1)
+}
+`},
 }
 
 func main() {
 	fmt.Printf("%-15s %-25s %-15s %-15s %-15s\n", "Test", "Result", "Parse (sec)", "Compile (sec)", "Run (sec)")
 	fmt.Printf("%-15s %-25s %-15s %-15s %-15s\n", "----", "------", "-----------", "-------------", "---------")
 	for _, t := range tests {
-		a := core.NewArena(nil)
-		parseTime, compileTime, runTime, res, err := runBench(a, []byte(t.src))
+		compileTime, runTime, res, err := runBench([]byte(t.src))
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("%-15s %-25s %-15f %-15f %-15f\n", t.name, res.String(), parseTime.Seconds(), compileTime.Seconds(), runTime.Seconds())
+		fmt.Printf("%-15s %-25s %-15f %-15f\n", t.name, res.String(), compileTime.Seconds(), runTime.Seconds())
 	}
 }
 
-func runBench(a *core.Arena, input []byte) (parseTime time.Duration, compileTime time.Duration, runTime time.Duration, result core.Value, err error) {
-	var astFile *parser.File
-	parseTime, astFile, err = parse(input)
+func runBench(input []byte) (compileTime time.Duration, runTime time.Duration, result core.Value, err error) {
+	var compiled *kavun.Compiled
+
+	start := time.Now()
+	script := kavun.NewScript(input)
+	script.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
+	script.Add("out", core.Undefined)
+	compiled, err = script.Compile(nil, nil)
 	if err != nil {
 		return
 	}
+	compileTime = time.Since(start)
 
-	var bytecode *vm.Bytecode
-	compileTime, bytecode, err = compileFile(a, astFile)
-	if err != nil {
-		return
+	start = time.Now()
+	for range 100 {
+		if err = compiled.Run(); err != nil {
+			return
+		}
 	}
-
-	runTime, result, err = runVM(a, bytecode)
-
+	runTime = time.Since(start)
+	result = compiled.GetValue("out")
 	return
-}
-
-func parse(input []byte) (time.Duration, *parser.File, error) {
-	fileSet := parser.NewFileSet()
-	inputFile := fileSet.AddFile("bench", -1, len(input))
-
-	start := time.Now()
-
-	p := parser.NewParser(inputFile, input, nil)
-	file, err := p.ParseFile()
-	if err != nil {
-		return time.Since(start), nil, err
-	}
-
-	return time.Since(start), file, nil
-}
-
-func compileFile(a *core.Arena, file *parser.File) (time.Duration, *vm.Bytecode, error) {
-	symTable := vm.NewSymbolTable()
-	symTable.Define("out")
-
-	start := time.Now()
-
-	m := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
-	c := kavun.NewCompiler(a, file.InputFile, symTable, nil, m, nil)
-	if err := c.Compile(file); err != nil {
-		return time.Since(start), nil, err
-	}
-
-	bytecode := c.Bytecode()
-	bytecode.RemoveDuplicates()
-
-	return time.Since(start), bytecode, nil
-}
-
-func runVM(a *core.Arena, bytecode *vm.Bytecode) (time.Duration, core.Value, error) {
-	globals := make([]core.Value, vm.GlobalsSize)
-
-	start := time.Now()
-
-	v := vm.NewVM(a, bytecode, globals, vm.DefaultMaxFrames, vm.DefaultStackSize)
-	if err := v.Run(); err != nil {
-		return time.Since(start), core.Undefined, err
-	}
-
-	return time.Since(start), globals[0], nil
 }

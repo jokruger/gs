@@ -85,10 +85,10 @@ Converts to string.
 
 **Returns:** `string`
 
-**Description:** Returns JSON array representation of the range.
+**Description:** Converts range values to runes and builds a string.
 
 ```go
-range(0, 3).string()      // "[0,1,2]"
+range(65, 68).string()    // "ABC"
 ```
 
 #### `record()`
@@ -96,12 +96,12 @@ Converts to record.
 
 **Arguments:** None
 
-**Returns:** `record | undefined`
+**Returns:** `record`
 
-**Description:** Converts range to record (if it represents valid JSON structure). Typically returns `undefined`.
+**Description:** Converts range to a record with string index keys and range values.
 
 ```go
-range(0, 3).record()      // undefined
+range(1, 3, 1).record()   // {"0": 1, "1": 2}
 ```
 
 #### `dict()`
@@ -109,12 +109,12 @@ Converts to dict.
 
 **Arguments:** None
 
-**Returns:** `dict | undefined`
+**Returns:** `dict`
 
-**Description:** Converts range to dict (if it represents valid JSON structure). Typically returns `undefined`.
+**Description:** Converts range to a dict with string index keys and range values.
 
 ```go
-range(0, 3).dict()        // undefined
+range(1, 3, 1).dict()     // dict({"0": 1, "1": 2})
 ```
 
 ### Query and Accessor Functions

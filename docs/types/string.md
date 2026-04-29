@@ -34,9 +34,9 @@ backslash = "C:\\Users\\Bob"
 ### Unicode in Strings
 
 ```go
-greeting = "Bonjour"          // French
+greeting = "Bonjour"           // French
 wave = "👋"                    // Emoji
-chinese = "你好"              // Chinese
+japanese = "こんにちは"         // Japanese
 ```
 
 ### Raw Strings
@@ -141,14 +141,14 @@ Converts to float.
 
 **Arguments:** None
 
-**Returns:** `float | undefined`
+**Returns:** `float`
 
-**Description:** Parses the string as a floating-point number. Returns `undefined` if parsing fails.
+**Description:** Parses the string as a floating-point number. Returns `0` when parsing fails.
 
 ```go
 "3.14".float()     // 3.14
 "1e3".float()      // 1000.0
-"invalid".float()  // undefined
+"invalid".float()  // 0
 ```
 
 #### `int()`
@@ -156,14 +156,14 @@ Converts to integer.
 
 **Arguments:** None
 
-**Returns:** `int | undefined`
+**Returns:** `int`
 
-**Description:** Parses the string as an integer. Returns `undefined` if parsing fails.
+**Description:** Parses the string as an integer. Returns `0` when parsing fails.
 
 ```go
 "42".int()         // 42
 "-100".int()       // -100
-"invalid".int()    // undefined
+"invalid".int()    // 0
 ```
 
 #### `decimal()`
@@ -171,14 +171,14 @@ Converts to decimal.
 
 **Arguments:** None
 
-**Returns:** `decimal | undefined`
+**Returns:** `decimal`
 
-**Description:** Parses the string as a decimal number. Returns `undefined` if parsing fails.
+**Description:** Parses the string as a decimal number. Invalid input results in `decimal(NaN)`.
 
 ```go
 "1.23".decimal()       // decimal(1.23)
 "1e2".decimal()        // decimal(100)
-"invalid".decimal()    // undefined
+"invalid".decimal()    // decimal(NaN)
 ```
 
 #### `time()`
@@ -186,14 +186,14 @@ Converts to time.
 
 **Arguments:** None
 
-**Returns:** `time | undefined`
+**Returns:** `time`
 
-**Description:** Parses the string as an ISO 8601 date/time. Returns `undefined` if parsing fails.
+**Description:** Parses the string as a date/time value. Invalid input results in the zero time value.
 
 ```go
 "2024-01-01".time()             // time at midnight Jan 1, 2024
 "2024-01-01T12:30:00Z".time()   // specific time in UTC
-"invalid".time()                // undefined
+"invalid".time()                // zero time value
 ```
 
 #### `record()`
@@ -201,13 +201,12 @@ Converts to record.
 
 **Arguments:** None
 
-**Returns:** `record | undefined`
+**Returns:** `record`
 
-**Description:** Parses the string as JSON and returns a record. Returns `undefined` if JSON is invalid.
+**Description:** Converts the string into a record where keys are string indices (`"0"`, `"1"`, ...), and values are runes.
 
 ```go
-`{"name":"Alice"}`.record()    // {name: "Alice"}
-"invalid json".record()        // undefined
+"abc".record()    // {"0": 'a', "1": 'b', "2": 'c'}
 ```
 
 #### `dict()`
@@ -215,13 +214,12 @@ Converts to dict.
 
 **Arguments:** None
 
-**Returns:** `dict | undefined`
+**Returns:** `dict`
 
-**Description:** Parses the string as JSON and returns a dict. Returns `undefined` if JSON is invalid.
+**Description:** Converts the string into a dict where keys are string indices (`"0"`, `"1"`, ...), and values are runes.
 
 ```go
-`{"key":"value"}`.dict()       // dict with ["key"] = "value"
-"invalid json".dict()          // undefined
+"abc".dict()       // dict({"0": 'a', "1": 'b', "2": 'c'})
 ```
 
 ### Transformation and Filtering Functions
@@ -277,7 +275,7 @@ Removes leading and trailing characters.
 Filters by predicate on runes.
 
 **Arguments:**
-- `fn` (function): Predicate that takes a rune (as int) and returns bool
+- `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)` and returns bool
 
 **Returns:** `string`
 
@@ -294,7 +292,7 @@ Filters by predicate on runes.
 Tests if all runes match predicate.
 
 **Arguments:**
-- `fn` (function): Predicate that takes a rune (as int) and returns bool
+- `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)` and returns bool
 
 **Returns:** `bool`
 
@@ -309,7 +307,7 @@ Tests if all runes match predicate.
 Tests if any rune matches predicate.
 
 **Arguments:**
-- `fn` (function): Predicate that takes a rune (as int) and returns bool
+- `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)` and returns bool
 
 **Returns:** `bool`
 
@@ -326,7 +324,7 @@ Tests if any rune matches predicate.
 Counts runes matching predicate.
 
 **Arguments:**
-- `fn` (function): Predicate that takes a rune (as int) and returns bool
+- `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)` and returns bool
 
 **Returns:** `int`
 
@@ -342,12 +340,12 @@ Finds minimum rune.
 
 **Arguments:** None
 
-**Returns:** `rune | undefined`
+**Returns:** `int | undefined`
 
-**Description:** Returns the rune with the smallest code point. Returns `undefined` for empty string. Operates on **runes**.
+**Description:** Returns the smallest byte value as an integer. Returns `undefined` for empty string. (Byte-level operation)
 
 ```go
-"hello".min()    // 'e' (code point 101, smallest)
+"hello".min()    // 101 (byte value of 'e')
 "".min()         // undefined
 ```
 
@@ -356,12 +354,12 @@ Finds maximum rune.
 
 **Arguments:** None
 
-**Returns:** `rune | undefined`
+**Returns:** `int | undefined`
 
-**Description:** Returns the rune with the largest code point. Returns `undefined` for empty string. Operates on **runes**.
+**Description:** Returns the largest byte value as an integer. Returns `undefined` for empty string. (Byte-level operation)
 
 ```go
-"hello".max()    // 'o' (code point 111, largest)
+"hello".max()    // 111 (byte value of 'o')
 "".max()         // undefined
 ```
 

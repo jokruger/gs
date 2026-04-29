@@ -34,7 +34,7 @@ func TestJSON(t *testing.T) {
 	testJSONEncodeDecode(t, "1\u001C04")
 	testJSONEncodeDecode(t, "çığöşü")
 	testJSONEncodeDecode(t, "ç1\u001C04IĞÖŞÜ")
-	testJSONEncodeDecode(t, "错误测试")
+	testJSONEncodeDecode(t, "エラーテスト")
 
 	testJSONEncodeDecode(t, true)
 	testJSONEncodeDecode(t, false)

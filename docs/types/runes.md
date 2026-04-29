@@ -18,7 +18,7 @@ Unicode string literals use the `u"..."` syntax with full escape sequence proces
 
 ```go
 s = u"ウクライナ"          // Unicode string
-s2 = u"Привет"           // Cyrillic
+s2 = u"Привіт"           // Ukrainian
 s3 = u"🚀🌍🎉"            // Emoji
 ```
 
@@ -26,7 +26,7 @@ s3 = u"🚀🌍🎉"            // Emoji
 
 ```go
 s2 = runes("ウクライナ")   // builtin function
-s3 = runes("Hello")       // from ASCII string
+s3 = runes("Hello")      // from ASCII string
 ```
 
 ### Indexing and Slicing (Rune-level)
@@ -118,13 +118,13 @@ Converts to float.
 
 **Arguments:** None
 
-**Returns:** `float | undefined`
+**Returns:** `float`
 
-**Description:** Parses the runes as a floating-point number. Returns `undefined` if parsing fails.
+**Description:** Parses the runes as a floating-point number. Returns `0` when parsing fails.
 
 ```go
 u"3.14".float()     // 3.14
-u"invalid".float()  // undefined
+u"invalid".float()  // 0
 ```
 
 #### `int()`
@@ -132,13 +132,13 @@ Converts to integer.
 
 **Arguments:** None
 
-**Returns:** `int | undefined`
+**Returns:** `int`
 
-**Description:** Parses the runes as an integer. Returns `undefined` if parsing fails.
+**Description:** Parses the runes as an integer. Returns `0` when parsing fails.
 
 ```go
 u"42".int()         // 42
-u"invalid".int()    // undefined
+u"invalid".int()    // 0
 ```
 
 #### `decimal()`
@@ -146,9 +146,9 @@ Converts to decimal.
 
 **Arguments:** None
 
-**Returns:** `decimal | undefined`
+**Returns:** `decimal`
 
-**Description:** Parses the runes as a decimal number. Returns `undefined` if parsing fails.
+**Description:** Parses the runes as a decimal number. Invalid input results in `decimal(NaN)`.
 
 ```go
 u"1.23".decimal()   // decimal(1.23)
@@ -159,9 +159,9 @@ Converts to time.
 
 **Arguments:** None
 
-**Returns:** `time | undefined`
+**Returns:** `time`
 
-**Description:** Parses the runes as an ISO 8601 date/time. Returns `undefined` if parsing fails.
+**Description:** Parses the runes as a date/time value. Invalid input results in the zero time value.
 
 ```go
 u"2024-01-01".time()    // time at midnight Jan 1, 2024
@@ -172,12 +172,12 @@ Converts to record.
 
 **Arguments:** None
 
-**Returns:** `record | undefined`
+**Returns:** `record`
 
-**Description:** Parses the runes as JSON and returns a record.
+**Description:** Converts runes to a record where keys are string indices (`"0"`, `"1"`, ...), and values are runes.
 
 ```go
-u`{"name":"Alice"}`.record()    // {name: "Alice"}
+u"abc".record()    // {"0": 'a', "1": 'b', "2": 'c'}
 ```
 
 #### `dict()`
@@ -185,12 +185,12 @@ Converts to dict.
 
 **Arguments:** None
 
-**Returns:** `dict | undefined`
+**Returns:** `dict`
 
-**Description:** Parses the runes as JSON and returns a dict.
+**Description:** Converts runes to a dict where keys are string indices (`"0"`, `"1"`, ...), and values are runes.
 
 ```go
-u`{"key":"value"}`.dict()       // dict
+u"abc".dict()       // dict({"0": 'a', "1": 'b', "2": 'c'})
 ```
 
 ### Transformation and Filtering Functions
@@ -206,7 +206,7 @@ Converts to lowercase.
 
 ```go
 u"HELLO".lower()        // u"hello"
-u"ПРИВЕТ".lower()       // u"привет"
+u"ПРИВІТ".lower()       // u"привіт"
 u"Café".lower()         // u"café"
 ```
 
@@ -221,7 +221,7 @@ Converts to uppercase.
 
 ```go
 u"hello".upper()        // u"HELLO"
-u"привет".upper()       // u"ПРИВЕТ"
+u"привіт".upper()       // u"ПРИВІТ"
 u"café".upper()         // u"CAFÉ"
 ```
 
@@ -259,7 +259,7 @@ u"hello".sort()         // u"ehllo"
 Filters by predicate on runes.
 
 **Arguments:**
-- `fn` (function): Predicate that takes a rune (as int) and returns bool
+- `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)` and returns bool
 
 **Returns:** `runes`
 
@@ -276,7 +276,7 @@ u"a1b2c3".filter(r => r >= '0'.int() && r <= '9'.int())    // u"123"
 Tests if all runes match predicate.
 
 **Arguments:**
-- `fn` (function): Predicate that takes a rune (as int) and returns bool
+- `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)` and returns bool
 
 **Returns:** `bool`
 
@@ -291,7 +291,7 @@ u"abc123".all(r => r >= 'a'.int() && r <= 'z'.int()) // false
 Tests if any rune matches predicate.
 
 **Arguments:**
-- `fn` (function): Predicate that takes a rune (as int) and returns bool
+- `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)` and returns bool
 
 **Returns:** `bool`
 
@@ -308,7 +308,7 @@ u"abc123".any(r => r >= '0'.int() && r <= '9'.int())   // true
 Counts runes matching predicate.
 
 **Arguments:**
-- `fn` (function): Predicate that takes a rune (as int) and returns bool
+- `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)` and returns bool
 
 **Returns:** `int`
 
@@ -430,10 +430,10 @@ u"hello world".contains(u"xyz")      // false
 // Process multilingual text
 languages = [
     u"English",
-    u"中文",
-    u"Русский",
+    u"日本語",
+    u"українська",
     u"العربية",
-    u"日本語"
+    u"Español"
 ]
 
 // Count characters in each language

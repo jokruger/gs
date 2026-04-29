@@ -165,7 +165,7 @@ Gets array of values.
 
 **Returns:** `array`
 
-**Description:** Returns an array of all values (order matches `keys()` if called immediately after).
+**Description:** Returns an array of all values. Order is not guaranteed.
 
 ```go
 d = dict({a: 1, b: 2})
@@ -194,7 +194,7 @@ d.contains("c")    // false
 Filters by predicate.
 
 **Arguments:**
-- `fn` (function): Predicate function. Accepts two arguments (key, value).
+- `fn` (function): Predicate function. Accepts one argument `(key)` or two arguments `(key, value)`.
 
 **Returns:** `dict`
 
@@ -214,7 +214,7 @@ filtered = d.filter((k, v) => k != "a")  // dict({b: 2, c: 3, d: 4})
 Counts pairs matching predicate.
 
 **Arguments:**
-- `fn` (function): Predicate function. Accepts two arguments (key, value).
+- `fn` (function): Predicate function. Accepts one argument `(key)` or two arguments `(key, value)`.
 
 **Returns:** `int`
 
@@ -229,7 +229,7 @@ d.count((k, v) => v > 1)    // 2 (b: 2, c: 3)
 Tests if all pairs match predicate.
 
 **Arguments:**
-- `fn` (function): Predicate function. Accepts two arguments (key, value).
+- `fn` (function): Predicate function. Accepts one argument `(key)` or two arguments `(key, value)`.
 
 **Returns:** `bool`
 
@@ -247,7 +247,7 @@ d.all((k, v) => v > 2)         // false
 Tests if any pair matches predicate.
 
 **Arguments:**
-- `fn` (function): Predicate function. Accepts two arguments (key, value).
+- `fn` (function): Predicate function. Accepts one argument `(key)` or two arguments `(key, value)`.
 
 **Returns:** `bool`
 

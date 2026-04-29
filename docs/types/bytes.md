@@ -86,12 +86,12 @@ Converts to record.
 
 **Arguments:** None
 
-**Returns:** `record | undefined`
+**Returns:** `record`
 
-**Description:** Interprets bytes as JSON and returns a record. Returns `undefined` if invalid JSON.
+**Description:** Converts bytes to a record where keys are string indices (`"0"`, `"1"`, ...), and values are byte values as ints.
 
 ```go
-`{"name":"Alice"}`.bytes().record()   // {name: "Alice"}
+bytes("abc").record()   // {"0": 97, "1": 98, "2": 99}
 ```
 
 #### `dict()`
@@ -99,12 +99,12 @@ Converts to dict.
 
 **Arguments:** None
 
-**Returns:** `dict | undefined`
+**Returns:** `dict`
 
-**Description:** Interprets bytes as JSON and returns a dict. Returns `undefined` if invalid JSON.
+**Description:** Converts bytes to a dict where keys are string indices (`"0"`, `"1"`, ...), and values are byte values as ints.
 
 ```go
-`{"key":"value"}`.bytes().dict()      // dict
+bytes("abc").dict()      // dict({"0": 97, "1": 98, "2": 99})
 ```
 
 ### Transformation and Filtering Functions
@@ -127,7 +127,7 @@ bytes([3, 1, 4, 1]).sort()  // bytes([1, 1, 3, 4])
 Filters by predicate.
 
 **Arguments:**
-- `fn` (function): Predicate that takes a byte (as int 0-255) and returns bool
+- `fn` (function): Predicate that takes one argument `(byte)` or two arguments `(index, byte)` and returns bool
 
 **Returns:** `bytes`
 
@@ -146,7 +146,7 @@ bytes([1, 2, 3, 4, 5]).filter(b => b % 2 == 0)  // bytes([2, 4])
 Tests if all bytes match predicate.
 
 **Arguments:**
-- `fn` (function): Predicate that takes a byte (as int) and returns bool
+- `fn` (function): Predicate that takes one argument `(byte)` or two arguments `(index, byte)` and returns bool
 
 **Returns:** `bool`
 
@@ -161,7 +161,7 @@ bytes("abc123").all(b => b >= 'a'.int() && b <= 'z'.int()) // false
 Tests if any byte matches predicate.
 
 **Arguments:**
-- `fn` (function): Predicate that takes a byte (as int) and returns bool
+- `fn` (function): Predicate that takes one argument `(byte)` or two arguments `(index, byte)` and returns bool
 
 **Returns:** `bool`
 
@@ -178,7 +178,7 @@ bytes("abc123").any(b => b >= '0'.int() && b <= '9'.int())   // true
 Counts bytes matching predicate.
 
 **Arguments:**
-- `fn` (function): Predicate that takes a byte (as int) and returns bool
+- `fn` (function): Predicate that takes one argument `(byte)` or two arguments `(index, byte)` and returns bool
 
 **Returns:** `int`
 

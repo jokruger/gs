@@ -317,7 +317,7 @@ func TestDecimal(t *testing.T) {
 
 func TestChar(t *testing.T) {
 	expectRun(t, `out = 'a'`, nil, 'a')
-	expectRun(t, `out = '九'`, nil, rune(20061))
+	expectRun(t, `out = 'あ'`, nil, rune(12354))
 	expectRun(t, `out = 'Æ'`, nil, rune(198))
 
 	expectRun(t, `out = '0' + '9'`, nil, rune(105))
@@ -486,14 +486,14 @@ func TestString(t *testing.T) {
 	expectRun(t, `out = " їЇґҐ ".trim()`, nil, "їЇґҐ")
 	expectRun(t, `out = "їЇґҐ".upper()`, nil, "ЇЇҐҐ")
 	expectRun(t, `out = "їЇґҐ".lower()`, nil, "їїґґ")
-	expectRun(t, `out = "普京是个傻屌"[1]`, nil, 153)      // byte index, not rune index
-	expectRun(t, `out = "普京是个傻屌"[1:2]`, nil, "\x99") // byte slice, not rune slice
-	expectRun(t, `out = "普京是个傻屌"[0:3]`, nil, "普")    // byte slice, not rune slice
+	expectRun(t, `out = "こんにちはさ"[1]`, nil, 129)      // byte index, not rune index
+	expectRun(t, `out = "こんにちはさ"[1:2]`, nil, "\x81") // byte slice, not rune slice
+	expectRun(t, `out = "こんにちはさ"[0:3]`, nil, "こ")    // byte slice, not rune slice
 
 	expectRun(t, `out = len("")`, nil, 0)
 	expectRun(t, `out = len("hello")`, nil, 5)
 	expectRun(t, `out = len("їЇґҐ")`, nil, 8)    // byte length, not rune length
-	expectRun(t, `out = len("普京是个傻屌")`, nil, 18) // byte length, not rune length
+	expectRun(t, `out = len("こんにちはさ")`, nil, 18) // byte length, not rune length
 
 	expectRun(t, `out = "hello".filter(x => x > 'e')`, nil, "hllo")
 	expectRun(t, `out = "hello".filter((i, x) => i > 2)`, nil, "lo")
@@ -571,14 +571,14 @@ func TestRunes(t *testing.T) {
 	expectRun(t, `out = u"їЇґҐ"[1]`, nil, 'Ї')
 	expectRun(t, `out = u"їЇґҐ"[1:2]`, nil, []rune("Ї"))
 	expectRun(t, `out = u"їЇґҐ"[1:3]`, nil, []rune("Їґ"))
-	expectRun(t, `out = u"普京是个傻屌"[1]`, nil, '京')
-	expectRun(t, `out = u"普京是个傻屌"[1:2]`, nil, []rune("京"))
-	expectRun(t, `out = u"普京是个傻屌"[1:3]`, nil, []rune("京是"))
+	expectRun(t, `out = u"こんにちはさ"[1]`, nil, 'ん')
+	expectRun(t, `out = u"こんにちはさ"[1:2]`, nil, []rune("ん"))
+	expectRun(t, `out = u"こんにちはさ"[1:3]`, nil, []rune("んに"))
 
 	expectRun(t, `out = len(u"")`, nil, 0)
 	expectRun(t, `out = len(u"hello")`, nil, 5)
 	expectRun(t, `out = len(u"їЇґҐ")`, nil, 4)
-	expectRun(t, `out = len(u"普京是个傻屌")`, nil, 6)
+	expectRun(t, `out = len(u"こんにちはさ")`, nil, 6)
 
 	expectRun(t, `out = u"hello".sort()`, nil, []rune("ehllo"))
 	expectRun(t, `out = u"hello".filter(x => x > 'e')`, nil, []rune("hllo"))

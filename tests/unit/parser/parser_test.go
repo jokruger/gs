@@ -489,15 +489,15 @@ func TestParseChar(t *testing.T) {
 			exprStmt(
 				charLit('A', 1)))
 	})
-	expectParse(t, `'九'`, func(p pfn) []Stmt {
+	expectParse(t, `'あ'`, func(p pfn) []Stmt {
 		return stmts(
 			exprStmt(
-				charLit('九', 1)))
+				charLit('あ', 1)))
 	})
 
 	expectParseError(t, `''`)
 	expectParseError(t, `'AB'`)
-	expectParseError(t, `'A九'`)
+	expectParseError(t, `'Aあ'`)
 }
 
 func TestParseCondExpr(t *testing.T) {

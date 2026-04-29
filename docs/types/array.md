@@ -94,11 +94,10 @@ Converts to string.
 
 **Returns:** `string`
 
-**Description:** Converts array to JSON string representation.
+**Description:** Converts elements to runes and builds a string from them.
 
 ```go
-[1, 2, 3].string()           // "[1,2,3]"
-[1, "two", 3].string()       // "[1,\"two\",3]"
+[72, 101, 108, 108, 111].string()  // "Hello"
 ```
 
 #### `record()`
@@ -106,12 +105,12 @@ Converts to record.
 
 **Arguments:** None
 
-**Returns:** `record | undefined`
+**Returns:** `record`
 
-**Description:** Converts array to record (if it represents JSON object). Returns `undefined` if not valid.
+**Description:** Converts array to record where keys are string indices (`"0"`, `"1"`, ...).
 
 ```go
-[{name: "Alice"}, {name: "Bob"}].record()  // may return undefined if not valid object representation
+[48, 49, -1].record()   // {"0": 48, "1": 49, "2": -1}
 ```
 
 #### `dict()`
@@ -119,12 +118,12 @@ Converts to dict.
 
 **Arguments:** None
 
-**Returns:** `dict | undefined`
+**Returns:** `dict`
 
-**Description:** Converts array to dict (if it represents JSON object). Returns `undefined` if not valid.
+**Description:** Converts array to dict where keys are string indices (`"0"`, `"1"`, ...).
 
 ```go
-// Implementation-dependent
+[48, 49, -1].dict()     // dict({"0": 48, "1": 49, "2": -1})
 ```
 
 ### Transformation and Filtering Functions

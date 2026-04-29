@@ -317,12 +317,12 @@ Records do not expose member functions. Selector access is for fields.
 Declaration and usage:
 
 ```go
-m = dict({a: 1, b: 2})
-m["a"]       // 1
-m.a          // runtime error - dot access not allowed on dict elements
+d = dict({a: 1, b: 2})
+d["a"]       // 1
+d.a          // runtime error - dot access not allowed on dict elements
 
-m.keys()     // array of keys (unsorted)
-m.values()   // array of values
+d.keys()     // array of keys (unsorted)
+d.values()   // array of values
 ```
 
 Record and dict relationship:

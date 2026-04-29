@@ -1,286 +1,99 @@
 # Type Reference
 
-This section describes each builtin type in detail.
+Kavun has a comprehensive type system with scalar types (numbers, strings, runes), collections (arrays, records, dicts), and specialized types (errors, time, ranges, and immutable wrappers).
 
-## undefined
+For detailed documentation on each type including all member functions, arguments, descriptions, and examples, see the individual type guides below.
 
-Represents absence of value.
+## Scalar Types
 
-- Field/index access on `undefined` returns `undefined`.
-- It is falsy.
-- Many conversion builtins return `undefined` on conversion failure unless a fallback is provided.
+### [undefined](types/undefined.md)
+Represents the absence of a value. Returned from failed conversions and missing fields.
 
-```go
-u = undefined
-u.anything        // undefined
-u[0]              // undefined
-```
+### [bool](types/bool.md)
+Boolean values: `true` and `false`. Used in control flow and logical operations.
 
-## bool
+### [int](types/int.md)
+Signed 64-bit integers. Supports decimal, hexadecimal, octal, and binary literals. Includes numeric utilities like `sign()` and `abs()`.
 
-Boolean values are `true` and `false`.
+### [float](types/float.md)
+IEEE 754 double-precision floating-point numbers. Supports scientific notation. Note precision limitations; use `decimal` for exact arithmetic.
 
-- Used directly in control flow (`if`, `for condition`).
-- Participates in coercive equality/comparisons where appropriate.
+### [decimal](types/decimal.md)
+Exact decimal type for precise arithmetic, especially financial calculations. Includes extensive rounding and scaling operations.
 
-```go
-ok = true
-ok && false   // false
-```
+### [rune](types/rune.md)
+Single Unicode code point. Useful for character operations and Unicode handling.
 
-Bool member functions:
+## String Types
 
-- Conversion: `bool()`, `int()`, `string()`
+### [string](types/string.md)
+Immutable UTF-8 encoded text. Operations are split between byte-level (indexing, slicing) and rune-level (text operations). Raw strings supported via `r"..."` syntax.
 
-## int
+### [runes](types/runes.md)
+Unicode strings indexed by rune, not byte. Use `u"..."` syntax for Unicode literals. Ideal for Unicode-first operations where rune indexing is required throughout.
 
-Signed integer type.
+### [bytes](types/bytes.md)
+Mutable byte arrays. Each element is an integer (0-255). Useful for binary data manipulation.
 
-Declaration and usage:
+## Collection Types
 
-```go
-i = 42
-i2 = 0x2a
-```
+### [array](types/array.md)
+Mutable, reference-typed ordered collections of heterogeneous values. Supports filtering, mapping, reduction, and aggregation operations.
 
-Int member functions:
+### [record](types/record.md)
+Primary object type with string keys and heterogeneous values. Supports both dot notation (`r.field`) and index notation (`r["field"]`). No member functions; fields only.
 
-- Conversion: `int()`, `float()`, `decimal()`, `bool()`, `rune()`, `string()`, `time()`
-- Numeric utilities: `sign()`, `abs()`
+### [dict](types/dict.md)
+Dictionary/map type similar to record but only supports index access for elements (`d["key"]`). Selector notation reserved for member functions. Rich query and filtering operations.
 
-## float
+### [range](types/range.md)
+Lazy sequences of integers. Efficiently represents large sequences without memory allocation until materialized.
 
-Floating-point type.
+## Specialized Types
 
-Declaration and usage:
+### [time](types/time.md)
+Date and time values representing instants in time. Parse from ISO 8601 strings or Unix timestamps. Includes extensive date/time field access and timezone handling.
 
-```go
-f = 3.14
-g = 1e3
-h = 1f
-```
+### [error](types/error.md)
+First-class error values carrying payloads. Errors don't interrupt execution; use conditional checks with `is_error()` for handling.
 
-Float member functions:
+### [immutable wrappers](types/immutable-wrappers.md)
+Wrap containers (arrays, bytes, dicts, records, runes) to make them immutable at the container level. Use `immutable()` to create and `copy()` to get mutable copies.
 
-- Conversion: `float()`, `decimal()`, `int()`, `string()`
-- Numeric utilities: `sign()`
+## Type Overview Quick Reference
 
-## decimal
+| Type | Mutability | Indexed By | Primary Use |
+|------|-----------|-----------|------------|
+| int | N/A | N/A | Whole numbers |
+| float | N/A | N/A | Approximate decimals |
+| decimal | N/A | N/A | Exact decimals |
+| string | Immutable | Bytes | Text, UTF-8 encoded |
+| runes | Immutable | Runes | Text, rune indexed |
+| bytes | Mutable | Bytes | Binary data |
+| array | Mutable | Integers | Ordered collections |
+| record | Mutable | Strings | Object representation |
+| dict | Mutable | Strings | Dictionary operations |
+| range | Lazy | Integers | Integer sequences |
+| time | N/A | N/A | Date/time values |
+| error | N/A | N/A | Error handling |
 
-`decimal` is an exact decimal type.
+## Common Operations by Category
 
-Declaration and construction:
+### Conversion Functions
+Most types support conversion functions: `int()`, `float()`, `string()`, `array()`, `bool()`, `decimal()`, `time()`, etc. Each type's documentation details its conversion capabilities.
 
-```go
-a = 1.23d
-b = 123d
+### Text Operations
+- **Byte-level**: `len()`, `first()`, `last()`, indexing, slicing
+- **Rune-level**: `lower()`, `upper()`, `filter()`, `all()`, `any()`, `count()`, `min()`, `max()`
 
-a2 = decimal(123)       // int -> decimal
-b2 = decimal(1.23)      // float -> decimal
-c2 = decimal("1.23")    // string -> decimal
+### Collection Operations
+- **Filtering**: `filter(fn)` (arrays, bytes, dicts, runes)
+- **Mapping**: `map(fn)` (arrays only)
+- **Aggregation**: `sum()`, `avg()`, `min()`, `max()`, `count()`, `reduce()` (arrays, dicts)
+- **Queries**: `is_empty()`, `len()`, `contains()`, `all()`, `any()`
 
-d = (123).decimal()
-e = (1.23).decimal()
-f = "1.23".decimal()
-```
-
-`decimal(x)` conversion rules:
-
-- `decimal()` returns `decimal(0)`.
-- `decimal(decimalValue)` returns the same decimal value.
-- `decimal(x)` attempts runtime conversion via `AsDecimal`.
-- `decimal(x, fallback)` returns `fallback` when conversion fails.
-
-`decimal()` member methods exist on:
-
-- `int.decimal()`
-- `float.decimal()`
-- `string.decimal()`
-- `decimal.decimal()`
-
-Notable edge cases from implementation:
-
-- `float.decimal()` returns decimal `NaN` for `NaN` and infinities.
-- `string.decimal()` returns decimal `NaN` for invalid input.
-- `decimal("bad")` returns `undefined` (or fallback when provided), because conversion failure is tracked separately from the returned decimal value.
-
-Automatic conversions in mixed operations involving `decimal`:
-
-- `decimal op x` converts `x` to decimal (if possible); arithmetic result is decimal.
-- `int op decimal` promotes `int` to decimal; arithmetic result is decimal.
-- `float op decimal` keeps float semantics (decimal converted to float); arithmetic result is float.
-- `string + decimal` is valid only when string is on the left; decimal is converted to string.
-
-Examples:
-
-```go
-decimal(1) + 2         // decimal(3)
-1 + decimal(2)         // decimal(3)
-decimal(1) + 2.0       // decimal(3)
-1.0 + decimal(2)       // 3.0 (float)
-"value=" + decimal(2)  // "value=2"
-```
-
-Decimal member functions:
-
-- Conversion: `decimal()`, `float()`, `int()`, `string()`
-- Classification: `is_zero()`, `is_negative()`, `is_positive()`, `is_nan()`
-- Metadata: `sign()`, `scale()`, `error_details()`
-- Scale/normalization: `rescale(scale)`, `canonical()`, `trunc(scale)`
-- Neighbor/value transforms: `next_up()`, `next_down()`, `abs()`, `negate()`, `sqrt()`
-- Rounding: `round_down(scale)`, `round_up(scale)`, `round_toward_zero(scale)`, `round_away_from_zero(scale)`, `round_half_toward_zero(scale)`, `round_half_away_from_zero(scale)`, `round_bank(scale)`
-
-For decimal methods that accept `scale`, the argument must be an `int` in the implementation-defined decimal scale range; otherwise a runtime error is raised.
-
-## rune
-
-`rune` is a single Unicode code point.
-
-Declaration and usage:
-
-```go
-c = 'A'
-'A' + 1   // 66 (int)
-'9' - '0' // 9 (int)
-```
-
-Rune member functions:
-
-- Conversion: `rune()`, `bool()`, `int()`, `string()`
-
-## string
-
-Strings are immutable UTF-8 encoded values. Use `string` for common text IO and identity-like values: printing/messages, formatting, keys, protocol fields, etc.
-
-Operational model:
-
-- `len()`, `first()`, `last()`, `min()`, `max()`, indexing (`s[i]`), and slicing (`s[a:b]`) operate on bytes.
-- `lower()`, `upper()`, `filter(fn)`, `all(fn)`, `any(fn)`, and `count(fn)` operate on runes.
-
-This split is intentional: it keeps byte-level access efficient when needed, while still providing Unicode-aware text operations.
-
-Declaration and usage:
-
-```go
-s = "héllo"
-s[0]         // first byte as int
-s[0:2]       // byte slice as string
-len(s)       // byte length
-s.lower()    // rune-aware
-```
-
-Raw strings preserve escape sequences literally (useful for regular expressions):
-
-```go
-pattern = r"\d+\w*"  // interpreted literally, no escape processing
-path = r"C:\Users\Bob"  // backslashes are literal
-```
-
-String member functions:
-
-- Conversion: `string()`, `array()`, `bool()`, `bytes()`, `float()`, `int()`, `decimal()`, `time()`, `record()`, `dict()`
-- Transformations and filtering: `lower()`, `upper()`, `trim([cutset])`, `filter(fn)`
-- Predicates and matching: `all(fn)`, `any(fn)`
-- Aggregations: `count(fn)`, `min()`, `max()`
-- Queries and accessors: `is_empty()`, `len()`, `first()`, `last()`, `contains(x)`
-
-## runes
-
-Runes are immutable Unicode strings indexed by rune (not byte). Unicode string literals can be created using the `u"..."` syntax (with full escape sequence processing) or via the `runes()` builtin function.
-
-Use `runes` for Unicode-first tasks where code-point semantics are required across indexing/slicing and related operations.
-
-Declaration and usage:
-
-```go
-s = u"ウクライナ"          // u"..." syntax
-s2 = runes("ウクライナ")   // builtin function
-s[0]                     // rune 'ウ'
-s[0:2]                   // u"ウク"
-len(s)                   // 5 (rune count)
-```
-
-Runes member functions:
-
-- Conversion: `runes()`, `string()`, `array()`, `bool()`, `bytes()`, `float()`, `int()`, `decimal()`, `time()`, `record()`, `dict()`
-- Transformations and filtering: `lower()`, `upper()`, `trim([cutset])`, `sort()`, `filter(fn)`
-- Predicates and matching: `all(fn)`, `any(fn)`
-- Aggregations: `count(fn)`, `min()`, `max()`
-- Queries and accessors: `is_empty()`, `len()`, `first()`, `last()`, `contains(x)`
-
-## bytes
-
-Bytes are mutable byte arrays. Indexing returns an `int` in `0..255`.
-
-Declaration and usage:
-
-```go
-b = bytes("abc")
-b[0]                            // 97
-b[0:2]                          // bytes slice
-bytes("abc") + bytes("def")     // concatenation
-```
-
-Bytes member functions:
-
-- Conversion: `bytes()`, `array()`, `string()`, `record()`, `dict()`
-- Transformations and filtering: `sort()`, `filter(fn)`
-- Predicates and matching: `all(fn)`, `any(fn)`
-- Aggregations: `count(fn)`, `min()`, `max()`
-- Queries and accessors: `is_empty()`, `len()`, `first()`, `last()`, `contains(x)`
-
-## time
-
-Time values are builtin scalar values, usually created via `time(...)`.
-
-```go
-t = time("2024-01-01")
-```
-
-Time member functions:
-
-- Conversion: `time()`, `bool()`, `int()`, `string()`
-- Date and time fields: `year()`, `month()`, `day()`, `hour()`, `minute()`, `second()`, `nanosecond()`
-- Epoch and calendar metadata: `unix()`, `unix_nano()`, `week_day()`, `year_day()`, `month_name()`, `week_day_name()`
-- Timezone and formatting: `utc()`, `local()`, `format_date()`, `format_time()`, `format_datetime()`, `zone_offset()`, `zone_name()`
-
-## error
-
-Error values carry payload and are first-class values.
-
-```go
-e = error("something went wrong")
-e.value()      // "something went wrong"
-is_error(e)    // true
-```
-
-Error member functions:
-
-- Accessors: `value()`
-- Conversion: `string()`
-
-## array
-
-Arrays are mutable and reference-typed (`a = b` makes both variables point at the same array).
-
-Declaration and usage:
-
-```go
-a = [1, 2, 3]
-b = a
-a[0] = 99
-// b[0] == 99
-```
-
-Array member functions:
-
-- Conversion: `array()`, `bytes()`, `string()`, `record()`, `dict()`
-- Transformations and filtering: `sort()`, `filter(fn)`, `map(fn)`
-- Predicates and matching: `all(fn)`, `any(fn)`, `contains(x)`
-- Aggregations: `count(fn)`, `reduce(init, fn)`, `min()`, `max()`, `sum()`, `avg()`
-- Queries and accessors: `is_empty()`, `len()`, `first()`, `last()`
-
-Lambda callbacks for `filter`/`map`/etc. can accept one argument (value) or two (index, value):
+### Lambda Callbacks
+Most collection operations accept callbacks that can take one argument (value) or two (index, value):
 
 ```go
 [1, 2, 3, 4].filter(x => x % 2 == 0)          // [2, 4]
@@ -288,88 +101,30 @@ Lambda callbacks for `filter`/`map`/etc. can accept one argument (value) or two 
 [1, 2, 3].reduce(0, (acc, v) => acc + v)      // 6
 ```
 
-## record
+## Reference Types
 
-Records are the primary object type. Keys are strings. Both dot notation and index notation work.
+These types maintain reference semantics—assignments create references, not copies:
 
-Declaration and usage:
+- **array**
+- **bytes** 
+- **record**
+- **dict**
+- **immutable containers**
 
-```go
-r = {name: "Alice", age: 30}
-r.name       // "Alice"
-r["age"]     // 30
-r.missing    // undefined
+Use `copy()` to create independent copies of reference types.
 
-r.city = "Berlin"   // add new key
-delete(r, "age")    // remove key
+## Value Types
 
-"name" in r  // true - key existence check
-```
+These types are immutable and copied by value:
 
-Records are reference-typed.
-
-Records do not expose member functions. Selector access is for fields.
-
-## dict
-
-`dict` is similar to a record but only supports index access for elements; selector access is reserved for dict member functions.
-
-Declaration and usage:
-
-```go
-d = dict({a: 1, b: 2})
-d["a"]       // 1
-d.a          // runtime error - dot access not allowed on dict elements
-
-d.keys()     // array of keys (unsorted)
-d.values()   // array of values
-```
-
-Record and dict relationship:
-
-Records and dicts represent the same logical structure: a string-keyed dictionary with values of any type. Converting a record with `dict(record)` does not copy data; the resulting dict points to the same underlying structure.
-
-Access rules:
-
-- Record: selector and index access read/write elements (`r.name`, `r["name"]`); no member functions.
-- Dict: index access reads/writes elements (`m["name"]`); selector access is for dict member functions (for example `m.len()`, `m.filter(...)`, `m.keys()`).
-
-Dict member functions:
-
-- Conversion: `record()`, `dict()`
-- Queries and accessors: `is_empty()`, `len()`, `keys()`, `values()`, `contains(x)`
-- Filtering and predicates: `filter(fn)`, `count(fn)`, `all(fn)`, `any(fn)`
-
-## range
-
-Ranges are lazy sequences.
-
-Declaration and usage:
-
-```go
-range(0, 5).array()       // [0, 1, 2, 3, 4]
-range(5, 0, 1).array()    // [5, 4, 3, 2, 1]
-range(0, 10, 2).contains(4)  // true
-
-for v in range(1, 4) { }     // v = 1, 2, 3
-```
-
-Range member functions:
-
-- Conversion: `array()`, `bytes()`, `string()`, `record()`, `dict()`
-- Queries and accessors: `is_empty()`, `len()`, `contains(x)`
-
-## immutable wrappers
-
-`immutable(x)` makes a container immutable at container level. Mutating an immutable container raises a runtime error.
-
-`copy()` always returns a mutable deep copy, even from an immutable value:
-
-```go
-a = immutable([1, 2, 3])
-a[0] = 9       // runtime error
-type_name(a)   // "immutable-array"
-
-b = copy(a)   // mutable copy
-b[0] = 9       // ok
-```
+- **int**
+- **float**
+- **decimal**
+- **rune**
+- **string**
+- **runes**
+- **time**
+- **error**
+- **range** (lazy)
+- **bool**
+- **undefined**

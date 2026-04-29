@@ -1,0 +1,415 @@
+# dict
+
+Dictionary/map type with string keys and values of any type.
+
+## Overview
+
+The `dict` type is similar to a `record` but only supports index access for elements; selector access is reserved for dict member functions. Use `dict` when you need to perform operations on the dictionary itself (filtering, querying keys/values, etc.).
+
+**Key Characteristic:** Dicts use index notation (`d["key"]`) for element access and selector notation (`d.method()`) for operations.
+
+## Declaration and Usage
+
+### Construction
+
+```go
+d = dict({a: 1, b: 2})
+d2 = dict({})              // empty dict
+```
+
+### Index Access for Elements
+
+All element access uses index notation:
+
+```go
+d = dict({a: 1, b: 2})
+d["a"]       // 1
+d["b"]       // 2
+d["missing"] // undefined (non-existent keys)
+```
+
+### Adding and Modifying Elements
+
+```go
+d = dict({a: 1})
+d["b"] = 2           // Add new element
+d["a"] = 10          // Modify existing element
+```
+
+### Selector Access NOT Allowed for Elements
+
+Attempting to use selector notation for element access raises an error:
+
+```go
+d = dict({a: 1})
+d.a          // runtime error - dot access not allowed for elements
+```
+
+### Selector Access for Member Functions
+
+Selector notation is used for calling member functions:
+
+```go
+d = dict({a: 1, b: 2})
+d.keys()     // array of keys
+d.len()      // number of elements
+```
+
+### Reference Semantics
+
+```go
+d1 = dict({a: 1})
+d2 = d1
+
+d1["a"] = 10
+println(d2["a"])   // 10 (both point to same dict)
+
+d3 = copy(d1)      // Independent copy
+d1["a"] = 1
+println(d3["a"])   // 10 (d3 is unchanged)
+```
+
+## Record and Dict Relationship
+
+Records and dicts represent the same underlying structure and can reference the same data:
+
+```go
+r = {a: 1, b: 2}
+d = dict(r)
+
+// They point to the same data
+r.a = 10
+println(d["a"])   // 10 (both reflect the change)
+```
+
+## Member Functions
+
+### Conversion Functions
+
+#### `record()`
+Converts to record.
+
+**Arguments:** None
+
+**Returns:** `record`
+
+**Description:** Returns the dict as a record, allowing field access via dot notation.
+
+```go
+d = dict({name: "Alice"})
+r = d.record()
+println(r.name)   // "Alice"
+```
+
+#### `dict()`
+Converts to dict.
+
+**Arguments:** None
+
+**Returns:** `dict`
+
+**Description:** Returns the same dict value.
+
+```go
+dict({a: 1}).dict()    // dict({a: 1})
+```
+
+### Query and Accessor Functions
+
+#### `is_empty()`
+Checks if dict is empty.
+
+**Arguments:** None
+
+**Returns:** `bool`
+
+**Description:** Returns `true` if the dict has no keys.
+
+```go
+dict({}).is_empty()        // true
+dict({a: 1}).is_empty()    // false
+```
+
+#### `len()`
+Gets number of keys.
+
+**Arguments:** None
+
+**Returns:** `int`
+
+**Description:** Returns the number of key-value pairs.
+
+```go
+dict({a: 1, b: 2, c: 3}).len()    // 3
+dict({}).len()                     // 0
+```
+
+#### `keys()`
+Gets array of keys.
+
+**Arguments:** None
+
+**Returns:** `array`
+
+**Description:** Returns an array of all keys (unsorted).
+
+```go
+d = dict({a: 1, b: 2})
+d.keys()           // array with "a" and "b" (order not guaranteed)
+```
+
+#### `values()`
+Gets array of values.
+
+**Arguments:** None
+
+**Returns:** `array`
+
+**Description:** Returns an array of all values (order matches `keys()` if called immediately after).
+
+```go
+d = dict({a: 1, b: 2})
+d.values()         // array with 1 and 2
+```
+
+#### `contains(x)`
+Checks if dict contains key.
+
+**Arguments:**
+- `x` (string): Key to search for
+
+**Returns:** `bool`
+
+**Description:** Returns `true` if the key exists.
+
+```go
+d = dict({a: 1, b: 2})
+d.contains("a")    // true
+d.contains("c")    // false
+```
+
+### Filtering and Predicate Functions
+
+#### `filter(fn)`
+Filters by predicate.
+
+**Arguments:**
+- `fn` (function): Predicate function. Accepts two arguments (key, value).
+
+**Returns:** `dict`
+
+**Description:** Returns a new dict with only key-value pairs where the predicate returns `true`.
+
+```go
+d = dict({a: 1, b: 2, c: 3, d: 4})
+
+// Filter by value > 2
+filtered = d.filter((k, v) => v > 2)  // dict({c: 3, d: 4})
+
+// Filter by key name
+filtered = d.filter((k, v) => k != "a")  // dict({b: 2, c: 3, d: 4})
+```
+
+#### `count(fn)`
+Counts pairs matching predicate.
+
+**Arguments:**
+- `fn` (function): Predicate function. Accepts two arguments (key, value).
+
+**Returns:** `int`
+
+**Description:** Returns the number of key-value pairs where the predicate returns `true`.
+
+```go
+d = dict({a: 1, b: 2, c: 3})
+d.count((k, v) => v > 1)    // 2 (b: 2, c: 3)
+```
+
+#### `all(fn)`
+Tests if all pairs match predicate.
+
+**Arguments:**
+- `fn` (function): Predicate function. Accepts two arguments (key, value).
+
+**Returns:** `bool`
+
+**Description:** Returns `true` if all key-value pairs satisfy the predicate.
+
+```go
+d = dict({a: 2, b: 4, c: 6})
+d.all((k, v) => v % 2 == 0)    // true (all even)
+
+d = dict({a: 1, b: 2, c: 3})
+d.all((k, v) => v > 2)         // false
+```
+
+#### `any(fn)`
+Tests if any pair matches predicate.
+
+**Arguments:**
+- `fn` (function): Predicate function. Accepts two arguments (key, value).
+
+**Returns:** `bool`
+
+**Description:** Returns `true` if any key-value pair satisfies the predicate.
+
+```go
+d = dict({a: 1, b: 2, c: 3})
+d.any((k, v) => v > 2)      // true (c: 3)
+
+d = dict({a: 1, b: 1})
+d.any((k, v) => v > 2)      // false
+```
+
+## Examples
+
+### Working with Configuration
+
+```go
+// Store and query configuration
+config = dict({
+    debug: false,
+    timeout: 30,
+    port: 8080,
+    host: "localhost"
+})
+
+println("Server running on " + config["host"] + ":" + config["port"].string())
+
+// Check if keys exist
+if config.contains("ssl_cert") {
+    println("SSL configured")
+} else {
+    println("No SSL configuration")
+}
+```
+
+### Filtering Data
+
+```go
+// Filter dictionary by criteria
+users = dict({
+    alice: {age: 25, active: true},
+    bob: {age: 17, active: false},
+    carol: {age: 30, active: true}
+})
+
+// Adults only
+adults = users.filter((name, user) => user.age >= 18)
+println("Adults: " + adults.len().string())
+
+// Active users
+active = users.filter((name, user) => user.active)
+println("Active: " + active.len().string())
+```
+
+### Aggregation
+
+```go
+// Calculate statistics
+scores = dict({
+    alice: 85,
+    bob: 92,
+    carol: 78,
+    dave: 95
+})
+
+// Count high scorers
+high_scores = scores.count((name, score) => score >= 90)
+println("High scores (>= 90): " + high_scores.string())
+
+// Check if all passed (>= 70)
+all_passed = scores.all((name, score) => score >= 70)
+println("All passed: " + all_passed.string())
+```
+
+### Key-Value Iteration
+
+```go
+// Iterate through dict
+cache = dict({user_1: "Alice", user_2: "Bob", user_3: "Carol"})
+
+for key in cache.keys() {
+    value = cache[key]
+    println(key + " => " + value)
+}
+```
+
+### Dynamic Key Access
+
+```go
+// Access with dynamic keys
+data = dict({
+    field_a: 10,
+    field_b: 20,
+    field_c: 30
+})
+
+// Iterate and process
+for key in data.keys() {
+    value = data[key]
+    doubled = value * 2
+    println(key + " (doubled): " + doubled.string())
+}
+```
+
+### Querying and Filtering
+
+```go
+// Find and filter data
+inventory = dict({
+    widget: {stock: 50, price: 10.0},
+    gadget: {stock: 25, price: 25.0},
+    doohickey: {stock: 0, price: 5.0}
+})
+
+// Items in stock
+in_stock = inventory.filter((item, info) => info.stock > 0)
+println("Items in stock: " + in_stock.len().string())
+
+// Expensive items
+expensive = inventory.filter((item, info) => info.price >= 20.0)
+println("Expensive items: " + expensive.len().string())
+```
+
+### Combined Record and Dict Operations
+
+```go
+// Use record for data, dict for queries
+employee = {
+    name: "Alice",
+    department: "Engineering",
+    salary: 100000
+}
+
+// Convert to dict for operations
+emp_dict = dict(employee)
+
+// Query
+if emp_dict.contains("salary") {
+    salary = emp_dict["salary"]
+    println("Salary: $" + salary.string())
+}
+
+// Back to record for field access
+emp_dict.record().name  // "Alice"
+```
+
+## Comparison with Record
+
+| Feature | Dict | Record |
+|---------|------|--------|
+| Element Access | Index only (`d["key"]`) | Index and dot (`r["key"]`, `r.key`) |
+| Member Functions | Many available | None |
+| Iteration | Use `.keys()` and `.values()` | Must convert to dict |
+| Use Case | Maps, queries, operations | Object/data representation |
+
+Choose `dict` when you need to manipulate/query the collection, or `record` for simple data representation.
+
+## Notes
+
+- Dict keys are always strings
+- Dict values can be any type (including nested dicts/records)
+- Dicts are reference-typed (use `copy()` for independent copies)
+- All operations on elements must use index notation, never dot notation
+- Member functions use dot notation exclusively

@@ -1,0 +1,517 @@
+# string
+
+Immutable UTF-8 encoded text values.
+
+## Overview
+
+Strings are immutable sequences of UTF-8 encoded bytes. Use `string` for general text handling, messages, formatting, keys, protocol fields, and identity-like values. Strings are reference-typed in terms of performance optimizations but remain logically immutable.
+
+**Important:** This type splits operations between byte-level and rune-level:
+- `len()`, `first()`, `last()`, `min()`, `max()`, indexing (`s[i]`), and slicing (`s[a:b]`) operate on **bytes**
+- `lower()`, `upper()`, `filter(fn)`, `all(fn)`, `any(fn)`, and `count(fn)` operate on **runes** (Unicode characters)
+
+This design keeps byte-level access efficient while providing Unicode-aware operations.
+
+## Declaration and Usage
+
+### String Literals
+
+```go
+s = "hello"
+message = "Hello, World!"
+empty = ""
+```
+
+### Escape Sequences
+
+```go
+newline = "line1\nline2"
+tab = "col1\tcol2"
+quote = "He said \"hi\""
+backslash = "C:\\Users\\Bob"
+```
+
+### Unicode in Strings
+
+```go
+greeting = "Bonjour"          // French
+wave = "👋"                    // Emoji
+chinese = "你好"              // Chinese
+```
+
+### Raw Strings
+
+Raw strings preserve escape sequences literally, which is useful for regular expressions and file paths:
+
+```go
+pattern = r"\d+\w*"           // raw: literally \d+\w*
+path = r"C:\Users\Bob"        // raw: backslashes are literal, no escape processing
+regex = r"[a-zA-Z0-9]+"       // raw: patterns stay readable
+```
+
+## String Operations
+
+### Concatenation
+
+```go
+greeting = "Hello, " + "World"   // "Hello, World"
+```
+
+### Comparison
+
+```go
+"abc" < "abd"      // true (lexicographic)
+"abc" == "abc"     // true
+"ABC" != "abc"     // true (case-sensitive)
+```
+
+### Indexing and Slicing (Byte-level)
+
+All indexing and slicing operates on **bytes**:
+
+```go
+s = "héllo"        // é is 2 bytes in UTF-8
+s[0]               // 104 (first byte of 'h')
+s[0:2]             // "hé" (first 2 bytes)
+len(s)             // 6 (byte length, not character count)
+```
+
+## Member Functions
+
+### Conversion Functions
+
+#### `string()`
+Converts to string.
+
+**Arguments:** None
+
+**Returns:** `string`
+
+**Description:** Returns the same string.
+
+```go
+"hello".string()   // "hello"
+```
+
+#### `array()`
+Converts to array of code points.
+
+**Arguments:** None
+
+**Returns:** `array`
+
+**Description:** Returns an array where each element is a rune (Unicode character) converted to int.
+
+```go
+"ABC".array()      // [65, 66, 67]
+"hi".array()       // [104, 105]
+```
+
+#### `bool()`
+Converts to boolean.
+
+**Arguments:** None
+
+**Returns:** `bool`
+
+**Description:** Returns `false` for empty string, `true` otherwise.
+
+```go
+"".bool()          // false
+"hello".bool()     // true
+" ".bool()         // true (space is not empty)
+```
+
+#### `bytes()`
+Converts to bytes.
+
+**Arguments:** None
+
+**Returns:** `bytes`
+
+**Description:** Returns a mutable bytes array containing the UTF-8 encoding.
+
+```go
+"ABC".bytes()      // bytes with [65, 66, 67]
+"".bytes()         // empty bytes
+```
+
+#### `float()`
+Converts to float.
+
+**Arguments:** None
+
+**Returns:** `float | undefined`
+
+**Description:** Parses the string as a floating-point number. Returns `undefined` if parsing fails.
+
+```go
+"3.14".float()     // 3.14
+"1e3".float()      // 1000.0
+"invalid".float()  // undefined
+```
+
+#### `int()`
+Converts to integer.
+
+**Arguments:** None
+
+**Returns:** `int | undefined`
+
+**Description:** Parses the string as an integer. Returns `undefined` if parsing fails.
+
+```go
+"42".int()         // 42
+"-100".int()       // -100
+"invalid".int()    // undefined
+```
+
+#### `decimal()`
+Converts to decimal.
+
+**Arguments:** None
+
+**Returns:** `decimal | undefined`
+
+**Description:** Parses the string as a decimal number. Returns `undefined` if parsing fails.
+
+```go
+"1.23".decimal()       // decimal(1.23)
+"1e2".decimal()        // decimal(100)
+"invalid".decimal()    // undefined
+```
+
+#### `time()`
+Converts to time.
+
+**Arguments:** None
+
+**Returns:** `time | undefined`
+
+**Description:** Parses the string as an ISO 8601 date/time. Returns `undefined` if parsing fails.
+
+```go
+"2024-01-01".time()             // time at midnight Jan 1, 2024
+"2024-01-01T12:30:00Z".time()   // specific time in UTC
+"invalid".time()                // undefined
+```
+
+#### `record()`
+Converts to record.
+
+**Arguments:** None
+
+**Returns:** `record | undefined`
+
+**Description:** Parses the string as JSON and returns a record. Returns `undefined` if JSON is invalid.
+
+```go
+`{"name":"Alice"}`.record()    // {name: "Alice"}
+"invalid json".record()        // undefined
+```
+
+#### `dict()`
+Converts to dict.
+
+**Arguments:** None
+
+**Returns:** `dict | undefined`
+
+**Description:** Parses the string as JSON and returns a dict. Returns `undefined` if JSON is invalid.
+
+```go
+`{"key":"value"}`.dict()       // dict with ["key"] = "value"
+"invalid json".dict()          // undefined
+```
+
+### Transformation and Filtering Functions
+
+#### `lower()`
+Converts to lowercase.
+
+**Arguments:** None
+
+**Returns:** `string`
+
+**Description:** Returns the string with all letters converted to lowercase. Operates on **runes** (Unicode-aware).
+
+```go
+"HELLO".lower()        // "hello"
+"HeLLo WoRLd".lower()  // "hello world"
+"Café".lower()         // "café"
+```
+
+#### `upper()`
+Converts to uppercase.
+
+**Arguments:** None
+
+**Returns:** `string`
+
+**Description:** Returns the string with all letters converted to uppercase. Operates on **runes** (Unicode-aware).
+
+```go
+"hello".upper()        // "HELLO"
+"HeLLo WoRLd".upper()  // "HELLO WORLD"
+"café".upper()         // "CAFÉ"
+```
+
+#### `trim([cutset])`
+Removes leading and trailing characters.
+
+**Arguments:**
+- `cutset` (string, optional): Characters to remove. Default is whitespace.
+
+**Returns:** `string`
+
+**Description:** Returns the string with specified characters removed from both ends.
+
+```go
+"  hello  ".trim()              // "hello"
+"xxhelloxx".trim("x")           // "hello"
+"\n\t  text  \n".trim()         // "text"
+"---text---".trim("-")          // "text"
+```
+
+#### `filter(fn)`
+Filters by predicate on runes.
+
+**Arguments:**
+- `fn` (function): Predicate that takes a rune (as int) and returns bool
+
+**Returns:** `string`
+
+**Description:** Returns a string with only runes where the predicate returns `true`. Operates on **runes**.
+
+```go
+"hello123".filter(r => r >= 'a'.int() && r <= 'z'.int())  // "hello"
+"a1b2c3".filter(r => r >= '0'.int() && r <= '9'.int())    // "123"
+```
+
+### Predicate Functions
+
+#### `all(fn)`
+Tests if all runes match predicate.
+
+**Arguments:**
+- `fn` (function): Predicate that takes a rune (as int) and returns bool
+
+**Returns:** `bool`
+
+**Description:** Returns `true` if all runes satisfy the predicate. Operates on **runes**.
+
+```go
+"abc".all(r => r >= 'a'.int() && r <= 'z'.int())   // true
+"abc123".all(r => r >= 'a'.int() && r <= 'z'.int()) // false
+```
+
+#### `any(fn)`
+Tests if any rune matches predicate.
+
+**Arguments:**
+- `fn` (function): Predicate that takes a rune (as int) and returns bool
+
+**Returns:** `bool`
+
+**Description:** Returns `true` if any rune satisfies the predicate. Operates on **runes**.
+
+```go
+"abc".any(r => r >= '0'.int() && r <= '9'.int())      // false
+"abc123".any(r => r >= '0'.int() && r <= '9'.int())   // true
+```
+
+### Aggregation Functions
+
+#### `count(fn)`
+Counts runes matching predicate.
+
+**Arguments:**
+- `fn` (function): Predicate that takes a rune (as int) and returns bool
+
+**Returns:** `int`
+
+**Description:** Returns the number of runes where the predicate returns `true`. Operates on **runes**.
+
+```go
+"hello world".count(r => r == ' '.int())    // 1
+"abc123xyz".count(r => r >= '0'.int() && r <= '9'.int())  // 3
+```
+
+#### `min()`
+Finds minimum rune.
+
+**Arguments:** None
+
+**Returns:** `rune | undefined`
+
+**Description:** Returns the rune with the smallest code point. Returns `undefined` for empty string. Operates on **runes**.
+
+```go
+"hello".min()    // 'e' (code point 101, smallest)
+"".min()         // undefined
+```
+
+#### `max()`
+Finds maximum rune.
+
+**Arguments:** None
+
+**Returns:** `rune | undefined`
+
+**Description:** Returns the rune with the largest code point. Returns `undefined` for empty string. Operates on **runes**.
+
+```go
+"hello".max()    // 'o' (code point 111, largest)
+"".max()         // undefined
+```
+
+### Query and Accessor Functions
+
+#### `is_empty()`
+Checks if string is empty.
+
+**Arguments:** None
+
+**Returns:** `bool`
+
+**Description:** Returns `true` if the string has zero bytes.
+
+```go
+"".is_empty()      // true
+"hello".is_empty() // false
+" ".is_empty()     // false
+```
+
+#### `len()`
+Gets byte length.
+
+**Arguments:** None
+
+**Returns:** `int`
+
+**Description:** Returns the number of bytes. Note: For Unicode strings, this may be different from the rune count.
+
+```go
+"hello".len()      // 5
+"hi".len()         // 2
+"café".len()       // 5 (é is 2 bytes in UTF-8)
+```
+
+#### `first()`
+Gets first byte.
+
+**Arguments:** None
+
+**Returns:** `int | undefined`
+
+**Description:** Returns the first byte as an integer. Returns `undefined` for empty string. (Byte-level operation)
+
+```go
+"hello".first()    // 104 (byte value of 'h')
+"".first()         // undefined
+```
+
+#### `last()`
+Gets last byte.
+
+**Arguments:** None
+
+**Returns:** `int | undefined`
+
+**Description:** Returns the last byte as an integer. Returns `undefined` for empty string. (Byte-level operation)
+
+```go
+"hello".last()     // 111 (byte value of 'o')
+"".last()          // undefined
+```
+
+#### `contains(x)`
+Checks if string contains substring.
+
+**Arguments:**
+- `x` (string): Substring to search for
+
+**Returns:** `bool`
+
+**Description:** Returns `true` if the substring is found.
+
+```go
+"hello world".contains("world")    // true
+"hello world".contains("xyz")      // false
+"hello".contains("")               // true (empty string in any string)
+```
+
+## Examples
+
+### Text Processing
+
+```go
+// Clean and validate input
+function process_name(name) {
+    trimmed = name.trim()
+    
+    if trimmed.is_empty() {
+        return error("Name cannot be empty")
+    }
+    
+    if trimmed.len() > 100 {
+        return error("Name too long")
+    }
+    
+    return trimmed.lower()
+}
+
+result = process_name("  JOHN DOE  ")  // "john doe"
+```
+
+### String Parsing
+
+```go
+// Parse CSV-like data
+data = "name,age,city"
+fields = data       // Would need split function for real parsing
+
+// Extract and convert
+name_part = "42"
+age = name_part.int()         // 42
+price = "19.99".decimal()     // decimal(19.99)
+```
+
+### Character Filtering
+
+```go
+// Remove non-alphabetic characters
+function alpha_only(s) {
+    return s.filter(r => 
+        (r >= 'a'.int() && r <= 'z'.int()) ||
+        (r >= 'A'.int() && r <= 'Z'.int())
+    )
+}
+
+clean = alpha_only("abc123def")  // "abcdef"
+```
+
+### Validation
+
+```go
+// Check if string contains only digits
+function is_numeric(s) {
+    if s.is_empty() {
+        return false
+    }
+    return s.all(r => r >= '0'.int() && r <= '9'.int())
+}
+
+is_numeric("12345")   // true
+is_numeric("123a5")   // false
+```
+
+## Byte vs. Rune Operations
+
+- **Byte operations** (`len`, `first`, `last`, indexing, slicing): Work with raw bytes
+- **Rune operations** (`lower`, `upper`, `filter`, `all`, `any`, `count`, `min`, `max`): Aware of Unicode and work with code points
+
+This design ensures:
+- Efficient byte-level access when needed
+- Proper Unicode handling for text operations
+- Predictable behavior for both use cases

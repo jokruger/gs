@@ -200,8 +200,6 @@ enumerable = array, record, dict
 
 ===
 
-Not in
-
 Negative Indexing: Accesses elements from the end of the sequence. The last element is -1, the second to last is -2, etc..
 
 Error Handling: Attempting to access an index that does not exist (e.g., my_list[10] when the list has only 5 items) will raise an IndexError (arrays) or KeyError (dicts).

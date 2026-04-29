@@ -415,6 +415,7 @@ func TestString(t *testing.T) {
 	expectRun(t, `out = "Hello".contains('e')`, nil, true)
 	expectRun(t, `out = "z" in "Hello"`, nil, false)
 	expectRun(t, `out = "Hello".contains("z")`, nil, false)
+	expectRun(t, `out = "z" not in "Hello"`, nil, true)
 
 	// index operator
 	str := "abcdef"
@@ -570,6 +571,7 @@ func TestRunes(t *testing.T) {
 	expectRun(t, `out = runes("Hello").contains('e')`, nil, true)
 	expectRun(t, `out = runes("z") in u"Hello"`, nil, false)
 	expectRun(t, `out = runes("Hello").contains(u"z")`, nil, false)
+	expectRun(t, `out = runes("z") not in u"Hello"`, nil, true)
 
 	expectRun(t, `out = runes("").is_empty()`, nil, true)
 	expectRun(t, `out = runes("abcd").is_empty()`, nil, false)
@@ -791,6 +793,7 @@ func TestArray(t *testing.T) {
 	expectRun(t, `out = [1, 2, 3].contains([])`, nil, true)
 	expectRun(t, `out = [1, 3] in [1, 2, 3]`, nil, false)
 	expectRun(t, `out = [1, 2, 3].contains([1, 3])`, nil, false)
+	expectRun(t, `out = [1, 3] not in [1, 2, 3]`, nil, true)
 }
 
 func TestRecord(t *testing.T) {
@@ -845,6 +848,7 @@ out = m["foo"](2) + m["foo"](3)
 	expectRun(t, `out = {a: 1, b: 2}.q`, nil, core.Undefined)
 	expectRun(t, `out = "a" in {a: 1, b: 2}`, nil, true)
 	expectRun(t, `out = "q" in {a: 1, b: 2}`, nil, false)
+	expectRun(t, `out = "q" not in {a: 1, b: 2}`, nil, true)
 	expectRun(t, `t := {a: 1, b: 2}; t["a"] = 3; out = t.a`, nil, 3)
 	expectRun(t, `t := {a: 1, b: 2}; t.a = 3; out = t["a"]`, nil, 3)
 }
@@ -864,6 +868,7 @@ func TestDict(t *testing.T) {
 	expectRun(t, `out = dict({a: 1, b: 2})["q"]`, nil, core.Undefined)
 	expectRun(t, `out = "a" in dict({a: 1, b: 2})`, nil, true)
 	expectRun(t, `out = "q" in dict({a: 1, b: 2})`, nil, false)
+	expectRun(t, `out = "q" not in dict({a: 1, b: 2})`, nil, true)
 	expectRun(t, `t := dict({a: 1, b: 2}); t["a"] = 3; out = t["a"]`, nil, 3)
 	expectError(t, `dict({a: 1, b: 2}).q`, nil, "Runtime Error: invalid selector: type dict has no property q\n\tat test:1:20")
 
@@ -896,6 +901,7 @@ func TestDict(t *testing.T) {
 	expectRun(t, `out = dict({a: 1, b: 2, c: 3}).contains("a")`, nil, true)
 	expectRun(t, `out = "q" in dict({a: 1, b: 2, c: 3})`, nil, false)
 	expectRun(t, `out = dict({a: 1, b: 2, c: 3}).contains("q")`, nil, false)
+	expectRun(t, `out = "q" not in dict({a: 1, b: 2, c: 3})`, nil, true)
 }
 
 func TestTime(t *testing.T) {
@@ -968,6 +974,7 @@ func TestBytes(t *testing.T) {
 	expectRun(t, `out = bytes("abc").contains(bytes("bc"))`, nil, true)
 	expectRun(t, `out = bytes("bd") in bytes("abc")`, nil, false)
 	expectRun(t, `out = bytes("abc").contains(bytes("bd"))`, nil, false)
+	expectRun(t, `out = bytes("bd") not in bytes("abc")`, nil, true)
 	expectRun(t, `out = bytes("hello").sort()`, nil, []byte("ehllo"))
 	expectRun(t, `out = bytes("hello").filter(x => x > 'e')`, nil, []byte("hllo"))
 	expectRun(t, `out = bytes("hello").filter((i, x) => i > 2)`, nil, []byte("lo"))
@@ -1230,6 +1237,7 @@ func TestRange(t *testing.T) {
 	expectRun(t, `r := range(10, 0, 2); out = r.contains(10)`, nil, true)
 	expectRun(t, `r := range(10, 0, 2); out = r.contains(9)`, nil, false)
 	expectRun(t, `r := range(10, 0, 2); out = r.contains(8)`, nil, true)
+	expectRun(t, `out = 11 not in range(0, 10, 1)`, nil, true)
 
 	expectRun(t, `
 out = 0

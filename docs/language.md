@@ -165,9 +165,10 @@ Kavun has arithmetic, comparison, logical, bitwise, membership, and conditional 
 
 ```go
 x = 10 > 5 ? "yes" : "no"
-found = "el" in "hello"     // true - substring check
-found2 = 2 in [1, 2, 3]     // true - element check
-has_key = "a" in {a: 1}     // true - key check
+found = "el" in "hello"      // true - substring check
+found2 = 2 in [1, 2, 3]      // true - element check
+has_key = "a" in {a: 1}      // true - key check
+missing = "z" not in "hello" // true - negated membership check
 ```
 
 ### Operator precedence
@@ -178,7 +179,7 @@ From lowest to highest:
 |---|---|
 | 1 | `\|\|` |
 | 2 | `&&` |
-| 3 | `==` `!=` `<` `<=` `>` `>=` `in` |
+| 3 | `==` `!=` `<` `<=` `>` `>=` `in` `not in` |
 | 4 | `+` `-` `\|` `^` |
 | 5 | `*` `/` `%` `<<` `>>` `&` `&^` |
 
@@ -190,7 +191,7 @@ Unary operators: `-`, `+`, `!`, `^` (bitwise complement). Ternary `?:` binds loo
 |---|---|
 | Arithmetic and bitwise | `+` `-` `*` `/` `%` `&` `\|` `^` `<<` `>>` `&^` |
 | Comparison and logical | `==` `!=` `<` `<=` `>` `>=` `&&` `\|\|` `!` |
-| Membership and conditional | `in` `?:` |
+| Membership and conditional | `in` `not in` `?:` |
 | Assignment and declaration | `=` `:=` |
 | Compound assignment | `+=` `-=` `*=` `/=` `%=` `&=` `\|=` `^=` `<<=` `>>=` `&^=` |
 | Increment and decrement | `++` `--` |

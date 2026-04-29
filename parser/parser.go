@@ -186,6 +186,31 @@ func (p *Parser) parseBinaryExpr(prec1 int) Expr {
 		if p.forInLHS && p.forInNest == 0 && op == token.In {
 			return x
 		}
+		if op == token.NotKw && p.peekToken() == token.In {
+			if p.forInLHS && p.forInNest == 0 {
+				return x
+			}
+
+			const notInPrec = 3 // same precedence level as `in`
+			if notInPrec < prec1 {
+				return x
+			}
+
+			notPos := p.expect(token.NotKw)
+			inPos := p.expect(token.In)
+			y := p.parseBinaryExpr(notInPrec + 1)
+			x = &UnaryExpr{
+				Token:    token.Not,
+				TokenPos: notPos,
+				Expr: &BinaryExpr{
+					LHS:      x,
+					RHS:      y,
+					Token:    token.In,
+					TokenPos: inPos,
+				},
+			}
+			continue
+		}
 		if prec < prec1 {
 			return x
 		}
@@ -1406,6 +1431,13 @@ func (p *Parser) next() {
 		}
 	}
 	p.token, p.tokenLit, p.pos = p.scanner.Scan()
+}
+
+func (p *Parser) peekToken() token.Token {
+	bkp := p.scanner.Backup()
+	tok, _, _ := p.scanner.Scan()
+	p.scanner.Restore(bkp)
+	return tok
 }
 
 func (p *Parser) printTrace(a ...any) {

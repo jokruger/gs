@@ -89,10 +89,11 @@ const (
 	True        = Token(165)
 	False       = Token(166)
 	In          = Token(167)
-	Undefined   = Token(168)
-	Import      = Token(169)
-	Var         = Token(170)
-	// 171..254 are reserved for future keywords
+	NotKw       = Token(168)
+	Undefined   = Token(169)
+	Import      = Token(170)
+	Var         = Token(171)
+	// 172..254 are reserved for future keywords
 	_keywordEnd = Token(255) // Keywords block end
 )
 
@@ -176,6 +177,7 @@ var tokens = [...]string{
 	True:        "true",
 	False:       "false",
 	In:          "in",
+	NotKw:       "not",
 	Undefined:   "undefined",
 	Import:      "import",
 	Var:         "var",

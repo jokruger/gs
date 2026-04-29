@@ -323,6 +323,21 @@ func TestParseBoolean(t *testing.T) {
 					token.Not,
 					p(1, 1))))
 	})
+
+	expectParse(t, `"z" not in "Hello"`, func(p pfn) []Stmt {
+		return stmts(
+			exprStmt(
+				unaryExpr(
+					binaryExpr(
+						stringLit("z", p(1, 1)),
+						stringLit("Hello", p(1, 12)),
+						token.In,
+						p(1, 9),
+					),
+					token.Not,
+					p(1, 5),
+				)))
+	})
 }
 
 func TestParseCall(t *testing.T) {

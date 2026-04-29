@@ -431,6 +431,7 @@ func TestString(t *testing.T) {
 
 	expectError(t, fmt.Sprintf("%s[%d]", strStr, -strLen-1), nil, "index out of bounds")
 	expectError(t, fmt.Sprintf("%s[%d]", strStr, strLen), nil, "index out of bounds")
+	expectRun(t, fmt.Sprintf("out = %s[%d]", strStr, -2), nil, str[strLen-2])
 
 	// slice operator
 	for low := 0; low <= strLen; low++ {
@@ -452,7 +453,9 @@ func TestString(t *testing.T) {
 	expectRun(t, fmt.Sprintf("out = %s[:%d]", strStr, -1), nil, str[:strLen-1])
 	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", strStr, 0, -1), nil, str[:strLen-1])
 	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", strStr, -3, -1), nil, str[strLen-3:strLen-1])
+	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", strStr, 1, -1), nil, str[1:strLen-1])
 	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", strStr, 2, 1), nil, "")
+	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", strStr, 10, 20), nil, "")
 	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", strStr, -100, 100), nil, str)
 	expectRun(t, fmt.Sprintf("out = %s[1:5:2]", strStr), nil, "bd")
 	expectRun(t, fmt.Sprintf("out = %s[1:5:-1]", strStr), nil, "")
@@ -614,10 +617,13 @@ func TestRunes(t *testing.T) {
 	expectRun(t, `out = u"їЇґҐ".lower()`, nil, []rune("їїґґ"))
 	expectRun(t, `out = u"їЇґҐ"[1]`, nil, 'Ї')
 	expectRun(t, `out = u"їЇґҐ"[-1]`, nil, 'Ґ')
+	expectRun(t, `out = u"їЇґҐ"[-2]`, nil, 'ґ')
 	expectRun(t, `out = u"їЇґҐ"[1:2]`, nil, []rune("Ї"))
 	expectRun(t, `out = u"їЇґҐ"[1:3]`, nil, []rune("Їґ"))
 	expectRun(t, `out = u"їЇґҐ"[:-1]`, nil, []rune("їЇґ"))
+	expectRun(t, `out = u"їЇґҐ"[1:-1]`, nil, []rune("Їґ"))
 	expectRun(t, `out = u"їЇґҐ"[-3:-1]`, nil, []rune("Їґ"))
+	expectRun(t, `out = u"їЇґҐ"[10:20]`, nil, []rune(""))
 	expectRun(t, `out = u"їЇґҐ"[1:4:2]`, nil, []rune("ЇҐ"))
 	expectRun(t, `out = u"їЇґҐ"[1:4:-1]`, nil, []rune(""))
 	expectRun(t, `out = u"їЇґҐ"[3:0:-1]`, nil, []rune("ҐґЇ"))
@@ -702,6 +708,7 @@ func TestArray(t *testing.T) {
 
 	expectError(t, fmt.Sprintf("%s[%d]", arrStr, -arrLen-1), nil, "index out of bounds")
 	expectError(t, fmt.Sprintf("%s[%d]", arrStr, arrLen), nil, "index out of bounds")
+	expectRun(t, fmt.Sprintf("out = %s[%d]", arrStr, -2), nil, arr[arrLen-2])
 	expectRun(t, `a1 := [1, 2, 3]; a1[-1] = 5; out = a1[2]`, nil, 5)
 	expectError(t, `a1 := [1, 2, 3]; a1[-4] = 5`, nil, "index out of bounds")
 
@@ -723,8 +730,10 @@ func TestArray(t *testing.T) {
 	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, 2, 2), nil, ARR{})
 	expectRun(t, fmt.Sprintf("out = %s[:%d]", arrStr, -1), nil, ARR{1, 2, 3, 4, 5})
 	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, 0, -1), nil, ARR{1, 2, 3, 4, 5})
+	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, 1, -1), nil, ARR{2, 3, 4, 5})
 	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, -3, -1), nil, ARR{4, 5})
 	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, 2, 1), nil, ARR{})
+	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, 10, 20), nil, ARR{})
 	expectRun(t, fmt.Sprintf("out = %s[%d:%d]", arrStr, -100, 100), nil, arr)
 	expectRun(t, fmt.Sprintf("out = %s[1:5:2]", arrStr), nil, ARR{2, 4})
 	expectRun(t, fmt.Sprintf("out = %s[1:5:-1]", arrStr), nil, ARR{})
@@ -970,15 +979,18 @@ func TestBytes(t *testing.T) {
 	expectRun(t, `out = bytes("abcde")[1]`, nil, byte(98))
 	expectRun(t, `out = bytes("abcde")[4]`, nil, byte(101))
 	expectRun(t, `out = bytes("abcde")[-1]`, nil, byte(101))
+	expectRun(t, `out = bytes("abcde")[-2]`, nil, byte(100))
 	expectError(t, `out = bytes("abcde")[-6]`, nil, "index out of bounds")
 	expectError(t, `out = bytes("abcde")[10]`, nil, "index out of bounds")
 
 	// bytes[a:b] -> bytes
 	expectRun(t, `out = bytes("abcde")[1:4]`, nil, []byte("bcd"))
 	expectRun(t, `out = bytes("abcde")[:-1]`, nil, []byte("abcd"))
+	expectRun(t, `out = bytes("abcde")[1:-1]`, nil, []byte("bcd"))
 	expectRun(t, `out = bytes("abcde")[-2:]`, nil, []byte("de"))
 	expectRun(t, `out = bytes("abcde")[-3:-1]`, nil, []byte("cd"))
 	expectRun(t, `out = bytes("abcde")[3:1]`, nil, []byte{})
+	expectRun(t, `out = bytes("abcde")[10:20]`, nil, []byte{})
 	expectRun(t, `out = bytes("abcde")[1:5:2]`, nil, []byte("bd"))
 	expectRun(t, `out = bytes("abcde")[1:5:-1]`, nil, []byte(""))
 	expectRun(t, `out = bytes("abcde")[4:0:-1]`, nil, []byte("edcb"))

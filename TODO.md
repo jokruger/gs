@@ -122,3 +122,4 @@
 - remove dict/record to string conversion - it breaks consistency... complex values should be printed, not converted to string implicitly
 - add flag to `immutable` function to do a deep immutability (for arrays/dicts/records) - so all nested structures will be immutable as well
 - go style switch with multi-value cases, default, etc
+- "not in" operator

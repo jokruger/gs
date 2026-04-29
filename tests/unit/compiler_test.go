@@ -530,6 +530,25 @@ func TestCompiler_Compile(t *testing.T) {
 				intObject(3),
 				intObject(0))))
 
+	expectCompile(t, `[1, 2, 3][0:3:2]`,
+		bytecode(
+			concatInsts(
+				vm.MakeInstruction(core.OpConstant, 0),
+				vm.MakeInstruction(core.OpConstant, 1),
+				vm.MakeInstruction(core.OpConstant, 2),
+				vm.MakeInstruction(core.OpArray, 3),
+				vm.MakeInstruction(core.OpConstant, 3),
+				vm.MakeInstruction(core.OpConstant, 2),
+				vm.MakeInstruction(core.OpConstant, 1),
+				vm.MakeInstruction(core.OpSliceIndexStep),
+				vm.MakeInstruction(core.OpPop),
+				vm.MakeInstruction(core.OpSuspend)),
+			objectsArray(
+				intObject(1),
+				intObject(2),
+				intObject(3),
+				intObject(0))))
+
 	expectCompile(t, `f1 := func(a) { return a }; f1([1, 2]...);`,
 		bytecode(
 			concatInsts(

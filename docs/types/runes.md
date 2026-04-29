@@ -39,10 +39,13 @@ s[0]                     // 'ウ' (first rune)
 s[-1]                    // 'ナ' (last rune)
 s[0:2]                   // u"ウク" (first 2 runes)
 s[:-1]                   // u"ウクライ"
+s[1:5:2]                 // u"クラ"
+s[4:1:-1]                // u"ナイラク"
+s[::-1]                  // reversed runes
 len(s)                   // 5 (rune count, not byte count)
 ```
 
-Single-element indexing supports negative indices. Slice bounds follow the same rules: negative bounds count from the end, omitted bounds default to the natural edge, oversized bounds clamp, and an inverted slice returns an empty result. Out-of-bounds index access raises `index out of bounds`.
+Single-element indexing supports negative indices. Two-part slice bounds follow the same rules: negative bounds count from the end, omitted bounds default to the natural edge, oversized bounds clamp, and an inverted slice returns an empty result. Runes also support three-part slices `start:end:step`; `step` may be negative (reverse traversal) but cannot be zero. Out-of-bounds index access raises `index out of bounds`.
 
 ## Member Functions
 

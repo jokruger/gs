@@ -226,3 +226,67 @@ func normalizeSliceBounds(start int64, hasStart bool, end int64, hasEnd bool, le
 
 	return start, end
 }
+
+// normalizeSliceBoundsStep returns the effective start and end for a step-based slice.
+// Caller must ensure step != 0. For step > 0 the iteration is start..end (exclusive).
+// For step < 0 the iteration is start..end (exclusive, with end possibly -1 to include index 0).
+func normalizeSliceBoundsStep(si int64, hasStart bool, ei int64, hasEnd bool, step int64, length int64) (int64, int64) {
+	var start, end int64
+	if step > 0 {
+		if !hasStart {
+			start = 0
+		} else {
+			start = si
+			if start < 0 {
+				start += length
+			}
+			if start < 0 {
+				start = 0
+			} else if start > length {
+				start = length
+			}
+		}
+		if !hasEnd {
+			end = length
+		} else {
+			end = ei
+			if end < 0 {
+				end += length
+			}
+			if end < 0 {
+				end = 0
+			} else if end > length {
+				end = length
+			}
+		}
+	} else {
+		// step < 0: lower bound is -1, upper bound is length-1
+		if !hasStart {
+			start = length - 1
+		} else {
+			start = si
+			if start < 0 {
+				start += length
+			}
+			if start < -1 {
+				start = -1
+			} else if start >= length {
+				start = length - 1
+			}
+		}
+		if !hasEnd {
+			end = -1
+		} else {
+			end = ei
+			if end < 0 {
+				end += length
+			}
+			if end < -1 {
+				end = -1
+			} else if end >= length {
+				end = length - 1
+			}
+		}
+	}
+	return start, end
+}

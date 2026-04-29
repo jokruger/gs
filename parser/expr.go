@@ -538,6 +538,7 @@ type SliceExpr struct {
 	LBrack core.Pos
 	Low    Expr
 	High   Expr
+	Step   Expr
 	RBrack core.Pos
 }
 
@@ -560,6 +561,9 @@ func (e *SliceExpr) String() string {
 	}
 	if e.High != nil {
 		high = e.High.String()
+	}
+	if e.Step != nil {
+		return e.Expr.String() + "[" + low + ":" + high + ":" + e.Step.String() + "]"
 	}
 	return e.Expr.String() + "[" + low + ":" + high + "]"
 }

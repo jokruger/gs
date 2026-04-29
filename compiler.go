@@ -441,7 +441,14 @@ func (c *Compiler) Compile(node parser.Node) error {
 		} else {
 			c.emit(node, core.OpNull)
 		}
-		c.emit(node, core.OpSliceIndex)
+		if node.Step != nil {
+			if err := c.Compile(node.Step); err != nil {
+				return err
+			}
+			c.emit(node, core.OpSliceIndexStep)
+		} else {
+			c.emit(node, core.OpSliceIndex)
+		}
 
 	case *parser.FuncLit:
 		c.enterScope()

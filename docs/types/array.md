@@ -50,9 +50,12 @@ a[-1]            // 50 (last element)
 a[:-1]           // [10, 20, 30, 40]
 a[-3:-1]         // [30, 40]
 a[4:2]           // []
+a[1:5:2]         // [20, 40]
+a[5:1:-1]        // [50, 40, 30, 20]
+a[::-1]          // [50, 40, 30, 20, 10]
 ```
 
-Single-element indexing supports negative indices. Slice bounds follow the same rules: negative bounds count from the end, omitted bounds default to the natural edge, oversized bounds clamp, and an inverted slice returns an empty result. Out-of-bounds index access raises `index out of bounds`.
+Single-element indexing supports negative indices. Two-part slice bounds follow the same rules: negative bounds count from the end, omitted bounds default to the natural edge, oversized bounds clamp, and an inverted slice returns an empty result. Arrays also support three-part slices `start:end:step`; `step` may be negative (reverse traversal) but cannot be zero. Out-of-bounds index access raises `index out of bounds`.
 
 ### Mutation
 

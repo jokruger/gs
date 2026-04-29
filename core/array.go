@@ -405,6 +405,48 @@ func arrayTypeSlice(v Value, a *Arena, s Value, e Value) (Value, error) {
 	return a.NewArrayValue(o.Elements[si:ei], v.Const), nil
 }
 
+func arrayTypeSliceStep(v Value, a *Arena, s Value, e Value, stepVal Value) (Value, error) {
+	var si, ei int64
+	var ok bool
+
+	o := (*Array)(v.Ptr)
+	l := int64(len(o.Elements))
+
+	step, ok := stepVal.AsInt()
+	if !ok {
+		return Undefined, errs.NewInvalidIndexTypeError("slice step", "int", stepVal.TypeName())
+	}
+	if step == 0 {
+		return Undefined, errs.NewSliceStepZeroError()
+	}
+
+	if s.Type != VT_UNDEFINED {
+		si, ok = s.AsInt()
+		if !ok {
+			return Undefined, errs.NewInvalidIndexTypeError("slice", "int", s.TypeName())
+		}
+	}
+	if e.Type != VT_UNDEFINED {
+		ei, ok = e.AsInt()
+		if !ok {
+			return Undefined, errs.NewInvalidIndexTypeError("slice", "int", e.TypeName())
+		}
+	}
+
+	start, end := normalizeSliceBoundsStep(si, s.Type != VT_UNDEFINED, ei, e.Type != VT_UNDEFINED, step, l)
+	result := a.NewArray(0, false)
+	if step > 0 {
+		for i := start; i < end; i += step {
+			result = append(result, o.Elements[i])
+		}
+	} else {
+		for i := start; i > end; i += step {
+			result = append(result, o.Elements[i])
+		}
+	}
+	return a.NewArrayValue(result, v.Const), nil
+}
+
 func arrayTypeAsBool(v Value) (bool, bool) {
 	o := (*Array)(v.Ptr)
 	return len(o.Elements) > 0, true

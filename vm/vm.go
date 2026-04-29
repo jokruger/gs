@@ -467,6 +467,20 @@ func (v *VM) run() {
 			v.stack[v.sp] = res
 			v.sp++
 
+		case core.OpSliceIndexStep:
+			step := v.stack[v.sp-1]
+			high := v.stack[v.sp-2]
+			low := v.stack[v.sp-3]
+			l := v.stack[v.sp-4]
+			v.sp -= 4
+			res, err := l.SliceStep(v.alloc, low, high, step)
+			if err != nil {
+				v.err = err
+				return
+			}
+			v.stack[v.sp] = res
+			v.sp++
+
 		case core.OpCall:
 			numArgs := int(v.curInsts[v.ip+1])
 			spread := int(v.curInsts[v.ip+2])

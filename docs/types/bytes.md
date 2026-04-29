@@ -24,9 +24,12 @@ b[0]                          // byte(97)
 b[-1]                         // byte(99)
 b[0:2]                        // bytes slice
 b[:-1]                        // bytes("ab")
+b[1:5:2]                      // bytes("bd")
+b[4:0:-1]                     // bytes("edcb")
+b[::-1]                       // bytes reversed
 ```
 
-Single-element indexing supports negative indices. Slice bounds follow the same rules: negative bounds count from the end, omitted bounds default to the natural edge, oversized bounds clamp, and an inverted slice returns an empty result. Out-of-bounds index access raises `index out of bounds`.
+Single-element indexing supports negative indices. Two-part slice bounds follow the same rules: negative bounds count from the end, omitted bounds default to the natural edge, oversized bounds clamp, and an inverted slice returns an empty result. Bytes also support three-part slices `start:end:step`; `step` may be negative (reverse traversal) but cannot be zero. Out-of-bounds index access raises `index out of bounds`.
 
 ### Operations
 

@@ -494,6 +494,49 @@ func runesTypeSlice(v Value, a *Arena, s Value, e Value) (Value, error) {
 	return a.NewRunesValue(rs[si:ei]), nil
 }
 
+func runesTypeSliceStep(v Value, a *Arena, s Value, e Value, stepVal Value) (Value, error) {
+	var si, ei int64
+	var ok bool
+
+	o := (*Runes)(v.Ptr)
+	rs := o.Elements
+	l := int64(len(rs))
+
+	step, ok := stepVal.AsInt()
+	if !ok {
+		return Undefined, errs.NewInvalidIndexTypeError("slice step", "int", stepVal.TypeName())
+	}
+	if step == 0 {
+		return Undefined, errs.NewSliceStepZeroError()
+	}
+
+	if s.Type != VT_UNDEFINED {
+		si, ok = s.AsInt()
+		if !ok {
+			return Undefined, errs.NewInvalidIndexTypeError("slice", "int", s.TypeName())
+		}
+	}
+	if e.Type != VT_UNDEFINED {
+		ei, ok = e.AsInt()
+		if !ok {
+			return Undefined, errs.NewInvalidIndexTypeError("slice", "int", e.TypeName())
+		}
+	}
+
+	start, end := normalizeSliceBoundsStep(si, s.Type != VT_UNDEFINED, ei, e.Type != VT_UNDEFINED, step, l)
+	result := a.NewRunes(0, false)
+	if step > 0 {
+		for i := start; i < end; i += step {
+			result = append(result, rs[i])
+		}
+	} else {
+		for i := start; i > end; i += step {
+			result = append(result, rs[i])
+		}
+	}
+	return a.NewRunesValue(result), nil
+}
+
 func runesFnFilter(v Value, vm VM, args []Value) (Value, error) {
 	if len(args) != 1 {
 		return Undefined, errs.NewWrongNumArgumentsError("filter", "1", len(args))

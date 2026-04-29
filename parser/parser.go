@@ -371,7 +371,7 @@ func (p *Parser) parseIndexOrSlice(x Expr) Expr {
 	lbrack := p.expect(token.LBrack)
 	p.exprLevel++
 
-	var index [2]Expr
+	var index [3]Expr
 	if p.token != token.Colon {
 		index[0] = p.parseExpr()
 	}
@@ -381,7 +381,17 @@ func (p *Parser) parseIndexOrSlice(x Expr) Expr {
 		p.next()
 
 		if p.token != token.RBrack && p.token != token.EOF {
-			index[1] = p.parseExpr()
+			if p.token != token.Colon {
+				index[1] = p.parseExpr()
+			}
+		}
+	}
+	if p.token == token.Colon {
+		numColons++
+		p.next()
+
+		if p.token != token.RBrack && p.token != token.EOF {
+			index[2] = p.parseExpr()
 		}
 	}
 
@@ -396,6 +406,7 @@ func (p *Parser) parseIndexOrSlice(x Expr) Expr {
 			RBrack: rbrack,
 			Low:    index[0],
 			High:   index[1],
+			Step:   index[2],
 		}
 	}
 	return &IndexExpr{

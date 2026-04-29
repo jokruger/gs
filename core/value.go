@@ -222,6 +222,10 @@ func (v Value) Slice(a *Arena, s Value, e Value) (Value, error) {
 	return ValueTypes[v.Type].Slice(v, a, s, e)
 }
 
+func (v Value) SliceStep(a *Arena, s Value, e Value, step Value) (Value, error) {
+	return ValueTypes[v.Type].SliceStep(v, a, s, e, step)
+}
+
 func (v Value) Immutable(a *Arena) (Value, error) {
 	t := v
 	t.Const = true

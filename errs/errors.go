@@ -113,3 +113,7 @@ func NewInvalidDeleteError(valType string) error {
 func NewInvalidSliceError(valType string) error {
 	return fmt.Errorf("%w: type %s does not support slicing", ErrInvalidSlice, valType)
 }
+
+func NewSliceStepZeroError() error {
+	return fmt.Errorf("%w: step cannot be zero", ErrInvalidSlice)
+}

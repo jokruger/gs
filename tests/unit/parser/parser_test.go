@@ -1168,6 +1168,37 @@ func TestParseIndex(t *testing.T) {
 					p(1, 10), p(1, 24))))
 	})
 
+	expectParse(t, "[1, 2, 3][0:3:2]", func(p pfn) []Stmt {
+		return stmts(
+			exprStmt(
+				sliceExprStep(
+					arrayLit(p(1, 1), p(1, 9),
+						intLit(1, p(1, 2)),
+						intLit(2, p(1, 5)),
+						intLit(3, p(1, 8))),
+					intLit(0, p(1, 11)),
+					intLit(3, p(1, 13)),
+					intLit(2, p(1, 15)),
+					p(1, 10), p(1, 16))))
+	})
+
+	expectParse(t, "[1, 2, 3][::-1]", func(p pfn) []Stmt {
+		return stmts(
+			exprStmt(
+				sliceExprStep(
+					arrayLit(p(1, 1), p(1, 9),
+						intLit(1, p(1, 2)),
+						intLit(2, p(1, 5)),
+						intLit(3, p(1, 8))),
+					nil,
+					nil,
+					unaryExpr(
+						intLit(1, p(1, 14)),
+						token.Sub,
+						p(1, 13)),
+					p(1, 10), p(1, 15))))
+	})
+
 	expectParse(t, `{a: 1, b: 2}["b"]`, func(p pfn) []Stmt {
 		return stmts(
 			exprStmt(
@@ -2042,6 +2073,10 @@ func sliceExpr(x, low, high Expr, lbrack, rbrack core.Pos) *SliceExpr {
 	return &SliceExpr{Expr: x, Low: low, High: high, LBrack: lbrack, RBrack: rbrack}
 }
 
+func sliceExprStep(x, low, high, step Expr, lbrack, rbrack core.Pos) *SliceExpr {
+	return &SliceExpr{Expr: x, Low: low, High: high, Step: step, LBrack: lbrack, RBrack: rbrack}
+}
+
 func selectorExpr(x, sel Expr) *SelectorExpr {
 	return &SelectorExpr{Expr: x, Sel: sel}
 }
@@ -2249,6 +2284,8 @@ func equalExpr(t *testing.T, expected, actual Expr) {
 			actual.(*SliceExpr).Low)
 		equalExpr(t, expected.High,
 			actual.(*SliceExpr).High)
+		equalExpr(t, expected.Step,
+			actual.(*SliceExpr).Step)
 		require.Equal(t, expected.LBrack,
 			actual.(*SliceExpr).LBrack)
 		require.Equal(t, expected.RBrack,

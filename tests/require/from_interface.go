@@ -33,7 +33,7 @@ func FromInterface(alloc *core.Arena, v any) (core.Value, error) {
 		return core.RuneValue(v), nil
 
 	case byte:
-		return core.RuneValue(rune(v)), nil
+		return core.ByteValue(v), nil
 
 	case float64:
 		return core.FloatValue(v), nil

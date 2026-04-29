@@ -178,6 +178,13 @@ func runesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		i, _ := runesTypeAsInt(v)
 		return IntValue(i), nil
 
+	case "byte":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
+		}
+		b, _ := runesTypeAsByte(v)
+		return ByteValue(b), nil
+
 	case "decimal":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
@@ -364,6 +371,18 @@ func runesTypeAsString(v Value) (string, bool) {
 func runesTypeAsRunes(v Value) ([]rune, bool) {
 	o := (*Runes)(v.Ptr)
 	return o.Elements, true
+}
+
+func runesTypeAsByte(v Value) (byte, bool) {
+	o := (*Runes)(v.Ptr)
+	i, err := strconv.ParseInt(string(o.Elements), 10, 64)
+	if err == nil {
+		if i < 0 || i > 255 {
+			return byte(i), false
+		}
+		return byte(i), true
+	}
+	return 0, false
 }
 
 func runesTypeAsInt(v Value) (int64, bool) {

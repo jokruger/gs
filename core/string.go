@@ -180,6 +180,13 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		i, _ := stringTypeAsInt(v)
 		return IntValue(i), nil
 
+	case "byte":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
+		}
+		b, _ := stringTypeAsByte(v)
+		return ByteValue(b), nil
+
 	case "decimal":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
@@ -237,7 +244,7 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		if len(o.Value) == 0 {
 			return Undefined, nil
 		}
-		return IntValue(int64(o.Value[0])), nil
+		return ByteValue(o.Value[0]), nil
 
 	case "last":
 		if len(args) != 0 {
@@ -246,7 +253,7 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		if len(o.Value) == 0 {
 			return Undefined, nil
 		}
-		return IntValue(int64(o.Value[len(o.Value)-1])), nil
+		return ByteValue(o.Value[len(o.Value)-1]), nil
 
 	case "min":
 		if len(args) != 0 {
@@ -255,7 +262,7 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		if len(o.Value) == 0 {
 			return Undefined, nil
 		}
-		return IntValue(int64(slices.Min([]byte(o.Value)))), nil
+		return ByteValue(slices.Min([]byte(o.Value))), nil
 
 	case "max":
 		if len(args) != 0 {
@@ -264,7 +271,7 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		if len(o.Value) == 0 {
 			return Undefined, nil
 		}
-		return IntValue(int64(slices.Max([]byte(o.Value)))), nil
+		return ByteValue(slices.Max([]byte(o.Value))), nil
 
 	case "lower":
 		if len(args) != 0 {
@@ -324,7 +331,7 @@ func stringTypeAccess(v Value, a *Arena, index Value, mode Opcode) (Value, error
 		if i < 0 || i >= int64(len(o.Value)) {
 			return Undefined, nil
 		}
-		return IntValue(int64(o.Value[i])), nil
+		return ByteValue(o.Value[i]), nil
 	}
 
 	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), index.String())
@@ -355,6 +362,18 @@ func stringTypeAsInt(v Value) (int64, bool) {
 	i, err := strconv.ParseInt(o.Value, 10, 64)
 	if err == nil {
 		return i, true
+	}
+	return 0, false
+}
+
+func stringTypeAsByte(v Value) (byte, bool) {
+	o := (*String)(v.Ptr)
+	i, err := strconv.ParseInt(o.Value, 10, 64)
+	if err == nil {
+		if i < 0 || i > 255 {
+			return byte(i), false
+		}
+		return byte(i), true
 	}
 	return 0, false
 }

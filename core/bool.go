@@ -67,6 +67,13 @@ func boolTypeAsInt(v Value) (int64, bool) {
 	return 1, true
 }
 
+func boolTypeAsByte(v Value) (byte, bool) {
+	if v.Data == 0 {
+		return 0, true
+	}
+	return 1, true
+}
+
 func boolTypeAsBool(v Value) (bool, bool) {
 	return v.Data != 0, true
 }
@@ -93,6 +100,13 @@ func boolTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 		}
 		b, _ := boolTypeAsInt(v)
 		return IntValue(b), nil
+
+	case "byte":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
+		}
+		b, _ := boolTypeAsByte(v)
+		return ByteValue(b), nil
 
 	case "string":
 		if len(args) != 0 {

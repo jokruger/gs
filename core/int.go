@@ -82,9 +82,17 @@ func intTypeAsBool(v Value) (bool, bool) {
 func intTypeAsRune(v Value) (rune, bool) {
 	i := int64(v.Data)
 	if i < 0 || i > utf8.MaxRune {
-		return 0, false
+		return rune(i), false
 	}
 	return rune(i), true
+}
+
+func intTypeAsByte(v Value) (byte, bool) {
+	i := int64(v.Data)
+	if i < 0 || i > math.MaxUint8 {
+		return byte(i), false
+	}
+	return byte(i), true
 }
 
 func intTypeAsTime(v Value) (time.Time, bool) {
@@ -137,6 +145,13 @@ func intTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error)
 		}
 		c, _ := v.AsRune()
 		return RuneValue(c), nil
+
+	case "byte":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
+		}
+		b, _ := v.AsByte()
+		return ByteValue(b), nil
 
 	case "string":
 		if len(args) != 0 {

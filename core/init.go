@@ -85,6 +85,29 @@ func init() {
 		AsString:     boolTypeAsString,
 		AsInt:        boolTypeAsInt,
 		AsBool:       boolTypeAsBool,
+		AsByte:       boolTypeAsByte,
+	})
+
+	// Byte
+	SetValueType(VT_BYTE, ValueType{
+		Name:         byteTypeName,
+		String:       byteTypeString,
+		Interface:    byteTypeInterface,
+		EncodeJSON:   byteTypeEncodeJSON,
+		EncodeBinary: byteTypeEncodeBinary,
+		DecodeBinary: byteTypeDecodeBinary,
+		IsTrue:       byteTypeIsTrue,
+		Equal:        byteTypeEqual,
+		Len:          default1,
+		BinaryOp:     byteTypeBinaryOp,
+		MethodCall:   byteTypeMethodCall,
+		AsString:     byteTypeAsString,
+		AsInt:        byteTypeAsInt,
+		AsBool:       byteTypeAsBool,
+		AsRune:       byteTypeAsRune,
+		AsByte:       byteTypeAsByte,
+		AsFloat:      byteTypeAsFloat,
+		AsDecimal:    intTypeAsDecimal,
 	})
 
 	// Rune
@@ -104,6 +127,7 @@ func init() {
 		AsInt:        runeTypeAsInt,
 		AsBool:       runeTypeAsBool,
 		AsRune:       runeTypeAsRune,
+		AsByte:       runeTypeAsByte,
 	})
 
 	// Int
@@ -127,6 +151,7 @@ func init() {
 		AsBool:       intTypeAsBool,
 		AsRune:       intTypeAsRune,
 		AsTime:       intTypeAsTime,
+		AsByte:       intTypeAsByte,
 	})
 
 	// Float
@@ -211,6 +236,7 @@ func init() {
 		Slice:        stringTypeSlice,
 		AsBool:       stringTypeAsBool,
 		AsInt:        stringTypeAsInt,
+		AsByte:       stringTypeAsByte,
 		AsFloat:      stringTypeAsFloat,
 		AsDecimal:    stringTypeAsDecimal,
 		AsTime:       stringTypeAsTime,
@@ -241,6 +267,7 @@ func init() {
 		Slice:        runesTypeSlice,
 		AsBool:       runesTypeAsBool,
 		AsInt:        runesTypeAsInt,
+		AsByte:       runesTypeAsByte,
 		AsFloat:      runesTypeAsFloat,
 		AsDecimal:    runesTypeAsDecimal,
 		AsTime:       runesTypeAsTime,

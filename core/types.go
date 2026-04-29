@@ -38,24 +38,25 @@ const (
 	VT_COMPILED_FUNCTION  = uint8(3)
 	VT_ERROR              = uint8(4)
 	VT_BOOL               = uint8(5)
-	VT_RUNE               = uint8(6)
-	VT_INT                = uint8(7)
-	VT_FLOAT              = uint8(8)
-	VT_DECIMAL            = uint8(9)
-	VT_TIME               = uint8(10)
-	VT_STRING             = uint8(11)
-	VT_RUNES              = uint8(12)
-	VT_BYTES              = uint8(13)
-	VT_ARRAY              = uint8(14)
-	VT_RECORD             = uint8(15)
-	VT_DICT               = uint8(16)
-	VT_INT_RANGE          = uint8(17)
-	VT_RUNES_ITERATOR     = uint8(18)
-	VT_BYTES_ITERATOR     = uint8(19)
-	VT_ARRAY_ITERATOR     = uint8(20)
-	VT_DICT_ITERATOR      = uint8(21)
-	VT_INT_RANGE_ITERATOR = uint8(22)
-	VT_USER_DEFINED       = uint8(23) // must be last
+	VT_BYTE               = uint8(6)
+	VT_RUNE               = uint8(7)
+	VT_INT                = uint8(8)
+	VT_FLOAT              = uint8(9)
+	VT_DECIMAL            = uint8(10)
+	VT_TIME               = uint8(11)
+	VT_STRING             = uint8(12)
+	VT_RUNES              = uint8(13)
+	VT_BYTES              = uint8(14)
+	VT_ARRAY              = uint8(15)
+	VT_RECORD             = uint8(16)
+	VT_DICT               = uint8(17)
+	VT_INT_RANGE          = uint8(18)
+	VT_RUNES_ITERATOR     = uint8(19)
+	VT_BYTES_ITERATOR     = uint8(20)
+	VT_ARRAY_ITERATOR     = uint8(21)
+	VT_DICT_ITERATOR      = uint8(22)
+	VT_INT_RANGE_ITERATOR = uint8(23)
+	VT_USER_DEFINED       = uint8(24) // must be last
 )
 
 type ValueType struct {
@@ -92,6 +93,7 @@ type ValueType struct {
 	Value func(v Value, a *Arena) (Value, error)
 
 	AsBool    func(v Value) (bool, bool)
+	AsByte    func(v Value) (byte, bool)
 	AsRune    func(v Value) (rune, bool)
 	AsInt     func(v Value) (int64, bool)
 	AsFloat   func(v Value) (float64, bool)
@@ -138,6 +140,7 @@ var ValueTypeDefaults = ValueType{
 	Value: defaultUndefined,
 
 	AsBool:    defaultTypeAsBool,
+	AsByte:    defaultTypeAsByte,
 	AsRune:    defaultTypeAsRune,
 	AsInt:     defaultTypeAsInt,
 	AsFloat:   defaultTypeAsFloat,
@@ -386,6 +389,10 @@ func defaultTypeInterface(v Value) any {
 
 func defaultTypeAsBool(v Value) (bool, bool) {
 	return false, false
+}
+
+func defaultTypeAsByte(v Value) (byte, bool) {
+	return 0, false
 }
 
 func defaultTypeAsRune(v Value) (rune, bool) {

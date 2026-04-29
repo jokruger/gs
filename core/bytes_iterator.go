@@ -59,5 +59,5 @@ func bytesIteratorTypeKey(v Value, a *Arena) (Value, error) {
 
 func bytesIteratorTypeValue(v Value, a *Arena) (Value, error) {
 	i := (*BytesIterator)(v.Ptr)
-	return IntValue(int64(i.Elements[i.i])), nil
+	return ByteValue(i.Elements[i.i]), nil
 }

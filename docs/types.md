@@ -24,6 +24,9 @@ Exact decimal type for precise arithmetic, especially financial calculations. In
 ### [rune](types/rune.md)
 Single Unicode code point. Useful for character operations and Unicode handling.
 
+### [byte](types/byte.md)
+Unsigned 8-bit integer (0-255). Ideal for binary data manipulation and byte-level operations.
+
 ## String Types
 
 ### [string](types/string.md)
@@ -65,6 +68,8 @@ Wrap containers (arrays, bytes, dicts, records, runes) to make them immutable at
 | Type | Mutability | Indexed By | Primary Use |
 |------|-----------|-----------|------------|
 | int | N/A | N/A | Whole numbers |
+| byte | N/A | N/A | Binary data |
+| rune | N/A | N/A | Unicode code points |
 | float | N/A | N/A | Approximate decimals |
 | decimal | N/A | N/A | Exact decimals |
 | string | Immutable | Bytes | Text, UTF-8 encoded |
@@ -121,6 +126,7 @@ These types are immutable and copied by value:
 - **float**
 - **decimal**
 - **rune**
+- **byte**
 - **string**
 - **runes**
 - **time**

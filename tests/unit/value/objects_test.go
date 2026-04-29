@@ -58,6 +58,18 @@ func TestObject_Value(t *testing.T) {
 	require.Equal(t, false, x.Data != 0)
 	require.Equal(t, true, v.Equal(x))
 
+	// Byte
+	v = core.ByteValue(123)
+	require.True(t, v.Type == core.VT_BYTE)
+	require.Equal(t, byte(123), byte(v.Data))
+	bs, err = v.EncodeBinary()
+	require.NoError(t, err)
+	err = x.DecodeBinary(bs)
+	require.NoError(t, err)
+	require.True(t, x.Type == core.VT_BYTE)
+	require.Equal(t, byte(123), byte(x.Data))
+	require.Equal(t, true, v.Equal(x))
+
 	// Rune
 	v = core.RuneValue('A')
 	require.True(t, v.Type == core.VT_RUNE)
@@ -389,6 +401,9 @@ func TestObject_TypeName(t *testing.T) {
 	o = core.FloatValue(0)
 	require.Equal(t, "float", o.TypeName())
 
+	o = core.ByteValue(0)
+	require.Equal(t, "byte", o.TypeName())
+
 	o = core.RuneValue(0)
 	require.Equal(t, "rune", o.TypeName())
 
@@ -493,6 +508,12 @@ func TestObject_IsTrue(t *testing.T) {
 	o = core.NewIntRangeValue(0, 0, 1)
 	require.False(t, o.IsTrue())
 	o = core.NewIntRangeValue(0, 10, 1)
+	require.True(t, o.IsTrue())
+
+	// byte
+	o = core.ByteValue(0)
+	require.False(t, o.IsTrue())
+	o = core.ByteValue(123)
 	require.True(t, o.IsTrue())
 }
 

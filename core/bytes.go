@@ -150,7 +150,7 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		}
 		m := alloc.NewDict(len(o.Elements))
 		for i, b := range o.Elements {
-			m[strconv.Itoa(i)] = IntValue(int64(b))
+			m[strconv.Itoa(i)] = ByteValue(b)
 		}
 		return alloc.NewRecordValue(m, false), nil
 
@@ -160,7 +160,7 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		}
 		m := alloc.NewDict(len(o.Elements))
 		for i, b := range o.Elements {
-			m[strconv.Itoa(i)] = IntValue(int64(b))
+			m[strconv.Itoa(i)] = ByteValue(b)
 		}
 		return alloc.NewDictValue(m, false), nil
 
@@ -189,7 +189,7 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(o.Elements) == 0 {
 			return Undefined, nil
 		}
-		return IntValue(int64(o.Elements[0])), nil
+		return ByteValue(o.Elements[0]), nil
 
 	case "last":
 		if len(args) != 0 {
@@ -198,7 +198,7 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(o.Elements) == 0 {
 			return Undefined, nil
 		}
-		return IntValue(int64(o.Elements[len(o.Elements)-1])), nil
+		return ByteValue(o.Elements[len(o.Elements)-1]), nil
 
 	case "min":
 		if len(args) != 0 {
@@ -207,7 +207,7 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(o.Elements) == 0 {
 			return Undefined, nil
 		}
-		return IntValue(int64(slices.Min(o.Elements))), nil
+		return ByteValue(slices.Min(o.Elements)), nil
 
 	case "max":
 		if len(args) != 0 {
@@ -216,7 +216,7 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		if len(o.Elements) == 0 {
 			return Undefined, nil
 		}
-		return IntValue(int64(slices.Max(o.Elements))), nil
+		return ByteValue(slices.Max(o.Elements)), nil
 
 	case "contains":
 		if len(args) != 1 {
@@ -260,7 +260,7 @@ func bytesTypeAccess(v Value, a *Arena, index Value, mode Opcode) (Value, error)
 		if i < 0 || i >= int64(len(o.Elements)) {
 			return Undefined, nil
 		}
-		return IntValue(int64(o.Elements[i])), nil
+		return ByteValue(o.Elements[i]), nil
 	}
 
 	return Undefined, errs.NewInvalidSelectorError(v.TypeName(), index.String())
@@ -294,7 +294,7 @@ func bytesTypeAsArray(v Value, a *Arena) ([]Value, bool) {
 	o := (*Bytes)(v.Ptr)
 	arr := a.NewArray(len(o.Elements), true)
 	for i, b := range o.Elements {
-		arr[i] = IntValue(int64(b))
+		arr[i] = ByteValue(b)
 	}
 	return arr, true
 }
@@ -302,6 +302,10 @@ func bytesTypeAsArray(v Value, a *Arena) ([]Value, bool) {
 func bytesTypeContains(v Value, e Value) bool {
 	o := (*Bytes)(v.Ptr)
 	switch e.Type {
+	case VT_BYTE:
+		b := byte(e.Data)
+		return bytes.Contains(o.Elements, []byte{b})
+
 	case VT_INT:
 		b := int64(e.Data)
 		if b < 0 || b > 255 {
@@ -314,11 +318,11 @@ func bytesTypeContains(v Value, e Value) bool {
 		return bytes.Contains(o.Elements, t.Elements)
 
 	default:
-		b, ok := e.AsInt()
-		if !ok || b < 0 || b > 255 {
+		b, ok := e.AsByte()
+		if !ok {
 			return false
 		}
-		return bytes.Contains(o.Elements, []byte{byte(b)})
+		return bytes.Contains(o.Elements, []byte{b})
 	}
 }
 
@@ -388,7 +392,7 @@ func bytesFnFilter(v Value, vm VM, args []Value) (Value, error) {
 	switch fn.Arity() {
 	case 1:
 		for _, v := range o.Elements {
-			buf[0] = IntValue(int64(v))
+			buf[0] = ByteValue(v)
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
 				return Undefined, err
@@ -402,7 +406,7 @@ func bytesFnFilter(v Value, vm VM, args []Value) (Value, error) {
 	case 2:
 		for i, v := range o.Elements {
 			buf[0] = IntValue(int64(i))
-			buf[1] = IntValue(int64(v))
+			buf[1] = ByteValue(v)
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
 				return Undefined, err
@@ -434,7 +438,7 @@ func bytesFnCount(v Value, vm VM, args []Value) (Value, error) {
 	case 1:
 		var count int64
 		for _, v := range o.Elements {
-			buf[0] = IntValue(int64(v))
+			buf[0] = ByteValue(v)
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
 				return Undefined, err
@@ -449,7 +453,7 @@ func bytesFnCount(v Value, vm VM, args []Value) (Value, error) {
 		var count int64
 		for i, v := range o.Elements {
 			buf[0] = IntValue(int64(i))
-			buf[1] = IntValue(int64(v))
+			buf[1] = ByteValue(v)
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
 				return Undefined, err
@@ -480,7 +484,7 @@ func bytesFnAll(v Value, vm VM, args []Value) (Value, error) {
 	switch fn.Arity() {
 	case 1:
 		for _, v := range o.Elements {
-			buf[0] = IntValue(int64(v))
+			buf[0] = ByteValue(v)
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
 				return Undefined, err
@@ -494,7 +498,7 @@ func bytesFnAll(v Value, vm VM, args []Value) (Value, error) {
 	case 2:
 		for i, v := range o.Elements {
 			buf[0] = IntValue(int64(i))
-			buf[1] = IntValue(int64(v))
+			buf[1] = ByteValue(v)
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
 				return Undefined, err
@@ -525,7 +529,7 @@ func bytesFnAny(v Value, vm VM, args []Value) (Value, error) {
 	switch fn.Arity() {
 	case 1:
 		for _, v := range o.Elements {
-			buf[0] = IntValue(int64(v))
+			buf[0] = ByteValue(v)
 			res, err := fn.Call(vm, buf[:1])
 			if err != nil {
 				return Undefined, err
@@ -539,7 +543,7 @@ func bytesFnAny(v Value, vm VM, args []Value) (Value, error) {
 	case 2:
 		for i, v := range o.Elements {
 			buf[0] = IntValue(int64(i))
-			buf[1] = IntValue(int64(v))
+			buf[1] = ByteValue(v)
 			res, err := fn.Call(vm, buf[:2])
 			if err != nil {
 				return Undefined, err

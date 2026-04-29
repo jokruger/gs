@@ -11,9 +11,10 @@ import (
 )
 
 // do not change builtin function indexes as it will break compatibility
-// 38..99 are reserved for future builtin functions
+// 40..99 are reserved for future builtin functions
 var BuiltinFuncs = map[int]core.Value{
 	7:  core.NewBuiltinFunctionValue("bool", builtinBool, 0, true),
+	38: core.NewBuiltinFunctionValue("byte", builtinByte, 0, true),
 	9:  core.NewBuiltinFunctionValue("rune", builtinRune, 0, true),
 	6:  core.NewBuiltinFunctionValue("int", builtinInt, 0, true),
 	8:  core.NewBuiltinFunctionValue("float", builtinFloat, 0, true),
@@ -27,6 +28,7 @@ var BuiltinFuncs = map[int]core.Value{
 	33: core.NewBuiltinFunctionValue("error", builtinError, 0, true),
 
 	15: core.NewBuiltinFunctionValue("is_bool", builtinIsBool, 1, false),
+	39: core.NewBuiltinFunctionValue("is_byte", builtinIsByte, 1, false),
 	16: core.NewBuiltinFunctionValue("is_rune", builtinIsRune, 1, false),
 	12: core.NewBuiltinFunctionValue("is_int", builtinIsInt, 1, false),
 	13: core.NewBuiltinFunctionValue("is_float", builtinIsFloat, 1, false),
@@ -118,6 +120,16 @@ func builtinIsBool(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, errs.NewWrongNumArgumentsError("is_bool", "1", len(args))
 	}
 	if args[0].Type == core.VT_BOOL {
+		return core.True, nil
+	}
+	return core.False, nil
+}
+
+func builtinIsByte(vm core.VM, args []core.Value) (core.Value, error) {
+	if len(args) != 1 {
+		return core.Undefined, errs.NewWrongNumArgumentsError("is_byte", "1", len(args))
+	}
+	if args[0].Type == core.VT_BYTE {
 		return core.True, nil
 	}
 	return core.False, nil
@@ -473,6 +485,30 @@ func builtinBool(vm core.VM, args []core.Value) (core.Value, error) {
 	default:
 		if v, ok := args[0].AsBool(); ok {
 			return core.BoolValue(v), nil
+		}
+		if l == 2 {
+			return args[1], nil
+		}
+		return core.Undefined, nil
+	}
+}
+
+func builtinByte(vm core.VM, args []core.Value) (core.Value, error) {
+	l := len(args)
+	if l == 0 {
+		return core.ByteValue(0), nil
+	}
+	if l > 2 {
+		return core.Undefined, errs.NewWrongNumArgumentsError("byte", "0, 1 or 2", len(args))
+	}
+
+	switch args[0].Type {
+	case core.VT_BYTE:
+		return args[0], nil
+
+	default:
+		if v, ok := args[0].AsByte(); ok {
+			return core.ByteValue(v), nil
 		}
 		if l == 2 {
 			return args[1], nil

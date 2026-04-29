@@ -72,6 +72,14 @@ func runeTypeAsRune(v Value) (rune, bool) {
 	return rune(v.Data), true
 }
 
+func runeTypeAsByte(v Value) (byte, bool) {
+	c := rune(v.Data)
+	if c > 255 {
+		return byte(c), false
+	}
+	return byte(c), true
+}
+
 func runeTypeEqual(v Value, rhs Value) bool {
 	r, ok := rhs.AsRune()
 	if !ok {
@@ -101,6 +109,13 @@ func runeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 		}
 		i, _ := int64(v.Data), true
 		return IntValue(i), nil
+
+	case "byte":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
+		}
+		b, _ := runeTypeAsByte(v)
+		return ByteValue(b), nil
 
 	case "string":
 		if len(args) != 0 {

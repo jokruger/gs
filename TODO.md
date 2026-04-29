@@ -197,25 +197,3 @@ enumerable = array, record, dict
       if fn(k, v) { return k }
     }
   },
-
-  // map creates an array of values by running each element in `x` through `fn`.
-  // `fn` is invoked with two arguments: `key` and `value`. `key` is an int index
-  // if `x` is array. `key` is a string key if `x` is dict. It returns undefined
-  // if `x` is not enumerable.
-  map: func(x, fn) {
-    if !is_enumerable(x) { return undefined }
-
-    dst := []
-    for k, v in x {
-      dst = append(dst, fn(k, v))
-    }
-
-    return dst
-  },
-
-  // key returns the first argument.
-  key: func(k, _) { return k },
-
-  // value returns the second argument.
-  value: func(_, v) { return v }
-}

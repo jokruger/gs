@@ -107,7 +107,7 @@ func errorTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		o := (*Error)(v.Ptr)
 		return o.Payload, nil
 
-	case "to_string":
+	case "string":
 		if len(args) != 0 {
 			return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
 		}

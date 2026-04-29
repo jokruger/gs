@@ -131,20 +131,20 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 	alloc := vm.Allocator()
 
 	switch name {
-	case "to_bytes":
+	case "bytes":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		return v, nil
 
-	case "to_array":
+	case "array":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		t, _ := bytesTypeAsArray(v, alloc)
 		return alloc.NewArrayValue(t, false), nil
 
-	case "to_record":
+	case "record":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -154,7 +154,7 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		}
 		return alloc.NewRecordValue(m, false), nil
 
-	case "to_dict":
+	case "dict":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -164,7 +164,7 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		}
 		return alloc.NewDictValue(m, false), nil
 
-	case "to_string":
+	case "string":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}

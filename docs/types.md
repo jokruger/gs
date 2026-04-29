@@ -30,7 +30,7 @@ ok && false   // false
 
 Bool member functions:
 
-- Conversion: `to_bool()`, `to_int()`, `to_string()`
+- Conversion: `bool()`, `int()`, `string()`
 
 ## int
 
@@ -45,7 +45,7 @@ i2 = 0x2a
 
 Int member functions:
 
-- Conversion: `to_int()`, `to_float()`, `to_decimal()`, `to_bool()`, `to_rune()`, `to_string()`, `to_time()`
+- Conversion: `int()`, `float()`, `decimal()`, `bool()`, `rune()`, `string()`, `time()`
 - Numeric utilities: `sign()`, `abs()`
 
 ## float
@@ -62,7 +62,7 @@ h = 1f
 
 Float member functions:
 
-- Conversion: `to_float()`, `to_decimal()`, `to_int()`, `to_string()`
+- Conversion: `float()`, `decimal()`, `int()`, `string()`
 - Numeric utilities: `sign()`
 
 ## decimal
@@ -79,9 +79,9 @@ a2 = decimal(123)       // int -> decimal
 b2 = decimal(1.23)      // float -> decimal
 c2 = decimal("1.23")    // string -> decimal
 
-d = (123).to_decimal()
-e = (1.23).to_decimal()
-f = "1.23".to_decimal()
+d = (123).decimal()
+e = (1.23).decimal()
+f = "1.23".decimal()
 ```
 
 `decimal(x)` conversion rules:
@@ -91,17 +91,17 @@ f = "1.23".to_decimal()
 - `decimal(x)` attempts runtime conversion via `AsDecimal`.
 - `decimal(x, fallback)` returns `fallback` when conversion fails.
 
-`to_decimal()` member methods exist on:
+`decimal()` member methods exist on:
 
-- `int.to_decimal()`
-- `float.to_decimal()`
-- `string.to_decimal()`
-- `decimal.to_decimal()`
+- `int.decimal()`
+- `float.decimal()`
+- `string.decimal()`
+- `decimal.decimal()`
 
 Notable edge cases from implementation:
 
-- `float.to_decimal()` returns decimal `NaN` for `NaN` and infinities.
-- `string.to_decimal()` returns decimal `NaN` for invalid input.
+- `float.decimal()` returns decimal `NaN` for `NaN` and infinities.
+- `string.decimal()` returns decimal `NaN` for invalid input.
 - `decimal("bad")` returns `undefined` (or fallback when provided), because conversion failure is tracked separately from the returned decimal value.
 
 Automatic conversions in mixed operations involving `decimal`:
@@ -123,10 +123,10 @@ decimal(1) + 2.0       // decimal(3)
 
 Decimal member functions:
 
-- Conversion: `to_decimal()`, `to_float()`, `to_int()`, `to_string()`
+- Conversion: `decimal()`, `float()`, `int()`, `string()`
 - Classification: `is_zero()`, `is_negative()`, `is_positive()`, `is_nan()`
 - Metadata: `sign()`, `scale()`, `error_details()`
-- Scale/normalization: `to_scale(scale)`, `canonical()`, `trunc(scale)`
+- Scale/normalization: `rescale(scale)`, `canonical()`, `trunc(scale)`
 - Neighbor/value transforms: `next_up()`, `next_down()`, `abs()`, `negate()`, `sqrt()`
 - Rounding: `round_down(scale)`, `round_up(scale)`, `round_toward_zero(scale)`, `round_away_from_zero(scale)`, `round_half_toward_zero(scale)`, `round_half_away_from_zero(scale)`, `round_bank(scale)`
 
@@ -146,7 +146,7 @@ c = 'A'
 
 Rune member functions:
 
-- Conversion: `to_rune()`, `to_bool()`, `to_int()`, `to_string()`
+- Conversion: `rune()`, `bool()`, `int()`, `string()`
 
 ## string
 
@@ -178,7 +178,7 @@ path = r"C:\Users\Bob"  // backslashes are literal
 
 String member functions:
 
-- Conversion: `to_string()`, `to_array()`, `to_bool()`, `to_bytes()`, `to_float()`, `to_int()`, `to_decimal()`, `to_time()`, `to_record()`, `to_dict()`
+- Conversion: `string()`, `array()`, `bool()`, `bytes()`, `float()`, `int()`, `decimal()`, `time()`, `record()`, `dict()`
 - Transformations and filtering: `lower()`, `upper()`, `trim([cutset])`, `filter(fn)`
 - Predicates and matching: `all(fn)`, `any(fn)`
 - Aggregations: `count(fn)`, `min()`, `max()`
@@ -202,7 +202,7 @@ len(s)                   // 5 (rune count)
 
 Runes member functions:
 
-- Conversion: `to_runes()`, `to_string()`, `to_array()`, `to_bool()`, `to_bytes()`, `to_float()`, `to_int()`, `to_decimal()`, `to_time()`, `to_record()`, `to_dict()`
+- Conversion: `runes()`, `string()`, `array()`, `bool()`, `bytes()`, `float()`, `int()`, `decimal()`, `time()`, `record()`, `dict()`
 - Transformations and filtering: `lower()`, `upper()`, `trim([cutset])`, `sort()`, `filter(fn)`
 - Predicates and matching: `all(fn)`, `any(fn)`
 - Aggregations: `count(fn)`, `min()`, `max()`
@@ -223,7 +223,7 @@ bytes("abc") + bytes("def")     // concatenation
 
 Bytes member functions:
 
-- Conversion: `to_bytes()`, `to_array()`, `to_string()`, `to_record()`, `to_dict()`
+- Conversion: `bytes()`, `array()`, `string()`, `record()`, `dict()`
 - Transformations and filtering: `sort()`, `filter(fn)`
 - Predicates and matching: `all(fn)`, `any(fn)`
 - Aggregations: `count(fn)`, `min()`, `max()`
@@ -239,10 +239,10 @@ t = time("2024-01-01")
 
 Time member functions:
 
-- Conversion: `to_time()`, `to_bool()`, `to_int()`, `to_string()`
+- Conversion: `time()`, `bool()`, `int()`, `string()`
 - Date and time fields: `year()`, `month()`, `day()`, `hour()`, `minute()`, `second()`, `nanosecond()`
 - Epoch and calendar metadata: `unix()`, `unix_nano()`, `week_day()`, `year_day()`, `month_name()`, `week_day_name()`
-- Timezone and formatting: `to_utc()`, `to_local()`, `format_date()`, `format_time()`, `format_datetime()`, `zone_offset()`, `zone_name()`
+- Timezone and formatting: `utc()`, `local()`, `format_date()`, `format_time()`, `format_datetime()`, `zone_offset()`, `zone_name()`
 
 ## error
 
@@ -257,7 +257,7 @@ is_error(e)    // true
 Error member functions:
 
 - Accessors: `value()`
-- Conversion: `to_string()`
+- Conversion: `string()`
 
 ## array
 
@@ -274,7 +274,7 @@ a[0] = 99
 
 Array member functions:
 
-- Conversion: `to_array()`, `to_bytes()`, `to_string()`, `to_record()`, `to_dict()`
+- Conversion: `array()`, `bytes()`, `string()`, `record()`, `dict()`
 - Transformations and filtering: `sort()`, `filter(fn)`, `map(fn)`
 - Predicates and matching: `all(fn)`, `any(fn)`, `contains(x)`
 - Aggregations: `count(fn)`, `reduce(init, fn)`, `min()`, `max()`, `sum()`, `avg()`
@@ -336,7 +336,7 @@ Access rules:
 
 Dict member functions:
 
-- Conversion: `to_record()`, `to_dict()`
+- Conversion: `record()`, `dict()`
 - Queries and accessors: `is_empty()`, `len()`, `keys()`, `values()`, `contains(x)`
 - Filtering and predicates: `filter(fn)`, `count(fn)`, `all(fn)`, `any(fn)`
 
@@ -347,8 +347,8 @@ Ranges are lazy sequences.
 Declaration and usage:
 
 ```go
-range(0, 5).to_array()       // [0, 1, 2, 3, 4]
-range(5, 0, 1).to_array()    // [5, 4, 3, 2, 1]
+range(0, 5).array()       // [0, 1, 2, 3, 4]
+range(5, 0, 1).array()    // [5, 4, 3, 2, 1]
 range(0, 10, 2).contains(4)  // true
 
 for v in range(1, 4) { }     // v = 1, 2, 3
@@ -356,7 +356,7 @@ for v in range(1, 4) { }     // v = 1, 2, 3
 
 Range member functions:
 
-- Conversion: `to_array()`, `to_bytes()`, `to_string()`, `to_record()`, `to_dict()`
+- Conversion: `array()`, `bytes()`, `string()`, `record()`, `dict()`
 - Queries and accessors: `is_empty()`, `len()`, `contains(x)`
 
 ## immutable wrappers

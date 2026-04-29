@@ -81,20 +81,20 @@ func boolTypeEqual(v Value, rhs Value) bool {
 
 func boolTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
 	switch name {
-	case "to_bool":
+	case "bool":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		return v, nil
 
-	case "to_int":
+	case "int":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		b, _ := boolTypeAsInt(v)
 		return IntValue(b), nil
 
-	case "to_string":
+	case "string":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}

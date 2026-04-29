@@ -60,19 +60,6 @@ Boolean-returning methods must use explicit predicate prefixes.
 
 Do not expose bare adjectives/nouns for booleans (`empty()`, `sorted()`, `zero()`).
 
-### Conversion Prefixes (`to_`, `as_`)
-
-Use `to_*` for explicit type conversion methods.
-
-- `to_int()`, `to_float()`, `to_string()`, `to_bytes()`
-
-Avoid `as_*` for general conversions to keep rules simple and unambiguous.
-
-If both strict and non-strict forms are needed, use `to_*` plus `try_to_*`.
-
-- `to_int()` -> strict conversion (fails on invalid value)
-- `try_to_int()` -> non-throwing conversion (returns `(value, ok)` or `null`)
-
 ### Mutating vs Non-mutating Methods
 
 Default convention: methods are non-mutating and return new values where relevant.

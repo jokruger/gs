@@ -121,13 +121,13 @@ func floatTypeEqual(v Value, rhs Value) bool {
 
 func floatTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
 	switch name {
-	case "to_float":
+	case "float":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		return v, nil
 
-	case "to_decimal":
+	case "decimal":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -141,14 +141,14 @@ func floatTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		*d = dec128.FromFloat64(f)
 		return DecimalValue(d), nil
 
-	case "to_int":
+	case "int":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		i, _ := v.AsInt()
 		return IntValue(i), nil
 
-	case "to_string":
+	case "string":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}

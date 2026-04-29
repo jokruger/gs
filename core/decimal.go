@@ -111,13 +111,13 @@ func decimalTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, er
 	alloc := vm.Allocator()
 
 	switch name {
-	case "to_decimal":
+	case "decimal":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		return v, nil
 
-	case "to_float":
+	case "float":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -127,7 +127,7 @@ func decimalTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, er
 		}
 		return FloatValue(f), nil
 
-	case "to_int":
+	case "int":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -137,7 +137,7 @@ func decimalTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, er
 		}
 		return IntValue(i), nil
 
-	case "to_string":
+	case "string":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -186,7 +186,7 @@ func decimalTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, er
 		}
 		return IntValue(int64(o.Scale())), nil
 
-	case "to_scale":
+	case "rescale":
 		if len(args) != 1 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "1", len(args))
 		}

@@ -145,13 +145,13 @@ func dictTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 	alloc := vm.Allocator()
 
 	switch name {
-	case "to_dict":
+	case "dict":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		return v, nil
 
-	case "to_record":
+	case "record":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}

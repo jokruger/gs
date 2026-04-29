@@ -391,9 +391,9 @@ func Test_builtinRange(t *testing.T) {
 				return
 			}
 			if tt.result.Type != core.VT_UNDEFINED {
-				got, err = got.MethodCall(mock.Vm, "to_array", nil)
+				got, err = got.MethodCall(mock.Vm, "array", nil)
 				if err != nil {
-					t.Errorf("builtinRange() to_array error = %s", err.Error())
+					t.Errorf("builtinRange() array error = %s", err.Error())
 					return
 				}
 			}

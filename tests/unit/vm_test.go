@@ -186,12 +186,12 @@ func() {
 	v = core.False
 	expectRun(t, fmt.Sprintf(`out = false == %s`, v.String()), nil, true)
 
-	expectRun(t, `out = true.to_bool()`, nil, true)
-	expectRun(t, `out = false.to_bool()`, nil, false)
-	expectRun(t, `out = true.to_int()`, nil, 1)
-	expectRun(t, `out = false.to_int()`, nil, 0)
-	expectRun(t, `out = true.to_string()`, nil, "true")
-	expectRun(t, `out = false.to_string()`, nil, "false")
+	expectRun(t, `out = true.bool()`, nil, true)
+	expectRun(t, `out = false.bool()`, nil, false)
+	expectRun(t, `out = true.int()`, nil, 1)
+	expectRun(t, `out = false.int()`, nil, 0)
+	expectRun(t, `out = true.string()`, nil, "true")
+	expectRun(t, `out = false.string()`, nil, "false")
 }
 
 func TestInteger(t *testing.T) {
@@ -230,13 +230,13 @@ func TestInteger(t *testing.T) {
 	expectRun(t, `out = 5 + "-5"`, nil, 0)
 	expectRun(t, `out = 5 + "5"`, nil, 10)
 
-	expectRun(t, `out = (12).to_int()`, nil, 12)
-	expectRun(t, `out = (0).to_bool()`, nil, false)
-	expectRun(t, `out = (10).to_bool()`, nil, true)
-	expectRun(t, `out = (48).to_rune()`, nil, '0')
-	expectRun(t, `out = (48).to_float()`, nil, 48.0)
-	expectRun(t, `out = (48).to_string()`, nil, "48")
-	expectRun(t, `out = (1234567890).to_time().to_utc().to_string()`, nil, "2009-02-13 23:31:30 +0000 UTC")
+	expectRun(t, `out = (12).int()`, nil, 12)
+	expectRun(t, `out = (0).bool()`, nil, false)
+	expectRun(t, `out = (10).bool()`, nil, true)
+	expectRun(t, `out = (48).rune()`, nil, '0')
+	expectRun(t, `out = (48).float()`, nil, 48.0)
+	expectRun(t, `out = (48).string()`, nil, "48")
+	expectRun(t, `out = (1234567890).time().utc().string()`, nil, "2009-02-13 23:31:30 +0000 UTC")
 }
 
 func TestFloat(t *testing.T) {
@@ -258,9 +258,9 @@ func TestFloat(t *testing.T) {
 	expectRun(t, `out = 5.0 + "-5.0"`, nil, 0.0)
 	expectRun(t, `out = 5.0 + "5.0"`, nil, 10.0)
 
-	expectRun(t, `out = (1.5).to_float()`, nil, 1.5)
-	expectRun(t, `out = (1.5).to_int()`, nil, 1)
-	expectRun(t, `out = (1.5).to_string()`, nil, "1.5")
+	expectRun(t, `out = (1.5).float()`, nil, 1.5)
+	expectRun(t, `out = (1.5).int()`, nil, 1)
+	expectRun(t, `out = (1.5).string()`, nil, "1.5")
 
 	// f-suffix float literals
 	expectRun(t, `out = 1f`, nil, 1.0)
@@ -275,9 +275,9 @@ func TestDecimal(t *testing.T) {
 	expectRun(t, `out = decimal(1.23)`, nil, dec128.FromFloat64(1.23))
 	expectRun(t, `out = decimal("1.23")`, nil, dec128.FromString("1.23"))
 
-	expectRun(t, `out = (123).to_decimal()`, nil, dec128.FromInt64(123))
-	expectRun(t, `out = (1.23).to_decimal()`, nil, dec128.FromFloat64(1.23))
-	expectRun(t, `out = "1.23".to_decimal()`, nil, dec128.FromString("1.23"))
+	expectRun(t, `out = (123).decimal()`, nil, dec128.FromInt64(123))
+	expectRun(t, `out = (1.23).decimal()`, nil, dec128.FromFloat64(1.23))
+	expectRun(t, `out = "1.23".decimal()`, nil, dec128.FromString("1.23"))
 
 	expectRun(t, `out = decimal(1) + decimal(2)`, nil, dec128.FromString("3"))
 	expectRun(t, `out = decimal(1) + 2`, nil, dec128.FromString("3"))
@@ -296,10 +296,10 @@ func TestDecimal(t *testing.T) {
 	expectRun(t, `out = 1.5d + 0.5d`, nil, dec128.FromString("2"))
 	expectRun(t, `out = -1d`, nil, dec128.FromInt64(-1))
 
-	expectRun(t, `out = (1.23d).to_decimal()`, nil, dec128.FromString("1.23"))
-	expectRun(t, `out = (123d).to_float().to_decimal()`, nil, dec128.FromString("123"))
-	expectRun(t, `out = (123d).to_int().to_decimal()`, nil, dec128.FromString("123"))
-	expectRun(t, `out = (1.23d).to_string()`, nil, "1.23")
+	expectRun(t, `out = (1.23d).decimal()`, nil, dec128.FromString("1.23"))
+	expectRun(t, `out = (123d).float().decimal()`, nil, dec128.FromString("123"))
+	expectRun(t, `out = (123d).int().decimal()`, nil, dec128.FromString("123"))
+	expectRun(t, `out = (1.23d).string()`, nil, "1.23")
 	expectRun(t, `out = (1.23d).is_zero()`, nil, false)
 	expectRun(t, `out = (0d).is_zero()`, nil, true)
 	expectRun(t, `out = (0d).is_negative()`, nil, false)
@@ -311,8 +311,8 @@ func TestDecimal(t *testing.T) {
 	expectRun(t, `out = (0d).sign()`, nil, 0)
 	expectRun(t, `out = (1d).sign()`, nil, 1)
 	expectRun(t, `out = (-1d).sign()`, nil, -1)
-	expectRun(t, `out = (123d).to_scale(2).scale()`, nil, 2)
-	expectRun(t, `out = (123d).to_scale(2).canonical().scale()`, nil, 0)
+	expectRun(t, `out = (123d).rescale(2).scale()`, nil, 2)
+	expectRun(t, `out = (123d).rescale(2).canonical().scale()`, nil, 0)
 }
 
 func TestChar(t *testing.T) {
@@ -353,10 +353,10 @@ func TestChar(t *testing.T) {
 	expectRun(t, `out = '4' + "4"`, nil, "44")
 	expectError(t, `'4' - "4"`, nil, "invalid binary operator: rune - string")
 
-	expectRun(t, `out = '4'.to_rune()`, nil, '4')
-	expectRun(t, `out = '4'.to_bool()`, nil, true)
-	expectRun(t, `out = '4'.to_int()`, nil, 52)
-	expectRun(t, `out = '4'.to_string()`, nil, "4")
+	expectRun(t, `out = '4'.rune()`, nil, '4')
+	expectRun(t, `out = '4'.bool()`, nil, true)
+	expectRun(t, `out = '4'.int()`, nil, 52)
+	expectRun(t, `out = '4'.string()`, nil, "4")
 }
 
 func TestString(t *testing.T) {
@@ -466,22 +466,22 @@ func TestString(t *testing.T) {
 	expectRun(t, `out = "abcd ".trim()`, nil, "abcd")
 	expectRun(t, `out = "abcd".trim("ad")`, nil, "bc")
 
-	expectRun(t, `out = "abc".to_string()`, nil, "abc")
-	expectRun(t, `out = "abc".to_array()`, nil, ARR{int64('a'), int64('b'), int64('c')})
-	expectRun(t, `out = "abc".to_array().to_string()`, nil, "abc")
-	expectRun(t, `out = "true".to_bool()`, nil, true)
-	expectRun(t, `out = "false".to_bool()`, nil, false)
-	expectRun(t, `out = "abc".to_bool()`, nil, false)
-	expectRun(t, `out = "true".to_bool().to_string()`, nil, "true")
-	expectRun(t, `out = "abc".to_bytes()`, nil, core.NewBytesValue([]byte{'a', 'b', 'c'}))
-	expectRun(t, `out = "abc".to_bytes().to_string()`, nil, "abc")
-	expectRun(t, `out = "1.2".to_float()`, nil, 1.2)
-	expectRun(t, `out = "1.2".to_float().to_string()`, nil, "1.2")
-	expectRun(t, `out = "12".to_int()`, nil, 12)
-	expectRun(t, `out = "12".to_float().to_string()`, nil, "12")
-	expectRun(t, `out = "abc".to_int()`, nil, 0)
-	expectRun(t, `out = "abc".to_record()`, nil, MAP{"0": 'a', "1": 'b', "2": 'c'})
-	expectRun(t, `out = "abc".to_dict()`, nil, MAP{"0": 'a', "1": 'b', "2": 'c'})
+	expectRun(t, `out = "abc".string()`, nil, "abc")
+	expectRun(t, `out = "abc".array()`, nil, ARR{int64('a'), int64('b'), int64('c')})
+	expectRun(t, `out = "abc".array().string()`, nil, "abc")
+	expectRun(t, `out = "true".bool()`, nil, true)
+	expectRun(t, `out = "false".bool()`, nil, false)
+	expectRun(t, `out = "abc".bool()`, nil, false)
+	expectRun(t, `out = "true".bool().string()`, nil, "true")
+	expectRun(t, `out = "abc".bytes()`, nil, core.NewBytesValue([]byte{'a', 'b', 'c'}))
+	expectRun(t, `out = "abc".bytes().string()`, nil, "abc")
+	expectRun(t, `out = "1.2".float()`, nil, 1.2)
+	expectRun(t, `out = "1.2".float().string()`, nil, "1.2")
+	expectRun(t, `out = "12".int()`, nil, 12)
+	expectRun(t, `out = "12".float().string()`, nil, "12")
+	expectRun(t, `out = "abc".int()`, nil, 0)
+	expectRun(t, `out = "abc".record()`, nil, MAP{"0": 'a', "1": 'b', "2": 'c'})
+	expectRun(t, `out = "abc".dict()`, nil, MAP{"0": 'a', "1": 'b', "2": 'c'})
 
 	expectRun(t, `out = " їЇґҐ ".trim()`, nil, "їЇґҐ")
 	expectRun(t, `out = "їЇґҐ".upper()`, nil, "ЇЇҐҐ")
@@ -546,22 +546,22 @@ func TestRunes(t *testing.T) {
 	expectRun(t, `out = runes("abcd ").trim()`, nil, []rune("abcd"))
 	expectRun(t, `out = runes("abcd").trim("ad")`, nil, []rune("bc"))
 
-	expectRun(t, `out = runes("abc").to_string()`, nil, "abc")
-	expectRun(t, `out = runes("abc").to_array()`, nil, ARR{'a', 'b', 'c'})
-	expectRun(t, `out = runes("abc").to_array().to_string()`, nil, "abc")
-	expectRun(t, `out = runes("true").to_bool()`, nil, true)
-	expectRun(t, `out = runes("false").to_bool()`, nil, false)
-	expectRun(t, `out = runes("abc").to_bool()`, nil, false)
-	expectRun(t, `out = runes("true").to_bool().to_string()`, nil, "true")
-	expectRun(t, `out = runes("abc").to_bytes()`, nil, core.NewBytesValue([]byte{'a', 'b', 'c'}))
-	expectRun(t, `out = runes("abc").to_bytes().to_string()`, nil, "abc")
-	expectRun(t, `out = runes("1.2").to_float()`, nil, 1.2)
-	expectRun(t, `out = runes("1.2").to_float().to_string()`, nil, "1.2")
-	expectRun(t, `out = runes("12").to_int()`, nil, 12)
-	expectRun(t, `out = runes("12").to_float().to_string()`, nil, "12")
-	expectRun(t, `out = runes("abc").to_int()`, nil, 0)
-	expectRun(t, `out = runes("abc").to_record()`, nil, MAP{"0": 'a', "1": 'b', "2": 'c'})
-	expectRun(t, `out = runes("abc").to_dict()`, nil, MAP{"0": 'a', "1": 'b', "2": 'c'})
+	expectRun(t, `out = runes("abc").string()`, nil, "abc")
+	expectRun(t, `out = runes("abc").array()`, nil, ARR{'a', 'b', 'c'})
+	expectRun(t, `out = runes("abc").array().string()`, nil, "abc")
+	expectRun(t, `out = runes("true").bool()`, nil, true)
+	expectRun(t, `out = runes("false").bool()`, nil, false)
+	expectRun(t, `out = runes("abc").bool()`, nil, false)
+	expectRun(t, `out = runes("true").bool().string()`, nil, "true")
+	expectRun(t, `out = runes("abc").bytes()`, nil, core.NewBytesValue([]byte{'a', 'b', 'c'}))
+	expectRun(t, `out = runes("abc").bytes().string()`, nil, "abc")
+	expectRun(t, `out = runes("1.2").float()`, nil, 1.2)
+	expectRun(t, `out = runes("1.2").float().string()`, nil, "1.2")
+	expectRun(t, `out = runes("12").int()`, nil, 12)
+	expectRun(t, `out = runes("12").float().string()`, nil, "12")
+	expectRun(t, `out = runes("abc").int()`, nil, 0)
+	expectRun(t, `out = runes("abc").record()`, nil, MAP{"0": 'a', "1": 'b', "2": 'c'})
+	expectRun(t, `out = runes("abc").dict()`, nil, MAP{"0": 'a', "1": 'b', "2": 'c'})
 
 	expectRun(t, `out = runes(" їЇґҐ ").trim()`, nil, []rune("їЇґҐ"))
 	expectRun(t, `out = u" їЇґҐ ".trim()`, nil, []rune("їЇґҐ"))
@@ -607,7 +607,7 @@ func TestError(t *testing.T) {
 	expectRun(t, `out = error(error("foo"))`, nil, errorObject(errorObject("foo")))
 	expectRun(t, `out = error("some error")`, nil, errorObject("some error"))
 	expectRun(t, `out = error("some error").value()`, nil, "some error")
-	expectRun(t, `out = error("some error").to_string()`, nil, "some error")
+	expectRun(t, `out = error("some error").string()`, nil, "some error")
 
 	expectError(t, `error("error").err`, nil, "object is not accessible: type error does not support indexing or field access")
 	expectError(t, `error("error").value_`, nil, "object is not accessible: type error does not support indexing or field access")
@@ -738,11 +738,11 @@ func TestArray(t *testing.T) {
 	expectRun(t, `out = [1, 2, 3].reduce(0, (a, i, v) => a + i)`, nil, 3)
 	expectRun(t, `out = [1, 2].reduce(0, (a, v) => a + [10, 20].reduce(0, (b, w) => b + w) + v)`, nil, 63)
 
-	expectRun(t, `out = [1, 2, 3].to_array()`, nil, ARR{1, 2, 3})
-	expectRun(t, `out = [48, 49, -1].to_bytes()`, nil, core.NewBytesValue([]byte{48, 49, 0}))
-	expectRun(t, `out = [48, 49, -1].to_record()`, nil, MAP{"0": 48, "1": 49, "2": -1})
-	expectRun(t, `out = [48, 49, -1].to_dict()`, nil, MAP{"0": 48, "1": 49, "2": -1})
-	expectRun(t, `out = [48, 49, 50].to_string()`, nil, "012")
+	expectRun(t, `out = [1, 2, 3].array()`, nil, ARR{1, 2, 3})
+	expectRun(t, `out = [48, 49, -1].bytes()`, nil, core.NewBytesValue([]byte{48, 49, 0}))
+	expectRun(t, `out = [48, 49, -1].record()`, nil, MAP{"0": 48, "1": 49, "2": -1})
+	expectRun(t, `out = [48, 49, -1].dict()`, nil, MAP{"0": 48, "1": 49, "2": -1})
+	expectRun(t, `out = [48, 49, 50].string()`, nil, "012")
 
 	expectRun(t, `out = 2 in [1, 2, 3]`, nil, true)
 	expectRun(t, `out = [1, 2, 3].contains(2)`, nil, true)
@@ -825,7 +825,7 @@ func TestDict(t *testing.T) {
 	}, false).String()), nil, true)
 
 	expectRun(t, `out = dict({a: 1, b: 2})["b"]`, nil, 2)
-	expectRun(t, `out = dict({a: 1, b: 2}).to_record().b`, nil, 2)
+	expectRun(t, `out = dict({a: 1, b: 2}).record().b`, nil, 2)
 	expectRun(t, `out = dict({a: 1, b: 2})["q"]`, nil, core.Undefined)
 	expectRun(t, `out = "a" in dict({a: 1, b: 2})`, nil, true)
 	expectRun(t, `out = "q" in dict({a: 1, b: 2})`, nil, false)
@@ -886,11 +886,11 @@ func TestTime(t *testing.T) {
 	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").format_date()`, nil, "2020-06-20")
 	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").format_time()`, nil, "01:02:03")
 	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").format_datetime()`, nil, "2020-06-20 01:02:03")
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").to_utc().to_string()`, nil, "2020-06-19 23:02:03.000000004 +0000 UTC")
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").utc().string()`, nil, "2020-06-19 23:02:03.000000004 +0000 UTC")
 	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").zone_offset()`, nil, 7200)
 
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").to_string()`, nil, "2020-06-20 01:02:03.000000004 +0200 +0200")
-	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").to_int().to_time().to_utc().to_string()`, nil, "2020-06-19 23:02:03 +0000 UTC")
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").string()`, nil, "2020-06-20 01:02:03.000000004 +0200 +0200")
+	expectRun(t, `out = time("2020-06-20 01:02:03.000000004 +0200").int().time().utc().string()`, nil, "2020-06-19 23:02:03 +0000 UTC")
 }
 
 func TestBytes(t *testing.T) {
@@ -919,11 +919,11 @@ func TestBytes(t *testing.T) {
 	expectRun(t, `out = bytes("abcde").first()`, nil, 97)
 	expectRun(t, `out = bytes("abcde").last()`, nil, 101)
 
-	expectRun(t, `out = bytes("abc").to_array()`, nil, ARR{97, 98, 99})
-	expectRun(t, `out = bytes("abc").to_record()`, nil, MAP{"0": 97, "1": 98, "2": 99})
-	expectRun(t, `out = bytes("abc").to_dict()`, nil, MAP{"0": 97, "1": 98, "2": 99})
-	expectRun(t, `out = bytes("abc").to_string()`, nil, "abc")
-	expectRun(t, `out = "abc".to_bytes().to_array().to_string()`, nil, "abc")
+	expectRun(t, `out = bytes("abc").array()`, nil, ARR{97, 98, 99})
+	expectRun(t, `out = bytes("abc").record()`, nil, MAP{"0": 97, "1": 98, "2": 99})
+	expectRun(t, `out = bytes("abc").dict()`, nil, MAP{"0": 97, "1": 98, "2": 99})
+	expectRun(t, `out = bytes("abc").string()`, nil, "abc")
+	expectRun(t, `out = "abc".bytes().array().string()`, nil, "abc")
 
 	expectRun(t, `out = 98 in bytes("abc")`, nil, true)
 	expectRun(t, `out = bytes("abc").contains(98)`, nil, true)
@@ -1024,11 +1024,11 @@ x := bytes("abcdefg")
 y := x[2:5]
 res1 := ""
 for v in x {
-	res1 += v.to_rune()
+	res1 += v.rune()
 }
 res2 := ""
 for v in y {
-	res2 += v.to_rune()
+	res2 += v.rune()
 }
 out = [res1, res2]
 `, nil, ARR{"abcdefg", "cde"})
@@ -1040,13 +1040,13 @@ isum1 := 0
 res1 := ""
 for i, v in x {
 	isum1 += i
-	res1 += v.to_rune()
+	res1 += v.rune()
 }
 isum2 := 0
 res2 := ""
 for i, v in y {
 	isum2 += i
-	res2 += v.to_rune()
+	res2 += v.rune()
 }
 out = [isum1, res1, isum2, res2]
 `, nil, ARR{21, "abcdefg", 3, "cde"})
@@ -1097,12 +1097,12 @@ out = [sum1, sum2]
 }
 
 func TestRange(t *testing.T) {
-	expectRun(t, `out = range(97, 103, 1).to_bytes().to_string()`, nil, "abcdef")
-	expectRun(t, `out = range(103, 97, 1).to_bytes().to_string()`, nil, "gfedcb")
-	expectRun(t, `out = range(97, 103, 1).to_string()`, nil, "abcdef")
-	expectRun(t, `out = range(103, 97, 1).to_string()`, nil, "gfedcb")
-	expectRun(t, `out = range(1, 3, 1).to_record()`, nil, MAP{"0": 1, "1": 2})
-	expectRun(t, `out = range(1, 3, 1).to_dict()`, nil, MAP{"0": 1, "1": 2})
+	expectRun(t, `out = range(97, 103, 1).bytes().string()`, nil, "abcdef")
+	expectRun(t, `out = range(103, 97, 1).bytes().string()`, nil, "gfedcb")
+	expectRun(t, `out = range(97, 103, 1).string()`, nil, "abcdef")
+	expectRun(t, `out = range(103, 97, 1).string()`, nil, "gfedcb")
+	expectRun(t, `out = range(1, 3, 1).record()`, nil, MAP{"0": 1, "1": 2})
+	expectRun(t, `out = range(1, 3, 1).dict()`, nil, MAP{"0": 1, "1": 2})
 
 	expectRun(t, `r := range(0, 10, 1); out = r.len()`, nil, 10)
 	expectRun(t, `r := range(0, 10, 2); out = r.len()`, nil, 5)
@@ -1141,21 +1141,21 @@ func TestRange(t *testing.T) {
 	expectRun(t, `r := range(100, 0, 5); out = r.len()`, nil, 20)
 	expectRun(t, `r := range(100, 0, 10); out = r.len()`, nil, 10)
 
-	expectRun(t, `r := range(0, 5, 1); out = r.to_array()`, nil, ARR{0, 1, 2, 3, 4})
-	expectRun(t, `r := range(5, 0, 1); out = r.to_array()`, nil, ARR{5, 4, 3, 2, 1})
-	expectRun(t, `r := range(-5, 5, 1); out = r.to_array()`, nil, ARR{-5, -4, -3, -2, -1, 0, 1, 2, 3, 4})
+	expectRun(t, `r := range(0, 5, 1); out = r.array()`, nil, ARR{0, 1, 2, 3, 4})
+	expectRun(t, `r := range(5, 0, 1); out = r.array()`, nil, ARR{5, 4, 3, 2, 1})
+	expectRun(t, `r := range(-5, 5, 1); out = r.array()`, nil, ARR{-5, -4, -3, -2, -1, 0, 1, 2, 3, 4})
 
-	expectRun(t, `r := range(0, 10, 1); out = r.to_array()`, nil, ARR{0, 1, 2, 3, 4, 5, 6, 7, 8, 9})
-	expectRun(t, `r := range(0, 10, 2); out = r.to_array()`, nil, ARR{0, 2, 4, 6, 8})
-	expectRun(t, `r := range(0, 10, 3); out = r.to_array()`, nil, ARR{0, 3, 6, 9})
-	expectRun(t, `r := range(0, 10, 4); out = r.to_array()`, nil, ARR{0, 4, 8})
-	expectRun(t, `r := range(0, 10, 5); out = r.to_array()`, nil, ARR{0, 5})
+	expectRun(t, `r := range(0, 10, 1); out = r.array()`, nil, ARR{0, 1, 2, 3, 4, 5, 6, 7, 8, 9})
+	expectRun(t, `r := range(0, 10, 2); out = r.array()`, nil, ARR{0, 2, 4, 6, 8})
+	expectRun(t, `r := range(0, 10, 3); out = r.array()`, nil, ARR{0, 3, 6, 9})
+	expectRun(t, `r := range(0, 10, 4); out = r.array()`, nil, ARR{0, 4, 8})
+	expectRun(t, `r := range(0, 10, 5); out = r.array()`, nil, ARR{0, 5})
 
-	expectRun(t, `r := range(10, 0, 1); out = r.to_array()`, nil, ARR{10, 9, 8, 7, 6, 5, 4, 3, 2, 1})
-	expectRun(t, `r := range(10, 0, 2); out = r.to_array()`, nil, ARR{10, 8, 6, 4, 2})
-	expectRun(t, `r := range(10, 0, 3); out = r.to_array()`, nil, ARR{10, 7, 4, 1})
-	expectRun(t, `r := range(10, 0, 4); out = r.to_array()`, nil, ARR{10, 6, 2})
-	expectRun(t, `r := range(10, 0, 5); out = r.to_array()`, nil, ARR{10, 5})
+	expectRun(t, `r := range(10, 0, 1); out = r.array()`, nil, ARR{10, 9, 8, 7, 6, 5, 4, 3, 2, 1})
+	expectRun(t, `r := range(10, 0, 2); out = r.array()`, nil, ARR{10, 8, 6, 4, 2})
+	expectRun(t, `r := range(10, 0, 3); out = r.array()`, nil, ARR{10, 7, 4, 1})
+	expectRun(t, `r := range(10, 0, 4); out = r.array()`, nil, ARR{10, 6, 2})
+	expectRun(t, `r := range(10, 0, 5); out = r.array()`, nil, ARR{10, 5})
 
 	expectRun(t, `r := range(0, 100, 1); out = r[0]`, nil, 0)
 	expectRun(t, `r := range(0, 100, 1); out = r[1]`, nil, 1)
@@ -1219,7 +1219,7 @@ for i, e in range(1, 10, 2) {
 
 	expectRun(t, `
 r := range(-10, 10, 1)
-a := r.to_array()
+a := r.array()
 s1 := 0
 s2 := 0
 for i, e in r {
@@ -1231,7 +1231,7 @@ out = [s1, s2]
 
 	expectRun(t, `
 r := range(10, -10, 1)
-a := r.to_array()
+a := r.array()
 s1 := 0
 s2 := 0
 for i, e in r {

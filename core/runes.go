@@ -132,53 +132,53 @@ func runesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 	alloc := vm.Allocator()
 
 	switch name {
-	case "to_runes":
+	case "runes":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		return v, nil
 
-	case "to_string":
+	case "string":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		return alloc.NewStringValue(string(o.Elements)), nil
 
-	case "to_array":
+	case "array":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		t, _ := runesTypeAsArray(v, alloc)
 		return alloc.NewArrayValue(t, false), nil
 
-	case "to_bool":
+	case "bool":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		b, _ := runesTypeAsBool(v)
 		return BoolValue(b), nil
 
-	case "to_bytes":
+	case "bytes":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		return alloc.NewBytesValue([]byte(string(o.Elements))), nil
 
-	case "to_float":
+	case "float":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		f, _ := runesTypeAsFloat(v)
 		return FloatValue(f), nil
 
-	case "to_int":
+	case "int":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		i, _ := runesTypeAsInt(v)
 		return IntValue(i), nil
 
-	case "to_decimal":
+	case "decimal":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -187,7 +187,7 @@ func runesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		*r = d
 		return DecimalValue(r), nil
 
-	case "to_time":
+	case "time":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -196,7 +196,7 @@ func runesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		*d = t
 		return TimeValue(d), nil
 
-	case "to_record":
+	case "record":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -206,7 +206,7 @@ func runesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		}
 		return alloc.NewRecordValue(m, false), nil
 
-	case "to_dict":
+	case "dict":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}

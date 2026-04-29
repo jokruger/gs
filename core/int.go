@@ -101,20 +101,20 @@ func intTypeEqual(v Value, rhs Value) bool {
 
 func intTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
 	switch name {
-	case "to_int":
+	case "int":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		return v, nil
 
-	case "to_float":
+	case "float":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		f, _ := v.AsFloat()
 		return FloatValue(f), nil
 
-	case "to_decimal":
+	case "decimal":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -124,28 +124,28 @@ func intTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error)
 		*r = d
 		return DecimalValue(r), nil
 
-	case "to_bool":
+	case "bool":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		b, _ := v.AsBool()
 		return BoolValue(b), nil
 
-	case "to_rune":
+	case "rune":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		c, _ := v.AsRune()
 		return RuneValue(c), nil
 
-	case "to_string":
+	case "string":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		s, _ := v.AsString()
 		return vm.Allocator().NewStringValue(s), nil
 
-	case "to_time":
+	case "time":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}

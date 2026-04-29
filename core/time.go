@@ -85,27 +85,27 @@ func timeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 	o := (*time.Time)(v.Ptr)
 
 	switch name {
-	case "to_time":
+	case "time":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		return v, nil
 
-	case "to_bool":
+	case "bool":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		b, _ := timeTypeAsBool(v)
 		return BoolValue(b), nil
 
-	case "to_int":
+	case "int":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		i, _ := timeTypeAsInt(v)
 		return IntValue(i), nil
 
-	case "to_string":
+	case "string":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -189,7 +189,7 @@ func timeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 		}
 		return vm.Allocator().NewStringValue(o.Weekday().String()), nil
 
-	case "to_utc":
+	case "utc":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -197,7 +197,7 @@ func timeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 		*d = o.UTC()
 		return TimeValue(d), nil
 
-	case "to_local":
+	case "local":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}

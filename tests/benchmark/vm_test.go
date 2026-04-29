@@ -9,7 +9,7 @@ import (
 )
 
 func BenchmarkVM(b *testing.B) {
-	//src := []byte(`out = range(1, 10000, 1).to_array().reduce(0, (a, b) => a + b * b)`)
+	//src := []byte(`out = range(1, 10000, 1).array().reduce(0, (a, b) => a + b * b)`)
 
 	src := []byte(`
 out = decimal(0)

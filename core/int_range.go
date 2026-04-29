@@ -142,7 +142,7 @@ func intRangeTypeCopy(v Value, a *Arena) (Value, error) {
 
 func intRangeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
 	switch name {
-	case "to_array":
+	case "array":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
@@ -150,16 +150,16 @@ func intRangeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, e
 		t, _ := intRangeTypeAsArray(v, a)
 		return a.NewArrayValue(t, false), nil
 
-	case "to_bytes":
+	case "bytes":
 		return intRangeFnToBytes(v, vm, args)
 
-	case "to_string":
+	case "string":
 		return intRangeFnToString(v, vm, args)
 
-	case "to_record":
+	case "record":
 		return intRangeFnToRecord(v, vm, args)
 
-	case "to_dict":
+	case "dict":
 		return intRangeFnToDict(v, vm, args)
 
 	case "is_empty":
@@ -189,7 +189,7 @@ func intRangeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, e
 
 func intRangeFnToBytes(v Value, vm VM, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return Undefined, errs.NewWrongNumArgumentsError("to_bytes", "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError("bytes", "0", len(args))
 	}
 	o := (*IntRange)(v.Ptr)
 	alloc := vm.Allocator()
@@ -214,7 +214,7 @@ func intRangeFnToBytes(v Value, vm VM, args []Value) (Value, error) {
 
 func intRangeFnToString(v Value, vm VM, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return Undefined, errs.NewWrongNumArgumentsError("to_string", "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError("string", "0", len(args))
 	}
 	o := (*IntRange)(v.Ptr)
 	alloc := vm.Allocator()
@@ -239,7 +239,7 @@ func intRangeFnToString(v Value, vm VM, args []Value) (Value, error) {
 
 func intRangeFnToRecord(v Value, vm VM, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return Undefined, errs.NewWrongNumArgumentsError("to_record", "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError("record", "0", len(args))
 	}
 	o := (*IntRange)(v.Ptr)
 	alloc := vm.Allocator()
@@ -264,7 +264,7 @@ func intRangeFnToRecord(v Value, vm VM, args []Value) (Value, error) {
 
 func intRangeFnToDict(v Value, vm VM, args []Value) (Value, error) {
 	if len(args) != 0 {
-		return Undefined, errs.NewWrongNumArgumentsError("to_dict", "0", len(args))
+		return Undefined, errs.NewWrongNumArgumentsError("dict", "0", len(args))
 	}
 	o := (*IntRange)(v.Ptr)
 	alloc := vm.Allocator()

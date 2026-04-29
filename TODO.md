@@ -123,6 +123,7 @@
 - add flag to `immutable` function to do a deep immutability (for arrays/dicts/records) - so all nested structures will be immutable as well
 - go style switch with multi-value cases, default, etc
 - "not in" operator
+- string/rune/bytes/array * int => repeat n times
   
 # enum module
 implement following function from enums, then remove this module
@@ -147,19 +148,6 @@ enumerable = array, record, dict
     return res
   },
 
-  // at returns an element at the given index (if `x` is array) or
-  // key (if `x` is dict). It returns undefined if `x` is not enumerable.
-  at: func(x, key) {
-    if !is_enumerable(x) { return undefined }
-
-    if is_array_like(x) {
-        if !is_int(key) { return undefined }
-    } else {
-        if !is_string(key) { return undefined }
-    }
-
-    return x[key]
-  },
   // each iterates over elements of `x` and invokes `fn` for each element. `fn` is
   // invoked with two arguments: `key` and `value`. `key` is an int index
   // if `x` is array. `key` is a string key if `x` is dict. It does not iterate
@@ -171,6 +159,7 @@ enumerable = array, record, dict
       fn(k, v)
     }
   },
+
   // filter iterates over elements of `x`, returning an array of all elements `fn`
   // returns truthy for. `fn` is invoked with two arguments: `key` and `value`.
   // `key` is an int index if `x` is array. It returns undefined if `x` is not array.
@@ -184,6 +173,7 @@ enumerable = array, record, dict
 
     return dst
   },
+
   // find iterates over elements of `x`, returning value of the first element `fn`
   // returns truthy for. `fn` is invoked with two arguments: `key` and `value`.
   // `key` is an int index if `x` is array. `key` is a string key if `x` is dict.
@@ -195,6 +185,7 @@ enumerable = array, record, dict
       if fn(k, v) { return v }
     }
   },
+
   // find_key iterates over elements of `x`, returning key or index of the first
   // element `fn` returns truthy for. `fn` is invoked with two arguments: `key`
   // and `value`. `key` is an int index if `x` is array. `key` is a string key if
@@ -206,6 +197,7 @@ enumerable = array, record, dict
       if fn(k, v) { return k }
     }
   },
+
   // map creates an array of values by running each element in `x` through `fn`.
   // `fn` is invoked with two arguments: `key` and `value`. `key` is an int index
   // if `x` is array. `key` is a string key if `x` is dict. It returns undefined
@@ -220,8 +212,10 @@ enumerable = array, record, dict
 
     return dst
   },
+
   // key returns the first argument.
   key: func(k, _) { return k },
+
   // value returns the second argument.
   value: func(_, v) { return v }
 }

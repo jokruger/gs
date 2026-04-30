@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -136,6 +135,12 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		}
 		return v, nil
 
+	case "bytes":
+		if len(args) != 0 {
+			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
+		}
+		return alloc.NewBytesValue([]byte(o.Value)), nil
+
 	case "runes":
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
@@ -159,12 +164,6 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		}
 		b, _ := stringTypeAsBool(v)
 		return BoolValue(b), nil
-
-	case "bytes":
-		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
-		}
-		return alloc.NewBytesValue([]byte(o.Value)), nil
 
 	case "float":
 		if len(args) != 0 {
@@ -236,42 +235,6 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
 		return IntValue(int64(len(o.Value))), nil
-
-	case "first":
-		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
-		}
-		if len(o.Value) == 0 {
-			return Undefined, nil
-		}
-		return ByteValue(o.Value[0]), nil
-
-	case "last":
-		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
-		}
-		if len(o.Value) == 0 {
-			return Undefined, nil
-		}
-		return ByteValue(o.Value[len(o.Value)-1]), nil
-
-	case "min":
-		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
-		}
-		if len(o.Value) == 0 {
-			return Undefined, nil
-		}
-		return ByteValue(slices.Min([]byte(o.Value))), nil
-
-	case "max":
-		if len(args) != 0 {
-			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
-		}
-		if len(o.Value) == 0 {
-			return Undefined, nil
-		}
-		return ByteValue(slices.Max([]byte(o.Value))), nil
 
 	case "lower":
 		if len(args) != 0 {

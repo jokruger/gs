@@ -123,17 +123,23 @@
 - add flag to `immutable` function to do a deep immutability (for arrays/dicts/records) - so all nested structures will be immutable as well
 - go style switch with multi-value cases, default, etc
 - "not in" operator
-- string/rune/bytes/array * int => repeat n times
-  
+- string/rune/bytes/array \* int => repeat n times
+- slices.compact
+- .reverse method
+
+- compile time tail call optimization - runtime vm should not be smart, just a stupid loop over switch cases, all decisions should be made at compile time
+- inlining and other optimizations
+
 # enum module
+
 implement following function from enums, then remove this module
 
 enumerable = array, record, dict
 
-  // chunk returns an array of elements split into groups the length of size.
-  // If `x` can't be split evenly, the final chunk will be the remaining elements.
-  chunk: func(x, size) {
-    if !is_array_like(x) || !size { return undefined }
+// chunk returns an array of elements split into groups the length of size.
+// If `x` can't be split evenly, the final chunk will be the remaining elements.
+chunk: func(x, size) {
+if !is_array_like(x) || !size { return undefined }
 
     numElements := len(x)
     if !numElements { return [] }
@@ -146,25 +152,27 @@ enumerable = array, record, dict
     }
 
     return res
-  },
 
-  // each iterates over elements of `x` and invokes `fn` for each element. `fn` is
-  // invoked with two arguments: `key` and `value`. `key` is an int index
-  // if `x` is array. `key` is a string key if `x` is dict. It does not iterate
-  // and returns undefined if `x` is not enumerable.
-  each: func(x, fn) {
-    if !is_enumerable(x) { return undefined }
+},
+
+// each iterates over elements of `x` and invokes `fn` for each element. `fn` is
+// invoked with two arguments: `key` and `value`. `key` is an int index
+// if `x` is array. `key` is a string key if `x` is dict. It does not iterate
+// and returns undefined if `x` is not enumerable.
+each: func(x, fn) {
+if !is_enumerable(x) { return undefined }
 
     for k, v in x {
       fn(k, v)
     }
-  },
 
-  // filter iterates over elements of `x`, returning an array of all elements `fn`
-  // returns truthy for. `fn` is invoked with two arguments: `key` and `value`.
-  // `key` is an int index if `x` is array. It returns undefined if `x` is not array.
-  filter: func(x, fn) {
-    if !is_array_like(x) { return undefined }
+},
+
+// filter iterates over elements of `x`, returning an array of all elements `fn`
+// returns truthy for. `fn` is invoked with two arguments: `key` and `value`.
+// `key` is an int index if `x` is array. It returns undefined if `x` is not array.
+filter: func(x, fn) {
+if !is_array_like(x) { return undefined }
 
     dst := []
     for k, v in x {
@@ -172,28 +180,31 @@ enumerable = array, record, dict
     }
 
     return dst
-  },
 
-  // find iterates over elements of `x`, returning value of the first element `fn`
-  // returns truthy for. `fn` is invoked with two arguments: `key` and `value`.
-  // `key` is an int index if `x` is array. `key` is a string key if `x` is dict.
-  // It returns undefined if `x` is not enumerable.
-  find: func(x, fn) {
-    if !is_enumerable(x) { return undefined }
+},
+
+// find iterates over elements of `x`, returning value of the first element `fn`
+// returns truthy for. `fn` is invoked with two arguments: `key` and `value`.
+// `key` is an int index if `x` is array. `key` is a string key if `x` is dict.
+// It returns undefined if `x` is not enumerable.
+find: func(x, fn) {
+if !is_enumerable(x) { return undefined }
 
     for k, v in x {
       if fn(k, v) { return v }
     }
-  },
 
-  // find_key iterates over elements of `x`, returning key or index of the first
-  // element `fn` returns truthy for. `fn` is invoked with two arguments: `key`
-  // and `value`. `key` is an int index if `x` is array. `key` is a string key if
-  // `x` is dict. It returns undefined if `x` is not enumerable.
-  find_key: func(x, fn) {
-    if !is_enumerable(x) { return undefined }
+},
+
+// find_key iterates over elements of `x`, returning key or index of the first
+// element `fn` returns truthy for. `fn` is invoked with two arguments: `key`
+// and `value`. `key` is an int index if `x` is array. `key` is a string key if
+// `x` is dict. It returns undefined if `x` is not enumerable.
+find_key: func(x, fn) {
+if !is_enumerable(x) { return undefined }
 
     for k, v in x {
       if fn(k, v) { return k }
     }
-  },
+
+},

@@ -4,13 +4,22 @@ Immutable UTF-8 encoded text values.
 
 ## Overview
 
-Strings are immutable sequences of UTF-8 encoded bytes. Use `string` for general text handling, messages, formatting, keys, protocol fields, and identity-like values. Strings are reference-typed in terms of performance optimizations but remain logically immutable.
+Strings are immutable sequences of UTF-8 encoded bytes optimized for compact text data storage. Use `string` for string
+keys, printing and formatting, protocol fields, identity-like values, and basic text manipulation. Strings are
+reference-typed in terms of performance optimizations but remain logically immutable.
+
+Strings deliberately expose fewer sequence/container helpers than collection-oriented types. They do not provide
+accessors such as `first()` or `last()`, or aggregations such as `min()` and `max()`. Their indexing and slicing support
+is limited and operates on bytes, not Unicode code points. For correct Unicode indexing and slicing, prefer the
+[`runes`](runes.md) type.
 
 **Important:** This type splits operations between byte-level and rune-level:
-- `len()`, `first()`, `last()`, `min()`, `max()`, indexing (`s[i]`), and slicing (`s[a:b]`) operate on **bytes**
+
+- `len()`, indexing (`s[i]`), and slicing (`s[a:b]`) operate on **bytes**
 - `lower()`, `upper()`, `filter(fn)`, `all(fn)`, `any(fn)`, and `count(fn)` operate on **runes** (Unicode characters)
 
-This design keeps byte-level access efficient while providing Unicode-aware operations.
+This design keeps common string storage and byte-level access compact while providing a small set of Unicode-aware text
+operations.
 
 ## Declaration and Usage
 
@@ -81,13 +90,17 @@ s[::-1]            // reversed bytes
 len(s)             // 6 (byte length, not character count)
 ```
 
-Single-element indexing supports negative indices. Two-part slice bounds follow the same rules: negative bounds count from the end, omitted bounds default to the natural edge, oversized bounds clamp, and an inverted slice returns an empty result. Strings also support three-part slices `start:end:step`; `step` may be negative (reverse traversal) but cannot be zero. Out-of-bounds index access raises `index out of bounds`.
+Single-element indexing supports negative indices. Two-part slice bounds follow the same rules: negative bounds count
+from the end, omitted bounds default to the natural edge, oversized bounds clamp, and an inverted slice returns an empty
+result. Strings also support three-part slices `start:end:step`; `step` may be negative (reverse traversal) but cannot
+be zero. Out-of-bounds index access raises `index out of bounds`.
 
 ## Member Functions
 
 ### Conversion Functions
 
 #### `string()`
+
 Converts to string.
 
 **Arguments:** None
@@ -101,6 +114,7 @@ Converts to string.
 ```
 
 #### `array()`
+
 Converts to array of code points.
 
 **Arguments:** None
@@ -115,6 +129,7 @@ Converts to array of code points.
 ```
 
 #### `bool()`
+
 Converts to boolean.
 
 **Arguments:** None
@@ -130,6 +145,7 @@ Converts to boolean.
 ```
 
 #### `bytes()`
+
 Converts to bytes.
 
 **Arguments:** None
@@ -144,6 +160,7 @@ Converts to bytes.
 ```
 
 #### `float()`
+
 Converts to float.
 
 **Arguments:** None
@@ -159,6 +176,7 @@ Converts to float.
 ```
 
 #### `int()`
+
 Converts to integer.
 
 **Arguments:** None
@@ -174,6 +192,7 @@ Converts to integer.
 ```
 
 #### `decimal()`
+
 Converts to decimal.
 
 **Arguments:** None
@@ -189,6 +208,7 @@ Converts to decimal.
 ```
 
 #### `time()`
+
 Converts to time.
 
 **Arguments:** None
@@ -204,6 +224,7 @@ Converts to time.
 ```
 
 #### `record()`
+
 Converts to record.
 
 **Arguments:** None
@@ -217,6 +238,7 @@ Converts to record.
 ```
 
 #### `dict()`
+
 Converts to dict.
 
 **Arguments:** None
@@ -232,6 +254,7 @@ Converts to dict.
 ### Transformation and Filtering Functions
 
 #### `lower()`
+
 Converts to lowercase.
 
 **Arguments:** None
@@ -247,6 +270,7 @@ Converts to lowercase.
 ```
 
 #### `upper()`
+
 Converts to uppercase.
 
 **Arguments:** None
@@ -262,9 +286,11 @@ Converts to uppercase.
 ```
 
 #### `trim([cutset])`
+
 Removes leading and trailing characters.
 
 **Arguments:**
+
 - `cutset` (string, optional): Characters to remove. Default is whitespace.
 
 **Returns:** `string`
@@ -279,9 +305,11 @@ Removes leading and trailing characters.
 ```
 
 #### `filter(fn)`
+
 Filters by predicate on runes.
 
 **Arguments:**
+
 - `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)` and returns bool
 
 **Returns:** `string`
@@ -296,9 +324,11 @@ Filters by predicate on runes.
 ### Predicate Functions
 
 #### `all(fn)`
+
 Tests if all runes match predicate.
 
 **Arguments:**
+
 - `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)` and returns bool
 
 **Returns:** `bool`
@@ -311,9 +341,11 @@ Tests if all runes match predicate.
 ```
 
 #### `any(fn)`
+
 Tests if any rune matches predicate.
 
 **Arguments:**
+
 - `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)` and returns bool
 
 **Returns:** `bool`
@@ -328,9 +360,11 @@ Tests if any rune matches predicate.
 ### Aggregation Functions
 
 #### `count(fn)`
+
 Counts runes matching predicate.
 
 **Arguments:**
+
 - `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)` and returns bool
 
 **Returns:** `int`
@@ -342,37 +376,10 @@ Counts runes matching predicate.
 "abc123xyz".count(r => r >= '0'.int() && r <= '9'.int())  // 3
 ```
 
-#### `min()`
-Finds minimum byte.
-
-**Arguments:** None
-
-**Returns:** `byte | undefined`
-
-**Description:** Returns the smallest byte value as a `byte`. Returns `undefined` for empty string. (Byte-level operation)
-
-```go
-"hello".min()    // byte(101)
-"".min()         // undefined
-```
-
-#### `max()`
-Finds maximum byte.
-
-**Arguments:** None
-
-**Returns:** `byte | undefined`
-
-**Description:** Returns the largest byte value as a `byte`. Returns `undefined` for empty string. (Byte-level operation)
-
-```go
-"hello".max()    // byte(111)
-"".max()         // undefined
-```
-
 ### Query and Accessor Functions
 
 #### `is_empty()`
+
 Checks if string is empty.
 
 **Arguments:** None
@@ -388,6 +395,7 @@ Checks if string is empty.
 ```
 
 #### `len()`
+
 Gets byte length.
 
 **Arguments:** None
@@ -402,38 +410,12 @@ Gets byte length.
 "café".len()       // 5 (é is 2 bytes in UTF-8)
 ```
 
-#### `first()`
-Gets first byte.
-
-**Arguments:** None
-
-**Returns:** `byte | undefined`
-
-**Description:** Returns the first byte as a `byte`. Returns `undefined` for empty string. (Byte-level operation)
-
-```go
-"hello".first()    // byte(104)
-"".first()         // undefined
-```
-
-#### `last()`
-Gets last byte.
-
-**Arguments:** None
-
-**Returns:** `byte | undefined`
-
-**Description:** Returns the last byte as a `byte`. Returns `undefined` for empty string. (Byte-level operation)
-
-```go
-"hello".last()     // byte(111)
-"".last()          // undefined
-```
-
 #### `contains(x)`
+
 Checks if string contains substring.
 
 **Arguments:**
+
 - `x` (string): Substring to search for
 
 **Returns:** `bool`
@@ -454,15 +436,15 @@ Checks if string contains substring.
 // Clean and validate input
 function process_name(name) {
     trimmed = name.trim()
-    
+
     if trimmed.is_empty() {
         return error("Name cannot be empty")
     }
-    
+
     if trimmed.len() > 100 {
         return error("Name too long")
     }
-    
+
     return trimmed.lower()
 }
 
@@ -487,7 +469,7 @@ price = "19.99".decimal()     // decimal(19.99)
 ```go
 // Remove non-alphabetic characters
 function alpha_only(s) {
-    return s.filter(r => 
+    return s.filter(r =>
         (r >= 'a'.int() && r <= 'z'.int()) ||
         (r >= 'A'.int() && r <= 'Z'.int())
     )
@@ -513,10 +495,12 @@ is_numeric("123a5")   // false
 
 ## Byte vs. Rune Operations
 
-- **Byte operations** (`len`, `first`, `last`, indexing, slicing): Work with raw bytes
-- **Rune operations** (`lower`, `upper`, `filter`, `all`, `any`, `count`, `min`, `max`): Aware of Unicode and work with code points
+- **Byte operations** (`len`, indexing, slicing): Work with raw bytes
+- **Rune operations** (`lower`, `upper`, `filter`, `all`, `any`, `count`): Aware of Unicode and work with code points
 
 This design ensures:
+
+- Compact UTF-8 storage for text values, keys, and printing
 - Efficient byte-level access when needed
-- Proper Unicode handling for text operations
-- Predictable behavior for both use cases
+- Unicode-aware handling for the supported text operations
+- Clear guidance to use `runes` when Unicode indexing, slicing, or richer sequence operations are required

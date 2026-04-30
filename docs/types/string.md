@@ -378,6 +378,26 @@ Tests if any rune matches predicate.
 "abc123".any(r => r >= '0'.int() && r <= '9'.int())   // true
 ```
 
+#### `find(fn)`
+
+Finds byte index of first rune matching predicate.
+
+**Arguments:**
+
+- `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)`
+
+**Returns:** `int` or `undefined`
+
+**Description:** Returns the **byte index** of the first rune for which the predicate returns `true`. Iteration stops
+on the first match. Returns `undefined` if no rune matches. Operates on **runes**, with the index reported as a byte
+offset (matching the iteration index seen by `filter`, `count`, and `for_each`).
+
+```go
+"hello".find(r => r == 'l')         // 2
+"hello".find(r => r == 'z')         // undefined
+"hello".find((i, r) => i == 3)      // 3
+```
+
 ### Aggregation Functions
 
 #### `count(fn)`

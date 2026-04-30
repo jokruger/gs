@@ -282,6 +282,9 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 	case "for_each":
 		return stringFnForEach(v, vm, args)
 
+	case "find":
+		return stringFnFind(v, vm, args)
+
 	default:
 		return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
 	}
@@ -614,6 +617,51 @@ func stringFnForEach(v Value, vm VM, args []Value) (Value, error) {
 		}
 	}
 	return Undefined, nil
+}
+
+func stringFnFind(v Value, vm VM, args []Value) (Value, error) {
+	if len(args) != 1 {
+		return Undefined, errs.NewWrongNumArgumentsError("find", "1", len(args))
+	}
+
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return Undefined, errs.NewInvalidArgumentTypeError("find", "first", "non-variadic function", fn.TypeName())
+	}
+
+	o := (*String)(v.Ptr)
+	var buf [2]Value
+	switch fn.Arity() {
+	case 1:
+		for i, v := range o.Value {
+			buf[0] = RuneValue(v)
+			res, err := fn.Call(vm, buf[:1])
+			if err != nil {
+				return Undefined, err
+			}
+			if res.IsTrue() {
+				return IntValue(int64(i)), nil
+			}
+		}
+		return Undefined, nil
+
+	case 2:
+		for i, v := range o.Value {
+			buf[0] = IntValue(int64(i))
+			buf[1] = RuneValue(v)
+			res, err := fn.Call(vm, buf[:2])
+			if err != nil {
+				return Undefined, err
+			}
+			if res.IsTrue() {
+				return IntValue(int64(i)), nil
+			}
+		}
+		return Undefined, nil
+
+	default:
+		return Undefined, errs.NewInvalidArgumentTypeError("find", "first", "f/1 or f/2", fn.TypeName())
+	}
 }
 
 func stringFnAll(v Value, vm VM, args []Value) (Value, error) {

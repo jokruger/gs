@@ -300,6 +300,28 @@ d = dict({a: 1, b: 1})
 d.any((k, v) => v > 2)      // false
 ```
 
+#### `find(fn)`
+
+Finds key of first pair matching predicate.
+
+**Arguments:**
+
+- `fn` (function): Predicate function. Accepts one argument `(key)` or two arguments `(key, value)`.
+
+**Returns:** `string` or `undefined`
+
+**Description:** Returns the key of the first key-value pair for which the predicate returns `true`. Iteration stops on
+the first match. Returns `undefined` if no pair matches. Iteration order is unspecified, so for dicts with multiple
+matches the returned key may vary between runs.
+
+```go
+d = dict({a: 1, b: 2, c: 3})
+d.find(k => k == "b")        // "b"
+d.find(k => k == "q")        // undefined
+d.find((k, v) => v == 2)     // "b"
+d.find((k, v) => v == 99)    // undefined
+```
+
 ## Examples
 
 ### Working with Configuration

@@ -202,6 +202,9 @@ func dictTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error
 	case "for_each":
 		return dictFnForEach(v, vm, args)
 
+	case "find":
+		return dictFnFind(v, vm, args)
+
 	default:
 		return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
 	}
@@ -379,6 +382,54 @@ func dictFnForEach(v Value, vm VM, args []Value) (Value, error) {
 		}
 	}
 	return Undefined, nil
+}
+
+func dictFnFind(v Value, vm VM, args []Value) (Value, error) {
+	if len(args) != 1 {
+		return Undefined, errs.NewWrongNumArgumentsError("find", "1", len(args))
+	}
+
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return Undefined, errs.NewInvalidArgumentTypeError("find", "first", "non-variadic function", fn.TypeName())
+	}
+
+	alloc := vm.Allocator()
+	o := (*Dict)(v.Ptr)
+	var buf [2]Value
+	switch fn.Arity() {
+	case 1:
+		for k := range o.Elements {
+			t := alloc.NewStringValue(k)
+			buf[0] = t
+			res, err := fn.Call(vm, buf[:1])
+			if err != nil {
+				return Undefined, err
+			}
+			if res.IsTrue() {
+				return t, nil
+			}
+		}
+		return Undefined, nil
+
+	case 2:
+		for k, v := range o.Elements {
+			t := alloc.NewStringValue(k)
+			buf[0] = t
+			buf[1] = v
+			res, err := fn.Call(vm, buf[:2])
+			if err != nil {
+				return Undefined, err
+			}
+			if res.IsTrue() {
+				return t, nil
+			}
+		}
+		return Undefined, nil
+
+	default:
+		return Undefined, errs.NewInvalidArgumentTypeError("find", "first", "f/1 or f/2", fn.TypeName())
+	}
 }
 
 func dictFnAll(v Value, vm VM, args []Value) (Value, error) {

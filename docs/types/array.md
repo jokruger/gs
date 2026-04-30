@@ -272,6 +272,25 @@ Tests if any element matches predicate.
 [1, 2, 3].any(x => x % 2 == 0)     // true
 ```
 
+#### `find(fn)`
+
+Finds index of first matching element.
+
+**Arguments:**
+
+- `fn` (function): Predicate function. Accepts one argument (value) or two (index, value).
+
+**Returns:** `int` or `undefined`
+
+**Description:** Returns the index of the first element for which the predicate returns `true`. Iteration stops on the
+first match. Returns `undefined` if no element matches.
+
+```go
+[10, 20, 30].find(x => x == 20)      // 1
+[10, 20, 30].find(x => x == 99)      // undefined
+[10, 20, 30].find((i, v) => i == 2)  // 2
+```
+
 #### `contains(x)`
 
 Checks if array contains value.

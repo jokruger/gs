@@ -230,6 +230,25 @@ bytes("abc").any(b => b >= '0'.int() && b <= '9'.int())      // false
 bytes("abc123").any(b => b >= '0'.int() && b <= '9'.int())   // true
 ```
 
+#### `find(fn)`
+
+Finds index of first byte matching predicate.
+
+**Arguments:**
+
+- `fn` (function): Predicate that takes one argument `(byte)` or two arguments `(index, byte)`
+
+**Returns:** `int` or `undefined`
+
+**Description:** Returns the index of the first byte for which the predicate returns `true`. Iteration stops on the
+first match. Returns `undefined` if no byte matches.
+
+```go
+bytes("hello").find(b => b == 'l')         // 2
+bytes("hello").find(b => b == 'z')         // undefined
+bytes("hello").find((i, b) => i == 3)      // 3
+```
+
 ### Aggregation Functions
 
 #### `count(fn)`

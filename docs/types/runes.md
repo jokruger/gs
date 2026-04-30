@@ -379,6 +379,25 @@ u"abc".any(r => r >= '0'.int() && r <= '9'.int())      // false
 u"abc123".any(r => r >= '0'.int() && r <= '9'.int())   // true
 ```
 
+#### `find(fn)`
+
+Finds index of first rune matching predicate.
+
+**Arguments:**
+
+- `fn` (function): Predicate that takes one argument `(rune)` or two arguments `(index, rune)`
+
+**Returns:** `int` or `undefined`
+
+**Description:** Returns the index of the first rune for which the predicate returns `true`. Iteration stops on the
+first match. Returns `undefined` if no rune matches.
+
+```go
+u"hello".find(r => r == 'l')         // 2
+u"hello".find(r => r == 'z')         // undefined
+u"hello".find((i, r) => i == 3)      // 3
+```
+
 ### Aggregation Functions
 
 #### `count(fn)`

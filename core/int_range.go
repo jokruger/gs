@@ -185,6 +185,9 @@ func intRangeTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, e
 	case "for_each":
 		return intRangeFnForEach(v, vm, args)
 
+	case "find":
+		return intRangeFnFind(v, vm, args)
+
 	default:
 		return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
 	}
@@ -338,6 +341,75 @@ func intRangeFnForEach(v Value, vm VM, args []Value) (Value, error) {
 		ok, err := call(t)
 		if err != nil || !ok {
 			return Undefined, err
+		}
+		i++
+		t -= o.Step
+	}
+	return Undefined, nil
+}
+
+func intRangeFnFind(v Value, vm VM, args []Value) (Value, error) {
+	if len(args) != 1 {
+		return Undefined, errs.NewWrongNumArgumentsError("find", "1", len(args))
+	}
+
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return Undefined, errs.NewInvalidArgumentTypeError("find", "first", "non-variadic function", fn.TypeName())
+	}
+	arity := fn.Arity()
+	if arity != 1 && arity != 2 {
+		return Undefined, errs.NewInvalidArgumentTypeError("find", "first", "f/1 or f/2", fn.TypeName())
+	}
+
+	o := (*IntRange)(v.Ptr)
+	var buf [2]Value
+	i := int64(0)
+	t := o.Start
+
+	call := func(value int64) (bool, error) {
+		switch arity {
+		case 1:
+			buf[0] = IntValue(value)
+			res, err := fn.Call(vm, buf[:1])
+			if err != nil {
+				return false, err
+			}
+			return res.IsTrue(), nil
+
+		case 2:
+			buf[0] = IntValue(i)
+			buf[1] = IntValue(value)
+			res, err := fn.Call(vm, buf[:2])
+			if err != nil {
+				return false, err
+			}
+			return res.IsTrue(), nil
+		}
+		return false, nil
+	}
+
+	if o.Start <= o.Stop {
+		for t < o.Stop {
+			ok, err := call(t)
+			if err != nil {
+				return Undefined, err
+			}
+			if ok {
+				return IntValue(i), nil
+			}
+			i++
+			t += o.Step
+		}
+		return Undefined, nil
+	}
+	for t > o.Stop {
+		ok, err := call(t)
+		if err != nil {
+			return Undefined, err
+		}
+		if ok {
+			return IntValue(i), nil
 		}
 		i++
 		t -= o.Step

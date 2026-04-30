@@ -551,6 +551,14 @@ func TestString(t *testing.T) {
 	expectRun(t, `out = "hello".any(x => x == 'z')`, nil, false)
 	expectRun(t, `out = "hello".any((i, x) => i == 1 && x == 'e')`, nil, true)
 	expectRun(t, `out = "hello".any((i, x) => i == 1 && x == 'z')`, nil, false)
+	expectRun(t, `out = "hello".find(x => x == 'l')`, nil, 2)
+	expectRun(t, `out = "hello".find(x => x == 'z')`, nil, core.Undefined)
+	expectRun(t, `out = "hello".find((i, x) => i == 3)`, nil, 3)
+	expectRun(t, `out = "hello".find((i, x) => i > 100)`, nil, core.Undefined)
+	expectRun(t, `out = "".find(x => true)`, nil, core.Undefined)
+	expectError(t, `out = "x".find()`, nil, "wrong number of arguments: (find) expected 1 argument(s), got 0")
+	expectError(t, `out = "x".find(1)`, nil, "invalid argument type: (find) argument first expects type non-variadic function, got int")
+	expectError(t, `out = "x".find(func() { return true })`, nil, "invalid argument type: (find) argument first expects type f/1 or f/2")
 	expectRun(t, `
 out = ""
 ignored := "hello".for_each(func(r) {
@@ -668,6 +676,14 @@ func TestRunes(t *testing.T) {
 	expectRun(t, `out = u"hello".any(x => x == 'z')`, nil, false)
 	expectRun(t, `out = u"hello".any((i, x) => i == 1 && x == 'e')`, nil, true)
 	expectRun(t, `out = u"hello".any((i, x) => i == 1 && x == 'z')`, nil, false)
+	expectRun(t, `out = u"hello".find(x => x == 'l')`, nil, 2)
+	expectRun(t, `out = u"hello".find(x => x == 'z')`, nil, core.Undefined)
+	expectRun(t, `out = u"hello".find((i, x) => i == 3)`, nil, 3)
+	expectRun(t, `out = u"hello".find((i, x) => i > 100)`, nil, core.Undefined)
+	expectRun(t, `out = u"".find(x => true)`, nil, core.Undefined)
+	expectError(t, `out = u"x".find()`, nil, "wrong number of arguments: (find) expected 1 argument(s), got 0")
+	expectError(t, `out = u"x".find(1)`, nil, "invalid argument type: (find) argument first expects type non-variadic function, got int")
+	expectError(t, `out = u"x".find(func() { return true })`, nil, "invalid argument type: (find) argument first expects type f/1 or f/2")
 	expectRun(t, `out = u"hello".min()`, nil, 'e')
 	expectRun(t, `out = u"hello".max()`, nil, 'o')
 	expectRun(t, `
@@ -869,6 +885,15 @@ ignored := [10, 20, 30].for_each(func(i, v) {
 	expectError(t, `out = [1].for_each(func() { return true })`, nil, "invalid argument type: (for_each) argument first expects type f/1 or f/2")
 	expectError(t, `out = [1].for_each(func(v) { return v })`, nil, "invalid argument type: (for_each) argument callback return expects type bool, got int")
 
+	expectRun(t, `out = [10, 20, 30].find(x => x == 20)`, nil, 1)
+	expectRun(t, `out = [10, 20, 30].find(x => x == 99)`, nil, core.Undefined)
+	expectRun(t, `out = [10, 20, 30].find((i, v) => i == 2)`, nil, 2)
+	expectRun(t, `out = [10, 20, 30].find((i, v) => v == 99)`, nil, core.Undefined)
+	expectRun(t, `out = [].find(x => true)`, nil, core.Undefined)
+	expectError(t, `out = [1].find()`, nil, "wrong number of arguments: (find) expected 1 argument(s), got 0")
+	expectError(t, `out = [1].find(1)`, nil, "invalid argument type: (find) argument first expects type non-variadic function, got int")
+	expectError(t, `out = [1].find(func() { return true })`, nil, "invalid argument type: (find) argument first expects type f/1 or f/2")
+
 	expectRun(t, `out = [].reduce(0, (a, v) => a + v)`, nil, 0)
 	expectRun(t, `out = [1, 2, 3].reduce(0, (a, v) => a + v)`, nil, 6)
 	expectRun(t, `out = [1, 2, 3].reduce(0, (a, i, v) => a + i)`, nil, 3)
@@ -1014,6 +1039,15 @@ ignored = dict({a: 1, b: 2}).for_each(func(k, v) {
 out = items.sort()
 `, nil, ARR{"a1", "b2"})
 
+	expectRun(t, `t := dict({a: 1, b: 2, c: 3}); out = t.find(k => k == "b")`, nil, "b")
+	expectRun(t, `t := dict({a: 1, b: 2, c: 3}); out = t.find(k => k == "q")`, nil, core.Undefined)
+	expectRun(t, `t := dict({a: 1, b: 2, c: 3}); out = t.find((k, v) => v == 2)`, nil, "b")
+	expectRun(t, `t := dict({a: 1, b: 2, c: 3}); out = t.find((k, v) => v == 99)`, nil, core.Undefined)
+	expectRun(t, `t := dict(); out = t.find(k => true)`, nil, core.Undefined)
+	expectError(t, `dict({a: 1}).find()`, nil, "wrong number of arguments: (find) expected 1 argument(s), got 0")
+	expectError(t, `dict({a: 1}).find(1)`, nil, "invalid argument type: (find) argument first expects type non-variadic function, got int")
+	expectError(t, `dict({a: 1}).find(func() { return true })`, nil, "invalid argument type: (find) argument first expects type f/1 or f/2")
+
 	expectRun(t, `out = "a" in dict({a: 1, b: 2, c: 3})`, nil, true)
 	expectRun(t, `out = dict({a: 1, b: 2, c: 3}).contains("a")`, nil, true)
 	expectRun(t, `out = "q" in dict({a: 1, b: 2, c: 3})`, nil, false)
@@ -1127,6 +1161,14 @@ func TestBytes(t *testing.T) {
 	expectRun(t, `out = bytes("hello").any(x => x == 'z')`, nil, false)
 	expectRun(t, `out = bytes("hello").any((i, x) => i == 1 && x == 'e')`, nil, true)
 	expectRun(t, `out = bytes("hello").any((i, x) => i == 1 && x == 'z')`, nil, false)
+	expectRun(t, `out = bytes("hello").find(x => x == 'l')`, nil, 2)
+	expectRun(t, `out = bytes("hello").find(x => x == 'z')`, nil, core.Undefined)
+	expectRun(t, `out = bytes("hello").find((i, x) => i == 3)`, nil, 3)
+	expectRun(t, `out = bytes("hello").find((i, x) => i > 100)`, nil, core.Undefined)
+	expectRun(t, `out = bytes("").find(x => true)`, nil, core.Undefined)
+	expectError(t, `out = bytes("x").find()`, nil, "wrong number of arguments: (find) expected 1 argument(s), got 0")
+	expectError(t, `out = bytes("x").find(1)`, nil, "invalid argument type: (find) argument first expects type non-variadic function, got int")
+	expectError(t, `out = bytes("x").find(func() { return true })`, nil, "invalid argument type: (find) argument first expects type f/1 or f/2")
 	expectRun(t, `out = bytes("hello").min()`, nil, byte('e'))
 	expectRun(t, `out = bytes("hello").max()`, nil, byte('o'))
 	expectRun(t, `
@@ -1320,6 +1362,15 @@ ignored := range(10, 13, 1).for_each(func(i, v) {
 	return true
 })
 `, nil, 36)
+
+	expectRun(t, `out = range(10, 20, 1).find(v => v == 15)`, nil, 5)
+	expectRun(t, `out = range(10, 20, 1).find(v => v == 99)`, nil, core.Undefined)
+	expectRun(t, `out = range(10, 20, 1).find((i, v) => i == 3)`, nil, 3)
+	expectRun(t, `out = range(20, 10, 1).find(v => v == 15)`, nil, 5)
+	expectRun(t, `out = range(0, 0, 1).find(v => true)`, nil, core.Undefined)
+	expectError(t, `out = range(0, 5, 1).find()`, nil, "wrong number of arguments: (find) expected 1 argument(s), got 0")
+	expectError(t, `out = range(0, 5, 1).find(1)`, nil, "invalid argument type: (find) argument first expects type non-variadic function, got int")
+	expectError(t, `out = range(0, 5, 1).find(func() { return true })`, nil, "invalid argument type: (find) argument first expects type f/1 or f/2")
 
 	expectRun(t, `r := range(0, 10, 1); out = r.len()`, nil, 10)
 	expectRun(t, `r := range(0, 10, 2); out = r.len()`, nil, 5)

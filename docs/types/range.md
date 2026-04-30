@@ -148,6 +148,25 @@ range(1, 4).for_each(v => {
 })
 ```
 
+#### `find(fn)`
+
+Finds index of first range value matching predicate.
+
+**Arguments:**
+
+- `fn` (function): Predicate function. Accepts one argument `(value)` or two arguments `(index, value)`.
+
+**Returns:** `int` or `undefined`
+
+**Description:** Returns the iteration index of the first value for which the predicate returns `true`. Iteration stops
+on the first match. Returns `undefined` if no value matches. The range is not materialized.
+
+```go
+range(10, 20).find(v => v == 15)         // 5
+range(10, 20).find(v => v == 99)         // undefined
+range(10, 20).find((i, v) => i == 3)     // 3
+```
+
 ### Query and Accessor Functions
 
 #### `is_empty()`

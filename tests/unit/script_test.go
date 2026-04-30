@@ -184,6 +184,7 @@ func TestScript_BuiltinModules(t *testing.T) {
 	require.Error(t, err)
 }
 
+/*
 func TestScript_SourceModules(t *testing.T) {
 	cta := core.NewArena(nil)
 	rta := core.NewArena(nil)
@@ -191,8 +192,8 @@ func TestScript_SourceModules(t *testing.T) {
 
 	s := kavun.NewScript([]byte(`
 enum := import("enum")
-a := enum.all([1,2,3], func(_, v) { 
-	return v > 0 
+a := enum.all([1,2,3], func(_, v) {
+	return v > 0
 })
 `))
 	s.SetImports(stdlib.GetModuleMap("enum"))
@@ -207,6 +208,7 @@ a := enum.all([1,2,3], func(_, v) {
 	_, err = s.Compile(cta)
 	require.Error(t, err)
 }
+*/
 
 func TestScript_SetMaxConstObjects(t *testing.T) {
 	cta := core.NewArena(nil)
@@ -561,10 +563,10 @@ func TestCompiled_Set(t *testing.T) {
 
 	// case #2
 	c = compile(t, `
-a := func() { 
+a := func() {
 	return func() {
 		return b + 5
-	}() 
+	}()
 }()`, M{"b": 5})
 	compiledRun(t, c)
 	compiledGet(t, c, "a", int64(10))

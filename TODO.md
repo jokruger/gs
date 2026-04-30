@@ -51,7 +51,6 @@
   - dict/record to array of tuples
   - dict/record from array of tuples
 
-- check if we still need enums package - move missing functions to type properties
 - function property "arity" and "variadic"
 - migrate to crypto/rand
 - Move strings package functions to the string type member functions

@@ -20,6 +20,7 @@ t4 = time(1704067200)                    // Unix timestamp (int)
 ### Input Formats
 
 The `time()` function accepts:
+
 - ISO 8601 date strings: `"2024-01-01"`
 - ISO 8601 datetime: `"2024-01-01T12:30:00Z"`, `"2024-01-01T12:30:00.123Z"`
 - Unix timestamps as integers: `1704067200`
@@ -29,6 +30,7 @@ The `time()` function accepts:
 ### Conversion Functions
 
 #### `time()`
+
 Converts to time.
 
 **Arguments:** None
@@ -42,6 +44,7 @@ time("2024-01-01").time()    // 2024-01-01
 ```
 
 #### `bool()`
+
 Converts to boolean.
 
 **Arguments:** None
@@ -55,6 +58,7 @@ time("2024-01-01").bool()    // true
 ```
 
 #### `int()`
+
 Converts to integer.
 
 **Arguments:** None
@@ -69,6 +73,7 @@ time("2024-01-01T00:00:00Z").int()   // 1704067200
 ```
 
 #### `string()`
+
 Converts to string.
 
 **Arguments:** None
@@ -85,6 +90,7 @@ time("2024-01-01T12:30:45Z").string()  // "2024-01-01T12:30:45Z"
 ### Date and Time Field Functions
 
 #### `year()`
+
 Gets the year.
 
 **Arguments:** None
@@ -98,6 +104,7 @@ time("2024-06-15").year()    // 2024
 ```
 
 #### `month()`
+
 Gets the month.
 
 **Arguments:** None
@@ -111,6 +118,7 @@ time("2024-06-15").month()   // 6
 ```
 
 #### `day()`
+
 Gets the day of month.
 
 **Arguments:** None
@@ -124,6 +132,7 @@ time("2024-06-15").day()     // 15
 ```
 
 #### `hour()`
+
 Gets the hour.
 
 **Arguments:** None
@@ -137,6 +146,7 @@ time("2024-01-01T14:30:00Z").hour()  // 14
 ```
 
 #### `minute()`
+
 Gets the minute.
 
 **Arguments:** None
@@ -150,6 +160,7 @@ time("2024-01-01T14:30:45Z").minute()  // 30
 ```
 
 #### `second()`
+
 Gets the second.
 
 **Arguments:** None
@@ -163,6 +174,7 @@ time("2024-01-01T14:30:45Z").second()  // 45
 ```
 
 #### `nanosecond()`
+
 Gets the nanosecond.
 
 **Arguments:** None
@@ -178,6 +190,7 @@ time("2024-01-01T00:00:00.123456789Z").nanosecond()  // 123456789
 ### Epoch and Calendar Metadata Functions
 
 #### `unix()`
+
 Gets Unix timestamp in seconds.
 
 **Arguments:** None
@@ -192,6 +205,7 @@ time("2024-01-01T00:00:00Z").unix()    // 1704067200
 ```
 
 #### `unix_nano()`
+
 Gets Unix timestamp in nanoseconds.
 
 **Arguments:** None
@@ -205,6 +219,7 @@ time("1970-01-01T00:00:00Z").unix_nano()    // 0
 ```
 
 #### `week_day()`
+
 Gets day of week.
 
 **Arguments:** None
@@ -218,6 +233,7 @@ time("2024-01-01").week_day()  // 1 (Monday, January 1, 2024)
 ```
 
 #### `year_day()`
+
 Gets day of year.
 
 **Arguments:** None
@@ -232,6 +248,7 @@ time("2024-12-31").year_day()   // 366 (leap year)
 ```
 
 #### `month_name()`
+
 Gets month name.
 
 **Arguments:** None
@@ -245,6 +262,7 @@ time("2024-06-15").month_name()  // "June"
 ```
 
 #### `week_day_name()`
+
 Gets day of week name.
 
 **Arguments:** None
@@ -260,6 +278,7 @@ time("2024-01-01").week_day_name()  // "Monday"
 ### Timezone and Formatting Functions
 
 #### `utc()`
+
 Converts to UTC.
 
 **Arguments:** None
@@ -274,6 +293,7 @@ utc_t = t.utc()  // 2024-01-01T07:00:00Z
 ```
 
 #### `local()`
+
 Converts to local timezone.
 
 **Arguments:** None
@@ -288,6 +308,7 @@ local_t = t.local()  // Converts to local time
 ```
 
 #### `format_date()`
+
 Formats as date string.
 
 **Arguments:** None
@@ -301,6 +322,7 @@ time("2024-06-15T14:30:00Z").format_date()  // "2024-06-15"
 ```
 
 #### `format_time()`
+
 Formats as time string.
 
 **Arguments:** None
@@ -314,6 +336,7 @@ time("2024-06-15T14:30:45Z").format_time()  // "14:30:45"
 ```
 
 #### `format_datetime()`
+
 Formats as datetime string.
 
 **Arguments:** None
@@ -328,6 +351,7 @@ time("2024-06-15T14:30:45Z").format_datetime()
 ```
 
 #### `zone_offset()`
+
 Gets timezone offset.
 
 **Arguments:** None
@@ -342,6 +366,7 @@ time("2024-01-01T00:00:00+05:30").zone_offset()     // 19800 (5.5 hours)
 ```
 
 #### `zone_name()`
+
 Gets timezone name.
 
 **Arguments:** None
@@ -359,6 +384,8 @@ time("2024-01-01T00:00:00Z").zone_name()   // "UTC"
 ### Current Events Planning
 
 ```go
+fmt = import("fmt")
+
 // Check if event is today
 event_date = time("2024-06-15")
 today = time("2024-06-15")
@@ -366,7 +393,7 @@ today = time("2024-06-15")
 if event_date.year() == today.year() &&
    event_date.month() == today.month() &&
    event_date.day() == today.day() {
-    println("Event is today!")
+    fmt.println("Event is today!")
 }
 ```
 
@@ -385,6 +412,8 @@ duration_seconds = end_unix - start_unix  // 28800 (8 hours)
 ### Time Formatting
 
 ```go
+fmt = import("fmt")
+
 // Format times for display
 meeting = time("2024-06-15T14:30:00Z")
 
@@ -393,27 +422,31 @@ time_str = meeting.format_time()      // "14:30:00"
 datetime_str = meeting.format_datetime()  // "2024-06-15 14:30:00"
 
 message = "Meeting on " + date_str + " at " + time_str
-println(message)  // "Meeting on 2024-06-15 at 14:30:00"
+fmt.println(message)  // "Meeting on 2024-06-15 at 14:30:00"
 ```
 
 ### Timezone Handling
 
 ```go
+fmt = import("fmt")
+
 // Handle different timezones
 utc_time = time("2024-01-01T00:00:00Z")
 offset_time = time("2024-01-01T00:00:00+05:30")
 
-println("UTC: " + utc_time.string())
-println("Offset: " + offset_time.string())
+fmt.println("UTC: " + utc_time.string())
+fmt.println("Offset: " + offset_time.string())
 
 // Convert to UTC
 normalized = offset_time.utc()
-println("Normalized: " + normalized.string())
+fmt.println("Normalized: " + normalized.string())
 ```
 
 ### Day-of-Week Operations
 
 ```go
+fmt = import("fmt")
+
 // Check day of week
 dates = [
     time("2024-01-01"),
@@ -423,13 +456,15 @@ dates = [
 
 for date in dates {
     day_name = date.week_day_name()
-    println(date.format_date() + " is a " + day_name)
+    fmt.println(date.format_date() + " is a " + day_name)
 }
 ```
 
 ### Year Progress
 
 ```go
+fmt = import("fmt")
+
 // Calculate progress through year
 date = time("2024-06-15")
 year_start = time(date.year().string() + "-01-01")
@@ -439,7 +474,7 @@ year_day = date.year_day()
 days_in_year = year_end.year_day()
 progress = (year_day.float() / days_in_year.float()) * 100.0
 
-println("Year progress: " + progress.string() + "%")
+fmt.println("Year progress: " + progress.string() + "%")
 ```
 
 ## Notes

@@ -71,6 +71,7 @@ nan == nan         // false (NaN never equals anything, including itself)
 ### Conversion Functions
 
 #### `float()`
+
 Converts to float.
 
 **Arguments:** None
@@ -84,6 +85,7 @@ Converts to float.
 ```
 
 #### `decimal()`
+
 Converts to decimal (exact decimal type).
 
 **Arguments:** None
@@ -98,6 +100,7 @@ Converts to decimal (exact decimal type).
 ```
 
 #### `int()`
+
 Converts to integer.
 
 **Arguments:** None
@@ -113,6 +116,7 @@ Converts to integer.
 ```
 
 #### `string()`
+
 Converts to string.
 
 **Arguments:** None
@@ -131,6 +135,7 @@ Converts to string.
 ### Numeric Utility Functions
 
 #### `sign()`
+
 Determines the sign of the float.
 
 **Arguments:** None
@@ -150,12 +155,14 @@ Determines the sign of the float.
 ### Basic Calculations
 
 ```go
+fmt = import("fmt")
+
 // Calculate area and perimeter
 radius = 5.0
 area = 3.14159 * radius * radius      // 78.53975
 circumference = 2.0 * 3.14159 * radius  // 31.4159
 
-println("Area: " + area.string())
+fmt.println("Area: " + area.string())
 ```
 
 ### Working with Collections
@@ -188,14 +195,16 @@ exact_a == exact_b    // true
 ### Special Values
 
 ```go
+fmt = import("fmt")
+
 // Handle special values
 data = [1.0, 2.0 / 0.0, 3.0]
 
 for v in data {
     if v.string() == "Inf" {
-        println("Found infinity")
+        fmt.println("Found infinity")
     } else {
-        println("Value: " + v.string())
+        fmt.println("Value: " + v.string())
     }
 }
 ```

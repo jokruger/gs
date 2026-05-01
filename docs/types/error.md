@@ -28,6 +28,7 @@ err = error(message)
 ### Accessor Functions
 
 #### `value()`
+
 Gets the error message.
 
 **Arguments:** None
@@ -49,6 +50,7 @@ e.value()    // {code: 404, message: "Not found"}
 ### Conversion Functions
 
 #### `string()`
+
 Converts to string.
 
 **Arguments:** None
@@ -71,9 +73,11 @@ e2.string()  // "404"
 ### Error Detection
 
 #### `is_error(x)`
+
 Checks if a value is an error.
 
 **Arguments:**
+
 - `x` (any): Value to check
 
 **Returns:** `bool`
@@ -96,17 +100,21 @@ is_error(undefined_val)  // false
 ### Basic Error Handling
 
 ```go
+fmt = import("fmt")
+
 // Create and check errors
 result = error("operation failed")
 
 if is_error(result) {
-    println("Error occurred: " + result.string())
+    fmt.println("Error occurred: " + result.string())
 }
 ```
 
 ### Error Propagation
 
 ```go
+fmt = import("fmt")
+
 // Function that returns error on failure
 function divide(a, b) {
     if b == 0 {
@@ -117,13 +125,15 @@ function divide(a, b) {
 
 result = divide(10, 0)
 if is_error(result) {
-    println("Calculation failed: " + result.value().string())
+    fmt.println("Calculation failed: " + result.value().string())
 }
 ```
 
 ### Error with Structured Data
 
 ```go
+fmt = import("fmt")
+
 // Error with detailed information
 function validate_user(data) {
     if data.name == undefined || data.name == "" {
@@ -133,7 +143,7 @@ function validate_user(data) {
             field: "name"
         })
     }
-    
+
     if data.age == undefined || data.age < 0 {
         return error({
             code: "INVALID_AGE",
@@ -141,7 +151,7 @@ function validate_user(data) {
             field: "age"
         })
     }
-    
+
     return data
 }
 
@@ -150,31 +160,33 @@ result = validate_user(user)
 
 if is_error(result) {
     details = result.value()
-    println("Validation failed")
-    println("Code: " + details.code)
-    println("Field: " + details.field)
+    fmt.println("Validation failed")
+    fmt.println("Code: " + details.code)
+    fmt.println("Field: " + details.field)
 }
 ```
 
 ### Error Aggregation
 
 ```go
+fmt = import("fmt")
+
 // Collect multiple errors
 function validate_form(form) {
     errors = []
-    
+
     if form.email == undefined || form.email == "" {
         errors = errors + [error("Email is required")]
     }
-    
+
     if form.password == undefined || form.password.len() < 8 {
         errors = errors + [error("Password must be at least 8 characters")]
     }
-    
+
     if form.age != undefined && form.age < 18 {
         errors = errors + [error("Must be 18 or older")]
     }
-    
+
     if errors.len() > 0 {
         return error({
             message: "Multiple validation errors",
@@ -182,7 +194,7 @@ function validate_form(form) {
             errors: errors
         })
     }
-    
+
     return form
 }
 
@@ -191,7 +203,7 @@ result = validate_form(form)
 
 if is_error(result) {
     details = result.value()
-    println("Found " + details.count.string() + " errors")
+    fmt.println("Found " + details.count.string() + " errors")
 }
 ```
 
@@ -223,6 +235,8 @@ port = parse_with_default("invalid", 3000)   // 3000
 ### Error Filtering
 
 ```go
+fmt = import("fmt")
+
 // Filter operations
 data = [1, 2, "three", 4, "five", 6]
 
@@ -235,7 +249,7 @@ for item in data {
     }
 }
 
-println(converted)  // [1, 2, 4, 6]
+fmt.println(converted)  // [1, 2, 4, 6]
 ```
 
 ## Error Value Payloads
@@ -265,12 +279,12 @@ function process_data(data) {
     if is_error(validated) {
         return validated  // Propagate error
     }
-    
+
     transformed = transform(validated)
     if is_error(transformed) {
         return transformed  // Propagate error
     }
-    
+
     return transformed
 }
 ```
@@ -286,11 +300,13 @@ timeout = if is_error(value) { 30 } else { value }
 ### Logging Errors
 
 ```go
+fmt = import("fmt")
+
 function log_error(err) {
     if is_error(err) {
         message = err.string()
         payload = err.value()
-        println("[ERROR] " + message)
+        fmt.println("[ERROR] " + message)
         // In real code, write to log file or service
     }
 }

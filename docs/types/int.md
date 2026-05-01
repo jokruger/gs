@@ -65,6 +65,7 @@ a ** 2     // 100 (exponentiation)
 ### Conversion Functions
 
 #### `int()`
+
 Converts to integer.
 
 **Arguments:** None
@@ -78,6 +79,7 @@ Converts to integer.
 ```
 
 #### `float()`
+
 Converts to floating-point.
 
 **Arguments:** None
@@ -92,6 +94,7 @@ Converts to floating-point.
 ```
 
 #### `decimal()`
+
 Converts to decimal (exact decimal type).
 
 **Arguments:** None
@@ -106,6 +109,7 @@ Converts to decimal (exact decimal type).
 ```
 
 #### `bool()`
+
 Converts to boolean.
 
 **Arguments:** None
@@ -121,6 +125,7 @@ Converts to boolean.
 ```
 
 #### `rune()`
+
 Converts to rune (Unicode code point).
 
 **Arguments:** None
@@ -135,6 +140,7 @@ Converts to rune (Unicode code point).
 ```
 
 #### `string()`
+
 Converts to string.
 
 **Arguments:** None
@@ -149,6 +155,7 @@ Converts to string.
 ```
 
 #### `time()`
+
 Converts to time (Unix timestamp).
 
 **Arguments:** None
@@ -165,6 +172,7 @@ Converts to time (Unix timestamp).
 ### Numeric Utility Functions
 
 #### `sign()`
+
 Determines the sign of the integer.
 
 **Arguments:** None
@@ -180,6 +188,7 @@ Determines the sign of the integer.
 ```
 
 #### `abs()`
+
 Returns the absolute value.
 
 **Arguments:** None
@@ -199,12 +208,14 @@ Returns the absolute value.
 ### Working with Ranges
 
 ```go
+fmt = import("fmt")
+
 // Generate sequence of integers
 numbers = range(1, 11).array()    // [1, 2, 3, ..., 10]
 
 // Iterate and process
 for i in range(0, 5) {
-    println(i)
+    fmt.println(i)
 }
 ```
 

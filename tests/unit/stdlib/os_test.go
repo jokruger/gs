@@ -18,7 +18,7 @@ func TestReadFile(t *testing.T) {
 	require.NoError(t, err)
 	_ = tf.Close()
 
-	module(t, "os").call("read_file", tf.Name()).expect(core.NewBytesValue(content))
+	module(t, "os").call("read_file", tf.Name()).expect(core.NewBytesValue(content, false))
 }
 
 func TestReadFileArgs(t *testing.T) {

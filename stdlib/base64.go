@@ -30,7 +30,7 @@ func b64RawURLDecodeString(vm core.VM, args []core.Value) (ret core.Value, err e
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	return vm.Allocator().NewBytesValue(res), nil
+	return vm.Allocator().NewBytesValue(res, false), nil
 }
 
 func b64URLDecodeString(vm core.VM, args []core.Value) (ret core.Value, err error) {
@@ -45,7 +45,7 @@ func b64URLDecodeString(vm core.VM, args []core.Value) (ret core.Value, err erro
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	return vm.Allocator().NewBytesValue(res), nil
+	return vm.Allocator().NewBytesValue(res, false), nil
 }
 
 func b64RawDecodeString(vm core.VM, args []core.Value) (ret core.Value, err error) {
@@ -60,7 +60,7 @@ func b64RawDecodeString(vm core.VM, args []core.Value) (ret core.Value, err erro
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	return vm.Allocator().NewBytesValue(res), nil
+	return vm.Allocator().NewBytesValue(res, false), nil
 }
 
 func b64DecodeString(vm core.VM, args []core.Value) (ret core.Value, err error) {
@@ -75,7 +75,7 @@ func b64DecodeString(vm core.VM, args []core.Value) (ret core.Value, err error) 
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	return vm.Allocator().NewBytesValue(res), nil
+	return vm.Allocator().NewBytesValue(res, false), nil
 }
 
 func b64RawURLEncodeToString(vm core.VM, args []core.Value) (ret core.Value, err error) {

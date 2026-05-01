@@ -32,11 +32,11 @@ from_string = "abc".array()           // [97, 98, 99]
 a = [1, 2, 3]
 b = a
 a[0] = 99
-println(b[0])    // 99 (both point to same array)
+b[0]             // 99 (both point to same array)
 
 c = copy(a)      // Independent copy
 a[0] = 1
-println(c[0])    // 99 (c is unchanged)
+c[0]             // 99 (c is unchanged)
 ```
 
 ### Indexing and Slicing
@@ -493,6 +493,8 @@ Gets last element.
 ### Data Transformation
 
 ```go
+fmt = import("fmt")
+
 // Parse and transform data
 scores = [85, 92, 78, 95, 88]
 
@@ -501,12 +503,14 @@ results = scores
     .map(s => (s.float() / 100.0) * 100.0)
     .filter(p => p >= 80.0)
 
-println("Passing scores: " + results.len().string())
+fmt.println("Passing scores: " + results.len().string())
 ```
 
 ### Accumulation with Reduce
 
 ```go
+fmt = import("fmt")
+
 // Calculate total price with tax
 items = [
     {name: "Item A", price: 10.0},
@@ -516,13 +520,15 @@ items = [
 
 total = items.reduce(0.0, (sum, item) => sum + item.price)
 tax = total * 0.08
-println("Total: $" + total.string())
-println("Tax: $" + tax.string())
+fmt.println("Total: $" + total.string())
+fmt.println("Tax: $" + tax.string())
 ```
 
 ### Complex Filtering
 
 ```go
+fmt = import("fmt")
+
 // Multi-condition filtering
 users = [
     {name: "Alice", age: 25, active: true},
@@ -535,7 +541,7 @@ active_adults = users
     .filter(u => u.active)
     .filter(u => u.age >= 18)
 
-println("Active adults: " + active_adults.len().string())
+fmt.println("Active adults: " + active_adults.len().string())
 ```
 
 ### Nested Array Operations
@@ -558,6 +564,8 @@ total = flattened.sum()  // 45
 ### Array Statistics
 
 ```go
+fmt = import("fmt")
+
 // Calculate statistics
 data = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
 
@@ -566,15 +574,17 @@ minimum = data.min()
 maximum = data.max()
 average = data.avg()
 
-println("Count: " + count.string())
-println("Min: " + minimum.string())
-println("Max: " + maximum.string())
-println("Avg: " + average.string())
+fmt.println("Count: " + count.string())
+fmt.println("Min: " + minimum.string())
+fmt.println("Max: " + maximum.string())
+fmt.println("Avg: " + average.string())
 ```
 
 ### Deduplication
 
 ```go
+fmt = import("fmt")
+
 // Remove duplicates by filtering
 values = [1, 2, 2, 3, 3, 3, 4, 4, 4, 4]
 
@@ -586,7 +596,7 @@ for v in values {
     }
 }
 
-println(unique)  // [1, 2, 3, 4]
+fmt.println(unique)  // [1, 2, 3, 4]
 ```
 
 ## Performance Considerations

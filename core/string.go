@@ -140,7 +140,7 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		if len(args) != 0 {
 			return Undefined, errs.NewWrongNumArgumentsError(name, "0", len(args))
 		}
-		return alloc.NewBytesValue([]byte(o.Value)), nil
+		return alloc.NewBytesValue([]byte(o.Value), false), nil
 
 	case "runes":
 		if len(args) != 0 {
@@ -150,7 +150,7 @@ func stringTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, err
 		for i, r := range o.Value {
 			rs[i] = r
 		}
-		return alloc.NewRunesValue(rs), nil
+		return alloc.NewRunesValue(rs, false), nil
 
 	case "array":
 		if len(args) != 0 {

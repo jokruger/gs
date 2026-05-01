@@ -208,14 +208,14 @@ func intRangeFnToBytes(v Value, vm VM, args []Value) (Value, error) {
 			i++
 			t += o.Step
 		}
-		return alloc.NewBytesValue(bs), nil
+		return alloc.NewBytesValue(bs, false), nil
 	}
 	for t > o.Stop {
 		bs[i] = byte(t)
 		i++
 		t -= o.Step
 	}
-	return alloc.NewBytesValue(bs), nil
+	return alloc.NewBytesValue(bs, false), nil
 }
 
 func intRangeFnToString(v Value, vm VM, args []Value) (Value, error) {

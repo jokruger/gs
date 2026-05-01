@@ -19,7 +19,7 @@ func makeOSExecCommand(vm core.VM, cmd *exec.Cmd) (core.Value, error) {
 		if err != nil {
 			return wrapError(vm, err)
 		}
-		return vm.Allocator().NewBytesValue(res), nil
+		return vm.Allocator().NewBytesValue(res, false), nil
 	}, 0, false)
 
 	// output() => bytes/error
@@ -31,7 +31,7 @@ func makeOSExecCommand(vm core.VM, cmd *exec.Cmd) (core.Value, error) {
 		if err != nil {
 			return wrapError(vm, err)
 		}
-		return vm.Allocator().NewBytesValue(res), nil
+		return vm.Allocator().NewBytesValue(res, false), nil
 	}, 0, false)
 
 	// run() => error

@@ -67,9 +67,9 @@ func TestBytecodeConstString(t *testing.T) {
 
 func TestBytecodeConstBytes(t *testing.T) {
 	testBytecodeSerialization(t, bytecode(concatInsts(), objectsArray(
-		core.NewBytesValue([]byte{}),
-		core.NewBytesValue([]byte{1, 2, 3}),
-		core.NewBytesValue([]byte("foo bar")),
+		core.NewBytesValue([]byte{}, false),
+		core.NewBytesValue([]byte{1, 2, 3}, false),
+		core.NewBytesValue([]byte("foo bar"), false),
 	)))
 }
 
@@ -165,7 +165,7 @@ func TestBytecode(t *testing.T) {
 				}, true),
 				"true":  core.True,
 				"false": core.False,
-				"bytes": core.NewBytesValue(make([]byte, 16)),
+				"bytes": core.NewBytesValue(make([]byte, 16), false),
 				"char":  core.RuneValue('Y'),
 				"error": core.NewErrorValue(core.NewStringValue("some error")),
 				"float": core.FloatValue(-19.84),

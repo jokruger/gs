@@ -95,6 +95,7 @@ decimal(1) + 2.0       // float 3.0
 ### Conversion Functions
 
 #### `decimal()`
+
 Converts to decimal.
 
 **Arguments:** None
@@ -108,6 +109,7 @@ decimal(1.23).decimal()    // decimal(1.23)
 ```
 
 #### `float()`
+
 Converts to floating-point.
 
 **Arguments:** None
@@ -122,6 +124,7 @@ decimal("0.1").float()     // 0.1
 ```
 
 #### `int()`
+
 Converts to integer.
 
 **Arguments:** None
@@ -137,6 +140,7 @@ decimal(-3.99).int()      // -3
 ```
 
 #### `string()`
+
 Converts to string.
 
 **Arguments:** None
@@ -154,6 +158,7 @@ decimal(100).string()      // "100"
 ### Classification Functions
 
 #### `is_zero()`
+
 Checks if decimal is zero.
 
 **Arguments:** None
@@ -169,6 +174,7 @@ decimal(1).is_zero()       // false
 ```
 
 #### `is_negative()`
+
 Checks if decimal is negative.
 
 **Arguments:** None
@@ -184,6 +190,7 @@ decimal(0).is_negative()      // false
 ```
 
 #### `is_positive()`
+
 Checks if decimal is positive.
 
 **Arguments:** None
@@ -199,6 +206,7 @@ decimal(0).is_positive()      // false
 ```
 
 #### `is_nan()`
+
 Checks if decimal is NaN.
 
 **Arguments:** None
@@ -216,6 +224,7 @@ decimal(1.23).is_nan()        // false
 ### Metadata Functions
 
 #### `sign()`
+
 Determines the sign of the decimal.
 
 **Arguments:** None
@@ -231,6 +240,7 @@ decimal(0).sign()          // 0
 ```
 
 #### `scale()`
+
 Gets the scale (number of decimal places).
 
 **Arguments:** None
@@ -247,6 +257,7 @@ decimal("1.230").scale()   // 3
 ```
 
 #### `error_details()`
+
 Gets error information for failed conversions.
 
 **Arguments:** None
@@ -265,9 +276,11 @@ if result.is_nan() {
 ### Scale and Normalization Functions
 
 #### `rescale(scale)`
+
 Changes the scale (number of decimal places).
 
-**Arguments:** 
+**Arguments:**
+
 - `scale` (int): Target number of decimal places
 
 **Returns:** `decimal`
@@ -281,6 +294,7 @@ decimal("1.2").rescale(3)     // decimal(1.200)
 ```
 
 #### `canonical()`
+
 Returns the canonical form.
 
 **Arguments:** None
@@ -296,9 +310,11 @@ decimal("0.0").canonical()    // decimal(0)
 ```
 
 #### `trunc(scale)`
+
 Truncates to specified scale.
 
 **Arguments:**
+
 - `scale` (int): Number of decimal places to keep
 
 **Returns:** `decimal`
@@ -314,6 +330,7 @@ decimal("1.999").trunc(0)     // decimal(1)
 ### Neighbor and Transform Functions
 
 #### `next_up()`
+
 Gets the next representable decimal (toward positive infinity).
 
 **Arguments:** None
@@ -328,6 +345,7 @@ decimal(0).next_up()          // smallest positive decimal
 ```
 
 #### `next_down()`
+
 Gets the previous representable decimal (toward negative infinity).
 
 **Arguments:** None
@@ -342,6 +360,7 @@ decimal(0).next_down()        // smallest negative decimal
 ```
 
 #### `abs()`
+
 Returns absolute value.
 
 **Arguments:** None
@@ -356,6 +375,7 @@ decimal(5.23).abs()           // decimal(5.23)
 ```
 
 #### `negate()`
+
 Returns negated value.
 
 **Arguments:** None
@@ -370,6 +390,7 @@ decimal(-5.23).negate()       // decimal(5.23)
 ```
 
 #### `sqrt()`
+
 Returns the square root.
 
 **Arguments:** None
@@ -389,9 +410,11 @@ decimal(-1).sqrt()            // NaN
 The following rounding functions accept a `scale` argument (number of decimal places to round to). The scale must be within the implementation-defined range; otherwise raises a runtime error.
 
 #### `round_down(scale)`
+
 Rounds toward negative infinity.
 
 **Arguments:**
+
 - `scale` (int): Number of decimal places
 
 **Returns:** `decimal`
@@ -402,9 +425,11 @@ decimal("1.234").round_down(0)   // decimal(1)
 ```
 
 #### `round_up(scale)`
+
 Rounds toward positive infinity.
 
 **Arguments:**
+
 - `scale` (int): Number of decimal places
 
 **Returns:** `decimal`
@@ -415,9 +440,11 @@ decimal("1.201").round_up(1)     // decimal(1.3)
 ```
 
 #### `round_toward_zero(scale)`
+
 Rounds toward zero (truncation).
 
 **Arguments:**
+
 - `scale` (int): Number of decimal places
 
 **Returns:** `decimal`
@@ -428,9 +455,11 @@ decimal("-1.987").round_toward_zero(2)  // decimal(-1.98)
 ```
 
 #### `round_away_from_zero(scale)`
+
 Rounds away from zero.
 
 **Arguments:**
+
 - `scale` (int): Number of decimal places
 
 **Returns:** `decimal`
@@ -441,9 +470,11 @@ decimal("-1.234").round_away_from_zero(2)  // decimal(-1.24)
 ```
 
 #### `round_half_toward_zero(scale)`
+
 Rounds half values toward zero (banker's rounding variant).
 
 **Arguments:**
+
 - `scale` (int): Number of decimal places
 
 **Returns:** `decimal`
@@ -454,9 +485,11 @@ decimal("1.245").round_half_toward_zero(2)  // decimal(1.24)
 ```
 
 #### `round_half_away_from_zero(scale)`
+
 Rounds half values away from zero (standard rounding).
 
 **Arguments:**
+
 - `scale` (int): Number of decimal places
 
 **Returns:** `decimal`
@@ -467,9 +500,11 @@ decimal("1.245").round_half_away_from_zero(2)  // decimal(1.25)
 ```
 
 #### `round_bank(scale)`
+
 Rounds half values to nearest even (banker's rounding).
 
 **Arguments:**
+
 - `scale` (int): Number of decimal places
 
 **Returns:** `decimal`
@@ -484,31 +519,37 @@ decimal("1.225").round_bank(2)   // decimal(1.22) (2 is even)
 ### Financial Calculations
 
 ```go
+fmt = import("fmt")
+
 // Price calculation with tax
 price = decimal("100.00")
 tax_rate = decimal("0.0825")      // 8.25%
 tax = (price * tax_rate).round_half_away_from_zero(2)
 total = price + tax
 
-println("Price: " + price.string())
-println("Tax: " + tax.string())
-println("Total: " + total.string())
+fmt.println("Price: " + price.string())
+fmt.println("Tax: " + tax.string())
+fmt.println("Total: " + total.string())
 ```
 
 ### Currency Conversion
 
 ```go
+fmt = import("fmt")
+
 // Convert USD to EUR with exact precision
 usd = decimal("99.99")
 exchange_rate = decimal("0.9234")
 eur = (usd * exchange_rate).round_half_away_from_zero(2)
 
-println("USD " + usd.string() + " = EUR " + eur.string())
+fmt.println("USD " + usd.string() + " = EUR " + eur.string())
 ```
 
 ### Rounding Strategies
 
 ```go
+fmt = import("fmt")
+
 // Demonstrate different rounding methods
 value = decimal("1.235")
 
@@ -519,7 +560,7 @@ away_from_zero = value.round_away_from_zero(2)  // 1.24
 standard = value.round_half_away_from_zero(2)   // 1.24
 banker = value.round_bank(2)         // 1.24
 
-println("Standard rounding: " + standard.string())
+fmt.println("Standard rounding: " + standard.string())
 ```
 
 ### Validation and Classification
@@ -530,15 +571,15 @@ function validate_amount(amount) {
     if amount.is_negative() {
         return error("Amount cannot be negative")
     }
-    
+
     if amount.is_nan() {
         return error("Invalid amount")
     }
-    
+
     if amount.is_zero() {
         return error("Amount must be greater than zero")
     }
-    
+
     return amount
 }
 

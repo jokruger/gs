@@ -1,12 +1,14 @@
 # runes
 
-Unicode strings indexed by rune code points (not bytes).
+Mutable Unicode strings indexed by rune code points (not bytes).
 
 ## Overview
 
 The `runes` type is similar to `string` but is indexed and operated on by **rune** (Unicode code point) rather than
 byte. Use `runes` for Unicode-first applications where code-point-based indexing/slicing and rune-aware operations are
-required across all operations.
+required across all operations. Runes are mutable and reference-typed: `a = b` makes both variables refer to the same
+underlying buffer; use `copy()` to produce an independent value. Wrap with `immutable(...)` to obtain an
+`immutable-runes` value that rejects index assignment and `append` mutation.
 
 **Key Difference from `string`:**
 
@@ -52,6 +54,33 @@ Single-element indexing supports negative indices. Two-part slice bounds follow 
 from the end, omitted bounds default to the natural edge, oversized bounds clamp, and an inverted slice returns an empty
 result. Runes also support three-part slices `start:end:step`; `step` may be negative (reverse traversal) but cannot be
 zero. Out-of-bounds index access raises `index out of bounds`.
+
+### Mutation
+
+Runes support index assignment and the `append` builtin:
+
+```go
+r = runes("hello")
+r[0] = 'H'                    // u"Hello"
+r[-2] = '!'                   // u"Hel!o"
+r[0] = 0x41                   // numeric rune value
+
+r2 = append(r, '!')           // append a single rune; returns a new runes
+r3 = append(r, '!', '?')      // append multiple runes
+r4 = append(r, runes("xyz"))  // append another runes value
+```
+
+`append` returns a new runes value; the source is unchanged. Index assignment requires the right-hand side to be a
+valid rune; other types raise an error. Out-of-bounds indices raise `index out of bounds`.
+
+Wrapping with `immutable(...)` prevents both index assignment and any other mutation; reads continue to work normally:
+
+```go
+ir = immutable(runes("abc"))
+type_name(ir)                 // "immutable-runes"
+ir[0] = 'X'                   // runtime error - immutable
+copy(ir)                      // returns a mutable copy
+```
 
 ## Member Functions
 
@@ -433,6 +462,73 @@ u"hello world".count(r => r == ' '.int())    // 1
 u"abc123xyz".count(r => r >= '0'.int() && r <= '9'.int())  // 3
 ```
 
+#### `sum()`
+
+Sums the numeric rune (code-point) values.
+
+**Arguments:** None
+
+**Returns:** `int | undefined`
+
+**Description:** Returns the sum of all rune code points as an `int`. Returns `undefined` for empty runes.
+
+```go
+runes("abc").sum()        // 294
+runes("").sum()           // undefined
+```
+
+#### `avg()`
+
+Computes the integer average of rune code-point values.
+
+**Arguments:** None
+
+**Returns:** `int | undefined`
+
+**Description:** Returns the integer average (floor division) of all rune code points. Returns `undefined` for empty
+runes.
+
+```go
+runes("abc").avg()        // 98
+runes("").avg()           // undefined
+```
+
+#### `map(fn)`
+
+Maps each rune through a callback.
+
+**Arguments:**
+
+- `fn` (function): Callback that takes one argument `(rune)` or two arguments `(index, rune)`.
+
+**Returns:** `array`
+
+**Description:** Returns a new array where each element is the result of `fn` applied to the corresponding rune. The
+result is an `array` because the callback may return values of any type.
+
+```go
+runes("abc").map(r => r + 1)              // ['b', 'c', 'd']
+runes("abc").map((i, r) => [i, r])        // [[0, 'a'], [1, 'b'], [2, 'c']]
+```
+
+#### `reduce(initial, fn)`
+
+Reduces runes to a single value.
+
+**Arguments:**
+
+- `initial`: The initial accumulator value
+- `fn` (function): Reducer that takes `(acc, rune)` or `(acc, index, rune)` and returns the new accumulator.
+
+**Returns:** Whatever the reducer returns
+
+**Description:** Folds the runes from left to right using `fn`, starting with `initial`.
+
+```go
+runes("abc").reduce(0, (acc, r) => acc + r)               // 294
+runes("abc").reduce("", (acc, i, r) => acc + r.string())  // "abc"
+```
+
 #### `min()`
 
 Finds minimum rune.
@@ -549,6 +645,8 @@ u"hello world".contains(u"xyz")      // false
 ### Unicode Text Processing
 
 ```go
+fmt = import("fmt")
+
 // Process multilingual text
 languages = [
     u"English",
@@ -560,7 +658,7 @@ languages = [
 
 // Count characters in each language
 for lang in languages {
-    println(lang.string() + ": " + lang.len().string() + " characters")
+    fmt.println(lang.string() + ": " + lang.len().string() + " characters")
 }
 ```
 
@@ -588,6 +686,8 @@ filtered = greek_text.filter(r => r >= 0x0391 && r <= 0x03A9)
 ### Case-Insensitive Comparison
 
 ```go
+fmt = import("fmt")
+
 // Normalize text for comparison
 function normalize_for_comparison(text) {
     return text.lower().string()  // Convert to string for byte comparison
@@ -600,7 +700,7 @@ norm1 = normalize_for_comparison(text1)
 norm2 = normalize_for_comparison(text2)
 
 if norm1 == norm2 {
-    println("Texts match (case-insensitive)")
+    fmt.println("Texts match (case-insensitive)")
 }
 ```
 

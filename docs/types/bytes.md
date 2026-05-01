@@ -1,10 +1,13 @@
 # bytes
 
-Byte sequences.
+Mutable byte sequences.
 
 ## Overview
 
-The `bytes` type represents a sequence of byte values (0-255). Use `bytes` when you need to manipulate raw byte data. Each index holds a `byte`.
+The `bytes` type represents a sequence of byte values (0-255). Use `bytes` when you need to manipulate raw byte data.
+Each index holds a `byte`. Bytes are mutable and reference-typed: `a = b` makes both variables refer to the same
+underlying buffer; use `copy()` to produce an independent value. Wrap with `immutable(...)` to obtain an
+`immutable-bytes` value that rejects index assignment and `append` mutation.
 
 ## Declaration and Usage
 
@@ -40,6 +43,34 @@ zero. Out-of-bounds index access raises `index out of bounds`.
 b1 = bytes("ab")
 b2 = bytes("cd")
 result = b1 + b2              // bytes with [97, 98, 99, 100]
+```
+
+### Mutation
+
+Bytes support index assignment and the `append` builtin:
+
+```go
+b = bytes("hello")
+b[0] = 'H'                    // bytes("Hello")
+b[-2] = '!'                   // bytes("Hel!o")
+b[0] = 65                     // numeric byte value (0-255)
+
+b2 = append(b, 'X')           // append a single byte; returns a new bytes
+b3 = append(b, 'X', 'Y')      // append multiple bytes
+b4 = append(b, bytes("!!"))   // append another bytes value
+```
+
+`append` returns a new bytes value; the source value is unchanged. Index assignment requires the right-hand side to
+fit in a byte (0-255); other types or out-of-range values raise an error. Out-of-bounds indices raise
+`index out of bounds`.
+
+Wrapping with `immutable(...)` prevents both index assignment and any other mutation; reads continue to work normally:
+
+```go
+ib = immutable(bytes("abc"))
+type_name(ib)                 // "immutable-bytes"
+ib[0] = 'X'                   // runtime error - immutable
+copy(ib)                      // returns a mutable copy
 ```
 
 ## Member Functions
@@ -284,6 +315,74 @@ bytes("hello world").count(b => b == ' '.int())    // 1
 bytes("a0b1c2").count(b => b >= '0'.int() && b <= '9'.int())  // 3
 ```
 
+#### `sum()`
+
+Sums the numeric byte values.
+
+**Arguments:** None
+
+**Returns:** `int | undefined`
+
+**Description:** Returns the sum of all byte values as an `int`. Returns `undefined` for empty bytes.
+
+```go
+bytes([1, 2, 3]).sum()        // 6
+bytes("abc").sum()            // 294
+bytes().sum()                 // undefined
+```
+
+#### `avg()`
+
+Computes the integer average of byte values.
+
+**Arguments:** None
+
+**Returns:** `int | undefined`
+
+**Description:** Returns the integer average (floor division) of all byte values. Returns `undefined` for empty bytes.
+
+```go
+bytes([2, 4, 6]).avg()        // 4
+bytes("abc").avg()            // 98
+bytes().avg()                 // undefined
+```
+
+#### `map(fn)`
+
+Maps each byte through a callback.
+
+**Arguments:**
+
+- `fn` (function): Callback that takes one argument `(byte)` or two arguments `(index, byte)`.
+
+**Returns:** `array`
+
+**Description:** Returns a new array where each element is the result of `fn` applied to the corresponding byte. The
+result is an `array` because the callback may return values of any type.
+
+```go
+bytes("abc").map(b => b + 1)              // [98, 99, 100]
+bytes("abc").map((i, b) => [i, b])        // [[0, byte(97)], [1, byte(98)], [2, byte(99)]]
+```
+
+#### `reduce(initial, fn)`
+
+Reduces bytes to a single value.
+
+**Arguments:**
+
+- `initial`: The initial accumulator value
+- `fn` (function): Reducer that takes `(acc, byte)` or `(acc, index, byte)` and returns the new accumulator.
+
+**Returns:** Whatever the reducer returns
+
+**Description:** Folds the bytes from left to right using `fn`, starting with `initial`.
+
+```go
+bytes("abc").reduce(0, (acc, b) => acc + b)               // 294
+bytes("abc").reduce("", (acc, i, b) => acc + b.string())  // "abc"
+```
+
 #### `min()`
 
 Finds minimum byte.
@@ -402,7 +501,7 @@ bytes([1, 2, 3]).contains(2)          // true
 // Create and modify binary data
 data = [0xFF, 0x00, 0x42]
 data[1] = 0xAA           // Modify a byte
-println(data.string())   // Print as string (may be non-printable)
+data.string()            // Print as string (may be non-printable)
 ```
 
 ### String Encoding/Decoding
@@ -421,17 +520,18 @@ result = binary.string()   // "Jello"
 ### Byte Filtering and Analysis
 
 ```go
+fmt := import("fmt")
 // Filter ASCII text
 text = bytes("Hello123!")
 letters = text.filter(b =>
     (b >= 'A'.int() && b <= 'Z'.int()) ||
     (b >= 'a'.int() && b <= 'z'.int())
 )
-println(letters.string())   // "Hello"
+fmt.println(letters.string())   // "Hello"
 
 // Extract digits
 digits = text.filter(b => b >= '0'.int() && b <= '9'.int())
-println(digits.string())    // "123"
+fmt.println(digits.string())    // "123"
 ```
 
 ### Data Statistics
@@ -451,6 +551,8 @@ letter_a_count = data.count(b => b == 'a'.int())  // 1
 ### JSON Processing
 
 ```go
+fmt = import("fmt")
+
 // Simulate JSON manipulation
 json_bytes = `{"name":"Alice","age":30}`.bytes()
 
@@ -460,7 +562,7 @@ record = json_str.record()
 
 // Verify data integrity
 if record != undefined {
-    println("Valid JSON")
+    fmt.println("Valid JSON")
 }
 ```
 

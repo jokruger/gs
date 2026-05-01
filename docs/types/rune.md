@@ -50,6 +50,7 @@ Runes participate in arithmetic operations by their numeric code point value:
 ### Conversion Functions
 
 #### `rune()`
+
 Converts to rune.
 
 **Arguments:** None
@@ -63,6 +64,7 @@ Converts to rune.
 ```
 
 #### `bool()`
+
 Converts to boolean.
 
 **Arguments:** None
@@ -78,6 +80,7 @@ Converts to boolean.
 ```
 
 #### `int()`
+
 Converts to integer.
 
 **Arguments:** None
@@ -94,6 +97,7 @@ Converts to integer.
 ```
 
 #### `string()`
+
 Converts to string.
 
 **Arguments:** None
@@ -153,13 +157,15 @@ greeting = 'H'.string() + 'i'.string()  // "Hi"
 ### Keyboard and Input Processing
 
 ```go
+fmt = import("fmt")
+
 // Process keyboard input
 key = 'Enter'    // In real usage, from input
 
 if key == 'q' {
-    println("Quit requested")
+    fmt.println("Quit requested")
 } else if key == 'h' {
-    println("Help requested")
+    fmt.println("Help requested")
 }
 ```
 

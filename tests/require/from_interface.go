@@ -42,7 +42,10 @@ func FromInterface(alloc *core.Arena, v any) (core.Value, error) {
 		return core.NewDecimalValue(v), nil
 
 	case []byte:
-		return alloc.NewBytesValue(v), nil
+		return alloc.NewBytesValue(v, false), nil
+
+	case []rune:
+		return alloc.NewRunesValue(v, false), nil
 
 	case error:
 		t := alloc.NewStringValue(v.Error())

@@ -1,13 +1,10 @@
 # TODO list for Kavun
 
 - for arrays, bytes, runes, strings - store data=leng and ptr=underlying data (&[0] / StringData, etc) to avoid allocation of header struct
-- allocate/release underlying arrays and dicts through allocator
 - use store underlying array/dict pinter in Value.Ptr instead of using wrapper struct
-- remove bool argument from NewDict/NewRecord/NewArray - use separate constructors for mutable/immutable
-
 - try use unsafe.StringData / unsafe.String to store and rebuild strings?
 
-- make bytes/runes mutable - add assign operator and check for immutability
+<<<<<<<
 
 - disallow to SetValueType for primitive types because they can be hardcoded in a hot path (int arithmetics, etc)
 - do atomic load check for "abort" flag every X cycles, not every cycle
@@ -129,3 +126,5 @@
 - inlining and other optimizations
 
 - .index_of or .index - search for element or subsequence (depending on arguments - mirror the .contains method), return index
+
+- find a way to reuse value envelopes: receiver ptr instead of return value, mark as tmp, on assign copy if tmp, etc - primary usecase = loops

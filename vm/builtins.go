@@ -366,7 +366,7 @@ func builtinRunes(vm core.VM, args []core.Value) (core.Value, error) {
 
 	if l == 0 {
 		rs := alloc.NewRunes(0, false)
-		return alloc.NewRunesValue(rs), nil
+		return alloc.NewRunesValue(rs, false), nil
 	}
 	if l > 2 {
 		return core.Undefined, errs.NewWrongNumArgumentsError("runes", "0, 1 or 2", len(args))
@@ -379,11 +379,11 @@ func builtinRunes(vm core.VM, args []core.Value) (core.Value, error) {
 	case core.VT_INT:
 		n := int(int64(args[0].Data))
 		bs := alloc.NewRunes(n, true)
-		return alloc.NewRunesValue(bs), nil
+		return alloc.NewRunesValue(bs, false), nil
 
 	default:
 		if v, ok := args[0].AsRunes(); ok {
-			return alloc.NewRunesValue(v), nil
+			return alloc.NewRunesValue(v, false), nil
 		}
 		if l == 2 {
 			return args[1], nil
@@ -547,7 +547,7 @@ func builtinBytes(vm core.VM, args []core.Value) (core.Value, error) {
 
 	if l == 0 {
 		bs := alloc.NewBytes(0, false)
-		return alloc.NewBytesValue(bs), nil
+		return alloc.NewBytesValue(bs, false), nil
 	}
 	if l > 2 {
 		return core.Undefined, errs.NewWrongNumArgumentsError("bytes", "0, 1 or 2", len(args))
@@ -560,11 +560,11 @@ func builtinBytes(vm core.VM, args []core.Value) (core.Value, error) {
 	case core.VT_INT:
 		n := int(int64(args[0].Data))
 		bs := alloc.NewBytes(n, true)
-		return alloc.NewBytesValue(bs), nil
+		return alloc.NewBytesValue(bs, false), nil
 
 	default:
 		if v, ok := args[0].AsBytes(); ok {
-			return alloc.NewBytesValue(v), nil
+			return alloc.NewBytesValue(v, false), nil
 		}
 		if l == 2 {
 			return args[1], nil

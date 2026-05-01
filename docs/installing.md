@@ -49,7 +49,7 @@ Add a hashbang line as the first line of your script to make it directly executa
 ```go
 #!/usr/bin/env kavun
 
-fmt := import("fmt")
+fmt = import("fmt")
 fmt.println("Hello Kavun!")
 ```
 
@@ -73,11 +73,11 @@ cd kavun
 
 ### Common recipes
 
-| Command | Description |
-|---------|-------------|
-| `just build` | Generate sources and compile the `kavun` binary into `./build/kavun` |
-| `just install` | Build and copy the binary to `$HOME/bin/` |
-| `just test` | Run the full test suite |
-| `just clean` | Remove build artefacts and profiling files |
+| Command        | Description                                                          |
+| -------------- | -------------------------------------------------------------------- |
+| `just build`   | Generate sources and compile the `kavun` binary into `./build/kavun` |
+| `just install` | Build and copy the binary to `$HOME/bin/`                            |
+| `just test`    | Run the full test suite                                              |
+| `just clean`   | Remove build artefacts and profiling files                           |
 
 Run `just` with no arguments to list all available recipes.

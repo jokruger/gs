@@ -23,24 +23,27 @@ func (o *Bytes) Set(elements []byte) {
 }
 
 // BytesValue creates new boxed bytes value.
-func BytesValue(v *Bytes) Value {
+func BytesValue(v *Bytes, immutable bool) Value {
 	return Value{
 		Ptr:   unsafe.Pointer(v),
-		Const: true,
+		Const: immutable,
 		Type:  VT_BYTES,
 	}
 }
 
 // NewBytesValue creates new (heap-allocated) bytes value.
-func NewBytesValue(v []byte) Value {
+func NewBytesValue(v []byte, immutable bool) Value {
 	t := &Bytes{}
 	t.Set(v)
-	return BytesValue(t)
+	return BytesValue(t, immutable)
 }
 
 /* Bytes type methods */
 
 func bytesTypeName(v Value) string {
+	if v.Const {
+		return "immutable-bytes"
+	}
 	return "bytes"
 }
 
@@ -95,6 +98,49 @@ func bytesTypeInterface(v Value) any {
 	return o.Elements
 }
 
+func bytesTypeAssign(v Value, index Value, r Value) error {
+	if v.Const {
+		return errs.NewNotAssignableError("immutable-bytes")
+	}
+
+	o := (*Bytes)(v.Ptr)
+	i, ok := index.AsInt()
+	if !ok {
+		return errs.NewInvalidIndexTypeError("index assign", "int", index.TypeName())
+	}
+	i, ok = normalizeSequenceIndex(i, int64(len(o.Elements)))
+	if !ok {
+		return errs.NewIndexOutOfBoundsError("index assign", int(i), len(o.Elements))
+	}
+
+	b, ok := r.AsByte()
+	if !ok {
+		return errs.NewInvalidIndexTypeError("index assign value", "byte", r.TypeName())
+	}
+	o.Elements[i] = b
+
+	return nil
+}
+
+func bytesTypeAppend(v Value, a *Arena, args []Value) (Value, error) {
+	o := (*Bytes)(v.Ptr)
+	res := append([]byte{}, o.Elements...)
+	for i, arg := range args {
+		switch arg.Type {
+		case VT_BYTES:
+			t := (*Bytes)(arg.Ptr)
+			res = append(res, t.Elements...)
+		default:
+			b, ok := arg.AsByte()
+			if !ok {
+				return Undefined, errs.NewInvalidArgumentTypeError("append", fmt.Sprintf("%d", i+1), "byte or bytes", arg.TypeName())
+			}
+			res = append(res, b)
+		}
+	}
+	return a.NewBytesValue(res, false), nil
+}
+
 func bytesTypeBinaryOp(v Value, a *Arena, op token.Token, rhs Value) (Value, error) {
 	o := (*Bytes)(v.Ptr)
 	r, ok := rhs.AsBytes()
@@ -104,7 +150,7 @@ func bytesTypeBinaryOp(v Value, a *Arena, op token.Token, rhs Value) (Value, err
 
 	switch op {
 	case token.Add:
-		return a.NewBytesValue(append(o.Elements, r...)), nil
+		return a.NewBytesValue(append(o.Elements, r...), false), nil
 	}
 
 	return Undefined, errs.NewInvalidBinaryOperatorError(op.String(), v.TypeName(), rhs.TypeName())
@@ -123,7 +169,7 @@ func bytesTypeCopy(v Value, a *Arena) (Value, error) {
 	o := (*Bytes)(v.Ptr)
 	t := a.NewBytes(len(o.Elements), true)
 	copy(t, o.Elements)
-	return a.NewBytesValue(t), nil
+	return a.NewBytesValue(t, false), nil
 }
 
 func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, error) {
@@ -231,7 +277,7 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		sorted := alloc.NewBytes(len(o.Elements), true)
 		copy(sorted, o.Elements)
 		slices.Sort(sorted)
-		return alloc.NewBytesValue(sorted), nil
+		return alloc.NewBytesValue(sorted, false), nil
 
 	case "reverse":
 		if len(args) != 0 {
@@ -242,7 +288,7 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		for i, b := range o.Elements {
 			rev[n-1-i] = b
 		}
-		return alloc.NewBytesValue(rev), nil
+		return alloc.NewBytesValue(rev, false), nil
 
 	case "filter":
 		return bytesFnFilter(v, vm, args)
@@ -264,6 +310,18 @@ func bytesTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 
 	case "chunk":
 		return bytesFnChunk(v, vm, args)
+
+	case "sum":
+		return bytesFnSum(v, vm, args)
+
+	case "avg":
+		return bytesFnAvg(v, vm, args)
+
+	case "map":
+		return bytesFnMap(v, vm, args)
+
+	case "reduce":
+		return bytesFnReduce(v, vm, args)
 
 	default:
 		return Undefined, errs.NewInvalidMethodError(name, v.TypeName())
@@ -375,7 +433,7 @@ func bytesTypeSlice(v Value, a *Arena, s Value, e Value) (Value, error) {
 	}
 
 	si, ei = normalizeSliceBounds(si, s.Type != VT_UNDEFINED, ei, e.Type != VT_UNDEFINED, l)
-	return a.NewBytesValue(o.Elements[si:ei]), nil
+	return a.NewBytesValue(o.Elements[si:ei], v.Const), nil
 }
 
 func bytesTypeSliceStep(v Value, a *Arena, s Value, e Value, stepVal Value) (Value, error) {
@@ -417,7 +475,8 @@ func bytesTypeSliceStep(v Value, a *Arena, s Value, e Value, stepVal Value) (Val
 			result = append(result, o.Elements[i])
 		}
 	}
-	return a.NewBytesValue(result), nil
+
+	return a.NewBytesValue(result, false), nil
 }
 
 func bytesFnChunk(v Value, vm VM, args []Value) (Value, error) {
@@ -446,11 +505,13 @@ func bytesFnChunk(v Value, vm VM, args []Value) (Value, error) {
 			end = length
 		}
 		chunk := o.Elements[start:end]
+		chunkConst := v.Const
 		if copyChunks {
 			chunk = alloc.NewBytes(end-start, true)
 			copy(chunk, o.Elements[start:end])
+			chunkConst = false
 		}
-		chunks[i] = alloc.NewBytesValue(chunk)
+		chunks[i] = alloc.NewBytesValue(chunk, chunkConst)
 	}
 
 	return alloc.NewArrayValue(chunks, false), nil
@@ -565,7 +626,7 @@ func bytesFnFilter(v Value, vm VM, args []Value) (Value, error) {
 				filtered = append(filtered, v)
 			}
 		}
-		return alloc.NewBytesValue(filtered), nil
+		return alloc.NewBytesValue(filtered, false), nil
 
 	case 2:
 		for i, v := range o.Elements {
@@ -579,7 +640,7 @@ func bytesFnFilter(v Value, vm VM, args []Value) (Value, error) {
 				filtered = append(filtered, v)
 			}
 		}
-		return alloc.NewBytesValue(filtered), nil
+		return alloc.NewBytesValue(filtered, false), nil
 
 	default:
 		return Undefined, errs.NewInvalidArgumentTypeError("filter", "first", "f/1 or f/2", fn.TypeName())
@@ -720,5 +781,123 @@ func bytesFnAny(v Value, vm VM, args []Value) (Value, error) {
 
 	default:
 		return Undefined, errs.NewInvalidArgumentTypeError("any", "first", "f/1 or f/2", fn.TypeName())
+	}
+}
+
+func bytesFnSum(v Value, vm VM, args []Value) (Value, error) {
+	if len(args) != 0 {
+		return Undefined, errs.NewWrongNumArgumentsError("sum", "0", len(args))
+	}
+	o := (*Bytes)(v.Ptr)
+	if len(o.Elements) == 0 {
+		return Undefined, nil
+	}
+	var s int64
+	for _, b := range o.Elements {
+		s += int64(b)
+	}
+	return IntValue(s), nil
+}
+
+func bytesFnAvg(v Value, vm VM, args []Value) (Value, error) {
+	if len(args) != 0 {
+		return Undefined, errs.NewWrongNumArgumentsError("avg", "0", len(args))
+	}
+	o := (*Bytes)(v.Ptr)
+	if len(o.Elements) == 0 {
+		return Undefined, nil
+	}
+	var s int64
+	for _, b := range o.Elements {
+		s += int64(b)
+	}
+	return IntValue(s / int64(len(o.Elements))), nil
+}
+
+func bytesFnMap(v Value, vm VM, args []Value) (Value, error) {
+	if len(args) != 1 {
+		return Undefined, errs.NewWrongNumArgumentsError("map", "1", len(args))
+	}
+
+	fn := args[0]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return Undefined, errs.NewInvalidArgumentTypeError("map", "first", "non-variadic function", fn.TypeName())
+	}
+
+	var buf [2]Value
+	o := (*Bytes)(v.Ptr)
+	alloc := vm.Allocator()
+	mapped := alloc.NewArray(len(o.Elements), true)
+
+	switch fn.Arity() {
+	case 1:
+		for i, b := range o.Elements {
+			buf[0] = ByteValue(b)
+			res, err := fn.Call(vm, buf[:1])
+			if err != nil {
+				return Undefined, err
+			}
+			mapped[i] = res
+		}
+		return alloc.NewArrayValue(mapped, false), nil
+
+	case 2:
+		for i, b := range o.Elements {
+			buf[0] = IntValue(int64(i))
+			buf[1] = ByteValue(b)
+			res, err := fn.Call(vm, buf[:2])
+			if err != nil {
+				return Undefined, err
+			}
+			mapped[i] = res
+		}
+		return alloc.NewArrayValue(mapped, false), nil
+
+	default:
+		return Undefined, errs.NewInvalidArgumentTypeError("map", "first", "f/1 or f/2", fn.TypeName())
+	}
+}
+
+func bytesFnReduce(v Value, vm VM, args []Value) (Value, error) {
+	if len(args) != 2 {
+		return Undefined, errs.NewWrongNumArgumentsError("reduce", "2", len(args))
+	}
+
+	acc := args[0]
+	fn := args[1]
+	if !fn.IsCallable() || fn.IsVariadic() {
+		return Undefined, errs.NewInvalidArgumentTypeError("reduce", "second", "non-variadic function", fn.TypeName())
+	}
+
+	o := (*Bytes)(v.Ptr)
+	var buf [3]Value
+	switch fn.Arity() {
+	case 2:
+		for _, b := range o.Elements {
+			buf[0] = acc
+			buf[1] = ByteValue(b)
+			res, err := fn.Call(vm, buf[:2])
+			if err != nil {
+				return Undefined, err
+			}
+			acc = res
+		}
+		return acc, nil
+
+	case 3:
+		for i, b := range o.Elements {
+			buf[0] = acc
+			buf[1] = IntValue(int64(i))
+			buf[2] = ByteValue(b)
+			res, err := fn.Call(vm, buf[:3])
+			if err != nil {
+				return Undefined, err
+			}
+			acc = res
+		}
+		return acc, nil
+
+	default:
+		return Undefined, errs.NewInvalidArgumentTypeError("reduce", "second", "f/2 or f/3", fn.TypeName())
 	}
 }

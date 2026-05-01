@@ -213,7 +213,7 @@ func arrayTypeMethodCall(v Value, vm VM, name string, args []Value) (Value, erro
 		for i, e := range o.Elements {
 			bs[i], _ = e.AsByte()
 		}
-		return alloc.NewBytesValue(bs), nil
+		return alloc.NewBytesValue(bs, false), nil
 
 	case "string":
 		if len(args) != 0 {
@@ -466,7 +466,8 @@ func arrayTypeSliceStep(v Value, a *Arena, s Value, e Value, stepVal Value) (Val
 			result = append(result, o.Elements[i])
 		}
 	}
-	return a.NewArrayValue(result, v.Const), nil
+
+	return a.NewArrayValue(result, false), nil
 }
 
 func arrayTypeAsBool(v Value) (bool, bool) {
@@ -534,16 +535,15 @@ func arrayFnChunk(v Value, vm VM, args []Value) (Value, error) {
 	}
 
 	for i, start := 0, 0; start < length; i, start = i+1, start+chunkSize {
-		end := start + chunkSize
-		if end > length {
-			end = length
-		}
+		end := min(start+chunkSize, length)
 		chunk := o.Elements[start:end]
+		chunkConst := v.Const
 		if copyChunks {
 			chunk = alloc.NewArray(end-start, true)
 			copy(chunk, o.Elements[start:end])
+			chunkConst = false
 		}
-		chunks[i] = alloc.NewArrayValue(chunk, v.Const)
+		chunks[i] = alloc.NewArrayValue(chunk, chunkConst)
 	}
 
 	return alloc.NewArrayValue(chunks, false), nil

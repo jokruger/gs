@@ -177,7 +177,7 @@ func TestObject_Value(t *testing.T) {
 	require.Equal(t, true, v.Equal(x))
 
 	// Runes
-	v = core.NewRunesValue([]rune(""))
+	v = core.NewRunesValue([]rune(""), false)
 	require.True(t, v.Type == core.VT_RUNES)
 	s, _ = v.AsString()
 	require.Equal(t, "", s)
@@ -190,7 +190,7 @@ func TestObject_Value(t *testing.T) {
 	require.Equal(t, "", s)
 	require.Equal(t, true, v.Equal(x))
 
-	v = core.NewRunesValue([]rune("путін хуйло"))
+	v = core.NewRunesValue([]rune("путін хуйло"), false)
 	require.True(t, v.Type == core.VT_RUNES)
 	s, _ = v.AsString()
 	require.Equal(t, "путін хуйло", s)
@@ -204,7 +204,7 @@ func TestObject_Value(t *testing.T) {
 	require.Equal(t, true, v.Equal(x))
 
 	// Bytes
-	v = core.NewBytesValue([]byte{})
+	v = core.NewBytesValue([]byte{}, false)
 	require.True(t, v.Type == core.VT_BYTES)
 	b, _ := v.AsBytes()
 	require.Equal(t, []byte{}, b)
@@ -217,7 +217,7 @@ func TestObject_Value(t *testing.T) {
 	require.Equal(t, []byte{}, b)
 	require.Equal(t, true, v.Equal(x))
 
-	v = core.NewBytesValue([]byte("foo"))
+	v = core.NewBytesValue([]byte("foo"), false)
 	require.True(t, v.Type == core.VT_BYTES)
 	b, _ = v.AsBytes()
 	require.Equal(t, []byte("foo"), b)
@@ -440,7 +440,7 @@ func TestObject_TypeName(t *testing.T) {
 	o = core.NewErrorValue(core.Undefined)
 	require.Equal(t, "error", o.TypeName())
 
-	o = core.NewBytesValue(nil)
+	o = core.NewBytesValue(nil, false)
 	require.Equal(t, "bytes", o.TypeName())
 
 	o = core.NewIntRangeValue(1, 10, 1)
@@ -499,9 +499,9 @@ func TestObject_IsTrue(t *testing.T) {
 	require.False(t, o.IsTrue())
 
 	// empty bytes is false, non-empty bytes is true
-	o = core.NewBytesValue(nil)
+	o = core.NewBytesValue(nil, false)
 	require.False(t, o.IsTrue())
-	o = core.NewBytesValue([]byte{1, 2})
+	o = core.NewBytesValue([]byte{1, 2}, false)
 	require.True(t, o.IsTrue())
 
 	// empty range is false, non-empty range is true
@@ -559,10 +559,10 @@ func TestObject_String(t *testing.T) {
 	o = core.Undefined
 	require.Equal(t, "undefined", o.String())
 
-	o = core.NewBytesValue(nil)
+	o = core.NewBytesValue(nil, false)
 	require.Equal(t, "bytes([])", o.String())
 
-	o = core.NewBytesValue([]byte("foo"))
+	o = core.NewBytesValue([]byte("foo"), false)
 	require.Equal(t, "bytes([102, 111, 111])", o.String())
 
 	o = core.NewIntRangeValue(0, 10, 2)
@@ -689,9 +689,9 @@ func TestError_Equals(t *testing.T) {
 	string2 := core.NewStringValue("hello")
 	string3 := core.NewStringValue("world")
 
-	bytes1 := core.NewBytesValue([]byte("foo"))
-	bytes2 := core.NewBytesValue([]byte("foo"))
-	bytes3 := core.NewBytesValue([]byte("bar"))
+	bytes1 := core.NewBytesValue([]byte("foo"), false)
+	bytes2 := core.NewBytesValue([]byte("foo"), false)
+	bytes3 := core.NewBytesValue([]byte("bar"), false)
 
 	array1 := core.NewArrayValue([]core.Value{core.IntValue(1), core.IntValue(2)}, false)
 	array2 := core.NewArrayValue([]core.Value{core.IntValue(1), core.IntValue(2)}, false)

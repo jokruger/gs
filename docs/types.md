@@ -1,7 +1,7 @@
 # Type Reference
 
 Kavun has a comprehensive type system with scalar types (numbers, strings, runes), collections (arrays, records, dicts),
-and specialized types (errors, time, ranges, and immutable wrappers).
+and specialized types (errors, time, ranges) plus shared container semantics.
 
 For detailed documentation on each type including all member functions, arguments, descriptions, and examples, see the
 individual type guides below.
@@ -88,10 +88,11 @@ date/time field access and timezone handling.
 First-class error values carrying payloads. Errors don't interrupt execution; use conditional checks with `is_error()`
 for handling.
 
-### [immutable wrappers](types/immutable-wrappers.md)
+### [container semantics](types/container-semantics.md)
 
-Wrap containers (arrays, bytes, dicts, records, runes) to make them immutable at the container level. Use `immutable()`
-to create and `copy()` to get mutable copies.
+Reference behavior, immutability wrappers, slice/chunk propagation, and `append` aliasing pitfalls shared across
+array-like containers (arrays, bytes, dicts, records, runes). Use `immutable()` to lock a container, `copy()` to obtain
+an independent mutable copy.
 
 ## Type Overview Quick Reference
 

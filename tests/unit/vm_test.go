@@ -520,7 +520,7 @@ func TestString(t *testing.T) {
 	expectRun(t, `out = "false".bool()`, nil, false)
 	expectRun(t, `out = "abc".bool()`, nil, false)
 	expectRun(t, `out = "true".bool().string()`, nil, "true")
-	expectRun(t, `out = "abc".bytes()`, nil, core.NewBytesValue([]byte{'a', 'b', 'c'}))
+	expectRun(t, `out = "abc".bytes()`, nil, core.NewBytesValue([]byte{'a', 'b', 'c'}, false))
 	expectRun(t, `out = "abc".bytes().string()`, nil, "abc")
 	expectRun(t, `out = "1.2".float()`, nil, 1.2)
 	expectRun(t, `out = "1.2".float().string()`, nil, "1.2")
@@ -628,7 +628,7 @@ func TestRunes(t *testing.T) {
 	expectRun(t, `out = runes("false").bool()`, nil, false)
 	expectRun(t, `out = runes("abc").bool()`, nil, false)
 	expectRun(t, `out = runes("true").bool().string()`, nil, "true")
-	expectRun(t, `out = runes("abc").bytes()`, nil, core.NewBytesValue([]byte{'a', 'b', 'c'}))
+	expectRun(t, `out = runes("abc").bytes()`, nil, core.NewBytesValue([]byte{'a', 'b', 'c'}, false))
 	expectRun(t, `out = runes("abc").bytes().string()`, nil, "abc")
 	expectRun(t, `out = runes("1.2").float()`, nil, 1.2)
 	expectRun(t, `out = runes("1.2").float().string()`, nil, "1.2")
@@ -710,6 +710,58 @@ ignored := u"abc".for_each(func(i, r) {
 	return true
 })
 `, nil, 297)
+}
+
+func TestRunesMutability(t *testing.T) {
+	// index assignment
+	expectRun(t, `r := runes("hello"); r[0] = 'H'; out = r`, nil, []rune("Hello"))
+	expectRun(t, `r := runes("hello"); r[-2] = '!'; out = r`, nil, []rune("hel!o"))
+	expectRun(t, `r := runes("hello"); r[0] = 0x41; out = r`, nil, []rune("Aello"))
+
+	// append
+	expectRun(t, `r := runes("ab"); r2 := append(r, 'c'); out = r2`, nil, []rune("abc"))
+	expectRun(t, `r := runes("ab"); r2 := append(r, 'c', 'd'); out = r2`, nil, []rune("abcd"))
+	expectRun(t, `r := runes("ab"); r2 := append(r, runes("cd")); out = r2`, nil, []rune("abcd"))
+	expectRun(t, `r := runes("ab"); r2 := append(r, 'c'); out = r`, nil, []rune("ab"))
+
+	// sum / avg / map / reduce
+	expectRun(t, `out = runes("abc").sum()`, nil, 97+98+99)
+	expectRun(t, `out = runes("abc").avg()`, nil, (97+98+99)/3)
+	expectRun(t, `out = runes("").sum()`, nil, core.Undefined)
+	expectRun(t, `out = runes("").avg()`, nil, core.Undefined)
+	expectRun(t, `out = runes("abc").map(func(r) { return r + 1 })`, nil, ARR{int64('b'), int64('c'), int64('d')})
+	expectRun(t, `out = runes("abc").map(func(i, r) { return [i, r] })`, nil,
+		ARR{ARR{0, 'a'}, ARR{1, 'b'}, ARR{2, 'c'}})
+	expectRun(t, `out = runes("abc").reduce(0, func(acc, r) { return acc + r })`, nil, int64('a'+'b'+'c'))
+	expectRun(t, `out = runes("abc").reduce("", func(acc, i, r) { return acc + i.string() + r.string() })`, nil, "0a1b2c")
+
+	// type names
+	expectRun(t, `out = type_name(runes("abc"))`, nil, "runes")
+	expectRun(t, `out = type_name(immutable(runes("abc")))`, nil, "immutable-runes")
+
+	// immutable rejects writes
+	expectError(t, `r := immutable(runes("abc")); r[0] = 'X'`, nil,
+		"object is not assignable: type immutable-runes does not support assignment via indexing or field access")
+
+	// slice of immutable stays immutable (shares memory)
+	expectRun(t, `out = type_name(immutable(runes("abcd"))[1:3])`, nil, "immutable-runes")
+	// stepped slice produces a fresh independent buffer, so it is mutable
+	expectRun(t, `out = type_name(immutable(runes("abcd"))[::-1])`, nil, "runes")
+	// slice of mutable stays mutable
+	expectRun(t, `out = type_name(runes("abcd")[1:3])`, nil, "runes")
+
+	// copy of immutable yields mutable
+	expectRun(t, `r := immutable(runes("abc")); c := copy(r); c[0] = 'X'; out = c`, nil, []rune("Xbc"))
+
+	// append on immutable returns a fresh mutable value (does not mutate source)
+	expectRun(t, `r := immutable(runes("ab")); r2 := append(r, 'c'); r2[0] = 'X'; out = r2`, nil, []rune("Xbc"))
+	expectRun(t, `r := immutable(runes("ab")); r2 := append(r, 'c'); out = type_name(r2)`, nil, "runes")
+
+	// invalid assignment values
+	expectError(t, `r := runes("abc"); r[0] = "xy"`, nil,
+		"invalid index type: (index assign value) expected rune, got string")
+	expectError(t, `r := runes("abc"); r[10] = 'X'`, nil,
+		"index out of bounds: (index assign) 10 out of range [0, 3]")
 }
 
 func TestError(t *testing.T) {
@@ -915,7 +967,7 @@ ignored := [10, 20, 30].for_each(func(i, v) {
 	expectRun(t, `out = [1, 2].reduce(0, (a, v) => a + [10, 20].reduce(0, (b, w) => b + w) + v)`, nil, 63)
 
 	expectRun(t, `out = [1, 2, 3].array()`, nil, ARR{1, 2, 3})
-	expectRun(t, `out = [48, 49, -1].bytes()`, nil, core.NewBytesValue([]byte{48, 49, 255}))
+	expectRun(t, `out = [48, 49, -1].bytes()`, nil, core.NewBytesValue([]byte{48, 49, 255}, false))
 	expectRun(t, `out = [48, 49, -1].record()`, nil, MAP{"0": 48, "1": 49, "2": -1})
 	expectRun(t, `out = [48, 49, -1].dict()`, nil, MAP{"0": 48, "1": 49, "2": -1})
 	expectRun(t, `out = [48, 49, 50].string()`, nil, "012")
@@ -1128,14 +1180,14 @@ func TestBytes(t *testing.T) {
 	expectRun(t, `out = bytes("abcde")[::-1]`, nil, []byte("edcba"))
 	expectError(t, `out = bytes("abcde")[::0]`, nil, "step cannot be zero")
 
-	o := core.NewBytesValue([]byte("Hello World!"))
+	o := core.NewBytesValue([]byte("Hello World!"), false)
 	s, _ := o.AsString()
 	require.Equal(t, "Hello World!", s)
 	require.Equal(t, "bytes([72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 33])", o.String())
 
 	expectRun(t, fmt.Sprintf(`out = bytes([72, 101, 108, 108, 111, 32, 87, 111, 114, 108, 100, 33]) == %s`, o.String()), nil, true)
 
-	v := core.NewBytesValue([]byte("hello"))
+	v := core.NewBytesValue([]byte("hello"), false)
 	expectRun(t, fmt.Sprintf(`out = bytes("hello") == %s`, v.String()), nil, true)
 
 	expectRun(t, `out = bytes("abcde").len()`, nil, 5)
@@ -1211,6 +1263,61 @@ for i, b in bytes("ABC") {
 }
 out = items
 `, nil, ARR{0, byte('A'), 1, byte('B'), 2, byte('C')})
+}
+
+func TestBytesMutability(t *testing.T) {
+	// index assignment
+	expectRun(t, `b := bytes("hello"); b[0] = 'H'; out = b`, nil, []byte("Hello"))
+	expectRun(t, `b := bytes("hello"); b[-2] = '!'; out = b`, nil, []byte("hel!o"))
+	expectRun(t, `b := bytes("abc"); b[0] = 65; out = b`, nil, []byte("Abc"))
+
+	// append
+	expectRun(t, `b := bytes("ab"); b2 := append(b, 'c'); out = b2`, nil, []byte("abc"))
+	expectRun(t, `b := bytes("ab"); b2 := append(b, 'c', 'd'); out = b2`, nil, []byte("abcd"))
+	expectRun(t, `b := bytes("ab"); b2 := append(b, bytes("cd")); out = b2`, nil, []byte("abcd"))
+	expectRun(t, `b := bytes("ab"); b2 := append(b, 99); out = b2`, nil, []byte("abc"))
+	expectRun(t, `b := bytes("ab"); b2 := append(b, 'c'); out = b`, nil, []byte("ab"))
+
+	// sum / avg / map / reduce
+	expectRun(t, `out = bytes("abc").sum()`, nil, 97+98+99)
+	expectRun(t, `out = bytes("abc").avg()`, nil, (97+98+99)/3)
+	expectRun(t, `out = bytes().sum()`, nil, core.Undefined)
+	expectRun(t, `out = bytes().avg()`, nil, core.Undefined)
+	expectRun(t, `out = bytes("abc").map(func(b) { return b + 1 })`, nil, ARR{int64('b'), int64('c'), int64('d')})
+	expectRun(t, `out = bytes("abc").map(func(i, b) { return [i, b] })`, nil,
+		ARR{ARR{0, byte('a')}, ARR{1, byte('b')}, ARR{2, byte('c')}})
+	expectRun(t, `out = bytes("abc").reduce(0, func(acc, b) { return acc + b })`, nil, 97+98+99)
+	expectRun(t, `out = bytes("abc").reduce("", func(acc, i, b) { return acc + i.string() + b.string() })`, nil, "097198299")
+
+	// type names
+	expectRun(t, `out = type_name(bytes("abc"))`, nil, "bytes")
+	expectRun(t, `out = type_name(immutable(bytes("abc")))`, nil, "immutable-bytes")
+
+	// immutable rejects writes
+	expectError(t, `b := immutable(bytes("abc")); b[0] = 'X'`, nil,
+		"object is not assignable: type immutable-bytes does not support assignment via indexing or field access")
+
+	// slice of immutable stays immutable (shares memory)
+	expectRun(t, `out = type_name(immutable(bytes("abcd"))[1:3])`, nil, "immutable-bytes")
+	// stepped slice produces a fresh independent buffer, so it is mutable
+	expectRun(t, `out = type_name(immutable(bytes("abcd"))[::-1])`, nil, "bytes")
+	// slice of mutable stays mutable
+	expectRun(t, `out = type_name(bytes("abcd")[1:3])`, nil, "bytes")
+
+	// copy of immutable yields mutable
+	expectRun(t, `b := immutable(bytes("abc")); c := copy(b); c[0] = 'X'; out = c`, nil, []byte("Xbc"))
+
+	// append on immutable returns fresh mutable (does not mutate source)
+	expectRun(t, `b := immutable(bytes("ab")); b2 := append(b, 'c'); b2[0] = 'X'; out = b2`, nil, []byte("Xbc"))
+	expectRun(t, `b := immutable(bytes("ab")); b2 := append(b, 'c'); out = type_name(b2)`, nil, "bytes")
+
+	// invalid assignment values
+	expectError(t, `b := bytes("abc"); b[0] = "xy"`, nil,
+		"invalid index type: (index assign value) expected byte, got string")
+	expectError(t, `b := bytes("abc"); b[0] = 256`, nil,
+		"invalid index type: (index assign value) expected byte, got int")
+	expectError(t, `b := bytes("abc"); b[10] = 'X'`, nil,
+		"index out of bounds: (index assign) 10 out of range [0, 3]")
 }
 
 func TestArrayIterator(t *testing.T) {
@@ -1976,7 +2083,7 @@ func TestBuiltinFunctionBytes(t *testing.T) {
 	expectRun(t, `out = bytes(true)`, nil, core.Undefined)
 	expectRun(t, `out = bytes(false)`, nil, core.Undefined)
 	expectRun(t, `out = bytes('8')`, nil, core.Undefined)
-	expectRun(t, `out = bytes([1])`, nil, core.NewBytesValue([]byte{1}))
+	expectRun(t, `out = bytes([1])`, nil, core.NewBytesValue([]byte{1}, false))
 	expectRun(t, `out = bytes({a: 1})`, nil, core.Undefined)
 	expectRun(t, `out = bytes(undefined)`, nil, core.Undefined)
 	expectRun(t, `out = bytes("-522", ['8'])`, nil, []byte{'-', '5', '2', '2'})
@@ -4718,9 +4825,9 @@ func toObject(v any) core.Value {
 	case dec128.Dec128:
 		return core.NewDecimalValue(v)
 	case []byte:
-		return core.NewBytesValue(v)
+		return core.NewBytesValue(v, false)
 	case []rune:
-		return core.NewRunesValue(v)
+		return core.NewRunesValue(v, false)
 	case MAP:
 		objs := make(map[string]core.Value)
 		for k, v := range v {
@@ -4777,7 +4884,7 @@ func objectZeroCopy(o core.Value) core.Value {
 		return core.NewStringValue("")
 
 	case core.VT_RUNES:
-		return core.NewRunesValue([]rune(""))
+		return core.NewRunesValue([]rune(""), false)
 
 	case core.VT_ARRAY:
 		return core.NewArrayValue(nil, o.Const)
@@ -4792,7 +4899,7 @@ func objectZeroCopy(o core.Value) core.Value {
 		return core.NewErrorValue(core.Undefined)
 
 	case core.VT_BYTES:
-		return core.NewBytesValue(nil)
+		return core.NewBytesValue(nil, false)
 
 	default:
 		panic(fmt.Errorf("unknown value kind: %d", o.Type))

@@ -208,7 +208,8 @@ func (a *Arena) Stat() map[string]slab.Stats {
 	}
 }
 
-// Payload returns the payload associated with the arena, which can be used to store any additional data or context used by user-defined types and functions.
+// Payload returns the payload associated with the arena, which can be used to store any additional data or context used
+// by user-defined types and functions.
 func (a *Arena) Payload() any {
 	return a.payload
 }
@@ -294,16 +295,16 @@ func (a *Arena) NewStringValue(s string) Value {
 	return StringValue(o)
 }
 
-func (a *Arena) NewRunesValue(r []rune) Value {
+func (a *Arena) NewRunesValue(r []rune, immutable bool) Value {
 	o := a.runesValues.Alloc()
 	o.Set(r)
-	return RunesValue(o)
+	return RunesValue(o, immutable)
 }
 
-func (a *Arena) NewBytesValue(b []byte) Value {
+func (a *Arena) NewBytesValue(b []byte, immutable bool) Value {
 	o := a.bytesValues.Alloc()
 	o.Set(b)
-	return BytesValue(o)
+	return BytesValue(o, immutable)
 }
 
 func (a *Arena) NewArrayValue(arr []Value, immutable bool) Value {

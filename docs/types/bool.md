@@ -9,12 +9,13 @@ Boolean values are used in control flow and logical operations. Kavun has two bo
 ## Declaration and Usage
 
 ```go
+fmt = import("fmt")
 ok = true
 flag = false
 
 // Used in control flow
 if ok {
-    println("ok is true")
+    fmt.println("ok is true")
 }
 
 // Logical operations
@@ -45,17 +46,19 @@ true || false     // true
 Booleans are used directly in conditionals and loop conditions:
 
 ```go
+fmt = import("fmt")
+
 if true {
-    println("always runs")
+    fmt.println("always runs")
 }
 
 for true {
-    println("infinite loop")
+    fmt.println("infinite loop")
     break
 }
 
 for i = 0; i < 5; i = i + 1 {
-    println(i)
+    fmt.println(i)
 }
 ```
 
@@ -74,6 +77,7 @@ true != false         // true
 ### Conversion Functions
 
 #### `bool()`
+
 Converts to boolean.
 
 **Arguments:** None
@@ -88,6 +92,7 @@ false.bool()   // false
 ```
 
 #### `int()`
+
 Converts to integer.
 
 **Arguments:** None
@@ -105,6 +110,7 @@ count = [true, false, true].map(b => b.int()).sum()   // 2
 ```
 
 #### `string()`
+
 Converts to string.
 
 **Arguments:** None
@@ -126,12 +132,14 @@ message = "Status: " + ok.string()   // "Status: true"
 ### Basic Logic
 
 ```go
+fmt = import("fmt")
+
 // Simple boolean operations
 is_valid = age >= 18 && age < 65
 is_ready = !is_waiting
 
 if is_valid && is_ready {
-    println("Proceed")
+    fmt.println("Proceed")
 }
 ```
 

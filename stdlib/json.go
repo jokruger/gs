@@ -48,7 +48,7 @@ func jsonEncode(vm core.VM, args []core.Value) (core.Value, error) {
 		return vm.Allocator().NewErrorValue(t), nil
 	}
 
-	return alloc.NewBytesValue(b), nil
+	return alloc.NewBytesValue(b, false), nil
 }
 
 func jsonIndent(vm core.VM, args []core.Value) (core.Value, error) {
@@ -79,7 +79,7 @@ func jsonIndent(vm core.VM, args []core.Value) (core.Value, error) {
 		return vm.Allocator().NewErrorValue(t), nil
 	}
 
-	return alloc.NewBytesValue(dst.Bytes()), nil
+	return alloc.NewBytesValue(dst.Bytes(), false), nil
 }
 
 func jsonHTMLEscape(vm core.VM, args []core.Value) (core.Value, error) {
@@ -94,5 +94,5 @@ func jsonHTMLEscape(vm core.VM, args []core.Value) (core.Value, error) {
 
 	var dst bytes.Buffer
 	gojson.HTMLEscape(&dst, b)
-	return vm.Allocator().NewBytesValue(dst.Bytes()), nil
+	return vm.Allocator().NewBytesValue(dst.Bytes(), false), nil
 }

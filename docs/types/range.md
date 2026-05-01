@@ -29,12 +29,14 @@ range(5, 0, 1)     // 5, 4, 3, 2, 1 (descending)
 ### Using in Loops
 
 ```go
+fmt = import("fmt")
+
 for v in range(1, 4) {
-    println(v)    // 1, 2, 3
+    fmt.println(v)    // 1, 2, 3
 }
 
 for i in range(0, 10, 2) {
-    println(i)    // 0, 2, 4, 6, 8
+    fmt.println(i)    // 0, 2, 4, 6, 8
 }
 ```
 
@@ -225,19 +227,21 @@ range(0, 10, 2).contains(6) // true
 ### Looping
 
 ```go
+fmt = import("fmt")
+
 // Iterate from 0 to 9
 for i in range(0, 10) {
-    println(i)
+    fmt.println(i)
 }
 
 // Iterate with custom step
 for i in range(0, 20, 5) {
-    println(i)  // 0, 5, 10, 15
+    fmt.println(i)  // 0, 5, 10, 15
 }
 
 // Descending
 for i in range(10, 0, 1) {
-    println(i)  // 10, 9, 8, ..., 1
+    fmt.println(i)  // 10, 9, 8, ..., 1
 }
 ```
 
@@ -257,22 +261,26 @@ countdown = range(10, 0, 1).array()  // [10, 9, 8, ..., 1]
 ### Filtering Ranges
 
 ```go
+fmt = import("fmt")
+
 // Convert to array first, then filter
 r = range(0, 20)
 numbers = r.array()
 odd_numbers = numbers.filter(n => n % 2 != 0)
 
-println(odd_numbers)  // [1, 3, 5, ..., 19]
+fmt.println(odd_numbers)  // [1, 3, 5, ..., 19]
 ```
 
 ### Mapping Over Ranges
 
 ```go
+fmt = import("fmt")
+
 // Convert range and apply transformations
 r = range(1, 6)
 squared = r.array().map(n => n * n)
 
-println(squared)  // [1, 4, 9, 16, 25]
+fmt.println(squared)  // [1, 4, 9, 16, 25]
 ```
 
 ### Working with Large Ranges
@@ -292,6 +300,8 @@ first_100 = range(0, 100).array()
 ### Generating Test Data
 
 ```go
+fmt = import("fmt")
+
 // Create test data
 ids = range(1, 101).array()          // [1, 2, ..., 100]
 
@@ -300,7 +310,7 @@ user_ids = range(1000, 1010).array()  // [1000, 1001, ..., 1009]
 
 // Process each
 for id in ids {
-    println("Processing user " + id.string())
+    fmt.println("Processing user " + id.string())
 }
 ```
 

@@ -192,7 +192,7 @@ func object(v any) core.Value {
 	case float64:
 		return core.FloatValue(v)
 	case []byte:
-		return core.NewBytesValue(v)
+		return core.NewBytesValue(v, false)
 	case MAP:
 		objs := make(map[string]core.Value)
 		for k, v := range v {

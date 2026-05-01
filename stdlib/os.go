@@ -472,7 +472,7 @@ func osReadFile(vm core.VM, args []core.Value) (ret core.Value, err error) {
 	if err != nil {
 		return wrapError(vm, err)
 	}
-	return vm.Allocator().NewBytesValue(bytes), nil
+	return vm.Allocator().NewBytesValue(bytes, false), nil
 }
 
 func osStat(vm core.VM, args []core.Value) (ret core.Value, err error) {

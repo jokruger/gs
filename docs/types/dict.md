@@ -60,15 +60,17 @@ d.len()      // number of elements
 ### Reference Semantics
 
 ```go
+fmt = import("fmt")
+
 d1 = dict({a: 1})
 d2 = d1
 
 d1["a"] = 10
-println(d2["a"])   // 10 (both point to same dict)
+fmt.println(d2["a"])   // 10 (both point to same dict)
 
 d3 = copy(d1)      // Independent copy
 d1["a"] = 1
-println(d3["a"])   // 10 (d3 is unchanged)
+fmt.println(d3["a"])   // 10 (d3 is unchanged)
 ```
 
 ## Record and Dict Relationship
@@ -76,12 +78,14 @@ println(d3["a"])   // 10 (d3 is unchanged)
 Records and dicts represent the same underlying structure and can reference the same data:
 
 ```go
+fmt = import("fmt")
+
 r = {a: 1, b: 2}
 d = dict(r)
 
 // They point to the same data
 r.a = 10
-println(d["a"])   // 10 (both reflect the change)
+fmt.println(d["a"])   // 10 (both reflect the change)
 ```
 
 ## Member Functions
@@ -99,9 +103,10 @@ Converts to record.
 **Description:** Returns the dict as a record, allowing field access via dot notation.
 
 ```go
+fmt = import("fmt")
 d = dict({name: "Alice"})
 r = d.record()
-println(r.name)   // "Alice"
+fmt.println(r.name)   // "Alice"
 ```
 
 #### `dict()`
@@ -327,6 +332,8 @@ d.find((k, v) => v == 99)    // undefined
 ### Working with Configuration
 
 ```go
+fmt = import("fmt")
+
 // Store and query configuration
 config = dict({
     debug: false,
@@ -335,19 +342,21 @@ config = dict({
     host: "localhost"
 })
 
-println("Server running on " + config["host"] + ":" + config["port"].string())
+fmt.println("Server running on " + config["host"] + ":" + config["port"].string())
 
 // Check if keys exist
 if config.contains("ssl_cert") {
-    println("SSL configured")
+    fmt.println("SSL configured")
 } else {
-    println("No SSL configuration")
+    fmt.println("No SSL configuration")
 }
 ```
 
 ### Filtering Data
 
 ```go
+fmt = import("fmt")
+
 // Filter dictionary by criteria
 users = dict({
     alice: {age: 25, active: true},
@@ -357,16 +366,18 @@ users = dict({
 
 // Adults only
 adults = users.filter((name, user) => user.age >= 18)
-println("Adults: " + adults.len().string())
+fmt.println("Adults: " + adults.len().string())
 
 // Active users
 active = users.filter((name, user) => user.active)
-println("Active: " + active.len().string())
+fmt.println("Active: " + active.len().string())
 ```
 
 ### Aggregation
 
 ```go
+fmt = import("fmt")
+
 // Calculate statistics
 scores = dict({
     alice: 85,
@@ -377,28 +388,32 @@ scores = dict({
 
 // Count high scorers
 high_scores = scores.count((name, score) => score >= 90)
-println("High scores (>= 90): " + high_scores.string())
+fmt.println("High scores (>= 90): " + high_scores.string())
 
 // Check if all passed (>= 70)
 all_passed = scores.all((name, score) => score >= 70)
-println("All passed: " + all_passed.string())
+fmt.println("All passed: " + all_passed.string())
 ```
 
 ### Key-Value Iteration
 
 ```go
+fmt = import("fmt")
+
 // Iterate through dict
 cache = dict({user_1: "Alice", user_2: "Bob", user_3: "Carol"})
 
 for key in cache.keys() {
     value = cache[key]
-    println(key + " => " + value)
+    fmt.println(key + " => " + value)
 }
 ```
 
 ### Dynamic Key Access
 
 ```go
+fmt = import("fmt")
+
 // Access with dynamic keys
 data = dict({
     field_a: 10,
@@ -410,13 +425,15 @@ data = dict({
 for key in data.keys() {
     value = data[key]
     doubled = value * 2
-    println(key + " (doubled): " + doubled.string())
+    fmt.println(key + " (doubled): " + doubled.string())
 }
 ```
 
 ### Querying and Filtering
 
 ```go
+fmt = import("fmt")
+
 // Find and filter data
 inventory = dict({
     widget: {stock: 50, price: 10.0},
@@ -426,16 +443,18 @@ inventory = dict({
 
 // Items in stock
 in_stock = inventory.filter((item, info) => info.stock > 0)
-println("Items in stock: " + in_stock.len().string())
+fmt.println("Items in stock: " + in_stock.len().string())
 
 // Expensive items
 expensive = inventory.filter((item, info) => info.price >= 20.0)
-println("Expensive items: " + expensive.len().string())
+fmt.println("Expensive items: " + expensive.len().string())
 ```
 
 ### Combined Record and Dict Operations
 
 ```go
+fmt = import("fmt")
+
 // Use record for data, dict for queries
 employee = {
     name: "Alice",
@@ -449,7 +468,7 @@ emp_dict = dict(employee)
 // Query
 if emp_dict.contains("salary") {
     salary = emp_dict["salary"]
-    println("Salary: $" + salary.string())
+    fmt.println("Salary: $" + salary.string())
 }
 
 // Back to record for field access

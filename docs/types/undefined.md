@@ -55,13 +55,15 @@ float("invalid", 3.14)        // 3.14 (uses fallback)
 ## Examples
 
 ```go
+fmt = import("fmt")
+
 // Handling undefined values
 record = {name: "Alice"}
 age = record.age              // undefined
 
 // Using undefined in conditionals
 if age == undefined {
-    println("Age not specified")
+    fmt.println("Age not specified")
 }
 
 // Chaining through undefined

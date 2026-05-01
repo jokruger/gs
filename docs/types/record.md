@@ -74,15 +74,17 @@ delete(r, "age")    // Remove the age field
 ### Reference Semantics
 
 ```go
+fmt = import("fmt")
+
 r1 = {name: "Alice"}
 r2 = r1
 
 r1.name = "Alicia"
-println(r2.name)    // "Alicia" (both point to same record)
+fmt.println(r2.name)    // "Alicia" (both point to same record)
 
 r3 = copy(r1)       // Independent copy
 r1.name = "Alice"
-println(r3.name)    // "Alicia" (r3 is unchanged)
+fmt.println(r3.name)    // "Alicia" (r3 is unchanged)
 ```
 
 ## Checking Field Existence
@@ -106,24 +108,26 @@ r = {name: "Alice", age: 30}
 
 ## Differences from Dict
 
-| Feature | Record | Dict |
-|---------|--------|------|
-| Field Access | Dot and index | Index only |
-| Member Functions | None | Many (keys, values, filter, etc.) |
-| Use Case | Object representation | Map/dictionary operations |
-| Access Syntax | `r.field` or `r["field"]` | `d["key"]` for access; `d.method()` for operations |
+| Feature          | Record                    | Dict                                               |
+| ---------------- | ------------------------- | -------------------------------------------------- |
+| Field Access     | Dot and index             | Index only                                         |
+| Member Functions | None                      | Many (keys, values, filter, etc.)                  |
+| Use Case         | Object representation     | Map/dictionary operations                          |
+| Access Syntax    | `r.field` or `r["field"]` | `d["key"]` for access; `d.method()` for operations |
 
 ## Record to Dict Conversion
 
 Records and dicts represent the same logical structure internally. When you convert a record to a dict with `dict(record)`, no copy is made—they point to the same data:
 
 ```go
+fmt = import("fmt")
+
 r = {name: "Alice", age: 30}
 d = dict(r)
 
 // Both point to the same data
 r.name = "Alicia"
-println(d.keys())    // ["name", "age"] (with updated name)
+fmt.println(d.keys())    // ["name", "age"] (with updated name)
 ```
 
 ## Examples
@@ -131,6 +135,8 @@ println(d.keys())    // ["name", "age"] (with updated name)
 ### Data Representation
 
 ```go
+fmt = import("fmt")
+
 // Represent structured data
 user = {
     id: 1,
@@ -139,13 +145,15 @@ user = {
     active: true
 }
 
-println("User: " + user.name)
-println("Email: " + user.email)
+fmt.println("User: " + user.name)
+fmt.println("Email: " + user.email)
 ```
 
 ### Building Records Dynamically
 
 ```go
+fmt = import("fmt")
+
 // Create record with computed fields
 person = {}
 person.first_name = "John"
@@ -155,7 +163,7 @@ person.age = 30
 // Add computed field
 person.full_name = person.first_name + " " + person.last_name
 
-println(person.full_name)  // "John Doe"
+fmt.println(person.full_name)  // "John Doe"
 ```
 
 ### Nested Records
@@ -195,18 +203,22 @@ delete(config, "debug")
 Since records don't have iteration methods, convert to dict to iterate:
 
 ```go
+fmt = import("fmt")
+
 r = {name: "Alice", age: 30, city: "Berlin"}
 d = dict(r)
 
 for key in d.keys() {
     value = d[key]
-    println(key + ": " + value.string())
+    fmt.println(key + ": " + value.string())
 }
 ```
 
 ### JSON Serialization
 
 ```go
+fmt = import("fmt")
+
 // Parse JSON to record
 json_str = `{"name":"Alice","age":30,"active":true}`
 record = json_str.record()
@@ -214,13 +226,15 @@ record = json_str.record()
 if record != undefined {
     name = record.name
     age = record.age
-    println("Name: " + name + ", Age: " + age.string())
+    fmt.println("Name: " + name + ", Age: " + age.string())
 }
 ```
 
 ### Field Presence Checking
 
 ```go
+fmt = import("fmt")
+
 // Check if field exists before accessing
 data = {x: 10}
 
@@ -230,7 +244,7 @@ if "y" in data {
     y_value = 0  // default
 }
 
-println("Y value: " + y_value.string())
+fmt.println("Y value: " + y_value.string())
 ```
 
 ### Building Complex Objects

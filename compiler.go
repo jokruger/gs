@@ -251,7 +251,7 @@ func (c *Compiler) Compile(node parser.Node) error {
 		c.emit(node, core.OpConstant, c.addConstant(t))
 
 	case *parser.RunesLit:
-		t := core.NewRunesValue(node.Value)
+		t := core.NewRunesValue(node.Value, false)
 		c.emit(node, core.OpConstant, c.addConstant(t))
 
 	case *parser.RuneLit:

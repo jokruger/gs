@@ -20,7 +20,7 @@ Launch the interactive REPL by running `kavun` with no arguments:
 kavun
 ```
 
-You will see the `>> ` prompt. Type any Kavun expression and press Enter to evaluate it. Press `Ctrl+D` to exit.
+You will see the `>>` prompt. Type any Kavun expression and press Enter to evaluate it. Press `Ctrl+D` to exit.
 
 ### Running a script
 
@@ -36,7 +36,8 @@ kavun hello.kvn
 - `-version`: print the CLI version
 - `-strict-assign`: require variables to already exist for plain `=` assignment
 
-By default, Kavun uses smart `=` assignment at compile time (`x = expr` declares `x` in current scope if unresolved). Use `-strict-assign` to enforce explicit declaration before `=`.
+By default, Kavun uses smart `=` assignment at compile time (`x = expr` declares `x` in current scope if unresolved).
+Use `-strict-assign` to enforce explicit declaration before `=`.
 
 ```sh
 kavun -strict-assign hello.kvn
@@ -62,7 +63,8 @@ chmod +x hello.kvn
 
 ## Building from source
 
-The project uses [just](https://github.com/casey/just) as its build tool. Install it before proceeding (`brew install just` on macOS, or see the just documentation for other platforms).
+The project uses [just](https://github.com/casey/just) as its build tool. Install it before proceeding
+(`brew install just` on macOS, or see the just documentation for other platforms).
 
 Clone the repository and enter the project directory:
 

@@ -4,7 +4,8 @@ Single Unicode code point.
 
 ## Overview
 
-The `rune` type represents a single Unicode character. Runes are useful for character-level operations and Unicode manipulation. Each rune holds a code point from 0 to 0x10FFFF.
+The `rune` type represents a single Unicode character. Runes are useful for character-level operations and Unicode
+manipulation. Each rune holds a code point from 0 to 0x10FFFF.
 
 ## Declaration and Usage
 
@@ -117,18 +118,20 @@ Converts to string.
 ### Character Classification
 
 ```go
+fmt = import("fmt")
+
 // Check character types
-function is_digit(r) {
+is_digit = func(r) {
     return r >= '0' && r <= '9'
 }
 
-function is_letter(r) {
+is_letter = func(r) {
     return (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z')
 }
 
-is_digit('5')       // true
-is_digit('A')       // false
-is_letter('A')      // true
+fmt.println(is_digit('5'))       // true
+fmt.println(is_digit('A'))       // false
+fmt.println(is_letter('A'))      // true
 ```
 
 ### Character Conversion
@@ -152,35 +155,6 @@ code_point = greek_alpha.int()  // 945
 
 // Build strings from runes
 greeting = 'H'.string() + 'i'.string()  // "Hi"
-```
-
-### Keyboard and Input Processing
-
-```go
-fmt = import("fmt")
-
-// Process keyboard input
-key = 'Enter'    // In real usage, from input
-
-if key == 'q' {
-    fmt.println("Quit requested")
-} else if key == 'h' {
-    fmt.println("Help requested")
-}
-```
-
-### ASCII Operations
-
-```go
-// ASCII-based transformations
-char = 'a'
-
-// To uppercase
-upper = (char.int() - 32).rune()   // 'A' (for lowercase ASCII)
-
-// To lowercase
-lowercase_char = 'B'
-lower = (lowercase_char.int() + 32).rune()  // 'b' (for uppercase ASCII)
 ```
 
 ## Unicode Considerations

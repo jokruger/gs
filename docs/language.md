@@ -1,6 +1,9 @@
 # Language Reference
 
-Kavun (кавун, watermelon) is a lightweight, high-performance dynamically typed scripting language designed for embedding in Go. It emphasizes expression-oriented programming with first-class records, arrow-function lambdas, and fluent method chaining. It runs on a sandboxable bytecode VM implemented in Go, with a module system supporting explicit exports. Source files have a `.kvn` extension and content is UTF-8 encoded.
+Kavun (кавун, watermelon) is a lightweight, high-performance dynamically typed scripting language designed for embedding
+in Go. It emphasizes expression-oriented programming with first-class records, arrow-function lambdas, and fluent method
+chaining. It runs on a sandbox-able bytecode VM implemented in Go, with a module system supporting explicit exports.
+Source files have a `.kvn` extension and content is UTF-8 encoded.
 
 ## Builtin types overview
 
@@ -46,16 +49,16 @@ u = undefined
 
 Truthiness:
 
-| Value | Truthy? |
-|---|---|
-| `undefined` | no |
-| `false` | no |
-| `0` (int) | no |
-| `0.0` (float) | yes - all floats are truthy except NaN |
-| `decimal(0)` | no |
-| `""` (empty string) | no |
-| `[]`, `{}`, `dict()` | no - empty containers are falsy |
-| everything else | yes |
+| Value                | Truthy?                                |
+| -------------------- | -------------------------------------- |
+| `undefined`          | no                                     |
+| `false`              | no                                     |
+| `0` (int)            | no                                     |
+| `0.0` (float)        | yes - all floats are truthy except NaN |
+| `decimal(0)`         | no                                     |
+| `""` (empty string)  | no                                     |
+| `[]`, `{}`, `dict()` | no - empty containers are falsy        |
+| everything else      | yes                                    |
 
 Equality is coercive across types. `==` tries to convert both sides to a common type:
 
@@ -70,7 +73,9 @@ Use `type_name(x)` to inspect the actual runtime type.
 
 ## Lexical basics
 
-Line comments start with `//`. Block comments use `/* ... */`. Statements are separated by newlines; semicolons are inserted automatically after identifiers, literals, closing brackets, and keywords like `break`, `continue`, `return`. A newline before a dot (`.`) is treated as line continuation, not a statement break.
+Line comments start with `//`. Block comments use `/* ... */`. Statements are separated by newlines; semicolons are
+inserted automatically after identifiers, literals, closing brackets, and keywords like `break`, `continue`, `return`.
+A newline before a dot (`.`) is treated as line continuation, not a statement break.
 
 ### Numeric literals
 
@@ -117,7 +122,8 @@ Compound assignment operators (`+=`, `-=`, etc.) are always strict and require a
 
 You can switch plain `=` to strict mode in the compiler/CLI, where unresolved `x = expr` becomes a compile error.
 
-Redeclaring with `:=` in the same scope is a compile error. Variables declared inside `if`/`for` blocks are local to that block. Closures capture free variables by reference, so mutations are visible from the outer scope:
+Redeclaring with `:=` in the same scope is a compile error. Variables declared inside `if`/`for` blocks are local to
+that block. Closures capture free variables by reference, so mutations are visible from the outer scope:
 
 ```go
 counter = func() {
@@ -157,7 +163,9 @@ if x := 10; x > 0 {
 // x == 0, y == 1 (:= declares new local x in if block)
 ```
 
-In the first example, `x` already exists in outer scope, so `x = 10` modifies that outer variable. In the second example, `x := 10` declares a new local variable `x` confined to the if block scope, shadowing the outer `x`. The outer `x` remains unchanged.
+In the first example, `x` already exists in outer scope, so `x = 10` modifies that outer variable. In the second
+example, `x := 10` declares a new local variable `x` confined to the if block scope, shadowing the outer `x`. The outer
+`x` remains unchanged.
 
 ## Expressions
 
@@ -175,27 +183,27 @@ missing = "z" not in "hello" // true - negated membership check
 
 From lowest to highest:
 
-| Level | Operators |
-|---|---|
-| 1 | `\|\|` |
-| 2 | `&&` |
-| 3 | `==` `!=` `<` `<=` `>` `>=` `in` `not in` |
-| 4 | `+` `-` `\|` `^` |
-| 5 | `*` `/` `%` `<<` `>>` `&` `&^` |
+| Level | Operators                                 |
+| ----- | ----------------------------------------- |
+| 1     | `\|\|`                                    |
+| 2     | `&&`                                      |
+| 3     | `==` `!=` `<` `<=` `>` `>=` `in` `not in` |
+| 4     | `+` `-` `\|` `^`                          |
+| 5     | `*` `/` `%` `<<` `>>` `&` `&^`            |
 
 Unary operators: `-`, `+`, `!`, `^` (bitwise complement). Ternary `?:` binds looser than all binary operators.
 
 ### Complete operator list
 
-| Category | Operators |
-|---|---|
-| Arithmetic and bitwise | `+` `-` `*` `/` `%` `&` `\|` `^` `<<` `>>` `&^` |
-| Comparison and logical | `==` `!=` `<` `<=` `>` `>=` `&&` `\|\|` `!` |
-| Membership and conditional | `in` `not in` `?:` |
-| Assignment and declaration | `=` `:=` |
-| Compound assignment | `+=` `-=` `*=` `/=` `%=` `&=` `\|=` `^=` `<<=` `>>=` `&^=` |
-| Increment and decrement | `++` `--` |
-| Variadic spread in calls | `...` |
+| Category                   | Operators                                                  |
+| -------------------------- | ---------------------------------------------------------- |
+| Arithmetic and bitwise     | `+` `-` `*` `/` `%` `&` `\|` `^` `<<` `>>` `&^`            |
+| Comparison and logical     | `==` `!=` `<` `<=` `>` `>=` `&&` `\|\|` `!`                |
+| Membership and conditional | `in` `not in` `?:`                                         |
+| Assignment and declaration | `=` `:=`                                                   |
+| Compound assignment        | `+=` `-=` `*=` `/=` `%=` `&=` `\|=` `^=` `<<=` `>>=` `&^=` |
+| Increment and decrement    | `++` `--`                                                  |
+| Variadic spread in calls   | `...`                                                      |
 
 String concatenation uses `+` and requires a string on the left. The right side is converted automatically:
 
@@ -205,7 +213,12 @@ String concatenation uses `+` and requires a string on the left. The right side 
 1 + "x"             // runtime error
 ```
 
-Indexing works on strings, runes, arrays, bytes, and ranges. Slicing works on strings, runes, arrays, and bytes. Single-element indexing supports negative indices: `[-1]` is the last element, `[-2]` the second from the end, and so on. Out-of-bounds index access raises `index out of bounds`. Two-part slices follow the same rules: negative bounds count from the end, omitted bounds default to the natural edge, oversized bounds clamp silently, and an inverted slice returns an empty result. Arrays, strings, runes, and bytes also support three-part slices `start:end:step`: `step` is optional, can be negative, and cannot be zero.
+Indexing works on strings, runes, arrays, bytes, and ranges. Slicing works on strings, runes, arrays, and bytes.
+Single-element indexing supports negative indices: `[-1]` is the last element, `[-2]` the second from the end, and
+so on. Out-of-bounds index access raises `index out of bounds`. Two-part slices follow the same rules: negative bounds
+count from the end, omitted bounds default to the natural edge, oversized bounds clamp silently, and an inverted slice
+returns an empty result. Arrays, strings, runes, and bytes also support three-part slices `start:end:step`: `step` is
+optional, can be negative, and cannot be zero.
 
 ```go
 a = [1, 2, 3, 4, 5]
@@ -250,7 +263,8 @@ for v in collection { }         // iterator
 for k, v in collection { }      // iterator with key/index
 ```
 
-The iterator form (`for in`) works on arrays, strings, runes, bytes, records, dicts, and ranges. When two variables are used, the first is the index (arrays/strings/runes/bytes) or key (records/dicts):
+The iterator form (`for in`) works on arrays, strings, runes, bytes, records, dicts, and ranges. When two variables are
+used, the first is the index (arrays/strings/runes/bytes) or key (records/dicts):
 
 ```go
 for i, v in [10, 20, 30] { }   // i = 0,1,2; v = element
@@ -299,9 +313,11 @@ A function with no `return` statement returns `undefined`.
 
 ## Modules
 
-`import("name")` is an expression that loads a module and returns its exported value. Module source can be a builtin module or a Kavun source file.
+`import("name")` is an expression that loads a module and returns its exported value. Module source can be a builtin
+module or a Kavun source file.
 
-A Kavun module uses `export` to publish its result. The exported value is automatically made immutable. `export` inside a function body is a compile error.
+A Kavun module uses `export` to publish its result. The exported value is automatically made immutable. `export` inside
+a function body is a compile error.
 
 ```go
 // math_utils.kvn
@@ -331,7 +347,8 @@ double(21)   // 42
 
 ## Built-in functions
 
-Type conversion builtins accept an optional fallback as second argument. They return `undefined` (or the fallback) when conversion fails:
+Type conversion builtins accept an optional fallback as second argument. They return `undefined` (or the fallback) when
+conversion fails:
 
 ```go
 int("42")                   // 42
@@ -367,7 +384,9 @@ type_name(x)            // runtime type name
 
 Type predicates:
 
-`is_int`, `is_float`, `is_decimal`, `is_bool`, `is_rune`, `is_string`, `is_runes`, `is_bytes`, `is_array`, `is_record`, `is_dict`, `is_range`, `is_time`, `is_error`, `is_undefined`, `is_function`, `is_callable`, `is_iterable`, `is_immutable`
+`is_int`, `is_float`, `is_decimal`, `is_bool`, `is_rune`, `is_string`, `is_runes`, `is_bytes`, `is_array`, `is_record`,
+`is_dict`, `is_range`, `is_time`, `is_error`, `is_undefined`, `is_function`, `is_callable`, `is_iterable`,
+`is_immutable`
 
 ```go
 is_array([1, 2])   // true
@@ -413,4 +432,5 @@ is_error(e)    // true
 
 ## Detailed type documentation
 
-For detailed per-type semantics, conversions, member functions, and type-specific edge cases, see [Type reference](types.md).
+For detailed per-type semantics, conversions, member functions, and type-specific edge cases, see
+[Type reference](types.md).

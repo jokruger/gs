@@ -4,7 +4,9 @@ Exact decimal type for precise arithmetic.
 
 ## Overview
 
-The `decimal` type provides exact decimal arithmetic for cases where precision is critical, such as financial calculations. Unlike `float`, decimals maintain exact values without rounding errors inherent to binary floating-point representation.
+The `decimal` type provides exact decimal arithmetic for cases where precision is critical, such as financial
+calculations. Unlike `float`, decimals maintain exact values without rounding errors inherent to binary
+floating-point representation.
 
 ## Declaration and Construction
 
@@ -267,10 +269,13 @@ Gets error information for failed conversions.
 **Description:** Returns details about conversion errors for NaN decimals. Returns an error record if the decimal represents a conversion failure.
 
 ```go
+fmt = import("fmt")
+details = ""
 result = decimal("invalid")
 if result.is_nan() {
-    details = result.error_details()  // error information record
+    details = result.error_details()
 }
+fmt.println(details)
 ```
 
 ### Scale and Normalization Functions
@@ -285,7 +290,8 @@ Changes the scale (number of decimal places).
 
 **Returns:** `decimal`
 
-**Description:** Rescales to the specified number of decimal places. The scale argument must be within the implementation-defined range; otherwise raises a runtime error.
+**Description:** Rescales to the specified number of decimal places. The scale argument must be within the
+implementation-defined range; otherwise raises a runtime error.
 
 ```go
 decimal("1.234").rescale(2)   // decimal(1.23) or decimal(1.24) depending on rounding
@@ -407,7 +413,8 @@ decimal(-1).sqrt()            // NaN
 
 ### Rounding Functions
 
-The following rounding functions accept a `scale` argument (number of decimal places to round to). The scale must be within the implementation-defined range; otherwise raises a runtime error.
+The following rounding functions accept a `scale` argument (number of decimal places to round to). The scale must be
+within the implementation-defined range; otherwise raises a runtime error.
 
 #### `round_down(scale)`
 
@@ -527,70 +534,7 @@ tax_rate = decimal("0.0825")      // 8.25%
 tax = (price * tax_rate).round_half_away_from_zero(2)
 total = price + tax
 
-fmt.println("Price: " + price.string())
-fmt.println("Tax: " + tax.string())
-fmt.println("Total: " + total.string())
+fmt.println("Price:", price)
+fmt.println("Tax:", tax)
+fmt.println("Total:", total)
 ```
-
-### Currency Conversion
-
-```go
-fmt = import("fmt")
-
-// Convert USD to EUR with exact precision
-usd = decimal("99.99")
-exchange_rate = decimal("0.9234")
-eur = (usd * exchange_rate).round_half_away_from_zero(2)
-
-fmt.println("USD " + usd.string() + " = EUR " + eur.string())
-```
-
-### Rounding Strategies
-
-```go
-fmt = import("fmt")
-
-// Demonstrate different rounding methods
-value = decimal("1.235")
-
-down = value.round_down(2)           // 1.23
-up = value.round_up(2)               // 1.24
-toward_zero = value.round_toward_zero(2)    // 1.23
-away_from_zero = value.round_away_from_zero(2)  // 1.24
-standard = value.round_half_away_from_zero(2)   // 1.24
-banker = value.round_bank(2)         // 1.24
-
-fmt.println("Standard rounding: " + standard.string())
-```
-
-### Validation and Classification
-
-```go
-// Validate decimal values
-function validate_amount(amount) {
-    if amount.is_negative() {
-        return error("Amount cannot be negative")
-    }
-
-    if amount.is_nan() {
-        return error("Invalid amount")
-    }
-
-    if amount.is_zero() {
-        return error("Amount must be greater than zero")
-    }
-
-    return amount
-}
-
-try_amount = decimal("-50.00")
-result = validate_amount(try_amount)   // returns error
-```
-
-## Scale Range Constraints
-
-The decimal scale parameter in rounding and rescaling functions must be within the implementation-defined decimal scale range. Exceeding this range raises a runtime error. Typical implementations support scales from -999 to 999.
-
-## Precision Guarantees
-
-Unlike `float`, `decimal` maintains exact precision for decimal operations. However, operations involving very large exponents or invalid scales may produce NaN or raise errors. For guaranteed precision, ensure values stay within reasonable scales and the scale parameter is appropriate for your use case.

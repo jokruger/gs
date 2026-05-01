@@ -24,6 +24,34 @@ func fmtPrint(vm core.VM, args []core.Value) (core.Value, error) {
 	return core.Undefined, nil
 }
 
+func fmtPrintln(vm core.VM, args []core.Value) (core.Value, error) {
+	printArgs, err := getPrintArgs(args...)
+	if err != nil {
+		return core.Undefined, err
+	}
+	_, _ = fmt.Println(printArgs...)
+	return core.Undefined, nil
+}
+
+func getPrintArgs(args ...core.Value) ([]any, error) {
+	printArgs := make([]any, 0, len(args))
+	for _, arg := range args {
+		switch arg.Type {
+		case core.VT_UNDEFINED, core.VT_BYTES, core.VT_ARRAY, core.VT_RECORD, core.VT_DICT, core.VT_INT_RANGE:
+			printArgs = append(printArgs, arg.String())
+
+		default:
+			s, ok := arg.AsString()
+			if !ok {
+				s = arg.String()
+			}
+			printArgs = append(printArgs, s)
+		}
+	}
+
+	return printArgs, nil
+}
+
 func fmtPrintf(vm core.VM, args []core.Value) (core.Value, error) {
 	numArgs := len(args)
 	if numArgs == 0 {
@@ -47,15 +75,6 @@ func fmtPrintf(vm core.VM, args []core.Value) (core.Value, error) {
 	return core.Undefined, nil
 }
 
-func fmtPrintln(vm core.VM, args []core.Value) (core.Value, error) {
-	printArgs, err := getPrintArgs(args...)
-	if err != nil {
-		return core.Undefined, err
-	}
-	_, _ = fmt.Println(printArgs...)
-	return core.Undefined, nil
-}
-
 func fmtSprintf(vm core.VM, args []core.Value) (core.Value, error) {
 	numArgs := len(args)
 	if numArgs == 0 {
@@ -74,17 +93,4 @@ func fmtSprintf(vm core.VM, args []core.Value) (core.Value, error) {
 		return core.Undefined, err
 	}
 	return vm.Allocator().NewStringValue(s), nil
-}
-
-func getPrintArgs(args ...core.Value) ([]any, error) {
-	l := 0
-	printArgs := make([]any, 0, len(args))
-	for _, arg := range args {
-		// TODO: shell we check if arg cannot be converted to string?
-		s, _ := arg.AsString()
-		slen := len(s)
-		l += slen
-		printArgs = append(printArgs, s)
-	}
-	return printArgs, nil
 }

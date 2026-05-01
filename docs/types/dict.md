@@ -8,7 +8,8 @@ The `dict` type is similar to a `record` but only supports index access for elem
 dict member functions. Use `dict` when you need to perform operations on the dictionary itself (filtering, querying
 keys/values, etc.).
 
-**Key Characteristic:** Dicts use index notation (`d["key"]`) for element access and selector notation (`d.method()`) for operations.
+**Key Characteristic:** Dicts use index notation (`d["key"]`) for element access and selector notation (`d.method()`)
+for operations.
 
 ## Declaration and Usage
 
@@ -361,16 +362,16 @@ fmt = import("fmt")
 users = dict({
     alice: {age: 25, active: true},
     bob: {age: 17, active: false},
-    carol: {age: 30, active: true}
+    carol: {age: 30, active: false}
 })
 
 // Adults only
 adults = users.filter((name, user) => user.age >= 18)
-fmt.println("Adults: " + adults.len().string())
+fmt.println("Adults:", adults)
 
 // Active users
 active = users.filter((name, user) => user.active)
-fmt.println("Active: " + active.len().string())
+fmt.println("Active:", active)
 ```
 
 ### Aggregation
@@ -388,11 +389,11 @@ scores = dict({
 
 // Count high scorers
 high_scores = scores.count((name, score) => score >= 90)
-fmt.println("High scores (>= 90): " + high_scores.string())
+fmt.println("High scores (>= 90):", high_scores)
 
 // Check if all passed (>= 70)
 all_passed = scores.all((name, score) => score >= 70)
-fmt.println("All passed: " + all_passed.string())
+fmt.println("All passed:", all_passed)
 ```
 
 ### Key-Value Iteration
@@ -405,74 +406,8 @@ cache = dict({user_1: "Alice", user_2: "Bob", user_3: "Carol"})
 
 for key in cache.keys() {
     value = cache[key]
-    fmt.println(key + " => " + value)
+    fmt.println(key, "=>", value)
 }
-```
-
-### Dynamic Key Access
-
-```go
-fmt = import("fmt")
-
-// Access with dynamic keys
-data = dict({
-    field_a: 10,
-    field_b: 20,
-    field_c: 30
-})
-
-// Iterate and process
-for key in data.keys() {
-    value = data[key]
-    doubled = value * 2
-    fmt.println(key + " (doubled): " + doubled.string())
-}
-```
-
-### Querying and Filtering
-
-```go
-fmt = import("fmt")
-
-// Find and filter data
-inventory = dict({
-    widget: {stock: 50, price: 10.0},
-    gadget: {stock: 25, price: 25.0},
-    doohickey: {stock: 0, price: 5.0}
-})
-
-// Items in stock
-in_stock = inventory.filter((item, info) => info.stock > 0)
-fmt.println("Items in stock: " + in_stock.len().string())
-
-// Expensive items
-expensive = inventory.filter((item, info) => info.price >= 20.0)
-fmt.println("Expensive items: " + expensive.len().string())
-```
-
-### Combined Record and Dict Operations
-
-```go
-fmt = import("fmt")
-
-// Use record for data, dict for queries
-employee = {
-    name: "Alice",
-    department: "Engineering",
-    salary: 100000
-}
-
-// Convert to dict for operations
-emp_dict = dict(employee)
-
-// Query
-if emp_dict.contains("salary") {
-    salary = emp_dict["salary"]
-    fmt.println("Salary: $" + salary.string())
-}
-
-// Back to record for field access
-emp_dict.record().name  // "Alice"
 ```
 
 ## Comparison with Record

@@ -662,34 +662,13 @@ for lang in languages {
 }
 ```
 
-### Unicode Sorting
-
-```go
-// Sort Unicode characters
-random_text = u"café"
-sorted = random_text.sort()  // u"acéf"
-
-// Sort with custom rules (if needed through filters)
-text = u"aBcD"
-sorted = text.sort()         // u"Bac" (by code point)
-```
-
-### Unicode Filtering
-
-```go
-// Extract only Greek letters
-greek_text = u"Α Β Γ Δ"
-// Filter to keep only uppercase Greek (code points in specific range)
-filtered = greek_text.filter(r => r >= 0x0391 && r <= 0x03A9)
-```
-
 ### Case-Insensitive Comparison
 
 ```go
 fmt = import("fmt")
 
 // Normalize text for comparison
-function normalize_for_comparison(text) {
+normalize_for_comparison = func(text) {
     return text.lower().string()  // Convert to string for byte comparison
 }
 
@@ -702,24 +681,6 @@ norm2 = normalize_for_comparison(text2)
 if norm1 == norm2 {
     fmt.println("Texts match (case-insensitive)")
 }
-```
-
-### Rune-by-Rune Processing
-
-```go
-// Process each character
-function process_string(s) {
-    result = u""
-    for i = 0; i < s.len(); i = i + 1 {
-        r = s[i]  // Get i-th rune
-        processed = (r.int() * 2).rune()  // Transform
-        result = result + processed.string()
-    }
-    return result
-}
-
-input = u"abc"
-output = process_string(input)
 ```
 
 ## Comparison with `string`

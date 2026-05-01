@@ -4,7 +4,7 @@ Signed integer type for whole numbers.
 
 ## Overview
 
-The `int` type represents signed integers. Kavun's integers have implementation-defined range, typically 64-bit signed integers (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807).
+The `int` type represents 64-bit signed integers (-9,223,372,036,854,775,808 to 9,223,372,036,854,775,807).
 
 ## Declaration and Usage
 
@@ -132,7 +132,8 @@ Converts to rune (Unicode code point).
 
 **Returns:** `rune`
 
-**Description:** Converts the integer to a Unicode code point. The value must be a valid Unicode code point (0 to 0x10FFFF).
+**Description:** Converts the integer to a Unicode code point. The value must be a valid Unicode code point
+(0 to 0x10FFFF).
 
 ```go
 (65).rune()           // 'A'

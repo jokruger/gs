@@ -231,7 +231,8 @@ Converts to record.
 
 **Returns:** `record`
 
-**Description:** Converts the string into a record where keys are string indices (`"0"`, `"1"`, ...), and values are runes.
+**Description:** Converts the string into a record where keys are string indices (`"0"`, `"1"`, ...), and values are
+runes.
 
 ```go
 "abc".record()    // {"0": 'a', "1": 'b', "2": 'c'}
@@ -245,7 +246,8 @@ Converts to dict.
 
 **Returns:** `dict`
 
-**Description:** Converts the string into a dict where keys are string indices (`"0"`, `"1"`, ...), and values are runes.
+**Description:** Converts the string into a dict where keys are string indices (`"0"`, `"1"`, ...), and values are
+runes.
 
 ```go
 "abc".dict()       // dict({"0": 'a', "1": 'b', "2": 'c'})
@@ -491,8 +493,9 @@ Checks if string contains substring.
 ### Text Processing
 
 ```go
+fmt = import("fmt")
 // Clean and validate input
-function process_name(name) {
+process_name = func(name) {
     trimmed = name.trim()
 
     if trimmed.is_empty() {
@@ -507,26 +510,15 @@ function process_name(name) {
 }
 
 result = process_name("  JOHN DOE  ")  // "john doe"
-```
-
-### String Parsing
-
-```go
-// Parse CSV-like data
-data = "name,age,city"
-fields = data       // Would need split function for real parsing
-
-// Extract and convert
-name_part = "42"
-age = name_part.int()         // 42
-price = "19.99".decimal()     // decimal(19.99)
+fmt.println(result)
 ```
 
 ### Character Filtering
 
 ```go
+fmt = import("fmt")
 // Remove non-alphabetic characters
-function alpha_only(s) {
+alpha_only = func(s) {
     return s.filter(r =>
         (r >= 'a'.int() && r <= 'z'.int()) ||
         (r >= 'A'.int() && r <= 'Z'.int())
@@ -534,21 +526,7 @@ function alpha_only(s) {
 }
 
 clean = alpha_only("abc123def")  // "abcdef"
-```
-
-### Validation
-
-```go
-// Check if string contains only digits
-function is_numeric(s) {
-    if s.is_empty() {
-        return false
-    }
-    return s.all(r => r >= '0'.int() && r <= '9'.int())
-}
-
-is_numeric("12345")   // true
-is_numeric("123a5")   // false
+fmt.println(clean)
 ```
 
 ## Byte vs. Rune Operations

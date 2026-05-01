@@ -4,7 +4,8 @@ Floating-point type for decimal numbers with limited precision.
 
 ## Overview
 
-The `float` type represents IEEE 754 double-precision floating-point numbers. Use `float` when you need fast arithmetic with acceptable precision loss, or use `decimal` when you need exact decimal arithmetic.
+The `float` type represents IEEE 754 double-precision floating-point numbers. Use `float` when you need fast arithmetic
+with acceptable precision loss, or use `decimal` when you need exact decimal arithmetic.
 
 ## Declaration and Usage
 
@@ -123,7 +124,8 @@ Converts to string.
 
 **Returns:** `string`
 
-**Description:** Converts the float to its string representation. Special values are represented as `"Inf"`, `"-Inf"`, and `"NaN"`.
+**Description:** Converts the float to its string representation. Special values are represented as `"Inf"`, `"-Inf"`,
+and `"NaN"`.
 
 ```go
 (3.14).string()        // "3.14"
@@ -162,7 +164,7 @@ radius = 5.0
 area = 3.14159 * radius * radius      // 78.53975
 circumference = 2.0 * 3.14159 * radius  // 31.4159
 
-fmt.println("Area: " + area.string())
+fmt.println("Area:", area)
 ```
 
 ### Working with Collections
@@ -181,38 +183,15 @@ fahrenheit = celsius.map(c => (c * 9.0 / 5.0) + 32.0)
 ### Precision Considerations
 
 ```go
+fmt = import("fmt")
+
 // Float precision limitations
 a = 0.1 + 0.2
 b = 0.3
-a == b                // false (due to floating-point rounding)
+fmt.println(a == b)   // false (due to floating-point rounding)
 
 // For exact decimal arithmetic, use decimal type
 exact_a = decimal("0.1") + decimal("0.2")
 exact_b = decimal("0.3")
-exact_a == exact_b    // true
+fmt.println(exact_a == exact_b)    // true
 ```
-
-### Special Values
-
-```go
-fmt = import("fmt")
-
-// Handle special values
-data = [1.0, 2.0 / 0.0, 3.0]
-
-for v in data {
-    if v.string() == "Inf" {
-        fmt.println("Found infinity")
-    } else {
-        fmt.println("Value: " + v.string())
-    }
-}
-```
-
-## Precision and Floating-Point Considerations
-
-- Float arithmetic may accumulate rounding errors with repeated operations
-- Comparisons using `==` may fail due to precision issues
-- For financial calculations or exact decimal requirements, use the `decimal` type
-- `Infinity` and `NaN` are valid float values but behave specially in operations
-- Avoid comparing floats directly; consider using epsilon-based comparisons for non-exact types

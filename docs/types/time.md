@@ -4,7 +4,8 @@ Date and time values (timestamp or calendar values).
 
 ## Overview
 
-The `time` type represents an instant in time. Time values are typically created using the `time()` function with various input formats. They store a precise moment and provide methods for querying and formatting.
+The `time` type represents an instant in time. Time values are typically created using the `time()` function with
+various input formats. They store a precise moment and provide methods for querying and formatting.
 
 ## Declaration and Usage
 
@@ -19,11 +20,7 @@ t4 = time(1704067200)                    // Unix timestamp (int)
 
 ### Input Formats
 
-The `time()` function accepts:
-
-- ISO 8601 date strings: `"2024-01-01"`
-- ISO 8601 datetime: `"2024-01-01T12:30:00Z"`, `"2024-01-01T12:30:00.123Z"`
-- Unix timestamps as integers: `1704067200`
+Time constructor automatically detects various formats and parses them accordingly.
 
 ## Member Functions
 
@@ -83,7 +80,7 @@ Converts to string.
 **Description:** Returns the time in ISO 8601 format (RFC 3339).
 
 ```go
-time("2024-01-01").string()          // "2024-01-01T00:00:00Z"
+time("2024-01-01").string()            // "2024-01-01T00:00:00Z"
 time("2024-01-01T12:30:45Z").string()  // "2024-01-01T12:30:45Z"
 ```
 
@@ -381,34 +378,6 @@ time("2024-01-01T00:00:00Z").zone_name()   // "UTC"
 
 ## Examples
 
-### Current Events Planning
-
-```go
-fmt = import("fmt")
-
-// Check if event is today
-event_date = time("2024-06-15")
-today = time("2024-06-15")
-
-if event_date.year() == today.year() &&
-   event_date.month() == today.month() &&
-   event_date.day() == today.day() {
-    fmt.println("Event is today!")
-}
-```
-
-### Working with Timestamps
-
-```go
-// Parse and analyze timestamps
-start = time("2024-01-01T09:00:00Z")
-end = time("2024-01-01T17:00:00Z")
-
-start_unix = start.unix()
-end_unix = end.unix()
-duration_seconds = end_unix - start_unix  // 28800 (8 hours)
-```
-
 ### Time Formatting
 
 ```go
@@ -450,8 +419,8 @@ fmt = import("fmt")
 // Check day of week
 dates = [
     time("2024-01-01"),
-    time("2024-01-08"),
-    time("2024-01-15")
+    time("2024-01-09"),
+    time("2024-01-17")
 ]
 
 for date in dates {
@@ -459,27 +428,3 @@ for date in dates {
     fmt.println(date.format_date() + " is a " + day_name)
 }
 ```
-
-### Year Progress
-
-```go
-fmt = import("fmt")
-
-// Calculate progress through year
-date = time("2024-06-15")
-year_start = time(date.year().string() + "-01-01")
-year_end = time(date.year().string() + "-12-31")
-
-year_day = date.year_day()
-days_in_year = year_end.year_day()
-progress = (year_day.float() / days_in_year.float()) * 100.0
-
-fmt.println("Year progress: " + progress.string() + "%")
-```
-
-## Notes
-
-- Times are stored with precision to the nanosecond
-- All formatting functions return strings suitable for display
-- Timezone handling depends on the system's timezone database
-- Unix timestamps use seconds as the unit; use `unix_nano()` for nanosecond precision

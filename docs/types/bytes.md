@@ -55,9 +55,9 @@ b[0] = 'H'                    // bytes("Hello")
 b[-2] = '!'                   // bytes("Hel!o")
 b[0] = 65                     // numeric byte value (0-255)
 
-b2 = append(b, 'X')           // append a single byte; returns a new bytes
-b3 = append(b, 'X', 'Y')      // append multiple bytes
-b4 = append(b, bytes("!!"))   // append another bytes value
+b = append(b, 'X')            // append a single byte
+b = append(b, 'X', 'Y')       // append multiple bytes
+b = append(b, bytes("!!"))    // append another bytes value
 ```
 
 `append` returns a new bytes value; the source value is unchanged. Index assignment requires the right-hand side to
@@ -533,42 +533,3 @@ fmt.println(letters.string())   // "Hello"
 digits = text.filter(b => b >= '0'.int() && b <= '9'.int())
 fmt.println(digits.string())    // "123"
 ```
-
-### Data Statistics
-
-```go
-// Analyze byte distribution
-data = bytes("programming")
-
-min_byte = data.min()       // 97 ('a')
-max_byte = data.max()       // 114 ('r')
-total_bytes = data.len()    // 11
-
-// Count specific bytes
-letter_a_count = data.count(b => b == 'a'.int())  // 1
-```
-
-### JSON Processing
-
-```go
-fmt = import("fmt")
-
-// Simulate JSON manipulation
-json_bytes = `{"name":"Alice","age":30}`.bytes()
-
-// Convert to string for processing
-json_str = json_bytes.string()
-record = json_str.record()
-
-// Verify data integrity
-if record != undefined {
-    fmt.println("Valid JSON")
-}
-```
-
-## Performance Notes
-
-- `bytes` values are reference-typed for efficiency
-- `a = b` makes both variables refer to the same bytes value
-- Use `copy()` to create independent copies
-- Byte values must be in range 0-255; values outside this range raise errors

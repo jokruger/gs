@@ -457,15 +457,13 @@ func builtinDecimal(vm core.VM, args []core.Value) (core.Value, error) {
 		return args[0], nil
 
 	default:
-		if v, ok := args[0].AsDecimal(); ok {
-			d := vm.Allocator().NewDecimal()
-			*d = v
-			return core.DecimalValue(d), nil
-		}
-		if l == 2 {
+		v, ok := args[0].AsDecimal()
+		if !ok && l == 2 {
 			return args[1], nil
 		}
-		return core.Undefined, nil
+		d := vm.Allocator().NewDecimal()
+		*d = v
+		return core.DecimalValue(d), nil
 	}
 }
 

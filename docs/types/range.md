@@ -291,52 +291,10 @@ large_range = range(0, 1000000)
 
 // Check without materializing entire range
 large_range.contains(500000)    // true (efficient)
-len = large_range.len()         // 1000000
+sz = large_range.len()          // 1000000
 
 // Convert to array only when needed
 first_100 = range(0, 100).array()
-```
-
-### Generating Test Data
-
-```go
-fmt = import("fmt")
-
-// Create test data
-ids = range(1, 101).array()          // [1, 2, ..., 100]
-
-// Create with identifiers
-user_ids = range(1000, 1010).array()  // [1000, 1001, ..., 1009]
-
-// Process each
-for id in ids {
-    fmt.println("Processing user " + id.string())
-}
-```
-
-### Mathematical Sequences
-
-```go
-// Powers of 2
-powers = range(0, 10).array().map(n => 2 ** n)
-// [1, 2, 4, 8, 16, 32, 64, 128, 256, 512]
-
-// Fibonacci-like (would need more complex logic)
-// Multiples of 5
-multiples = range(1, 11).array().map(n => n * 5)
-// [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
-```
-
-### Conditional Ranges
-
-```go
-// Create range based on condition
-max = 20
-if max > 10 {
-    nums = range(0, max, 2).array()  // [0, 2, 4, ..., 18]
-} else {
-    nums = range(0, max).array()
-}
 ```
 
 ## Performance Notes

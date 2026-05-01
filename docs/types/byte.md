@@ -32,6 +32,7 @@ byte(5) >= byte(5)    // true
 ### Conversion Functions
 
 #### `int()`
+
 Converts to integer.
 
 **Arguments:** None
@@ -45,6 +46,7 @@ byte(42).int()   // 42
 ```
 
 #### `float()`
+
 Converts to floating-point.
 
 **Arguments:** None
@@ -58,6 +60,7 @@ byte(42).float()       // 42.0
 ```
 
 #### `decimal()`
+
 Converts to decimal (exact decimal type).
 
 **Arguments:** None
@@ -71,6 +74,7 @@ byte(42).decimal()    // decimal(42)
 ```
 
 #### `bool()`
+
 Converts to boolean.
 
 **Arguments:** None
@@ -85,6 +89,7 @@ byte(42).bool()    // true
 ```
 
 #### `rune()`
+
 Converts to rune (Unicode code point).
 
 **Arguments:** None
@@ -98,6 +103,7 @@ byte(65).rune()    // 'A'
 ```
 
 #### `string()`
+
 Converts to string.
 
 **Arguments:** None

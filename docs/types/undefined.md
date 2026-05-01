@@ -51,25 +51,3 @@ float("invalid", 3.14)        // 3.14 (uses fallback)
 ## Member Functions
 
 `undefined` has no member functions. Attempting to call a method on `undefined` will result in a runtime error.
-
-## Examples
-
-```go
-fmt = import("fmt")
-
-// Handling undefined values
-record = {name: "Alice"}
-age = record.age              // undefined
-
-// Using undefined in conditionals
-if age == undefined {
-    fmt.println("Age not specified")
-}
-
-// Chaining through undefined
-data = undefined
-value = data.field.subfield.nested   // undefined
-
-// Safe conversions with fallbacks
-port = int(env("PORT"), 8080)   // uses 8080 if PORT is undefined or not a number
-```

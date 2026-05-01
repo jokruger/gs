@@ -66,7 +66,7 @@ zero. Out-of-bounds index access raises `index out of bounds`.
 ```go
 a = [1, 2, 3]
 a[0] = 99        // Change element
-a[5] = 100       // Extend array (fills with undefined for indices 3-4)
+a[5] = 100       // Error: index out of bounds
 ```
 
 ## Member Functions
@@ -503,7 +503,7 @@ results = scores
     .map(s => (s.float() / 100.0) * 100.0)
     .filter(p => p >= 80.0)
 
-fmt.println("Passing scores: " + results.len().string())
+fmt.println("Passing scores: ", results)
 ```
 
 ### Accumulation with Reduce
@@ -520,8 +520,8 @@ items = [
 
 total = items.reduce(0.0, (sum, item) => sum + item.price)
 tax = total * 0.08
-fmt.println("Total: $" + total.string())
-fmt.println("Tax: $" + tax.string())
+fmt.println("Total: $" + total)
+fmt.println("Tax: $" + tax)
 ```
 
 ### Complex Filtering
@@ -541,24 +541,7 @@ active_adults = users
     .filter(u => u.active)
     .filter(u => u.age >= 18)
 
-fmt.println("Active adults: " + active_adults.len().string())
-```
-
-### Nested Array Operations
-
-```go
-// Process nested arrays
-matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
-
-// Flatten (conceptually)
-flattened = []
-for row in matrix {
-    for val in row {
-        flattened = flattened + [val]
-    }
-}
-
-total = flattened.sum()  // 45
+fmt.println("Active adults: ", active_adults)
 ```
 
 ### Array Statistics
@@ -574,35 +557,8 @@ minimum = data.min()
 maximum = data.max()
 average = data.avg()
 
-fmt.println("Count: " + count.string())
-fmt.println("Min: " + minimum.string())
-fmt.println("Max: " + maximum.string())
-fmt.println("Avg: " + average.string())
+fmt.println("Count:", count)
+fmt.println("Min:", minimum)
+fmt.println("Max:", maximum)
+fmt.println("Avg:", average)
 ```
-
-### Deduplication
-
-```go
-fmt = import("fmt")
-
-// Remove duplicates by filtering
-values = [1, 2, 2, 3, 3, 3, 4, 4, 4, 4]
-
-// Simple version using contains
-unique = []
-for v in values {
-    if !unique.contains(v) {
-        unique = unique + [v]
-    }
-}
-
-fmt.println(unique)  // [1, 2, 3, 4]
-```
-
-## Performance Considerations
-
-- Arrays maintain reference semantics for efficiency
-- Use `copy()` to create independent copies when needed
-- Sorting modifies the array in-place
-- Operations like `filter()` and `map()` create new arrays
-- Large arrays with complex predicates may be memory-intensive

@@ -128,7 +128,7 @@ fmt = import("fmt")
 x = [1, 2, 3]
 v1 = append(x, 100)     // v1 = [1, 2, 3, 100]
 v2 = append(x, 200)     // v2 = [1, 2, 3, 200]
-fmt.println(v1)             // ??? could be [1, 2, 3, 100] OR [1, 2, 3, 200]
+fmt.println(v1)         // ??? could be [1, 2, 3, 100] OR [1, 2, 3, 200]
 ```
 
 The outcome depends on the hidden capacity of `x`'s backing buffer:

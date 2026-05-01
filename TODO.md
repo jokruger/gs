@@ -121,6 +121,7 @@
 - "not in" operator
 - string/rune/bytes/array \* int => repeat n times
 - slices.compact
+- "byte" member functions (similar to .int)
 
 - compile time tail call optimization - runtime vm should not be smart, just a stupid loop over switch cases, all decisions should be made at compile time
 - inlining and other optimizations
@@ -128,3 +129,6 @@
 - .index_of or .index - search for element or subsequence (depending on arguments - mirror the .contains method), return index
 
 - find a way to reuse value envelopes: receiver ptr instead of return value, mark as tmp, on assign copy if tmp, etc - primary usecase = loops
+
+- "len = 10" fails with cryptic error
+- builtin cron support (expressions, next event, etc)

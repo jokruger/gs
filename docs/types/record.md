@@ -4,9 +4,12 @@ Object type with string keys and values of any type.
 
 ## Overview
 
-Records are the primary object type in Kavun. They are collections of key-value pairs where keys are always strings. Both dot notation (`.fieldname`) and index notation (`["fieldname"]`) can be used to access fields. Records are reference-typed.
+Records are the primary object type in Kavun. They are collections of key-value pairs where keys are always strings.
+Both dot notation (`.field_name`) and index notation (`["field_name"]`) can be used to access fields. Records are
+reference-typed.
 
-**Key Characteristic:** Records expose fields via selector/index access only - they have NO member functions. Use dot notation for both reading and writing fields.
+**Key Characteristic:** Records expose fields via selector/index access only - they have NO member functions. Use dot
+notation for both reading and writing fields.
 
 ## Declaration and Usage
 
@@ -117,7 +120,8 @@ r = {name: "Alice", age: 30}
 
 ## Record to Dict Conversion
 
-Records and dicts represent the same logical structure internally. When you convert a record to a dict with `dict(record)`, no copy is made—they point to the same data:
+Records and dicts represent the same logical structure internally. When you convert a record to a dict with
+`dict(record)`, no copy is made—they point to the same data:
 
 ```go
 fmt = import("fmt")
@@ -145,8 +149,8 @@ user = {
     active: true
 }
 
-fmt.println("User: " + user.name)
-fmt.println("Email: " + user.email)
+fmt.println("User:", user.name)
+fmt.println("Email:", user.email)
 ```
 
 ### Building Records Dynamically
@@ -214,22 +218,6 @@ for key in d.keys() {
 }
 ```
 
-### JSON Serialization
-
-```go
-fmt = import("fmt")
-
-// Parse JSON to record
-json_str = `{"name":"Alice","age":30,"active":true}`
-record = json_str.record()
-
-if record != undefined {
-    name = record.name
-    age = record.age
-    fmt.println("Name: " + name + ", Age: " + age.string())
-}
-```
-
 ### Field Presence Checking
 
 ```go
@@ -238,6 +226,7 @@ fmt = import("fmt")
 // Check if field exists before accessing
 data = {x: 10}
 
+y_value = undefined
 if "y" in data {
     y_value = data.y
 } else {
@@ -245,29 +234,6 @@ if "y" in data {
 }
 
 fmt.println("Y value: " + y_value.string())
-```
-
-### Building Complex Objects
-
-```go
-// Create complex nested structure
-user = {
-    id: 123,
-    profile: {
-        name: "Alice",
-        bio: "Developer",
-        social: {
-            twitter: "@alice",
-            github: "alice"
-        }
-    },
-    settings: {
-        notifications: true,
-        theme: "dark"
-    }
-}
-
-twitter = user.profile.social.twitter
 ```
 
 ## Notes

@@ -133,6 +133,8 @@ message = "Status: " + ok.string()   // "Status: true"
 
 ```go
 fmt = import("fmt")
+age = 30
+is_waiting = false
 
 // Simple boolean operations
 is_valid = age >= 18 && age < 65
@@ -141,25 +143,4 @@ is_ready = !is_waiting
 if is_valid && is_ready {
     fmt.println("Proceed")
 }
-```
-
-### Filtering with Booleans
-
-```go
-// Using booleans in filter predicates
-data = [1, 2, 3, 4, 5]
-evens = data.filter(n => (n % 2) == 0)   // [2, 4]
-
-// Boolean array operations
-flags = [true, false, true, false]
-count_true = flags.filter(f => f).len()   // 2
-```
-
-### Conversion for Counting
-
-```go
-// Converting booleans to integers for aggregation
-test_results = [true, true, false, true]
-passed = test_results.map(b => b.int()).sum()   // 3
-success_rate = passed.float() / test_results.len()   // 0.75
 ```

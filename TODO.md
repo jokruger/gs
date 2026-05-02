@@ -5,31 +5,11 @@
 - try use unsafe.StringData / unsafe.String to store and rebuild strings?
 - do atomic load check for "abort" flag every X cycles, not every cycle
 - for int/float/string/etc args, fast path for specific types, only then call .AsX()
-
-<<<<<<<
-
-- arity member function
 - string - make it unicode indexed (slice, index and member function work with unicode by iterating! - note on performance in docs)
-- string, add method to get len in runes (utf8.RuneCountInString)
 - runes.trim - custom implementation that uses runes slice from allocator
-
-- implement correct allocations limit control (dynamic objects, buffers, strings, etc) - is it even possible to control taking into account user types?
-
-- variable.go - use AsX instead of type assertion
-
-- vm: analyze "switch by (.type)" and replace with value member functions (.Immutable(), .Slice(), etc)
-- replace all "switch by (.type)" - should use .IsX() functions instead
-- mutable variables must be copied when assigned!
-
-- bytes and string should be similar to array (immutable flag, assign by index, etc) - ensure constructors from other copies create new bytes/string!
-- Bytes/String - IndexSet
 
 - array, string, bytes - multi-index get: array[1, 3, 5], or array[x] where x is array of ints
 - ... and multi-index set: array[1, 3, 5] = [10, 30, 50]
-
-- analyze VM, design allocator.Release use strategy - is it even possible (or worth it) to know when object can be released?
-  - Maybe it is better to minimize creation of new objects and just use arena allocator?
-- implement arenas (no release object, just pre-allocated pool) for small number of objects
 
 - vector types: bytes, ints, floats
 
@@ -48,18 +28,15 @@
 - array.extend (array) => inplace
 - array.unique
 - array.join
-- reduce(f, init?) → value
 - fold(f, init) → value (same as reduce-with-init; pick one name)
-- find(pred) → value? (or null if not found)
 - flatten() → array
 - array.sort(lambda(a, b) => bool)
-- chunk(n) → array[array]
 - window(n, step=1) → array[array]
 - zip(other) → array[tuple] (or array[array] of len 2)
 - enumerate() → array[(index, value)] (or dict-like pairs)
 - string.split(sep) → array[string]
 - array.join
-- string trim(), lower(), upper(), replace(old, new), startsWith, endsWith
+- string replace(old, new), startsWith, endsWith
 - bytes.hex()
 - bytes.base64()
 - move type related functions to type member functions; remove duplicates from stdlib (i.e. stdlib must be complimentary extension of type member functions)

@@ -1977,6 +1977,7 @@ func TestBuiltinFunctionLen(t *testing.T) {
 	expectRun(t, `out = len(0)`, nil, 1)
 	expectRun(t, `out = len(1)`, nil, 1)
 	expectError(t, `len("one", "two")`, nil, "wrong number of arguments")
+	expectError(t, `len = 10`, nil, "Compile Error: cannot assign to builtin 'len'")
 }
 
 func TestBuiltinFunctionCopy(t *testing.T) {

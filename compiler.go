@@ -753,6 +753,9 @@ func (c *Compiler) compileAssign(node parser.Node, lhs, rhs []parser.Expr, op to
 
 	_, isFunc := rhs[0].(*parser.FuncLit)
 	symbol, depth, exists := c.symbolTable.Resolve(ident, false)
+	if exists && symbol.Scope == vm.ScopeBuiltin {
+		return c.errorf(node, "cannot assign to builtin '%s'", ident)
+	}
 	if op == token.Define {
 		if depth == 0 && exists {
 			return c.errorf(node, "'%s' redeclared in this block", ident)

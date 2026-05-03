@@ -1,5 +1,6 @@
 # TODO list for Kavun
 
+- make sure you cannot crash VM from script: limit num of allocs, total size of containers and mem used, catch panics
 - for arrays, bytes, runes, strings - store data=leng and ptr=underlying data (&[0] / StringData, etc) to avoid allocation of header struct
 - use store underlying array/dict pinter in Value.Ptr instead of using wrapper struct
 - try use unsafe.StringData / unsafe.String to store and rebuild strings?
@@ -96,7 +97,4 @@
 
 - find a way to reuse value envelopes: receiver ptr instead of return value, mark as tmp, on assign copy if tmp, etc - primary usecase = loops
 
-- "len = 10" fails with cryptic error
 - builtin cron support (expressions, next event, etc)
-
-- make sure you cannot crash VM from script: limit num of allocs, total size of containers and mem used, catch panics
